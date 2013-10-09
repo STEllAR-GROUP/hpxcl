@@ -1,4 +1,4 @@
-// Copyright (c)	2013 Martin Stumpf
+// Copyright (c)    2013 Martin Stumpf
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -24,7 +24,7 @@ hpx::opencl::clGetDeviceInfo( hpx::naming::id_type  id,
                  cl_device_info        info_type,
                  size_t                param_value_size,
                  void*                 param_value,
-                 size_t*               param_value_size_ret)	
+                 size_t*               param_value_size_ret)    
 {
     // Retrieve info from node
     typedef hpx::opencl::server::clGetDeviceInfo_action action;

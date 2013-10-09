@@ -1,4 +1,4 @@
-// Copyright (c)	2013 Martin Stumpf
+// Copyright (c)    2013 Martin Stumpf
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -10,13 +10,13 @@
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{
-	
-	////////////////////////////////////////////////////////
-	/// Defines costum opencl variables, as the original
-	/// are pointers and not serializable
-	///
-	typedef intptr_t clx_device_id;
-	typedef intptr_t clx_platform_id;
+    
+    ////////////////////////////////////////////////////////
+    /// Defines costum opencl variables, as the original
+    /// are pointers and not serializable
+    ///
+    typedef intptr_t clx_device_id;
+    typedef intptr_t clx_platform_id;
 
 }}
 

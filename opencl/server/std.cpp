@@ -1,4 +1,4 @@
-// Copyright (c)	2013 Martin Stumpf
+// Copyright (c)    2013 Martin Stumpf
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -16,9 +16,9 @@ using hpx::opencl::clx_device_id;
 /// HPX Registration Stuff
 ///
 HPX_REGISTER_PLAIN_ACTION(hpx::opencl::server::clGetDeviceIDs_action,
-			  clGetDeviceIDs_action);
+                          clGetDeviceIDs_action);
 HPX_REGISTER_PLAIN_ACTION(hpx::opencl::server::clGetDeviceInfo_action,
-			  clGetDeviceInfo_action);
+                          clGetDeviceInfo_action);
 
 
 ///////////////////////////////////////////////////
@@ -66,7 +66,7 @@ hpx::opencl::server::clGetDeviceIDs(cl_device_type type)
     }
 
     // Return found devices.
-	return devices;
+    return devices;
 }
 
 

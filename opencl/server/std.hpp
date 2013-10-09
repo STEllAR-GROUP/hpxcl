@@ -1,4 +1,4 @@
-// Copyright (c)	2013 Martin Stumpf
+// Copyright (c)        2013 Martin Stumpf
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -19,20 +19,20 @@
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
-	
-	////////////////////////////////////////////////////////
-	/// Global opencl functions
-	/// 
+
+    ////////////////////////////////////////////////////////
+    /// Global opencl functions
+    /// 
 
     // Returns the IDs of all devices on current host
-	std::vector<clx_device_id> clGetDeviceIDs(cl_device_type);
+    std::vector<clx_device_id> clGetDeviceIDs(cl_device_type);
     // Returns informations about given device
     std::vector<char> clGetDeviceInfo(clx_device_id, cl_device_info);
 
-	//[opencl_management_action_types
-	HPX_DEFINE_PLAIN_ACTION(clGetDeviceIDs, clGetDeviceIDs_action);
-	HPX_DEFINE_PLAIN_ACTION(clGetDeviceInfo, clGetDeviceInfo_action);
-	//]
+    //[opencl_management_action_types
+    HPX_DEFINE_PLAIN_ACTION(clGetDeviceIDs, clGetDeviceIDs_action);
+    HPX_DEFINE_PLAIN_ACTION(clGetDeviceInfo, clGetDeviceInfo_action);
+    //]
 
 }}}
 
