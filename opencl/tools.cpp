@@ -11,18 +11,6 @@
 namespace hpx { namespace opencl { 
 
 
-// To be called on OpenCL errorcodes, throws an exception on OpenCL Error
-void clEnsure(cl_int errCode, const char* functionname){
-
-	if(errCode != CL_SUCCESS)
-	{
-		std::stringstream errorMessage;
-		errorMessage << "CL_ERROR(" << errCode << "): " << clErrToStr(errCode);
-		HPX_THROW_EXCEPTION(hpx::no_success, functionname, errorMessage.str().c_str());
-	}
-
-}
-
 const char* clErrToStr(cl_int errCode)
 {
 	switch(errCode)

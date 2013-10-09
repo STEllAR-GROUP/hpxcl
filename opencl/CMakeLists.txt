@@ -1,3 +1,11 @@
+add_hpx_library(opencl_std
+   ESSENTIAL
+   SOURCES std.cpp server/std.cpp
+   HEADERS std.hpp server/std.hpp name_definitions.hpp
+   COMPONENT_DEPENDENCIES iostreams
+   DEPENDENCIES ${OpenCL_LIBRARY} opencl_tools_lib
+   )
+
 add_hpx_library(opencl_tools
    ESSENTIAL
    SOURCES tools.cpp

@@ -7,6 +7,8 @@
 #ifndef HPX_OPENCL_SERVER_DEVICE_HPP__
 #define HPX_OPENCL_SERVER_DEVICE_HPP__
 
+#include <cstdint>
+
 #include <hpx/include/iostreams.hpp>
 
 #include <hpx/runtime/components/server/managed_component_base.hpp>
@@ -14,9 +16,11 @@
 
 #include <CL/cl.h>
 
+#include "../std.hpp"
+
 ////////////////////////////////////////////////////////////////
-namespace hpx { namespace opencl { namespace server
-{
+namespace hpx { namespace opencl{ namespace server{
+	
 	////////////////////////////////////////////////////////
 	/// This class represents an OpenCL accelerator device.
 	///
@@ -27,15 +31,16 @@ namespace hpx { namespace opencl { namespace server
 	{
 	public:
 		// Constructor
-		device(){}
-//		device(cl_device_id deviceID);
+		device(){return;HPX_THROW_EXCEPTION(hpx::no_success, "device()",
+			 "empty constructor 'device()' not allowed!");}
+		device(clx_device_id deviceID);
 
 		//////////////////////////////////////////////////
 		// Exposed functionality of this component
 		//
 
 		/// 
-		void test();
+		clx_device_id test();
 
 	//[opencl_management_action_types
 	HPX_DEFINE_COMPONENT_ACTION(device, test);

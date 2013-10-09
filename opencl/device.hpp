@@ -15,6 +15,8 @@
 namespace hpx {
 namespace opencl {
 
+	
+
 	class device
 	  : public hpx::components::client_base<
 	  	device, hpx::components::stub_base<server::device>
@@ -32,12 +34,12 @@ namespace opencl {
 			device(hpx::future<hpx::naming::id_type> const& gid)
 			  : base_type(gid)
 			{}
-
-			void test()
+			
+			clx_device_id test()
 			{
 				BOOST_ASSERT(this->get_gid());
 				typedef server::device::test_action test_func;
-				hpx::async<test_func>(this->get_gid()).get();
+				return hpx::async<test_func>(this->get_gid()).get();
 			}
 	};
 
