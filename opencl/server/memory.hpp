@@ -4,8 +4,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
-#ifndef HPX_OPENCL_SERVER_DEVICE_HPP__
-#define HPX_OPENCL_SERVER_DEVICE_HPP__
+#ifndef HPX_OPENCL_SERVER_MEM_HPP__
+#define HPX_OPENCL_SERVER_MEM_HPP__
 
 #include <cstdint>
 
@@ -16,7 +16,7 @@
 
 #include <CL/cl.h>
 
-#include "../std.hpp"
+#include "device.hpp"
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
@@ -24,61 +24,41 @@ namespace hpx { namespace opencl{ namespace server{
     ////////////////////////////////////////////////////////
     /// This class represents an OpenCL accelerator device.
     ///
-    class device
+    class memory
       : public hpx::components::locking_hook<
-          hpx::components::managed_component_base<device>
+          hpx::components::managed_component_base<memory>
         >
     {
     public:
         // Constructor
-        device();
-        device(clx_device_id device_id, bool enable_profiling=false);
+        memory();
+        memory(device *, size_t size);
+        
 
-        ~device();
+        virtual ~memory() = 0;
 
         //////////////////////////////////////////////////
         // Exposed functionality of this component
         //
 
-        /// 
-        clx_device_id test();
 
-        // Buffer Functions
-
-
-
-    //[opencl_management_action_types
-    HPX_DEFINE_COMPONENT_ACTION(device, test);
-    //]
 
     private:
         ///////////////////////////////////////////////
         // Private Member Functions
         //
         
-        // Error Callback
-        static void CL_CALLBACK error_callback(const char*, const void*,
-                                               size_t, void*);
 
     private:
         ///////////////////////////////////////////////
         // Private Member Variables
         //
-        cl_device_id        device_id;
-        cl_platform_id      platform_id;
-        cl_context          context;
-        cl_command_queue    command_queue;
+        device *parent_device;
+        cl_mem device_mem;
+        std::vector<char> host_mem;
+        size_t size;
 
     };
 }}}
-
-//[opencl_management_registration_declarations
-HPX_REGISTER_ACTION_DECLARATION(
-       hpx::opencl::server::device::test_action,
-    opencl_device_test_action);
-    
-//]
-
-
 
 #endif

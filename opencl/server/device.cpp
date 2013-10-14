@@ -14,61 +14,76 @@ using namespace hpx::opencl::server;
 clx_device_id device::test()
 {
 
-    cl_int err;
-
-    cl_uint num_Platforms;
-
-    err = clGetPlatformIDs(0,NULL,&num_Platforms);
-    clEnsure(err, "clGetPlatformIDs");
-
-    
-    cl_platform_id* platforms = new cl_platform_id[num_Platforms];
-
-    err = clGetPlatformIDs(num_Platforms, platforms, NULL);
-    clEnsure(err, "clGetPlatformIDs");
-
-    cl_device_id device = NULL;
-
-    for(cl_uint i = 0; i < num_Platforms; i++)
-    {
-        char name[128];
-        cl_device_type device_type = CL_DEVICE_TYPE_ACCELERATOR | CL_DEVICE_TYPE_GPU;
-        err = clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 128, &name, NULL);
-        clEnsure(err, "clGetPlatformIDs");
-        hpx::cout << "Platform #" << i << ": " <<  name << hpx::endl;
-        cl_uint num_Devices;
-        err = clGetDeviceIDs(platforms[i], device_type, 0, NULL, &num_Devices);
-        if(err == CL_DEVICE_NOT_FOUND) continue;
-        clEnsure(err, "clGetDeviceIDs");
-        
-        cl_device_id *devices = new cl_device_id[num_Devices];
-        err = clGetDeviceIDs(platforms[i], device_type, num_Devices, devices, NULL);
-        clEnsure(err, "clGetDeviceIDs");
-
-        for(cl_uint j = 0; j < num_Devices; j++)
-        {
-            err = clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 128, &name, NULL);
-            clEnsure(err, "clGetDeviceInfo");
-            hpx::cout << "\tDevice #" << j << ": " << name << hpx::endl;
-            device = devices[j];
-        }
-
-        delete(devices);
-    }
-
-    delete(platforms);
-
-    return (clx_device_id) device;
+    return (clx_device_id) NULL;
 }
 
+CL_FORBID_EMPTY_CONSTRUCTOR(device);
+
 // Constructor
-device::device(clx_device_id deviceID)
+device::device(clx_device_id _device_id, bool enable_profiling)
 {
-    this->deviceID = (cl_device_id) deviceID;
+    this->device_id = (cl_device_id) _device_id;
+    
+    cl_int err;
     
     // Retrieve platformID
-    cl_int err;
-    err = clGetDeviceInfo(this->deviceID, CL_DEVICE_PLATFORM, sizeof(platformID), &platformID, NULL);
-    clEnsure(err, "clGetDeviceInfo");
+    err = clGetDeviceInfo(this->device_id, CL_DEVICE_PLATFORM,
+                          sizeof(platform_id), &platform_id, NULL);
+    clEnsure(err, "clGetDeviceInfo()");
 
+    // Create Context
+    cl_context_properties context_properties[] = 
+                        {CL_CONTEXT_PLATFORM,
+                         (cl_context_properties) platform_id,
+                         0};
+    context = clCreateContext(context_properties,
+                              1,
+                              &this->device_id,
+                              error_callback,
+                              this,
+                              &err);
+    clEnsure(err, "clCreateContext()");
+
+    // Create Command Queue
+    cl_command_queue_properties command_queue_properties =
+                        CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE;
+    if(enable_profiling)
+        command_queue_properties |= CL_QUEUE_PROFILING_ENABLE;
+    command_queue = clCreateCommandQueue(context, device_id,
+                                         command_queue_properties, &err);
+    clEnsure(err, "clCreateCommandQueue()");
+
+}
+
+// Destructor
+device::~device()
+{
+    
+    cl_int err;
+
+    // Release command queue
+    if(command_queue)
+    {
+        err = clReleaseCommandQueue(command_queue);
+        clEnsure_nothrow(err, "clReleaseCommandQueue()");
+        command_queue = NULL; 
+    }
+    
+    // Release context
+    if(context)
+    {
+        err = clReleaseContext(context);
+        clEnsure_nothrow(err, "clReleaseContext()");
+        context = NULL;
+    }
+
+}
+
+void CL_CALLBACK
+device::error_callback(const char* errinfo, const void* info, size_t info_size,
+                                                void* _thisp)
+{
+    device* thisp = (device*) _thisp;
+    hpx::cerr << "device(" << thisp->device_id << "): CONTEXT_ERROR: "
+             << errinfo << hpx::endl;
 }

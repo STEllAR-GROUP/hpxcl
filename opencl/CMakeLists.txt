@@ -13,6 +13,7 @@ add_hpx_library(opencl_tools
    DEPENDENCIES ${OpenCL_LIBRARY}
    )
 
+
 add_hpx_component(opencl_device
    ESSENTIAL
    SOURCES device.cpp server/device.cpp
@@ -21,4 +22,11 @@ add_hpx_component(opencl_device
    DEPENDENCIES ${OpenCL_LIBRARY} opencl_tools_lib
    )
 
+add_hpx_component(opencl_memory
+   ESSENTIAL
+   SOURCES server/memory.cpp
+   HEADERS server/memory.hpp
+   COMPONENT_DEPENDENCIES opencl_device
+   DEPENDENCIES ${OpenCL_LIBRARY} opencl_tools_lib
+   )
 

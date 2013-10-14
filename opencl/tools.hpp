@@ -8,9 +8,17 @@
 #define HPX_OPENCL_TOOLS_HPP__
 
 #include <CL/cl.hpp>
+#include <sstream>
 
 
 namespace hpx { namespace opencl {
+
+    #define CL_FORBID_EMPTY_CONSTRUCTOR(classname)                           \
+        classname::classname()                                               \
+        {                                                                    \
+            HPX_THROW_EXCEPTION(hpx::no_success, #classname "()",              \
+                    "Empty constructor is not defined!");                    \
+        }
 
     // To be called on OpenCL errorcodes, throws an exception on OpenCL Error
     #define clEnsure(errCode, functionname){                    \
@@ -24,6 +32,19 @@ namespace hpx { namespace opencl {
             HPX_THROW_EXCEPTION(hpx::no_success,                \
                                 (functionname),                 \
                                 errorMessage.str().c_str());    \
+        }                                                       \
+    }
+    
+     // To be called on OpenCL errorcodes in destructors, does not throw
+    #define clEnsure_nothrow(errCode, functionname){            \
+        if(errCode != CL_SUCCESS)                               \
+        {                                                       \
+            hpx::cerr << (functionname)                         \
+                      << ": CL_ERROR("                          \
+                      << (errCode)                              \
+                      << "): "                                  \
+                      << clErrToStr(errCode)                    \
+                      << hpx::endl;                             \
         }                                                       \
     }
     
