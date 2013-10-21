@@ -74,7 +74,7 @@ namespace hpx { namespace opencl{ namespace server{
         //
         
 
-    private:
+    protected:
         ///////////////////////////////////////////////
         // Private Member Variables
         //
