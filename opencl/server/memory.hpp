@@ -12,7 +12,7 @@
 #include <hpx/include/iostreams.hpp>
 
 #include <hpx/hpx_main.hpp>
-#include <hpx/runtime/components/server/managed_component_base.hpp>
+#include <hpx/include/components.hpp>
 #include <hpx/runtime/components/server/locking_hook.hpp>
 
 #include <CL/cl.h>
@@ -36,7 +36,7 @@ namespace hpx { namespace opencl{ namespace server{
     public:
         // Constructor
         memory();
-        memory(device *, size_t size);
+        memory(intptr_t _parent_device, size_t size);
         
 
         virtual ~memory() = 0;
@@ -80,7 +80,6 @@ namespace hpx { namespace opencl{ namespace server{
         //
         device *parent_device;
         cl_mem device_mem;
-        std::vector<char> host_mem;
         size_t size;
 
     };

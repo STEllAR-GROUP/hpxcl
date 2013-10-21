@@ -48,7 +48,7 @@ namespace hpx { namespace opencl{ namespace server{
 
         /// 
         clx_device_id test();
-        void clCreateBuffer(cl_mem_flags, size_t);
+        hpx::naming::id_type clCreateBuffer(cl_mem_flags, size_t);
 
 
 

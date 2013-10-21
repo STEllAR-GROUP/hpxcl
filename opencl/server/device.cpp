@@ -6,7 +6,11 @@
 #include "device.hpp"
 #include "../tools.hpp"
 
+#include "buffer.hpp"
 #include <CL/cl.h>
+
+//#include <hpx/include/components.hpp>
+
 
 using hpx::opencl::clx_device_id;
 using namespace hpx::opencl::server;
@@ -79,11 +83,13 @@ device::~device()
 
 }
 
-void
+hpx::naming::id_type
 device::clCreateBuffer(cl_mem_flags flags, size_t size)
 {
-
-
+    hpx::naming::id_type ret = hpx::components::new_<hpx::opencl::server::buffer>
+                (hpx::find_here(), (intptr_t) this, flags, size)
+                    .get();
+    return ret;
 }
 
 cl_context

@@ -9,7 +9,7 @@
 
 
 #include <hpx/hpx_main.hpp>
-#include <hpx/runtime/components/server/managed_component_base.hpp>
+#include <hpx/include/components.hpp>
 
 #include "memory.hpp"
 
@@ -28,7 +28,8 @@ namespace hpx { namespace opencl{ namespace server{
 
         // Constructor
         buffer();
-        buffer(device *, size_t size);
+        buffer(intptr_t device, cl_mem_flags flags, size_t size,
+               char* init_data = NULL);
 
         ~buffer();
 

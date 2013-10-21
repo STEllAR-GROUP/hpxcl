@@ -6,6 +6,7 @@
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/components.hpp>
 
+#include <CL/cl.h>
 
 #include "buffer.hpp"
 #include "../tools.hpp"
@@ -16,33 +17,29 @@ using namespace hpx::opencl::server;
 
 CL_FORBID_EMPTY_CONSTRUCTOR(buffer);
 
+
 // Constructor
-buffer::buffer(device* parent_device, size_t size):memory(parent_device, size)
+buffer::buffer(intptr_t _parent_device, cl_mem_flags flags, size_t size,
+               char* init_data) : memory(_parent_device, size)
 {
 
+    // Retrieve the context from parent class
+    cl_context context = parent_device->getContext();
+
+    // The opencl error variable
+    cl_int err;
+
+    // Modify the cl_mem_flags
+    cl_mem_flags modified_flags = flags &! (CL_MEM_USE_HOST_PTR
+                                            || CL_MEM_ALLOC_HOST_PTR);
+
+    // Create the Context
+    device_mem = clCreateBuffer(context, modified_flags, size, init_data, &err);
+    clEnsure(err, "clCreateBuffer()");
+    
+    //
+
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
