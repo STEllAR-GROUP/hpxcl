@@ -17,6 +17,7 @@ clx_device_id device::test()
     return (clx_device_id) NULL;
 }
 
+
 CL_FORBID_EMPTY_CONSTRUCTOR(device);
 
 // Constructor
@@ -52,7 +53,6 @@ device::device(clx_device_id _device_id, bool enable_profiling)
     command_queue = clCreateCommandQueue(context, device_id,
                                          command_queue_properties, &err);
     clEnsure(err, "clCreateCommandQueue()");
-
 }
 
 // Destructor
@@ -77,6 +77,19 @@ device::~device()
         context = NULL;
     }
 
+}
+
+void
+device::clCreateBuffer(cl_mem_flags flags, size_t size)
+{
+
+
+}
+
+cl_context
+device::getContext()
+{
+    return context;
 }
 
 void CL_CALLBACK

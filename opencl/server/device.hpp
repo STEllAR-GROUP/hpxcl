@@ -36,19 +36,25 @@ namespace hpx { namespace opencl{ namespace server{
 
         ~device();
 
+
+        //////////////////////////////////////////////////
+        // Local public functions
+        cl_context getContext();
+        
+
         //////////////////////////////////////////////////
         // Exposed functionality of this component
         //
 
         /// 
         clx_device_id test();
-
-        // Buffer Functions
+        void clCreateBuffer(cl_mem_flags, size_t);
 
 
 
     //[opencl_management_action_types
     HPX_DEFINE_COMPONENT_ACTION(device, test);
+    HPX_DEFINE_COMPONENT_ACTION(device, clCreateBuffer);
     //]
 
     private:
@@ -76,6 +82,9 @@ namespace hpx { namespace opencl{ namespace server{
 HPX_REGISTER_ACTION_DECLARATION(
        hpx::opencl::server::device::test_action,
     opencl_device_test_action);
+HPX_REGISTER_ACTION_DECLARATION(
+       hpx::opencl::server::device::clCreateBuffer_action,
+    opencl_device_clCreateBuffer_action);
     
 //]
 

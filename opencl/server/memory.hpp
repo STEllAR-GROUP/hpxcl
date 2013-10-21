@@ -11,6 +11,7 @@
 
 #include <hpx/include/iostreams.hpp>
 
+#include <hpx/hpx_main.hpp>
 #include <hpx/runtime/components/server/managed_component_base.hpp>
 #include <hpx/runtime/components/server/locking_hook.hpp>
 
@@ -18,16 +19,19 @@
 
 #include "device.hpp"
 
+
+// TODO synchronization
+
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
     
-    ////////////////////////////////////////////////////////
-    /// This class represents an OpenCL accelerator device.
+    ///////////////////////////////////////////////////////////
+    /// This class represents a generic opencl memory. (cl_mem)
+    /// This is an abstract class and could hold an OpenCL buffer
+    /// or an OpenCL image.
     ///
     class memory
-      : public hpx::components::locking_hook<
-          hpx::components::managed_component_base<memory>
-        >
+      : public hpx::components::abstract_managed_component_base<memory>
     {
     public:
         // Constructor
@@ -40,7 +44,28 @@ namespace hpx { namespace opencl{ namespace server{
         //////////////////////////////////////////////////
         // Exposed functionality of this component
         //
+//f     virtual void releaseDeviceMem() = 0;
+//f     virtual void regainDeviceMem() = 0;
+        
+        /////////////////////////////////////////////////
+        // Functions with modified parameterlists for
+        // easy access
+        //         
 
+
+        //////////////////////////////////////////
+        // OLD CONCEPT - WILL NOT BE USED
+        //
+    //    virtual clx_event copyDeviceToHost(std::vector<clx_event>) = 0;
+    //    virtual clx_event copyHostToDevice(std::vector<clx_event>) = 0;
+    //    virtual void write(std::vector<char> mem, size_t offset) = 0;
+    //    virtual std::vector<char> read(size_t size, size_t offset) = 0;
+    //    clx_event         copyHostToDevice(clx_event);
+    //    clx_event         copyDeviceToHost(clx_event);
+    //    void              write(std::vector<char> mem) { write(mem, 0); }
+    //    std::vector<char> read()                       { return read(size, 0); }
+
+        
 
 
     private:

@@ -13,6 +13,7 @@
 
 namespace hpx { namespace opencl {
 
+    // Used to disable the empty constructor of classes
     #define CL_FORBID_EMPTY_CONSTRUCTOR(classname)                           \
         classname::classname()                                               \
         {                                                                    \

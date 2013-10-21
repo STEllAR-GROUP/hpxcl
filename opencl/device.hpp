@@ -41,6 +41,9 @@ namespace opencl {
                 typedef server::device::test_action test_func;
                 return hpx::async<test_func>(this->get_gid()).get();
             }
+
+            void clCreateBuffer(cl_mem_flags flags, size_t size);
+
     };
 
 }}

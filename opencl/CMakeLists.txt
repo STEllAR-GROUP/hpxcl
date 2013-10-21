@@ -30,3 +30,10 @@ add_hpx_component(opencl_memory
    DEPENDENCIES ${OpenCL_LIBRARY} opencl_tools_lib
    )
 
+add_hpx_component(opencl_buffer
+    ESSENTIAL
+    SOURCES server/buffer.cpp
+    HEADERS server/buffer.hpp
+    COMPONENT_DEPENDENCIES opencl_memory
+    DEPENDENCIES ${OpenCL_LIBRARY} opencl_tools_lib
+    )

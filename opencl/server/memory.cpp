@@ -12,7 +12,9 @@
 using hpx::opencl::clx_device_id;
 using namespace hpx::opencl::server;
 
+
 CL_FORBID_EMPTY_CONSTRUCTOR(memory);
+
 
 // Constructor
 memory::memory(device* parent_device, size_t size)
@@ -27,10 +29,10 @@ memory::memory(device* parent_device, size_t size)
     device_mem = NULL;
 }
 
+
 // Destructor
 memory::~memory()
 {
-
     cl_int err;
 
     // Release device memory
@@ -42,3 +44,8 @@ memory::~memory()
     }
 }
 
+//
+
+
+
+HPX_DEFINE_GET_COMPONENT_TYPE(memory);
