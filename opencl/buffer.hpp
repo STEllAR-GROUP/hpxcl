@@ -9,8 +9,11 @@
 
 
 #include <hpx/include/components.hpp>
+#include <hpx/lcos/future.hpp>
 
 #include "server/buffer.hpp"
+#include "clx_event.hpp"
+#include <vector>
 
 namespace hpx {
 namespace opencl { 
@@ -35,6 +38,12 @@ namespace opencl {
               : base_type(gid)
             {}
             
+            /////////////////////////////////////////////////
+            /// Exposed Component functionality
+            /// 
+            hpx::lcos::future<clx_event>
+            clEnqueueReadBuffer(size_t offset, size_t size, bool ptr,
+                                          std::vector<clx_event> event);
 
     };
 

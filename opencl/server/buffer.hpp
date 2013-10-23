@@ -13,6 +13,9 @@
 
 #include <CL/cl.h>
 
+#include "../clx_event.hpp"
+
+#include <vector>
 
 namespace hpx { namespace opencl{ namespace server{
 
@@ -36,7 +39,13 @@ namespace hpx { namespace opencl{ namespace server{
         ///////////////////////////////////////////////////
         /// Exposed functionality of this component
         ///
+        clx_event clEnqueueReadBuffer2(size_t offset, size_t size, bool ptr,
+                                      std::vector<clx_event_id> events);
 
+
+    //[
+    HPX_DEFINE_COMPONENT_ACTION(buffer, clEnqueueReadBuffer2);
+    //]
     private:
         //////////////////////////////////////////////////
         /// Private Member Functions
@@ -54,7 +63,11 @@ namespace hpx { namespace opencl{ namespace server{
 
 }}}
 
-
+//[
+HPX_REGISTER_ACTION_DECLARATION(
+        hpx::opencl::server::buffer::clEnqueueReadBuffer2_action,
+        opencl_buffer_clEnqueueReadBuffer2_action);
+//]
 
 
 

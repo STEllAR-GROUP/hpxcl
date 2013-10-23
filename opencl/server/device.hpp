@@ -25,9 +25,7 @@ namespace hpx { namespace opencl{ namespace server{
     /// This class represents an OpenCL accelerator device.
     ///
     class device
-      : public hpx::components::locking_hook<
-          hpx::components::managed_component_base<device>
-        >
+      : public hpx::components::managed_component_base<device>
     {
     public:
         // Constructor
@@ -39,21 +37,19 @@ namespace hpx { namespace opencl{ namespace server{
 
         //////////////////////////////////////////////////
         // Local public functions
-        cl_context getContext();
-        
+        cl_context get_context();
+        cl_command_queue get_read_command_queue();
+        cl_command_queue get_write_command_queue();
+        cl_command_queue get_work_command_queue();
 
         //////////////////////////////////////////////////
         // Exposed functionality of this component
         //
-
-        /// 
-        clx_device_id test();
         hpx::naming::id_type clCreateBuffer(cl_mem_flags, size_t);
 
 
 
     //[opencl_management_action_types
-    HPX_DEFINE_COMPONENT_ACTION(device, test);
     HPX_DEFINE_COMPONENT_ACTION(device, clCreateBuffer);
     //]
 
@@ -79,9 +75,6 @@ namespace hpx { namespace opencl{ namespace server{
 }}}
 
 //[opencl_management_registration_declarations
-HPX_REGISTER_ACTION_DECLARATION(
-       hpx::opencl::server::device::test_action,
-    opencl_device_test_action);
 HPX_REGISTER_ACTION_DECLARATION(
        hpx::opencl::server::device::clCreateBuffer_action,
     opencl_device_clCreateBuffer_action);

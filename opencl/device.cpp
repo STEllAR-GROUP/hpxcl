@@ -23,7 +23,6 @@ typedef hpx::components::managed_component<
 
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(device_type, device);
 
-HPX_REGISTER_ACTION(device_type::wrapped_type::test_action, device_test_action);
 HPX_REGISTER_ACTION(device_type::wrapped_type::clCreateBuffer_action,
                     device_clCreateBuffer_action);
 
@@ -34,11 +33,11 @@ hpx::opencl::device::clCreateBuffer(cl_mem_flags flags, size_t size)
 {
 
     BOOST_ASSERT(this->get_gid());
-    typedef hpx::opencl::server::device::clCreateBuffer_action create_buffer_func;
+    typedef hpx::opencl::server::device::clCreateBuffer_action func;
     
     // Create new Buffer Server
     hpx::lcos::future<hpx::naming::id_type> buffer_server = 
-    hpx::async<create_buffer_func>(this->get_gid(), flags, size);
+    hpx::async<func>(this->get_gid(), flags, size);
     
     // Return Buffer Client wrapped around Buffer Server
     return buffer(buffer_server);

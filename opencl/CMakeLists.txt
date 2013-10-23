@@ -1,3 +1,10 @@
+add_hpx_library(opencl_event
+    ESSENTIAL
+    SOURCES clx_event.cpp
+    HEADERS clx_event.hpp
+    DEPENDENCIES ${OpenCL_LIBRARY}
+)
+
 add_hpx_library(opencl_std
    ESSENTIAL
    SOURCES std.cpp server/std.cpp
@@ -20,11 +27,12 @@ add_hpx_component(opencl_device
    HEADERS device.hpp server/device.hpp
    COMPONENT_DEPENDENCIES iostreams 
    DEPENDENCIES ${OpenCL_LIBRARY} opencl_tools_lib opencl_buffer_component
+   opencl_event_lib
    )
 
 add_hpx_component(opencl_buffer
     ESSENTIAL
     SOURCES buffer.cpp server/buffer.cpp
     HEADERS buffer.hpp server/buffer.hpp
-    DEPENDENCIES ${OpenCL_LIBRARY} opencl_tools_lib
+    DEPENDENCIES ${OpenCL_LIBRARY} opencl_tools_lib opencl_event_lib
     )

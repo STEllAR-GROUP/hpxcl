@@ -12,6 +12,9 @@
 
 #include "server/device.hpp"
 #include "buffer.hpp"
+#include <vector>
+
+using hpx::opencl::clx_event;
 
 namespace hpx {
 namespace opencl {
@@ -36,13 +39,9 @@ namespace opencl {
               : base_type(gid)
             {}
             
-            clx_device_id test()
-            {
-                BOOST_ASSERT(this->get_gid());
-                typedef server::device::test_action test_func;
-                return hpx::async<test_func>(this->get_gid()).get();
-            }
-
+            //////////////////////////////////////////
+            /// Exposed Component functionality
+            /// 
             hpx::opencl::buffer clCreateBuffer(cl_mem_flags flags, size_t size);
 
     };

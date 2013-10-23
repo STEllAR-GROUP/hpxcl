@@ -15,13 +15,6 @@
 using hpx::opencl::clx_device_id;
 using namespace hpx::opencl::server;
 
-clx_device_id device::test()
-{
-
-    return (clx_device_id) NULL;
-}
-
-
 CL_FORBID_EMPTY_CONSTRUCTOR(device);
 
 // Constructor
@@ -87,6 +80,7 @@ device::~device()
 hpx::naming::id_type
 device::clCreateBuffer(cl_mem_flags flags, size_t size)
 {
+    // create buffer server component
     hpx::naming::id_type ret = hpx::components::new_<hpx::opencl::server::buffer>
                 (hpx::find_here(), (intptr_t) this, flags, size)
                     .get();
@@ -94,12 +88,29 @@ device::clCreateBuffer(cl_mem_flags flags, size_t size)
 }
 
 cl_context
-device::getContext()
+device::get_context()
 {
     return context;
 }
 
 
+cl_command_queue
+device::get_read_command_queue()
+{
+    return command_queue;
+}
+
+cl_command_queue
+device::get_write_command_queue()
+{
+    return command_queue;
+}
+
+cl_command_queue
+device::get_work_command_queue()
+{
+    return command_queue;
+}
 
 void CL_CALLBACK
 device::error_callback(const char* errinfo, const void* info, size_t info_size,

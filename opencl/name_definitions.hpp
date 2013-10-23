@@ -7,6 +7,7 @@
 #ifndef HPX_OPENCL_NAME_DEFINITIONS_HPP__
 #define HPX_OPENCL_NAME_DEFINITIONS_HPP__
 
+#include <cstdint>
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{
