@@ -11,8 +11,6 @@
 
 #include <hpx/include/components.hpp>
 
-#include "server/memory.hpp"
-
 namespace hpx {
 namespace opencl {
 

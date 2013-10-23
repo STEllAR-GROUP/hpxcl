@@ -11,6 +11,7 @@
 #include <hpx/include/components.hpp>
 
 #include "server/device.hpp"
+#include "buffer.hpp"
 
 namespace hpx {
 namespace opencl {
@@ -42,7 +43,7 @@ namespace opencl {
                 return hpx::async<test_func>(this->get_gid()).get();
             }
 
-            void clCreateBuffer(cl_mem_flags flags, size_t size);
+            hpx::opencl::buffer clCreateBuffer(cl_mem_flags flags, size_t size);
 
     };
 

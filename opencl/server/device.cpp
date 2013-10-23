@@ -83,11 +83,12 @@ device::~device()
 
 }
 
+
 hpx::naming::id_type
 device::clCreateBuffer(cl_mem_flags flags, size_t size)
 {
     hpx::naming::id_type ret = hpx::components::new_<hpx::opencl::server::buffer>
-                (hpx::find_here())//, (intptr_t) this, flags, size)
+                (hpx::find_here(), (intptr_t) this, flags, size)
                     .get();
     return ret;
 }
@@ -97,6 +98,8 @@ device::getContext()
 {
     return context;
 }
+
+
 
 void CL_CALLBACK
 device::error_callback(const char* errinfo, const void* info, size_t info_size,

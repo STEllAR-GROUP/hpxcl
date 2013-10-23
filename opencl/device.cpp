@@ -8,11 +8,12 @@
 
 #include <hpx/util/portable_binary_iarchive.hpp>
 #include <hpx/util/portable_binary_oarchive.hpp>
+#include <hpx/lcos/future.hpp>
 
 #include "server/device.hpp"
 
 #include "device.hpp"
-
+#include "buffer.hpp"
 
 
 HPX_REGISTER_COMPONENT_MODULE();
@@ -28,14 +29,18 @@ HPX_REGISTER_ACTION(device_type::wrapped_type::clCreateBuffer_action,
 
 
 
-void
+hpx::opencl::buffer
 hpx::opencl::device::clCreateBuffer(cl_mem_flags flags, size_t size)
 {
 
     BOOST_ASSERT(this->get_gid());
     typedef hpx::opencl::server::device::clCreateBuffer_action create_buffer_func;
-    //future<gid> buffer_server = 
-    hpx::async<create_buffer_func>(this->get_gid(), flags, size).get();
-    // return buffer(buffer_server);
+    
+    // Create new Buffer Server
+    hpx::lcos::future<hpx::naming::id_type> buffer_server = 
+    hpx::async<create_buffer_func>(this->get_gid(), flags, size);
+    
+    // Return Buffer Client wrapped around Buffer Server
+    return buffer(buffer_server);
 }
 

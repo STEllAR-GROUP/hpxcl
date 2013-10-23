@@ -11,14 +11,13 @@
 #include <hpx/include/components.hpp>
 
 #include "server/buffer.hpp"
-#include "memory.hpp"
 
 namespace hpx {
 namespace opencl { 
     
 
     class buffer
-      : public memory, public hpx::components::client_base<
+      : public hpx::components::client_base<
           buffer, hpx::components::stub_base<server::buffer>
         >
     {

@@ -10,6 +10,7 @@
 
 #include "buffer.hpp"
 #include "../tools.hpp"
+#include "device.hpp"
 
 using hpx::opencl::server::buffer;
 using namespace hpx::opencl::server;
@@ -19,9 +20,13 @@ CL_FORBID_EMPTY_CONSTRUCTOR(buffer);
 
 
 // Constructor
-buffer::buffer(intptr_t _parent_device, cl_mem_flags flags, size_t size,
-               char* init_data) : memory(_parent_device, size)
+buffer::buffer(intptr_t _parent_device, cl_mem_flags flags, size_t _size,
+               char* init_data)
 {
+
+    this->parent_device = (device*) _parent_device;
+    this->size = _size;
+    this->device_mem = NULL;
 
     // Retrieve the context from parent class
     cl_context context = parent_device->getContext();
@@ -36,20 +41,26 @@ buffer::buffer(intptr_t _parent_device, cl_mem_flags flags, size_t size,
     // Create the Context
     device_mem = clCreateBuffer(context, modified_flags, size, init_data, &err);
     clEnsure(err, "clCreateBuffer()");
-    
-    //
+
 
 };
 
 
+buffer::~buffer()
+{
+    cl_int err;
+    if(device_mem)
+    {
+        err = clReleaseMemObject(device_mem);   
+        clEnsure(err, "clReleaseMemObject()");
+        device_mem = NULL; 
+    }
+}
 
 
 
 
 
-
-typedef hpx::components::managed_component<buffer> buffer_server_type;
-HPX_REGISTER_DERIVED_COMPONENT_FACTORY(buffer_server_type, buffer, "memory");
 
 
 

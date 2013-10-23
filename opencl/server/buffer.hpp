@@ -11,20 +11,20 @@
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/components.hpp>
 
-#include "memory.hpp"
+#include <CL/cl.h>
 
 
 namespace hpx { namespace opencl{ namespace server{
 
     ////////////////////////////////////////////////////////
     /// This class represents an opencl buffer.
+    
+    class device;
 
     class buffer
-      : public memory, public hpx::components::managed_component_base<buffer>
+      : public hpx::components::managed_component_base<buffer>
     {
     public:
-        typedef buffer type_holder;
-        typedef memory base_type_holder;
 
         // Constructor
         buffer();
@@ -45,7 +45,9 @@ namespace hpx { namespace opencl{ namespace server{
     private:
         //////////////////////////////////////////////////
         //  Private Member Variables
-
+        device* parent_device;
+        size_t size;
+        cl_mem device_mem;
     };
 
 
