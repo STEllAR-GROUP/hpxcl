@@ -13,8 +13,9 @@
 
 #include <CL/cl.h>
 
-#include "../clx_event.hpp"
+#include "../event.hpp"
 
+#include <boost/shared_ptr.hpp>
 #include <vector>
 
 namespace hpx { namespace opencl{ namespace server{
@@ -39,12 +40,12 @@ namespace hpx { namespace opencl{ namespace server{
         ///////////////////////////////////////////////////
         /// Exposed functionality of this component
         ///
-        clx_event clEnqueueReadBuffer2(size_t offset, size_t size, bool ptr,
-                                      std::vector<clx_event_id> events);
+        hpx::opencl::event clEnqueueReadBuffer(size_t offset, size_t size,
+                                      std::vector<hpx::opencl::event> events);
 
 
     //[
-    HPX_DEFINE_COMPONENT_ACTION(buffer, clEnqueueReadBuffer2);
+    HPX_DEFINE_COMPONENT_ACTION(buffer, clEnqueueReadBuffer);
     //]
     private:
         //////////////////////////////////////////////////
@@ -57,6 +58,7 @@ namespace hpx { namespace opencl{ namespace server{
         device* parent_device;
         size_t size;
         cl_mem device_mem;
+
     };
 
 
@@ -65,8 +67,8 @@ namespace hpx { namespace opencl{ namespace server{
 
 //[
 HPX_REGISTER_ACTION_DECLARATION(
-        hpx::opencl::server::buffer::clEnqueueReadBuffer2_action,
-        opencl_buffer_clEnqueueReadBuffer2_action);
+        hpx::opencl::server::buffer::clEnqueueReadBuffer_action,
+        opencl_buffer_clEnqueueReadBuffer_action);
 //]
 
 

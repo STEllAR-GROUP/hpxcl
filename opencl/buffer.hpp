@@ -12,12 +12,13 @@
 #include <hpx/lcos/future.hpp>
 
 #include "server/buffer.hpp"
-#include "clx_event.hpp"
+#include "event.hpp"
+
 #include <vector>
 
 namespace hpx {
 namespace opencl { 
-    
+
 
     class buffer
       : public hpx::components::client_base<
@@ -41,9 +42,9 @@ namespace opencl {
             /////////////////////////////////////////////////
             /// Exposed Component functionality
             /// 
-            hpx::lcos::future<clx_event>
-            clEnqueueReadBuffer(size_t offset, size_t size, bool ptr,
-                                          std::vector<clx_event> event);
+            hpx::lcos::future<hpx::opencl::event>
+            clEnqueueReadBuffer(size_t offset, size_t size,
+                                       std::vector<hpx::opencl::event> event);
 
     };
 

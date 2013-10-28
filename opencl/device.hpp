@@ -14,7 +14,6 @@
 #include "buffer.hpp"
 #include <vector>
 
-using hpx::opencl::clx_event;
 
 namespace hpx {
 namespace opencl {

@@ -22,25 +22,18 @@ typedef hpx::components::managed_component<
                         hpx::opencl::server::buffer> buffer_type;
 
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(buffer_type, buffer);
-HPX_REGISTER_ACTION(buffer_type::wrapped_type::clEnqueueReadBuffer2_action,
-                    buffer_clEnqueueReadBuffer2_action);
+HPX_REGISTER_ACTION(buffer_type::wrapped_type::clEnqueueReadBuffer_action,
+                    buffer_clEnqueueReadBuffer_action);
 
 
-hpx::lcos::future<hpx::opencl::clx_event>
-buffer::clEnqueueReadBuffer(size_t offset, size_t size, bool ptr,
-                            std::vector<clx_event> events_)
+hpx::lcos::future<hpx::opencl::event>
+buffer::clEnqueueReadBuffer(size_t offset, size_t size,
+                            std::vector<hpx::opencl::event> events)
 {
 
     BOOST_ASSERT(this->get_gid());
-    typedef hpx::opencl::server::buffer::clEnqueueReadBuffer2_action func;
+    typedef hpx::opencl::server::buffer::clEnqueueReadBuffer_action func;
 
-    // Convert clx_event list to clx_event_id list
-    std::vector<clx_event_id> events(events_.size());
-    BOOST_FOREACH(const clx_event & event, events_)
-    {
-        events.push_back(event.get_cl_event_id());
-    }
-
-    return hpx::async<func>(this->get_gid(), offset, size, ptr, events);
+    return hpx::async<func>(this->get_gid(), offset, size, events);
 }
 

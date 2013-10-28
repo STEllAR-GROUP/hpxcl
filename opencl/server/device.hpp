@@ -70,6 +70,8 @@ namespace hpx { namespace opencl{ namespace server{
         cl_platform_id      platform_id;
         cl_context          context;
         cl_command_queue    command_queue;
+        // Map for memory returned from readBuffer-Calls
+        std::map<cl_event, boost::shared_ptr<std::vector<char>>> read_buffers;
 
     };
 }}}
