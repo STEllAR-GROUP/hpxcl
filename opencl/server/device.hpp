@@ -17,6 +17,10 @@
 #include <CL/cl.h>
 
 #include "../std.hpp"
+#include "../event.hpp"
+
+// ! This component header may NOT include other component headers !
+// (To avoid recurcive includes)
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
@@ -41,6 +45,11 @@ namespace hpx { namespace opencl{ namespace server{
         cl_command_queue get_read_command_queue();
         cl_command_queue get_write_command_queue();
         cl_command_queue get_work_command_queue();
+
+        // Reads the cl_event values from 
+        std::vector<cl_event>
+        get_cl_events(std::vector<hpx::opencl::event>);
+        void put_read_buffer(cl_event, boost::shared_ptr<std::vector<char>>);
 
         //////////////////////////////////////////////////
         // Exposed functionality of this component

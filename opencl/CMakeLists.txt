@@ -28,6 +28,7 @@ add_hpx_component(opencl_components
             server/device.cpp
             server/event.cpp
             server/buffer.cpp
+            component_definitions.cpp
    HEADERS  device.hpp
             event.hpp
             buffer.hpp

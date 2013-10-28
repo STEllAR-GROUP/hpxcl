@@ -14,7 +14,6 @@
 #include "device.hpp"
 
 using hpx::opencl::server::buffer;
-using hpx::lcos::future;
 using namespace hpx::opencl::server;
 
 CL_FORBID_EMPTY_CONSTRUCTOR(buffer);
@@ -71,8 +70,8 @@ buffer::clEnqueueReadBuffer(size_t offset, size_t size,
 
     // Get the command queue
     cl_command_queue command_queue = parent_device->get_read_command_queue();
-   /* 
-    // Fetch opencl event component pointers
+    
+   /* // Fetch opencl event component pointers
     std::vector<future<boost::shared_ptr<hpx::opencl::server::event>>>
             event_server_futures(events.size());
     BOOST_FOREACH(hpx::opencl::event & event, events)
@@ -100,8 +99,16 @@ buffer::clEnqueueReadBuffer(size_t offset, size_t size,
     if(!cl_events_list.empty())
     {
         cl_events_list_ptr = &cl_events_list[0];
+    }*/
+
+    // Get the cl_event dependency list
+    std::vector<cl_event> cl_events_list = parent_device->get_cl_events(events);
+    cl_event* cl_events_list_ptr = NULL;
+    if(!cl_events_list.empty())
+    {
+        cl_events_list_ptr = &cl_events_list[0];
     }
-    
+
     // Create the buffer
     std::vector<char> *buffer = new std::vector<char>(size);
     boost::shared_ptr<std::vector<char>> buffer_ptr(buffer);
@@ -119,15 +126,14 @@ buffer::clEnqueueReadBuffer(size_t offset, size_t size,
 
     // Add buffer to read map
     // lock
-    read_map.insert(
-        std::pair<clx_event_id, boost::shared_ptr<std::vector<char>>>
-            ((clx_event_id)returnEvent, buffer_ptr));
+    //read_map.insert(
+     //   std::pair<clx_event_id, boost::shared_ptr<std::vector<char>>>
+      //      ((clx_event_id)returnEvent, buffer_ptr));
     // unlock
     
     // Return the clx_event
-    return clx_event(parent_device->get_gid(), returnEvent);
-*/
-   
+//    return clx_event(parent_device->get_gid(), returnEvent);
+
     return hpx::opencl::event();
 }
 

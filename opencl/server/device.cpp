@@ -112,6 +112,12 @@ device::get_work_command_queue()
     return command_queue;
 }
 
+std::vector<cl_event>
+device::get_cl_events(std::vector<hpx::opencl::event>)
+{
+    return std::vector<cl_event>();
+}
+
 void CL_CALLBACK
 device::error_callback(const char* errinfo, const void* info, size_t info_size,
                                                 void* _thisp)

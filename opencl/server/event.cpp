@@ -13,3 +13,8 @@ using namespace hpx::opencl::server;
 
 CL_FORBID_EMPTY_CONSTRUCTOR(event);
 
+
+
+
+event::~event()
+{}

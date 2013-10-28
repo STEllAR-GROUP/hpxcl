@@ -9,15 +9,21 @@
 
 #include <cstdint>
 
-#include <hpx/runtime/components/server/managed_component_base.hpp>
+#include <hpx/hpx_main.hpp>
+#include <hpx/include/components.hpp>
 
 #include <CL/cl.h>
 
-#include "device.hpp"
+// ! This header may NOT have dependencies to other components !
+// A lot of components link to "../event.h", which links to this.
+// Won't compile with recursive includes!
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
-    
+
+    // Workaround to avoid including "device.hpp"
+    class device;
+
     ////////////////////////////////////////////////////////
     /// This component wraps the cl_event type, to make it
     /// serializable and to add a global reference count.
@@ -31,7 +37,7 @@ namespace hpx { namespace opencl{ namespace server{
     public:
         // Constructor
         event();
-        event(intptr_t device, clx_event event_id);
+        event(intptr_t device_, clx_event event_id);
 
         ~event();
 

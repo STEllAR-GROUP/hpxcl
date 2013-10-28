@@ -16,17 +16,6 @@
 #include "buffer.hpp"
 
 
-HPX_REGISTER_COMPONENT_MODULE();
-
-typedef hpx::components::managed_component<
-                        hpx::opencl::server::device> device_type;
-
-HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(device_type, device);
-
-HPX_REGISTER_ACTION(device_type::wrapped_type::clCreateBuffer_action,
-                    device_clCreateBuffer_action);
-
-
 
 hpx::opencl::buffer
 hpx::opencl::device::clCreateBuffer(cl_mem_flags flags, size_t size)
