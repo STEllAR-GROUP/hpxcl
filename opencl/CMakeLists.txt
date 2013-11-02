@@ -24,6 +24,7 @@ add_hpx_library(opencl_std
 add_hpx_component(opencl_components
    ESSENTIAL
    SOURCES  device.cpp
+            event.cpp
             buffer.cpp
             server/device.cpp
             server/event.cpp

@@ -37,7 +37,7 @@ namespace hpx { namespace opencl{ namespace server{
     public:
         // Constructor
         event();
-        event(intptr_t device_, clx_event event_id);
+        event(hpx::naming::id_type device_id, clx_event event_id);
 
         ~event();
 
@@ -68,8 +68,9 @@ namespace hpx { namespace opencl{ namespace server{
         ///////////////////////////////////////////////
         // Private Member Variables
         //
-        device* parent_device;
+        boost::shared_ptr<device> parent_device;
         cl_event event_id;
+        hpx::naming::id_type parent_device_id;
     };
 }}}
 

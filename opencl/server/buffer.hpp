@@ -32,7 +32,7 @@ namespace hpx { namespace opencl{ namespace server{
 
         // Constructor
         buffer();
-        buffer(intptr_t device, cl_mem_flags flags, size_t size,
+        buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size,
                char* init_data = NULL);
 
         ~buffer();
@@ -55,9 +55,10 @@ namespace hpx { namespace opencl{ namespace server{
     private:
         //////////////////////////////////////////////////
         //  Private Member Variables
-        device* parent_device;
+        boost::shared_ptr<device> parent_device;
         size_t size;
         cl_mem device_mem;
+        hpx::naming::id_type parent_device_id;
 
     };
 

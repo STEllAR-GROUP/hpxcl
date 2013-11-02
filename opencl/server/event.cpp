@@ -8,13 +8,33 @@
 
 //#include <hpx/include/components.hpp>
 #include "../tools.hpp"
+#include "device.hpp"
 
 using namespace hpx::opencl::server;
 
 CL_FORBID_EMPTY_CONSTRUCTOR(event);
 
-
-
+event::event(hpx::naming::id_type device_id, clx_event event_id_)
+{
+    this->parent_device_id = device_id;
+    this->parent_device = hpx::get_ptr
+                          <hpx::opencl::server::device>(parent_device_id).get();
+    this->event_id = (cl_event) event_id_;
+}
 
 event::~event()
-{}
+{
+    // Release ressources in device associated with the event
+    parent_device->release_event_resources(event_id);
+
+    // Release the cl_event
+    cl_int err;
+    err = clReleaseEvent(event_id);
+    clEnsure_nothrow(err, "clReleaseEvent()");
+}
+
+cl_event
+event::get_cl_event()
+{
+    return event_id;
+}

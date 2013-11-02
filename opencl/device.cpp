@@ -16,9 +16,10 @@
 #include "buffer.hpp"
 
 
+using hpx::opencl::device;
 
 hpx::opencl::buffer
-hpx::opencl::device::clCreateBuffer(cl_mem_flags flags, size_t size)
+device::clCreateBuffer(cl_mem_flags flags, size_t size)
 {
 
     BOOST_ASSERT(this->get_gid());
@@ -32,3 +33,12 @@ hpx::opencl::device::clCreateBuffer(cl_mem_flags flags, size_t size)
     return buffer(buffer_server);
 }
 
+hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
+device::get_event_data(hpx::opencl::event event)
+{
+    BOOST_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::device::get_event_data_action func;
+
+    return hpx::async<func>(this->get_gid(), event);
+}

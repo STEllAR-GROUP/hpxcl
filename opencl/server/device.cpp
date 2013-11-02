@@ -55,7 +55,7 @@ device::device(clx_device_id _device_id, bool enable_profiling)
 // Destructor
 device::~device()
 {
-    
+    hpx::cout << "~device()" << hpx::endl; 
     cl_int err;
 
     // Release command queue
@@ -82,7 +82,7 @@ device::clCreateBuffer(cl_mem_flags flags, size_t size)
 {
     // create buffer server component
     hpx::naming::id_type ret = hpx::components::new_<hpx::opencl::server::buffer>
-                (hpx::find_here(), (intptr_t) this, flags, size)
+                (hpx::find_here(), this->get_gid(), flags, size)
                     .get();
     return ret;
 }
@@ -112,10 +112,52 @@ device::get_work_command_queue()
     return command_queue;
 }
 
-std::vector<cl_event>
-device::get_cl_events(std::vector<hpx::opencl::event>)
+void
+device::put_read_buffer(cl_event ev, boost::shared_ptr<std::vector<char>> mem)
 {
-    return std::vector<cl_event>();
+    hpx::cout << "put_read_buffer(" << (intptr_t)ev  << ")" << hpx::endl;
+    // Insert buffer to buffer map
+    boost::lock_guard<boost::mutex> lock(read_buffers_mutex);
+    read_buffers.insert(
+            std::pair<cl_event, boost::shared_ptr<std::vector<char>>>
+                        (ev, mem));
+    hpx::cout << "ended." << hpx::endl;
+}
+
+void
+device::release_event_resources(cl_event event_id)
+{
+    hpx::cout << "release_event_ressources(" << (intptr_t)event_id << ")" << hpx::endl;
+   
+    // Wait for events to end
+    clWaitForEvents(1, &event_id);
+   
+    // Delete all associated read buffers
+    boost::lock_guard<boost::mutex> lock(read_buffers_mutex);
+    read_buffers.erase(event_id);
+    
+    hpx::cout << "ended." << hpx::endl;
+}
+
+boost::shared_ptr<std::vector<char>>
+device::get_event_data(hpx::opencl::event event_id)
+{
+
+    // convert to cl_event
+    cl_event event = hpx::opencl::event::get_cl_events(event_id);
+
+    // wait for event to finish
+    clWaitForEvents(1, &event);
+
+    // retrieve the data
+    std::map<cl_event, boost::shared_ptr<std::vector<char>>>::iterator
+    it = read_buffers.find(event);
+
+    // Check for object exists. Should exist in a bug-free program.
+    BOOST_ASSERT (it != read_buffers.end());
+
+    // Return the data pointer
+    return it->second;
 }
 
 void CL_CALLBACK
@@ -126,3 +168,6 @@ device::error_callback(const char* errinfo, const void* info, size_t info_size,
     hpx::cerr << "device(" << thisp->device_id << "): CONTEXT_ERROR: "
              << errinfo << hpx::endl;
 }
+
+
+

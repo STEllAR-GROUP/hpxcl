@@ -40,26 +40,35 @@ namespace hpx { namespace opencl{ namespace server{
 
 
         //////////////////////////////////////////////////
-        // Local public functions
+        /// Local public functions
+        ///
         cl_context get_context();
         cl_command_queue get_read_command_queue();
         cl_command_queue get_write_command_queue();
         cl_command_queue get_work_command_queue();
 
-        // Reads the cl_event values from 
-        std::vector<cl_event>
-        get_cl_events(std::vector<hpx::opencl::event>);
+        // Registers a read buffer
         void put_read_buffer(cl_event, boost::shared_ptr<std::vector<char>>);
 
-        //////////////////////////////////////////////////
-        // Exposed functionality of this component
-        //
-        hpx::naming::id_type clCreateBuffer(cl_mem_flags, size_t);
+        // Delete all ressources registered with specific cl_event
+        void release_event_resources(cl_event);
 
+        //////////////////////////////////////////////////
+        /// Exposed functionality of this component
+        ///
+        
+        // Creates an openCL Buffer
+        hpx::naming::id_type
+        clCreateBuffer(cl_mem_flags, size_t);
+        
+        // Returns the data associated with a certain cl_event
+        boost::shared_ptr<std::vector<char>>
+        get_event_data(hpx::opencl::event event_id);
 
 
     //[opencl_management_action_types
     HPX_DEFINE_COMPONENT_ACTION(device, clCreateBuffer);
+    HPX_DEFINE_COMPONENT_ACTION(device, get_event_data);
     //]
 
     private:
@@ -81,7 +90,7 @@ namespace hpx { namespace opencl{ namespace server{
         cl_command_queue    command_queue;
         // Map for memory returned from readBuffer-Calls
         std::map<cl_event, boost::shared_ptr<std::vector<char>>> read_buffers;
-
+        boost::mutex read_buffers_mutex;
     };
 }}}
 
@@ -89,6 +98,9 @@ namespace hpx { namespace opencl{ namespace server{
 HPX_REGISTER_ACTION_DECLARATION(
        hpx::opencl::server::device::clCreateBuffer_action,
     opencl_device_clCreateBuffer_action);
+HPX_REGISTER_ACTION_DECLARATION(
+       hpx::opencl::server::device::get_event_data_action,
+    opencl_device_get_event_data_action);
     
 //]
 

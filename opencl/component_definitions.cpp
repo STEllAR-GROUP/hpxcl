@@ -25,6 +25,8 @@ typedef hpx::components::managed_component<
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(device_type, device);
 HPX_REGISTER_ACTION(device_type::wrapped_type::clCreateBuffer_action,
                     device_clCreateBuffer_action);
+HPX_REGISTER_ACTION(device_type::wrapped_type::get_event_data_action,
+                    device_get_event_data_action);
 
 
 

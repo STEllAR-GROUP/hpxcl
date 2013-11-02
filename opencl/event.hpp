@@ -35,6 +35,13 @@ namespace opencl {
               : base_type(gid)
             {}
 
+            // Converts hpx::opencl::event to cl_event
+            static std::vector<cl_event>
+            get_cl_events(std::vector<hpx::opencl::event>);
+            static cl_event
+            get_cl_events(hpx::opencl::event);
+
+
 
     };
 
