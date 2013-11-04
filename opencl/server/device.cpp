@@ -55,7 +55,6 @@ device::device(clx_device_id _device_id, bool enable_profiling)
 // Destructor
 device::~device()
 {
-    hpx::cout << "~device()" << hpx::endl; 
     cl_int err;
 
     // Release command queue
@@ -113,30 +112,28 @@ device::get_work_command_queue()
 }
 
 void
-device::put_read_buffer(cl_event ev, boost::shared_ptr<std::vector<char>> mem)
+device::put_event_data(cl_event ev, boost::shared_ptr<std::vector<char>> mem)
 {
-    hpx::cout << "put_read_buffer(" << (intptr_t)ev  << ")" << hpx::endl;
+    
     // Insert buffer to buffer map
-    boost::lock_guard<boost::mutex> lock(read_buffers_mutex);
-    read_buffers.insert(
+    boost::lock_guard<boost::mutex> lock(event_data_mutex);
+    event_data.insert(
             std::pair<cl_event, boost::shared_ptr<std::vector<char>>>
                         (ev, mem));
-    hpx::cout << "ended." << hpx::endl;
+    
 }
 
 void
 device::release_event_resources(cl_event event_id)
 {
-    hpx::cout << "release_event_ressources(" << (intptr_t)event_id << ")" << hpx::endl;
    
     // Wait for events to end
     clWaitForEvents(1, &event_id);
    
     // Delete all associated read buffers
-    boost::lock_guard<boost::mutex> lock(read_buffers_mutex);
-    read_buffers.erase(event_id);
+    boost::lock_guard<boost::mutex> lock(event_data_mutex);
+    event_data.erase(event_id);
     
-    hpx::cout << "ended." << hpx::endl;
 }
 
 boost::shared_ptr<std::vector<char>>
@@ -151,13 +148,14 @@ device::get_event_data(hpx::opencl::event event_id)
 
     // retrieve the data
     std::map<cl_event, boost::shared_ptr<std::vector<char>>>::iterator
-    it = read_buffers.find(event);
+    it = event_data.find(event);
 
     // Check for object exists. Should exist in a bug-free program.
-    BOOST_ASSERT (it != read_buffers.end());
+    BOOST_ASSERT (it != event_data.end());
 
     // Return the data pointer
     return it->second;
+
 }
 
 void CL_CALLBACK

@@ -39,6 +39,6 @@ device::get_event_data(hpx::opencl::event event)
     BOOST_ASSERT(this->get_gid());
 
     typedef hpx::opencl::server::device::get_event_data_action func;
-
+    
     return hpx::async<func>(this->get_gid(), event);
 }

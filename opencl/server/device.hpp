@@ -48,7 +48,7 @@ namespace hpx { namespace opencl{ namespace server{
         cl_command_queue get_work_command_queue();
 
         // Registers a read buffer
-        void put_read_buffer(cl_event, boost::shared_ptr<std::vector<char>>);
+        void put_event_data(cl_event, boost::shared_ptr<std::vector<char>>);
 
         // Delete all ressources registered with specific cl_event
         void release_event_resources(cl_event);
@@ -89,8 +89,8 @@ namespace hpx { namespace opencl{ namespace server{
         cl_context          context;
         cl_command_queue    command_queue;
         // Map for memory returned from readBuffer-Calls
-        std::map<cl_event, boost::shared_ptr<std::vector<char>>> read_buffers;
-        boost::mutex read_buffers_mutex;
+        std::map<cl_event, boost::shared_ptr<std::vector<char>>> event_data;
+        boost::mutex event_data_mutex;
     };
 }}}
 

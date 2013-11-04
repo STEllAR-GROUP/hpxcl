@@ -95,7 +95,7 @@ buffer::clEnqueueReadBuffer(size_t offset, size_t size,
     clEnsure(err, "clEnqueueReadBuffer()");
 
     // Send buffer to device class
-    parent_device->put_read_buffer(returnEvent, buffer_ptr);
+    parent_device->put_event_data(returnEvent, buffer_ptr);
     
     // Return the event
     return hpx::opencl::event(

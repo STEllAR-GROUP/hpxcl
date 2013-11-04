@@ -18,9 +18,9 @@ using hpx::opencl::event;
 
 cl_event
 event::get_cl_events(hpx::opencl::event event){
+    
     // TODO implement faster version
-
-    std::vector<hpx::opencl::event> vector(1);
+    std::vector<hpx::opencl::event> vector;
     vector.push_back(event);
     return get_cl_events(vector)[0];
 
@@ -32,7 +32,8 @@ event::get_cl_events(std::vector<hpx::opencl::event> events)
 
     // Step 1: Fetch opencl event component pointers
     std::vector<hpx::lcos::future<boost::shared_ptr
-            <hpx::opencl::server::event>>> event_server_futures(events.size());
+            <hpx::opencl::server::event>>> event_server_futures;
+    event_server_futures.reserve(events.size());
     BOOST_FOREACH(hpx::opencl::event & event, events)
     {
         BOOST_ASSERT(event.get_gid());
@@ -41,8 +42,8 @@ event::get_cl_events(std::vector<hpx::opencl::event> events)
     }
 
     // Wait for Step 1 to finish
-    std::vector<boost::shared_ptr<hpx::opencl::server::event>>
-            event_servers(events.size());
+    std::vector<boost::shared_ptr<hpx::opencl::server::event>> event_servers;
+    event_servers.reserve(events.size());
     BOOST_FOREACH(hpx::lcos::future<boost::shared_ptr
                     <hpx::opencl::server::event>> & event_server_future, 
                             event_server_futures)
@@ -51,7 +52,8 @@ event::get_cl_events(std::vector<hpx::opencl::event> events)
     }
 
     // Fetch the cl_event pointers from event servers and create eventlist
-    std::vector<cl_event> cl_events_list(events.size());
+    std::vector<cl_event> cl_events_list;
+    cl_events_list.reserve(events.size());
     BOOST_FOREACH(boost::shared_ptr<hpx::opencl::server::event> & event_server,
                                                                 event_servers)
     {
