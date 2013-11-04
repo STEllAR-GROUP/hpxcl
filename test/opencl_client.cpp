@@ -8,6 +8,7 @@
 #include <boost/foreach.hpp>
 
 #include "hpxcl/opencl/device.hpp"
+#include "hpxcl/opencl/buffer.hpp"
 
 void sayhellofunc()
 {
@@ -49,9 +50,12 @@ int hpx_main(int argc, char* argv[])
 
 //        hpx::opencl::buffer buffer
 //        cldevice.test();
-          cldevice.clCreateBuffer(CL_MEM_READ_WRITE, 10);
+        hpx::opencl::buffer buffer = cldevice.clCreateBuffer(CL_MEM_READ_WRITE, 10);
+        hpx::cout <<  buffer.get_gid() << hpx::endl;
+        hpx::opencl::event event = buffer.clEnqueueReadBuffer(0, 10, std::vector<hpx::opencl::event>(0)).get() ;
+        event.get_gid();
+        //hpx::cout << "clx_event_id:" << event.get_cl_event_id() << hpx::endl; 
     }
-
     return hpx::finalize();
 
 /*

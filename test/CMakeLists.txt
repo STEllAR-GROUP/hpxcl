@@ -29,6 +29,6 @@ add_subdirectory(hpxcl/opencl)
 add_hpx_executable(opencl_client
    ESSENTIAL
    SOURCES opencl_client.cpp
-   COMPONENT_DEPENDENCIES opencl_device
+   COMPONENT_DEPENDENCIES opencl_components
    DEPENDENCIES opencl_std_lib
    )
