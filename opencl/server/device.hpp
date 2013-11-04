@@ -10,9 +10,10 @@
 #include <cstdint>
 
 #include <hpx/include/iostreams.hpp>
+#include <hpx/util/serialize_buffer.hpp>
 
 #include <hpx/runtime/components/server/managed_component_base.hpp>
-#include <hpx/runtime/components/server/locking_hook.hpp>
+
 
 #include <CL/cl.h>
 
@@ -57,17 +58,12 @@ namespace hpx { namespace opencl{ namespace server{
         /// Exposed functionality of this component
         ///
         
-        // Creates an openCL Buffer
-        hpx::naming::id_type
-        clCreateBuffer(cl_mem_flags, size_t);
-        
         // Returns the data associated with a certain cl_event
         boost::shared_ptr<std::vector<char>>
         get_event_data(hpx::opencl::event event_id);
 
 
     //[opencl_management_action_types
-    HPX_DEFINE_COMPONENT_ACTION(device, clCreateBuffer);
     HPX_DEFINE_COMPONENT_ACTION(device, get_event_data);
     //]
 
@@ -95,9 +91,6 @@ namespace hpx { namespace opencl{ namespace server{
 }}}
 
 //[opencl_management_registration_declarations
-HPX_REGISTER_ACTION_DECLARATION(
-       hpx::opencl::server::device::clCreateBuffer_action,
-    opencl_device_clCreateBuffer_action);
 HPX_REGISTER_ACTION_DECLARATION(
        hpx::opencl::server::device::get_event_data_action,
     opencl_device_get_event_data_action);

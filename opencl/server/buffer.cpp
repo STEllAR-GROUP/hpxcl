@@ -21,8 +21,7 @@ CL_FORBID_EMPTY_CONSTRUCTOR(buffer);
 
 
 // Constructor
-buffer::buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size_,
-               char* init_data)
+buffer::buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size_)
 {
 
     this->parent_device_id = device_id;
@@ -39,13 +38,47 @@ buffer::buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size_,
 
     // Modify the cl_mem_flags
     cl_mem_flags modified_flags = flags &! (CL_MEM_USE_HOST_PTR
-                                            || CL_MEM_ALLOC_HOST_PTR);
-
+                                            | CL_MEM_ALLOC_HOST_PTR
+                                            | CL_MEM_COPY_HOST_PTR);
+    
     // Create the Context
-    device_mem = clCreateBuffer(context, modified_flags, size, init_data, &err);
+    device_mem = clCreateBuffer(context, modified_flags, size, NULL, &err);
     clEnsure(err, "clCreateBuffer()");
 
 };
+
+// Constructor
+buffer::buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size_,
+               hpx::util::serialize_buffer<char> data)
+{
+
+    BOOST_ASSERT(data.size() == size_);
+
+    this->parent_device_id = device_id;
+    this->parent_device = hpx::get_ptr
+                          <hpx::opencl::server::device>(parent_device_id).get();
+    this->size = size_;
+    this->device_mem = NULL;
+
+    // Retrieve the context from parent class
+    cl_context context = parent_device->get_context();
+
+    // The opencl error variable
+    cl_int err;
+
+    // Modify the cl_mem_flags
+    cl_mem_flags modified_flags = flags &! (CL_MEM_USE_HOST_PTR
+                                            | CL_MEM_ALLOC_HOST_PTR);
+    modified_flags = modified_flags | CL_MEM_COPY_HOST_PTR; 
+
+    // Create the Context
+    device_mem = clCreateBuffer(context, modified_flags, size,
+                                          const_cast<char*>(data.data()), &err);
+    clEnsure(err, "clCreateBuffer()");
+
+};
+
+
 
 
 buffer::~buffer()
@@ -65,7 +98,7 @@ buffer::~buffer()
 
 // Read Buffer
 hpx::opencl::event
-buffer::clEnqueueReadBuffer(size_t offset, size_t size,
+buffer::read(size_t offset, size_t size,
                             std::vector<hpx::opencl::event> events)
 {
     cl_int err;
@@ -107,6 +140,41 @@ buffer::clEnqueueReadBuffer(size_t offset, size_t size,
 
 }
 
+hpx::opencl::event
+buffer::write(size_t offset, hpx::util::serialize_buffer<char> data,
+                             std::vector<hpx::opencl::event> events)
+{
+    
+    cl_int err;
+    cl_event returnEvent;
+
+    // Get the command queue
+    cl_command_queue command_queue = parent_device->get_write_command_queue();
+    
+    
+    // Get the cl_event dependency list
+    std::vector<cl_event> cl_events_list = hpx::opencl::event::
+                                                    get_cl_events(events);
+    cl_event* cl_events_list_ptr = NULL;
+    if(!cl_events_list.empty())
+    {
+        cl_events_list_ptr = &cl_events_list[0];
+    }
+
+    // Write to the buffer
+    err = ::clEnqueueWriteBuffer(command_queue, device_mem, CL_FALSE, offset,
+                                 data.size(), data.data(), (cl_uint)events.size(),
+                                 cl_events_list_ptr, &returnEvent);
+    
+    // Return the event
+    return hpx::opencl::event(
+           hpx::components::new_<hpx::opencl::server::event>(
+                                hpx::find_here(),
+                                parent_device_id,
+                                (clx_event) returnEvent
+                            ));
+
+}
 
 
 

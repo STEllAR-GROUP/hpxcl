@@ -23,8 +23,6 @@ HPX_REGISTER_COMPONENT_MODULE();
 typedef hpx::components::managed_component<
                         hpx::opencl::server::device> device_type;
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(device_type, device);
-HPX_REGISTER_ACTION(device_type::wrapped_type::clCreateBuffer_action,
-                    device_clCreateBuffer_action);
 HPX_REGISTER_ACTION(device_type::wrapped_type::get_event_data_action,
                     device_get_event_data_action);
 
@@ -36,8 +34,10 @@ HPX_REGISTER_ACTION(device_type::wrapped_type::get_event_data_action,
 typedef hpx::components::managed_component<
                         hpx::opencl::server::buffer> buffer_type;
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(buffer_type, buffer);
-HPX_REGISTER_ACTION(buffer_type::wrapped_type::clEnqueueReadBuffer_action,
-                    buffer_clEnqueueReadBuffer_action);
+HPX_REGISTER_ACTION(buffer_type::wrapped_type::read_action,
+                    buffer_read_action);
+HPX_REGISTER_ACTION(buffer_type::wrapped_type::write_action,
+                    buffer_write_action);
 
 
 

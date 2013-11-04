@@ -76,16 +76,6 @@ device::~device()
 }
 
 
-hpx::naming::id_type
-device::clCreateBuffer(cl_mem_flags flags, size_t size)
-{
-    // create buffer server component
-    hpx::naming::id_type ret = hpx::components::new_<hpx::opencl::server::buffer>
-                (hpx::find_here(), this->get_gid(), flags, size)
-                    .get();
-    return ret;
-}
-
 cl_context
 device::get_context()
 {

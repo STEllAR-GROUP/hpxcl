@@ -10,6 +10,7 @@
 
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/components.hpp>
+#include <hpx/util/serialize_buffer.hpp>
 
 #include <CL/cl.h>
 
@@ -32,20 +33,23 @@ namespace hpx { namespace opencl{ namespace server{
 
         // Constructor
         buffer();
+        buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size);
         buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size,
-               char* init_data = NULL);
-
+               hpx::util::serialize_buffer<char> buffer);
         ~buffer();
 
         ///////////////////////////////////////////////////
         /// Exposed functionality of this component
         ///
-        hpx::opencl::event clEnqueueReadBuffer(size_t offset, size_t size,
+        hpx::opencl::event read(size_t offset, size_t size,
                                       std::vector<hpx::opencl::event> events);
-
+        hpx::opencl::event write(size_t offset, 
+                                 hpx::util::serialize_buffer<char> data,
+                                 std::vector<hpx::opencl::event> events);
 
     //[
-    HPX_DEFINE_COMPONENT_ACTION(buffer, clEnqueueReadBuffer);
+    HPX_DEFINE_COMPONENT_ACTION(buffer, read);
+    HPX_DEFINE_COMPONENT_ACTION(buffer, write);
     //]
     private:
         //////////////////////////////////////////////////
@@ -68,8 +72,11 @@ namespace hpx { namespace opencl{ namespace server{
 
 //[
 HPX_REGISTER_ACTION_DECLARATION(
-        hpx::opencl::server::buffer::clEnqueueReadBuffer_action,
-        opencl_buffer_clEnqueueReadBuffer_action);
+        hpx::opencl::server::buffer::read_action,
+        opencl_buffer_read_action);
+HPX_REGISTER_ACTION_DECLARATION(
+        hpx::opencl::server::buffer::write_action,
+        opencl_buffer_write_action);
 //]
 
 

@@ -45,7 +45,10 @@ namespace opencl {
             // Creates an OpenCL buffer
             hpx::opencl::buffer
             clCreateBuffer(cl_mem_flags flags, size_t size);
+            hpx::opencl::buffer
+            clCreateBuffer(cl_mem_flags flags, size_t size, const void* data);
             
+
             // Retrieves data associated with an event
             hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
             get_event_data(hpx::opencl::event);
