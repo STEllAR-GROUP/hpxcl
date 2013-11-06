@@ -12,7 +12,6 @@
 
 #include "event.hpp"
 
-
 using hpx::opencl::event;
 
 

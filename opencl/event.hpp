@@ -28,7 +28,7 @@ namespace opencl {
 
         public:
             // Empty constructor, necessary for hpx purposes
-            event(){}
+            event() {}
 
             // Constructor
             event(hpx::future<hpx::naming::id_type> const& gid)
