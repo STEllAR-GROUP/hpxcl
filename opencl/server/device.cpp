@@ -82,6 +82,11 @@ device::get_context()
     return context;
 }
 
+cl_device_id
+device::get_device_id()
+{
+    return device_id;
+}
 
 cl_command_queue
 device::get_read_command_queue()

@@ -57,6 +57,23 @@ device::clCreateBuffer(cl_mem_flags flags, size_t size)
 
 }
 
+hpx::opencl::program
+device::clCreateProgramWithSource(std::string source)
+{
+
+    BOOST_ASSERT(this->get_gid());
+
+    // Create new program object server
+    hpx::lcos::future<hpx::naming::id_type>
+    program_server = hpx::components::new_<hpx::opencl::server::program>
+                     (get_colocation_id_sync(get_gid()), get_gid(), source);
+
+    // Return program object client
+    return program(program_server);
+
+}
+
+
 hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
 device::get_event_data(hpx::opencl::event event)
 {

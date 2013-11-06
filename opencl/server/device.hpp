@@ -44,6 +44,7 @@ namespace hpx { namespace opencl{ namespace server{
         /// Local public functions
         ///
         cl_context get_context();
+        cl_device_id get_device_id();
         cl_command_queue get_read_command_queue();
         cl_command_queue get_write_command_queue();
         cl_command_queue get_work_command_queue();

@@ -12,6 +12,7 @@
 
 #include "server/device.hpp"
 #include "buffer.hpp"
+#include "program.hpp"
 #include <vector>
 
 
@@ -47,7 +48,10 @@ namespace opencl {
             clCreateBuffer(cl_mem_flags flags, size_t size);
             hpx::opencl::buffer
             clCreateBuffer(cl_mem_flags flags, size_t size, const void* data);
-            
+
+            // Creates an OpenCL program object
+            hpx::opencl::program
+            clCreateProgramWithSource(std::string source);
 
             // Retrieves data associated with an event
             hpx::lcos::future<boost::shared_ptr<std::vector<char>>>

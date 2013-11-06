@@ -26,16 +26,20 @@ add_hpx_component(opencl_components
    SOURCES  device.cpp
             event.cpp
             buffer.cpp
+            program.cpp
             server/device.cpp
             server/event.cpp
             server/buffer.cpp
+            server/program.cpp
             component_definitions.cpp
    HEADERS  device.hpp
             event.hpp
             buffer.hpp
+            program.hpp
             server/device.hpp
             server/event.hpp
             server/buffer.hpp
+            server/program.hpp
    COMPONENT_DEPENDENCIES iostreams 
    DEPENDENCIES ${OpenCL_LIBRARY} opencl_tools_lib opencl_std_lib
    )

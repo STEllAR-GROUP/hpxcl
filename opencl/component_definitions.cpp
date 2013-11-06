@@ -51,3 +51,9 @@ HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(event_type, event);
 
 
 
+// PROGRAM
+typedef hpx::components::managed_component<
+                        hpx::opencl::server::program> program_type;
+HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(program_type, program);
+HPX_REGISTER_ACTION(program_type::wrapped_type::build_action,
+                    program_build_aciton);
