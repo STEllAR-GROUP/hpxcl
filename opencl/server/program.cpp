@@ -115,3 +115,14 @@ program::build(std::string options)
 
 }
 
+cl_program
+program::get_cl_program()
+{
+    return program_id;
+}
+
+hpx::naming::id_type
+program::get_device_id()
+{
+    return parent_device_id;
+}

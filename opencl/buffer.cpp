@@ -28,8 +28,8 @@ hpx::lcos::future<hpx::opencl::event>
 buffer::clEnqueueReadBuffer(size_t offset, size_t size,
                             hpx::opencl::event event)
 {
-    std::vector<hpx::opencl::event> events(1);
-    events[0] = event;
+    std::vector<hpx::opencl::event> events;
+    events.push_back(event);
     return clEnqueueReadBuffer(offset, size, events);
 }
 

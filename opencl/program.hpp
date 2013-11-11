@@ -11,6 +11,7 @@
 #include <hpx/include/components.hpp>
 
 #include "server/program.hpp"
+#include "kernel.hpp"
 
 namespace hpx {
 namespace opencl { 
@@ -46,10 +47,14 @@ namespace opencl {
             hpx::lcos::future<void> build_async();
             hpx::lcos::future<void> build_async(std::string build_options);
 
+            // Create a kernel
+            hpx::opencl::kernel
+            create_kernel(std::string kernel_name);
+
     };
 
 }}
 
 
 
-#endif// HPX_OPENCL_BUFFER_HPP__
+#endif

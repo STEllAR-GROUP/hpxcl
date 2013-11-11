@@ -15,6 +15,8 @@
 #include "server/device.hpp"
 #include "device.hpp"
 
+#include "server/kernel.hpp"
+#include "kernel.hpp"
 
 HPX_REGISTER_COMPONENT_MODULE();
 
@@ -56,4 +58,18 @@ typedef hpx::components::managed_component<
                         hpx::opencl::server::program> program_type;
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(program_type, program);
 HPX_REGISTER_ACTION(program_type::wrapped_type::build_action,
-                    program_build_aciton);
+                    program_build_action);
+
+
+// KERNEL
+typedef hpx::components::managed_component<
+                        hpx::opencl::server::kernel> kernel_type;
+HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(kernel_type, kernel);
+HPX_REGISTER_ACTION(kernel_type::wrapped_type::set_arg_action,
+                    kernel_set_arg_action);
+HPX_REGISTER_ACTION(kernel_type::wrapped_type::enqueue_action,
+                    kernel_enqueue_action);
+
+
+
+

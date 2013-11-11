@@ -12,6 +12,7 @@
 #include "server/program.hpp"
 
 #include "program.hpp"
+#include "kernel.hpp"
 
 using namespace hpx::opencl;
 
@@ -37,10 +38,26 @@ hpx::lcos::future<void>
 program::build_async(std::string build_options)
 {
 
-   BOOST_ASSERT(this->get_gid());
+    BOOST_ASSERT(this->get_gid());
 
-   typedef hpx::opencl::server::program::build_action func;
+    typedef hpx::opencl::server::program::build_action func;
 
-   return hpx::async<func>(this->get_gid(), build_options);
+    return hpx::async<func>(this->get_gid(), build_options);
 
 }
+
+hpx::opencl::kernel
+program::create_kernel(std::string kernel_name)
+{
+
+    BOOST_ASSERT(this->get_gid());
+
+    // Create new kernel object server
+    hpx::lcos::future<hpx::naming::id_type>
+    kernel_server = hpx::components::new_<hpx::opencl::server::kernel>
+                    (get_colocation_id_sync(get_gid()), get_gid(), kernel_name);
+
+    return hpx::opencl::kernel(kernel_server);
+
+}
+

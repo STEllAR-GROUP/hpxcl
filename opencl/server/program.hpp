@@ -31,6 +31,11 @@ namespace hpx { namespace opencl{ namespace server{
 
         ~program();
 
+        //////////////////////////////////////////////////
+        /// Local functions
+        /// 
+        cl_program get_cl_program();
+        hpx::naming::id_type get_device_id();
 
         //////////////////////////////////////////////////
         /// Exposed functionality of this component

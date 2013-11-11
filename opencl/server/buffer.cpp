@@ -165,6 +165,7 @@ buffer::write(size_t offset, hpx::util::serialize_buffer<char> data,
     err = ::clEnqueueWriteBuffer(command_queue, device_mem, CL_FALSE, offset,
                                  data.size(), data.data(), (cl_uint)events.size(),
                                  cl_events_list_ptr, &returnEvent);
+    clEnsure(err, "clEnqueueWriteBuffer()");
     
     // Return the event
     return hpx::opencl::event(
@@ -176,5 +177,12 @@ buffer::write(size_t offset, hpx::util::serialize_buffer<char> data,
 
 }
 
+cl_mem
+buffer::get_cl_mem()
+{
+
+    return device_mem;
+
+}
 
 

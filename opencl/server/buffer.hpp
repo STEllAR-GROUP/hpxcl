@@ -39,6 +39,11 @@ namespace hpx { namespace opencl{ namespace server{
         ~buffer();
 
         ///////////////////////////////////////////////////
+        /// Local functions
+        /// 
+        cl_mem get_cl_mem();
+
+        ///////////////////////////////////////////////////
         /// Exposed functionality of this component
         ///
         hpx::opencl::event read(size_t offset, size_t size,

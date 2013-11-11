@@ -9,7 +9,7 @@
 
 #include <CL/cl.hpp>
 #include <sstream>
-
+#include <hpx/include/iostreams.hpp>
 
 namespace hpx { namespace opencl {
 
