@@ -21,9 +21,10 @@ static const char hello_world_src[] =
 int hpx_main(int argc, char* argv[])
 {
 
-    // Get list of available OpenCL Devices
-    std::vector<clx_device_id> devices = get_device_ids(hpx::find_here(),
-                                                        CL_DEVICE_TYPE_ALL);
+    // Get list of available OpenCL Devices.
+    std::vector<clx_device_id> devices = get_device_ids( hpx::find_here(),
+                                                         CL_DEVICE_TYPE_ALL,
+                                                         1.1f ).get();
 
     // Check whether there are any devices
     if(devices.size() < 1)

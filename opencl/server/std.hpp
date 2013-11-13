@@ -25,20 +25,20 @@ namespace hpx { namespace opencl{ namespace server{
     /// 
 
     // Returns the IDs of all devices on current host
-    std::vector<clx_device_id> clGetDeviceIDs(cl_device_type);
+    std::vector<clx_device_id> get_device_ids(cl_device_type, float cl_version);
     // Returns informations about given device
-    std::vector<char> clGetDeviceInfo(clx_device_id, cl_device_info);
+    std::vector<char> get_device_info(clx_device_id, cl_device_info);
 
     //[opencl_management_action_types
-    HPX_DEFINE_PLAIN_ACTION(clGetDeviceIDs, clGetDeviceIDs_action);
-    HPX_DEFINE_PLAIN_ACTION(clGetDeviceInfo, clGetDeviceInfo_action);
+    HPX_DEFINE_PLAIN_ACTION(get_device_ids, get_device_ids_action);
+    HPX_DEFINE_PLAIN_ACTION(get_device_info, get_device_info_action);
     //]
 
 }}}
 
 
-HPX_REGISTER_PLAIN_ACTION_DECLARATION(hpx::opencl::server::clGetDeviceIDs_action);
-HPX_REGISTER_PLAIN_ACTION_DECLARATION(hpx::opencl::server::clGetDeviceInfo_action);
+HPX_REGISTER_PLAIN_ACTION_DECLARATION(hpx::opencl::server::get_device_ids_action);
+HPX_REGISTER_PLAIN_ACTION_DECLARATION(hpx::opencl::server::get_device_info_action);
 
 
 #endif

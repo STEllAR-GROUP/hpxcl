@@ -8,6 +8,7 @@
 #define HPX_OPENCL_STD_HPP__
 
 #include <hpx/include/iostreams.hpp>
+#include <hpx/lcos/future.hpp>
 
 #include <CL/cl.h>
 
@@ -19,16 +20,19 @@
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{
 
-    // Get all devices on node
-    std::vector<clx_device_id> get_device_ids(hpx::naming::id_type node_id,
-                                              cl_device_type device_type);
+    // Get all devices on node.
+    //      It is recommended to only use OpenCL Version >= 1.1f.
+    //      Earlier devices seem to be blocking on every enqueue-call, which
+    //      seems counter-productive to the general idea of the hpx framework.
+    hpx::lcos::future<std::vector<clx_device_id>>
+    get_device_ids( hpx::naming::id_type node_id, cl_device_type device_type,
+                    float required_cl_version);
+
     // Get device information
-    void get_device_info( hpx::naming::id_type          node_id,
-                          clx_device_id                 device_id,
-                          cl_device_info                info_type,
-                          size_t                        param_value_size,
-                          void *                        param_value,
-                          size_t *                      param_value_size_ret);
+    hpx::lcos::future<std::vector<char>>
+    get_device_info( hpx::naming::id_type          node_id,
+                     clx_device_id                 device_id,
+                     cl_device_info                info_type);
 
 }}
 
