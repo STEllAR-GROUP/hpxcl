@@ -27,7 +27,7 @@ device::device(clx_device_id _device_id, bool enable_profiling)
     // Retrieve platformID
     err = clGetDeviceInfo(this->device_id, CL_DEVICE_PLATFORM,
                           sizeof(platform_id), &platform_id, NULL);
-    clEnsure(err, "clGetDeviceInfo()");
+    cl_ensure(err, "clGetDeviceInfo()");
 
     // Create Context
     cl_context_properties context_properties[] = 
@@ -40,7 +40,7 @@ device::device(clx_device_id _device_id, bool enable_profiling)
                               error_callback,
                               this,
                               &err);
-    clEnsure(err, "clCreateContext()");
+    cl_ensure(err, "clCreateContext()");
 
     // Create Command Queue
     cl_command_queue_properties command_queue_properties =
@@ -49,7 +49,7 @@ device::device(clx_device_id _device_id, bool enable_profiling)
         command_queue_properties |= CL_QUEUE_PROFILING_ENABLE;
     command_queue = clCreateCommandQueue(context, device_id,
                                          command_queue_properties, &err);
-    clEnsure(err, "clCreateCommandQueue()");
+    cl_ensure(err, "clCreateCommandQueue()");
 }
 
 // Destructor
@@ -61,9 +61,9 @@ device::~device()
     if(command_queue)
     {
         err = clFinish(command_queue);
-        clEnsure_nothrow(err, "clFinish()");
+        cl_ensure_nothrow(err, "clFinish()");
         err = clReleaseCommandQueue(command_queue);
-        clEnsure_nothrow(err, "clReleaseCommandQueue()");
+        cl_ensure_nothrow(err, "clReleaseCommandQueue()");
         command_queue = NULL; 
     }
     
@@ -71,7 +71,7 @@ device::~device()
     if(context)
     {
         err = clReleaseContext(context);
-        clEnsure_nothrow(err, "clReleaseContext()");
+        cl_ensure_nothrow(err, "clReleaseContext()");
         context = NULL;
     }
 

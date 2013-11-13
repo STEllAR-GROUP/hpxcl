@@ -11,24 +11,25 @@ using hpx::opencl::clx_device_id;
 
 
 std::vector<clx_device_id>
-hpx::opencl::clGetDeviceIDs(hpx::naming::id_type id, cl_device_type device_type)
+hpx::opencl::get_device_ids(hpx::naming::id_type node_id,
+                            cl_device_type device_type)
 {
     typedef hpx::opencl::server::clGetDeviceIDs_action action;
-    return async<action>(id, device_type).get();
+    return async<action>(node_id, device_type).get();
 }
 
 
 void
-hpx::opencl::clGetDeviceInfo( hpx::naming::id_type  id,
-                 clx_device_id         device_id,
-                 cl_device_info        info_type,
-                 size_t                param_value_size,
-                 void*                 param_value,
-                 size_t*               param_value_size_ret)    
+hpx::opencl::get_device_info( hpx::naming::id_type  node_id,
+                              clx_device_id         device_id,
+                              cl_device_info        info_type,
+                              size_t                param_value_size,
+                              void*                 param_value,
+                              size_t*               param_value_size_ret)    
 {
     // Retrieve info from node
     typedef hpx::opencl::server::clGetDeviceInfo_action action;
-    std::vector<char> info = async<action>(id, device_id, info_type).get();
+    std::vector<char> info = async<action>(node_id, device_id, info_type).get();
     
     // Write info to param_value
     if(param_value_size > 0)

@@ -20,15 +20,15 @@
 namespace hpx { namespace opencl{
 
     // Get all devices on node
-    std::vector<clx_device_id> clGetDeviceIDs(hpx::naming::id_type,
-                                              cl_device_type);
+    std::vector<clx_device_id> get_device_ids(hpx::naming::id_type node_id,
+                                              cl_device_type device_type);
     // Get device information
-    void clGetDeviceInfo( hpx::naming::id_type,
-                          clx_device_id,
-                          cl_device_info,
-                          size_t param_value_size,
-                          void *param_value,
-                          size_t *param_value_size_ret);
+    void get_device_info( hpx::naming::id_type          node_id,
+                          clx_device_id                 device_id,
+                          cl_device_info                info_type,
+                          size_t                        param_value_size,
+                          void *                        param_value,
+                          size_t *                      param_value_size_ret);
 
 }}
 

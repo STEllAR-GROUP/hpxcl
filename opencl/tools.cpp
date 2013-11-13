@@ -11,7 +11,7 @@
 namespace hpx { namespace opencl { 
 
 
-const char* clErrToStr(cl_int errCode)
+const char* cl_err_to_str(cl_int errCode)
 {
     switch(errCode)
     {

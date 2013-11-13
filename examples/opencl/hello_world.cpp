@@ -22,7 +22,7 @@ int hpx_main(int argc, char* argv[])
 {
 
     // Get list of available OpenCL Devices
-    std::vector<clx_device_id> devices = clGetDeviceIDs(hpx::find_here(),
+    std::vector<clx_device_id> devices = get_device_ids(hpx::find_here(),
                                                         CL_DEVICE_TYPE_ALL);
 
     // Check whether there are any devices
@@ -38,10 +38,10 @@ int hpx_main(int argc, char* argv[])
                        );
 
     // Create a buffer where the device can write to
-    buffer outbuffer = cldevice.clCreateBuffer(CL_MEM_WRITE_ONLY, 13);
+    buffer outbuffer = cldevice.create_buffer(CL_MEM_WRITE_ONLY, 13);
 
     // Create the hello_world device program
-    program prog = cldevice.clCreateProgramWithSource(hello_world_src);
+    program prog = cldevice.create_program_with_source(hello_world_src);
 
     // Compile the program
     prog.build();
@@ -59,7 +59,7 @@ int hpx_main(int argc, char* argv[])
                                                           (size_t*) NULL).get(); 
 
     // Read the buffer
-    event read_event = outbuffer.clEnqueueReadBuffer(0, 13, kernel_event).get();
+    event read_event = outbuffer.enqueue_read(0, 13, kernel_event).get();
 
     // Retrieve the read data
     boost::shared_ptr<std::vector<char>> data_ptr = read_event.get_data().get();

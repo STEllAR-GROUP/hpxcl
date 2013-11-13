@@ -18,23 +18,23 @@ using hpx::opencl::buffer;
 
 
 hpx::lcos::future<hpx::opencl::event>
-buffer::clEnqueueReadBuffer(size_t offset, size_t size)
+buffer::enqueue_read(size_t offset, size_t size)
 {
     std::vector<hpx::opencl::event> events(0);
-    return clEnqueueReadBuffer(offset, size, events);
+    return enqueue_read(offset, size, events);
 }
 
 hpx::lcos::future<hpx::opencl::event>
-buffer::clEnqueueReadBuffer(size_t offset, size_t size,
+buffer::enqueue_read(size_t offset, size_t size,
                             hpx::opencl::event event)
 {
     std::vector<hpx::opencl::event> events;
     events.push_back(event);
-    return clEnqueueReadBuffer(offset, size, events);
+    return enqueue_read(offset, size, events);
 }
 
 hpx::lcos::future<hpx::opencl::event>
-buffer::clEnqueueReadBuffer(size_t offset, size_t size,
+buffer::enqueue_read(size_t offset, size_t size,
                             std::vector<hpx::opencl::event> events)
 {
 
@@ -46,23 +46,23 @@ buffer::clEnqueueReadBuffer(size_t offset, size_t size,
 
 
 hpx::lcos::future<hpx::opencl::event>
-buffer::clEnqueueWriteBuffer(size_t offset, size_t size, const void* data)
+buffer::enqueue_write(size_t offset, size_t size, const void* data)
 {
     std::vector<hpx::opencl::event> events(0);
-    return clEnqueueWriteBuffer(offset, size, data, events);
+    return enqueue_write(offset, size, data, events);
 }
 
 hpx::lcos::future<hpx::opencl::event>
-buffer::clEnqueueWriteBuffer(size_t offset, size_t size, const void* data,
+buffer::enqueue_write(size_t offset, size_t size, const void* data,
                             hpx::opencl::event event)
 {
     std::vector<hpx::opencl::event> events(1);
     events[0] = event;
-    return clEnqueueWriteBuffer(offset, size, data, events);
+    return enqueue_write(offset, size, data, events);
 }
 
 hpx::lcos::future<hpx::opencl::event>
-buffer::clEnqueueWriteBuffer(size_t offset, size_t size, const void* data,
+buffer::enqueue_write(size_t offset, size_t size, const void* data,
                              std::vector<hpx::opencl::event> events)
 {
 

@@ -32,7 +32,7 @@ kernel::kernel(hpx::naming::id_type program_id, std::string kernel_name)
     cl_int err;
     kernel_id = clCreateKernel(parent_program->get_cl_program(),
                                kernel_name.c_str(), &err);
-    clEnsure(err, "clCreateKernel()");
+    cl_ensure(err, "clCreateKernel()");
                               
 }
 
@@ -44,7 +44,7 @@ kernel::~kernel()
     if(kernel_id)
     {
         err = clReleaseKernel(kernel_id);
-        clEnsure_nothrow(err, "clReleaseKernel()");
+        cl_ensure_nothrow(err, "clReleaseKernel()");
         kernel_id = NULL;
     }
 
@@ -65,7 +65,7 @@ kernel::set_arg(cl_uint arg_index, hpx::opencl::buffer arg)
     // Set the argument
     cl_int err;
     err = clSetKernelArg(kernel_id, arg_index, sizeof(cl_mem), &mem_id);
-    clEnsure(err, "clSetKernelArg()");
+    cl_ensure(err, "clSetKernelArg()");
 
 }
 
@@ -107,7 +107,7 @@ kernel::enqueue(cl_uint work_dim, std::vector<std::vector<size_t>> args,
                                  (cl_uint)events.size(),
                                  cl_events_list_ptr,
                                  &returnEvent);
-    clEnsure(err, "clEnqueueNDRangeKernel()");
+    cl_ensure(err, "clEnqueueNDRangeKernel()");
 
     // Return the event
     return hpx::opencl::event(

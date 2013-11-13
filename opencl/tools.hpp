@@ -17,19 +17,19 @@ namespace hpx { namespace opencl {
     #define CL_FORBID_EMPTY_CONSTRUCTOR(classname)                           \
         classname::classname()                                               \
         {                                                                    \
-            HPX_THROW_EXCEPTION(hpx::no_success, #classname "()",              \
+            HPX_THROW_EXCEPTION(hpx::no_success, #classname "()",            \
                     "Empty constructor is not defined!");                    \
         }
 
     // To be called on OpenCL errorcodes, throws an exception on OpenCL Error
-    #define clEnsure(errCode, functionname){                    \
+    #define cl_ensure(errCode, functionname){                   \
         if(errCode != CL_SUCCESS)                               \
         {                                                       \
             std::stringstream errorMessage;                     \
             errorMessage << "CL_ERROR("                         \
                          << (errCode)                           \
                          << "): "                               \
-                         << clErrToStr(errCode);                \
+                         << cl_err_to_str(errCode);             \
             HPX_THROW_EXCEPTION(hpx::no_success,                \
                                 (functionname),                 \
                                 errorMessage.str().c_str());    \
@@ -37,21 +37,21 @@ namespace hpx { namespace opencl {
     }
     
      // To be called on OpenCL errorcodes in destructors, does not throw
-    #define clEnsure_nothrow(errCode, functionname){            \
+    #define cl_ensure_nothrow(errCode, functionname){           \
         if(errCode != CL_SUCCESS)                               \
         {                                                       \
             hpx::cerr << (functionname)                         \
                       << ": CL_ERROR("                          \
                       << (errCode)                              \
                       << "): "                                  \
-                      << clErrToStr(errCode)                    \
+                      << cl_err_to_str(errCode)                 \
                       << hpx::endl;                             \
         }                                                       \
     }
     
     
     // Translates CL errorcode to descriptive string
-    const char* clErrToStr(cl_int errCode);
+    const char* cl_err_to_str(cl_int errCode);
 
 }}
 

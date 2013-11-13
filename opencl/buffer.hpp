@@ -45,31 +45,30 @@ namespace opencl {
             
             // Read Buffer
             hpx::lcos::future<hpx::opencl::event>
-            clEnqueueReadBuffer(size_t offset, size_t size);
+            enqueue_read(size_t offset, size_t size);
             
             hpx::lcos::future<hpx::opencl::event>
-            clEnqueueReadBuffer(size_t offset, size_t size,
+            enqueue_read(size_t offset, size_t size,
                                        hpx::opencl::event event);
 
             hpx::lcos::future<hpx::opencl::event>
-            clEnqueueReadBuffer(size_t offset, size_t size,
+            enqueue_read(size_t offset, size_t size,
                                        std::vector<hpx::opencl::event> events);
 
             // Write Buffer
             hpx::lcos::future<hpx::opencl::event>
-            clEnqueueWriteBuffer(size_t offset, size_t size, const void* data);
+            enqueue_write(size_t offset, size_t size, const void* data);
             
             hpx::lcos::future<hpx::opencl::event>
-            clEnqueueWriteBuffer(size_t offset, size_t size, const void* data,
+            enqueue_write(size_t offset, size_t size, const void* data,
                                        hpx::opencl::event event);
             
             hpx::lcos::future<hpx::opencl::event>
-            clEnqueueWriteBuffer(size_t offset, size_t size, const void* data,
+            enqueue_write(size_t offset, size_t size, const void* data,
                                        std::vector<hpx::opencl::event> events);
             
             /* TODO
              * clEnqueueReadBufferRect
-             * clEnqueueWriteBuffer
              * clEnqueueWriteBufferRect
              * clEnqueueFillBuffer
              * clEnqueueCopyBuffer

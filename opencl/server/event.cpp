@@ -30,7 +30,7 @@ event::~event()
     // Release the cl_event
     cl_int err;
     err = clReleaseEvent(event_id);
-    clEnsure_nothrow(err, "clReleaseEvent()");
+    cl_ensure_nothrow(err, "clReleaseEvent()");
 }
 
 cl_event

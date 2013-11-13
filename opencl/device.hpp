@@ -45,13 +45,13 @@ namespace opencl {
 
             // Creates an OpenCL buffer
             hpx::opencl::buffer
-            clCreateBuffer(cl_mem_flags flags, size_t size);
+            create_buffer(cl_mem_flags flags, size_t size);
             hpx::opencl::buffer
-            clCreateBuffer(cl_mem_flags flags, size_t size, const void* data);
+            create_buffer(cl_mem_flags flags, size_t size, const void* data);
 
             // Creates an OpenCL program object
             hpx::opencl::program
-            clCreateProgramWithSource(std::string source);
+            create_program_with_source(std::string source);
 
     };
 

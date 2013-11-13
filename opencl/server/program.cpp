@@ -35,7 +35,7 @@ program::program(hpx::naming::id_type device_id, std::string _code)
     cl_int err;
     program_id = clCreateProgramWithSource(parent_device->get_context(), 1,
                                             &code_ptr, &code_size, &err);
-    clEnsure(err, "clCreateProgramWithSource()");
+    cl_ensure(err, "clCreateProgramWithSource()");
                               
 }
 
@@ -47,7 +47,7 @@ program::~program()
     if(program_id)
     {
         err = clReleaseProgram(program_id);
-        clEnsure_nothrow(err, "clReleaseProgram()");
+        cl_ensure_nothrow(err, "clReleaseProgram()");
         program_id = NULL;
     }
 
@@ -106,12 +106,12 @@ program::build(std::string options)
     {
         // throw beautiful build log exception.
         HPX_THROW_EXCEPTION(hpx::no_success, "clBuildProgram()",
-                            (std::string(hpx::opencl::clErrToStr(err))
+                            (std::string(hpx::opencl::cl_err_to_str(err))
                             + acquire_build_log()).c_str());
     }
         
     // check for other errors
-    clEnsure(err, "clBuildProgram()");
+    cl_ensure(err, "clBuildProgram()");
 
 }
 

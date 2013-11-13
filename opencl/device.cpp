@@ -20,7 +20,7 @@
 using hpx::opencl::device;
 
 hpx::opencl::buffer
-device::clCreateBuffer(cl_mem_flags flags, size_t size, const void* data)
+device::create_buffer(cl_mem_flags flags, size_t size, const void* data)
 {
    
     BOOST_ASSERT(this->get_gid());
@@ -42,7 +42,7 @@ device::clCreateBuffer(cl_mem_flags flags, size_t size, const void* data)
 }
 
 hpx::opencl::buffer
-device::clCreateBuffer(cl_mem_flags flags, size_t size)
+device::create_buffer(cl_mem_flags flags, size_t size)
 {
 
     BOOST_ASSERT(this->get_gid());
@@ -58,7 +58,7 @@ device::clCreateBuffer(cl_mem_flags flags, size_t size)
 }
 
 hpx::opencl::program
-device::clCreateProgramWithSource(std::string source)
+device::create_program_with_source(std::string source)
 {
 
     BOOST_ASSERT(this->get_gid());

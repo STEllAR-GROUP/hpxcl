@@ -43,7 +43,7 @@ buffer::buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size_)
     
     // Create the Context
     device_mem = clCreateBuffer(context, modified_flags, size, NULL, &err);
-    clEnsure(err, "clCreateBuffer()");
+    cl_ensure(err, "clCreateBuffer()");
 
 };
 
@@ -74,7 +74,7 @@ buffer::buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size_,
     // Create the Context
     device_mem = clCreateBuffer(context, modified_flags, size,
                                           const_cast<char*>(data.data()), &err);
-    clEnsure(err, "clCreateBuffer()");
+    cl_ensure(err, "clCreateBuffer()");
 
 };
 
@@ -89,7 +89,7 @@ buffer::~buffer()
     if(device_mem)
     {
         err = clReleaseMemObject(device_mem);   
-        clEnsure(err, "clReleaseMemObject()");
+        cl_ensure(err, "clReleaseMemObject()");
         device_mem = NULL; 
     }
 }
@@ -125,7 +125,7 @@ buffer::read(size_t offset, size_t size,
     err = ::clEnqueueReadBuffer(command_queue, device_mem, CL_FALSE, offset,
                               size, (void*)&(*buffer)[0], (cl_uint)events.size(),
                               cl_events_list_ptr, &returnEvent);
-    clEnsure(err, "clEnqueueReadBuffer()");
+    cl_ensure(err, "clEnqueueReadBuffer()");
 
     // Send buffer to device class
     parent_device->put_event_data(returnEvent, buffer_ptr);
@@ -165,7 +165,7 @@ buffer::write(size_t offset, hpx::util::serialize_buffer<char> data,
     err = ::clEnqueueWriteBuffer(command_queue, device_mem, CL_FALSE, offset,
                                  data.size(), data.data(), (cl_uint)events.size(),
                                  cl_events_list_ptr, &returnEvent);
-    clEnsure(err, "clEnqueueWriteBuffer()");
+    cl_ensure(err, "clEnqueueWriteBuffer()");
     
     // Return the event
     return hpx::opencl::event(
