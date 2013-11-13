@@ -63,3 +63,20 @@ event::get_cl_events(std::vector<hpx::opencl::event> events)
 
 }
 
+void
+event::await()
+{
+    get_future().get();
+}
+
+hpx::lcos::future<void>
+event::get_future()
+{
+    BOOST_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::event::await_action func;
+
+    return hpx::async<func>(this->get_gid());
+}
+
+

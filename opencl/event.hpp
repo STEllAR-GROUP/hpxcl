@@ -9,6 +9,7 @@
 #define HPX_OPENCL_EVENT_HPP__
 
 #include <hpx/include/components.hpp>
+#include <hpx/lcos/future.hpp>
 
 #include "server/event.hpp"
 
@@ -41,7 +42,8 @@ namespace opencl {
             static cl_event
             get_cl_events(hpx::opencl::event);
 
-
+            void await();
+            hpx::lcos::future<void> get_future();
 
     };
 

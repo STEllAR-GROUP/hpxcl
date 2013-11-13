@@ -50,11 +50,9 @@ namespace hpx { namespace opencl{ namespace server{
         //////////////////////////////////////////////////
         // Exposed functionality of this component
         //
-        hpx::naming::id_type get_future() const;
         void await() const;
 
     //[opencl_management_action_types
-    HPX_DEFINE_COMPONENT_ACTION(event, get_future);
     HPX_DEFINE_COMPONENT_ACTION(event, await);
     //]
 
@@ -75,9 +73,6 @@ namespace hpx { namespace opencl{ namespace server{
 }}}
 
 //[opencl_management_registration_declarations
-HPX_REGISTER_ACTION_DECLARATION(
-       hpx::opencl::server::event::get_future_action,
-    opencl_event_get_future_action);
 HPX_REGISTER_ACTION_DECLARATION(
        hpx::opencl::server::event::await_action,
     opencl_event_await_action);

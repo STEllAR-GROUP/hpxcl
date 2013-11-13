@@ -49,6 +49,8 @@ HPX_REGISTER_ACTION(buffer_type::wrapped_type::write_action,
 typedef hpx::components::managed_component<
                         hpx::opencl::server::event> event_type;
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(event_type, event);
+HPX_REGISTER_ACTION(event_type::wrapped_type::await_action,
+                    event_await_action);
 
 
 

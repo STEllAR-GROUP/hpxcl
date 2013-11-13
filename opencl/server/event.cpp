@@ -38,3 +38,10 @@ event::get_cl_event()
 {
     return event_id;
 }
+
+void
+event::await() const {
+    
+    clWaitForEvents(1, &event_id);
+
+}
