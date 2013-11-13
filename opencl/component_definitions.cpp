@@ -25,8 +25,6 @@ HPX_REGISTER_COMPONENT_MODULE();
 typedef hpx::components::managed_component<
                         hpx::opencl::server::device> device_type;
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(device_type, device);
-HPX_REGISTER_ACTION(device_type::wrapped_type::get_event_data_action,
-                    device_get_event_data_action);
 
 
 
@@ -51,6 +49,8 @@ typedef hpx::components::managed_component<
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(event_type, event);
 HPX_REGISTER_ACTION(event_type::wrapped_type::await_action,
                     event_await_action);
+HPX_REGISTER_ACTION(event_type::wrapped_type::get_data_action,
+                    event_get_data_action);
 
 
 

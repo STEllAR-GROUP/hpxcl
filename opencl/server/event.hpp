@@ -11,6 +11,7 @@
 
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/components.hpp>
+#include <hpx/lcos/future.hpp>
 
 #include <CL/cl.h>
 
@@ -43,17 +44,25 @@ namespace hpx { namespace opencl{ namespace server{
 
 
         //////////////////////////////////////////////////
-        // Local public functions
-        //
+        /// Local public functions
+        ///
         cl_event get_cl_event();
     
         //////////////////////////////////////////////////
-        // Exposed functionality of this component
-        //
+        /// Exposed functionality of this component
+        ///
+
+        // Waits for the event to happen
         void await() const;
+
+        // Retrieves the data pointer associated with this event
+        // Blocks until event has happened
+        boost::shared_ptr<std::vector<char>>
+        get_data();
 
     //[opencl_management_action_types
     HPX_DEFINE_COMPONENT_ACTION(event, await);
+    HPX_DEFINE_COMPONENT_ACTION(event, get_data);
     //]
 
     private:
@@ -76,6 +85,9 @@ namespace hpx { namespace opencl{ namespace server{
 HPX_REGISTER_ACTION_DECLARATION(
        hpx::opencl::server::event::await_action,
     opencl_event_await_action);
+HPX_REGISTER_ACTION_DECLARATION(
+       hpx::opencl::server::event::get_data_action,
+    opencl_event_get_data_action);
 //]
 
 

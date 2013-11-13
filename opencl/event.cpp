@@ -10,6 +10,8 @@
 #include <hpx/util/portable_binary_oarchive.hpp>
 #include <hpx/lcos/future.hpp>
 
+#include <boost/serialization/vector.hpp>
+
 #include "event.hpp"
 
 using hpx::opencl::event;
@@ -79,4 +81,13 @@ event::get_future()
     return hpx::async<func>(this->get_gid());
 }
 
+hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
+event::get_data()
+{
+    BOOST_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::event::get_data_action func;
+
+    return hpx::async<func>(this->get_gid());
+}
 

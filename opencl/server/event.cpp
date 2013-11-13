@@ -45,3 +45,11 @@ event::await() const {
     clWaitForEvents(1, &event_id);
 
 }
+
+boost::shared_ptr<std::vector<char>>
+event::get_data()
+{
+
+    return parent_device->get_event_data(event_id);
+
+}

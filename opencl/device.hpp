@@ -53,11 +53,6 @@ namespace opencl {
             hpx::opencl::program
             clCreateProgramWithSource(std::string source);
 
-            // Retrieves data associated with an event
-            hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
-            get_event_data(hpx::opencl::event);
-
-
     };
 
 }}

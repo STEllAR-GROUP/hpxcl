@@ -132,14 +132,14 @@ device::release_event_resources(cl_event event_id)
 }
 
 boost::shared_ptr<std::vector<char>>
-device::get_event_data(hpx::opencl::event event_id)
+device::get_event_data(cl_event event)
 {
-
-    // convert to cl_event
-    cl_event event = hpx::opencl::event::get_cl_events(event_id);
 
     // wait for event to finish
     clWaitForEvents(1, &event);
+
+    // synchronization
+    boost::lock_guard<boost::mutex> lock(event_data_mutex);
 
     // retrieve the data
     std::map<cl_event, boost::shared_ptr<std::vector<char>>>::iterator

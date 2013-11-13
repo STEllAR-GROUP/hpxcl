@@ -42,9 +42,17 @@ namespace opencl {
             static cl_event
             get_cl_events(hpx::opencl::event);
 
+            // Blocks until the cl_event has happened
             void await();
+
+            // Returns a future variable that triggers when the cl_event has 
+            // happened
             hpx::lcos::future<void> get_future();
 
+            // Retrieves the data associated with the event
+            hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
+            get_data();
+    
     };
 
 }}
