@@ -37,7 +37,7 @@ int hpx_main(int argc, char* argv[])
              hpx::components::new_<server::device>(hpx::find_here(), devices[0])
                        );
 
-    // Create a buffer where the device can write to
+    // Create a buffer
     buffer outbuffer = cldevice.create_buffer(CL_MEM_WRITE_ONLY, 13);
 
     // Create the hello_world device program
@@ -58,10 +58,11 @@ int hpx_main(int argc, char* argv[])
     event kernel_event = hello_world_kernel.enqueue(1, &offset, &size,
                                                           (size_t*) NULL).get(); 
 
-    // Read the buffer
+    // Start reading the buffer (With kernel_event dependency.
+    //                           All hpxcl enqueue calls are nonblocking.)
     event read_event = outbuffer.enqueue_read(0, 13, kernel_event).get();
 
-    // Retrieve the read data
+    // Get the data (blocks until read_event finishes)
     boost::shared_ptr<std::vector<char>> data_ptr = read_event.get_data().get();
 
     // Write the data to hpx::cout
