@@ -60,6 +60,8 @@ device::~device()
     // Release command queue
     if(command_queue)
     {
+        err = clFinish(command_queue);
+        clEnsure_nothrow(err, "clFinish()");
         err = clReleaseCommandQueue(command_queue);
         clEnsure_nothrow(err, "clReleaseCommandQueue()");
         command_queue = NULL; 
