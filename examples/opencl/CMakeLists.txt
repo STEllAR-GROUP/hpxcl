@@ -5,6 +5,7 @@
 
 set(example_programs
     hello_world
+    _tmp_test
 )
 
 foreach(example_program ${example_programs})

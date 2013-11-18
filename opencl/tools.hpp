@@ -7,9 +7,13 @@
 #ifndef HPX_OPENCL_TOOLS_HPP__
 #define HPX_OPENCL_TOOLS_HPP__
 
-#include <CL/cl.hpp>
+#include <CL/cl.h>
 #include <sstream>
 #include <hpx/include/iostreams.hpp>
+
+#ifndef CL_VERSION_1_2
+#error "OpenCL 1.2 required!"
+#endif
 
 namespace hpx { namespace opencl {
 
