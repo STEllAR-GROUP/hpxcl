@@ -81,3 +81,40 @@ buffer::enqueue_write(size_t offset, size_t size, const void* data,
 
 }
 
+
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
+                     size_t size)
+{
+    std::vector<hpx::opencl::event> events(0);
+    return enqueue_fill(pattern, pattern_size, offset, size, events);
+}
+
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
+                     size_t size, hpx::opencl::event event)
+{
+    std::vector<hpx::opencl::event> events(1);
+    events[0] = event;
+    return enqueue_fill(pattern, pattern_size, offset, size, events);
+}
+
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
+                     size_t size, std::vector<hpx::opencl::event> events)
+{
+
+    BOOST_ASSERT(this->get_gid());
+
+    // Make data pointer serializable
+    hpx::util::serialize_buffer<char>
+    serializable_pattern((char*)const_cast<void*>(pattern), pattern_size,
+            hpx::util::serialize_buffer<char>::init_mode::reference);
+
+    // Run fill_action
+    typedef hpx::opencl::server::buffer::fill_action func;
+    return hpx::async<func>(this->get_gid(), serializable_pattern, offset, size,
+                            events);
+
+}
+

@@ -66,11 +66,25 @@ namespace opencl {
             hpx::lcos::future<hpx::opencl::event>
             enqueue_write(size_t offset, size_t size, const void* data,
                                        std::vector<hpx::opencl::event> events);
+
+            // Fill Buffer
+            hpx::lcos::future<hpx::opencl::event>
+            enqueue_fill(const void* pattern, size_t pattern_size,
+                                       size_t offset, size_t size);
+            
+            hpx::lcos::future<hpx::opencl::event>
+            enqueue_fill(const void* pattern, size_t pattern_size,
+                                       size_t offset, size_t size,
+                                       hpx::opencl::event event);
+            
+            hpx::lcos::future<hpx::opencl::event>
+            enqueue_fill(const void* pattern, size_t pattern_size,
+                                       size_t offset, size_t size,
+                                       std::vector<hpx::opencl::event> events);
             
             /* TODO
              * clEnqueueReadBufferRect
              * clEnqueueWriteBufferRect
-             * clEnqueueFillBuffer
              * clEnqueueCopyBuffer
              * clEnqueueCopyBufferRect
              */

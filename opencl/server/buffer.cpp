@@ -177,6 +177,42 @@ buffer::write(size_t offset, hpx::util::serialize_buffer<char> data,
 
 }
 
+hpx::opencl::event
+buffer::fill(hpx::util::serialize_buffer<char> pattern, size_t offset,
+             size_t size, std::vector<hpx::opencl::event> events)
+{
+    
+    cl_int err;
+    cl_event returnEvent;
+
+    // Get the command queue
+    cl_command_queue command_queue = parent_device->get_write_command_queue();
+    
+    // Get the cl_event dependency list
+    std::vector<cl_event> cl_events_list = hpx::opencl::event::
+                                                    get_cl_events(events);
+    cl_event* cl_events_list_ptr = NULL;
+    if(!cl_events_list.empty())
+    {
+        cl_events_list_ptr = &cl_events_list[0];
+    }
+
+    // Fill the buffer
+    err = ::clEnqueueFillBuffer(command_queue, device_mem, pattern.data(),
+                                pattern.size(), offset, size,
+                                (cl_uint)events.size(), cl_events_list_ptr,
+                                &returnEvent);
+
+    // Return the event
+    return hpx::opencl::event(
+           hpx::components::new_<hpx::opencl::server::event>(
+                                hpx::find_here(),
+                                parent_device_id,
+                                (clx_event) returnEvent
+                            ));
+
+}
+
 cl_mem
 buffer::get_cl_mem()
 {

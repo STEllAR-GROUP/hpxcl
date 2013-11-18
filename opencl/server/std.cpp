@@ -16,9 +16,9 @@ using hpx::opencl::clx_device_id;
 /// HPX Registration Stuff
 ///
 HPX_REGISTER_PLAIN_ACTION(hpx::opencl::server::get_device_ids_action,
-                          get_device_ids_action);
+                          opencl_get_device_ids_action);
 HPX_REGISTER_PLAIN_ACTION(hpx::opencl::server::get_device_info_action,
-                          get_device_info_action);
+                          opencl_get_device_info_action);
 
 ///////////////////////////////////////////////////
 /// Local functions
