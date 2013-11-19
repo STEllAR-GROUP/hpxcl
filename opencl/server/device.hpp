@@ -14,6 +14,9 @@
 
 #include <hpx/runtime/components/server/managed_component_base.hpp>
 
+#include <queue>
+#include <set>
+#include <map>
 
 #include <CL/cl.h>
 
@@ -58,11 +61,27 @@ namespace hpx { namespace opencl{ namespace server{
         // Returns the data associated with a certain cl_event
         boost::shared_ptr<std::vector<char>>
         get_event_data(cl_event event);
+
+        // Schedules mem object for deletion
+        //
+        // this is a workaround for the clSetEventStatus <-> clReleaseMemObj
+        // problem; further information:
+        // http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clSetUserEventStatus.html
+        // 
+        void schedule_cl_mem_deletion(cl_mem mem);
+
+        
         
         //////////////////////////////////////////////////
         /// Exposed functionality of this component
         ///
         
+        // creates an opencl event that can be triggered by the user
+        hpx::opencl::event create_user_event();
+        // triggers an event previously generated with create_user_event()
+        void trigger_user_event(hpx::opencl::event);
+
+
 
     private:
         ///////////////////////////////////////////////
@@ -72,6 +91,17 @@ namespace hpx { namespace opencl{ namespace server{
         // Error Callback
         static void CL_CALLBACK error_callback(const char*, const void*,
                                                size_t, void*);
+        // Try to delete buffers
+        void try_delete_cl_mem();
+        // same as above, but doesn't lock user_events_mutex internally.
+        // calling function needs to assure that user_events_mutex is already
+        // locked.
+        void try_delete_cl_mem_nolock();
+        
+        // same as trigger_user_event, but doesn't lock user_events_mutex.
+        // calling function needs to lock user_events_mutex manually.
+        void trigger_user_event_nolock(hpx::opencl::event);
+
 
     private:
         ///////////////////////////////////////////////
@@ -81,9 +111,21 @@ namespace hpx { namespace opencl{ namespace server{
         cl_platform_id      platform_id;
         cl_context          context;
         cl_command_queue    command_queue;
+        
         // Map for data returned from opencl calls
+        // (e.g. from buffer::enqueue_read)
         std::map<cl_event, boost::shared_ptr<std::vector<char>>> event_data;
         boost::mutex event_data_mutex;
+        
+        // List for all the user generated events (e.g. from futures)
+        std::set<hpx::opencl::event> user_events;
+        boost::mutex user_events_mutex;
+
+        // List of pending cl_mem deletions
+        // this is a workaround for the clSetEventStatus problem
+        std::queue<cl_mem> pending_cl_mem_deletions; 
+        boost::mutex pending_cl_mem_deletions_mutex;
+
     };
 }}}
 

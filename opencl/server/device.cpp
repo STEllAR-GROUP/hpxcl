@@ -155,6 +155,125 @@ device::get_event_data(cl_event event)
 
 }
 
+hpx::opencl::event
+device::create_user_event()
+{
+
+    BOOST_ASSERT(this->get_gid());
+
+    cl_int err;
+    cl_event returnEvent;
+   
+    // lock user_events_mutex, so no cl_mem can be deleted from now on
+    boost::lock_guard<boost::mutex> lock(user_events_mutex);
+
+    // create the user event
+    returnEvent = clCreateUserEvent(context, &err);
+    cl_ensure(err, "clCreateUserEvent()");
+
+    // initialize cl_event component client
+    hpx::opencl::event event_client(
+                       hpx::components::new_<hpx::opencl::server::event>(
+                                            hpx::find_here(),
+                                            get_gid(),
+                                            (clx_event) returnEvent
+                                        ));
+
+    // add event to list of user events
+    user_events.insert(event_client);
+
+    // Return the event
+    return event_client;
+
+}
+
+
+void
+device::trigger_user_event(hpx::opencl::event event)
+{
+
+    // lock user_events_mutex
+    boost::lock_guard<boost::mutex> lock(user_events_mutex);
+   
+    trigger_user_event_nolock(event);
+
+}
+
+void
+device::trigger_user_event_nolock(hpx::opencl::event event)
+{
+
+    // this function assumes that user_events_mutex is already locked
+
+    // check if event is a user event on this device
+    if(user_events.erase(event) < 1)
+        return;
+
+    // convert event to cl_event
+    cl_event event_ = hpx::opencl::event::get_cl_event(event);
+
+    // trigger event
+    cl_int err;
+    err = clSetUserEventStatus(event_, CL_COMPLETE);
+    cl_ensure(err, "clSetUserEventStatus()");
+
+    // try to delete cl_mems.
+    // call nolock version, as user_events_mutex is already locked.
+    try_delete_cl_mem_nolock();    
+
+}
+
+void
+device::schedule_cl_mem_deletion(cl_mem mem)
+{
+    
+    // add mem to list of pending deletions
+    pending_cl_mem_deletions_mutex.lock();
+    pending_cl_mem_deletions.push(mem);
+    pending_cl_mem_deletions_mutex.unlock();
+
+    // try to delete it
+    try_delete_cl_mem();
+
+}
+
+void
+device::try_delete_cl_mem()
+{
+    
+    // lock user_events
+    boost::lock_guard<boost::mutex> lock(user_events_mutex);
+
+    // call nolock function, as we just locked user_events_mutex.
+    try_delete_cl_mem_nolock();
+
+}
+
+void
+device::try_delete_cl_mem_nolock()
+{
+
+    // this function assumes that user_events_mutex is already locked externally.
+
+    // if still user events pending, don't delete
+    if(!user_events.empty())
+        return;
+
+    // else: delete. keep user_events_mutex locked, so no new events can be
+    // generated while deletion.
+
+    // lock pending_cl_mem_deletions
+    boost::lock_guard<boost::mutex> lock(pending_cl_mem_deletions_mutex);
+
+    // delete cl_mems
+    while(!pending_cl_mem_deletions.empty())
+    {
+        ::clReleaseMemObject(pending_cl_mem_deletions.front());
+        pending_cl_mem_deletions.pop();
+    }
+
+}
+
 void CL_CALLBACK
 device::error_callback(const char* errinfo, const void* info, size_t info_size,
                                                 void* _thisp)

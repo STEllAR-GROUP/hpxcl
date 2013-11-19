@@ -40,7 +40,7 @@ namespace opencl {
             static std::vector<cl_event>
             get_cl_events(std::vector<hpx::opencl::event>);
             static cl_event
-            get_cl_events(hpx::opencl::event);
+            get_cl_event(hpx::opencl::event);
 
             // Blocks until the cl_event has happened
             void await();

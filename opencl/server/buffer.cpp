@@ -83,13 +83,10 @@ buffer::buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size_,
 
 buffer::~buffer()
 {
-    cl_int err;
-
     // Release the device memory
     if(device_mem)
     {
-        err = clReleaseMemObject(device_mem);   
-        cl_ensure(err, "clReleaseMemObject()");
+        parent_device->schedule_cl_mem_deletion(device_mem);
         device_mem = NULL; 
     }
 }

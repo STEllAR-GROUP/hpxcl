@@ -18,11 +18,11 @@ using hpx::opencl::event;
 
 
 cl_event
-event::get_cl_events(hpx::opencl::event event){
+event::get_cl_event(hpx::opencl::event event){
     
     // TODO implement faster version
-    std::vector<hpx::opencl::event> vector;
-    vector.push_back(event);
+    std::vector<hpx::opencl::event> vector(1);
+    vector[0] = event;
     return get_cl_events(vector)[0];
 
 }
