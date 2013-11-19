@@ -9,6 +9,8 @@
 #include "buffer.hpp"
 #include <CL/cl.h>
 
+#include <boost/foreach.hpp>
+
 //#include <hpx/include/components.hpp>
 
 
@@ -57,6 +59,9 @@ device::~device()
 {
     cl_int err;
 
+    // cleanup user events and pending cl_mem deletions
+    cleanup_user_events();
+
     // Release command queue
     if(command_queue)
     {
@@ -74,7 +79,7 @@ device::~device()
         cl_ensure_nothrow(err, "clReleaseContext()");
         context = NULL;
     }
-
+    
 }
 
 
@@ -162,13 +167,13 @@ device::create_user_event()
     BOOST_ASSERT(this->get_gid());
 
     cl_int err;
-    cl_event returnEvent;
+    cl_event event;
    
     // lock user_events_mutex, so no cl_mem can be deleted from now on
     boost::lock_guard<boost::mutex> lock(user_events_mutex);
 
     // create the user event
-    returnEvent = clCreateUserEvent(context, &err);
+    event = clCreateUserEvent(context, &err);
     cl_ensure(err, "clCreateUserEvent()");
 
     // initialize cl_event component client
@@ -176,11 +181,13 @@ device::create_user_event()
                        hpx::components::new_<hpx::opencl::server::event>(
                                             hpx::find_here(),
                                             get_gid(),
-                                            (clx_event) returnEvent
+                                            (clx_event) event
                                         ));
 
     // add event to list of user events
-    user_events.insert(event_client);
+    user_events.insert(
+            std::pair<cl_event, hpx::opencl::event>(event, event_client)
+                            );
 
     // Return the event
     return event_client;
@@ -204,13 +211,13 @@ device::trigger_user_event_nolock(hpx::opencl::event event)
 {
 
     // this function assumes that user_events_mutex is already locked
-
-    // check if event is a user event on this device
-    if(user_events.erase(event) < 1)
-        return;
-
+    
     // convert event to cl_event
     cl_event event_ = hpx::opencl::event::get_cl_event(event);
+
+    // check if event is a user event on this device
+    if(user_events.erase(event_) < 1)
+        return;
 
     // trigger event
     cl_int err;
@@ -271,6 +278,33 @@ device::try_delete_cl_mem_nolock()
         ::clReleaseMemObject(pending_cl_mem_deletions.front());
         pending_cl_mem_deletions.pop();
     }
+
+}
+
+void
+device::cleanup_user_events()
+{
+
+    // trigger all user generated events
+    boost::lock_guard<boost::mutex> lock(user_events_mutex);
+    std::vector<hpx::opencl::event> leftover_user_events;
+    leftover_user_events.reserve(user_events.size());
+    typedef std::map<cl_event, hpx::opencl::event> user_events_map_type;
+    BOOST_FOREACH(user_events_map_type::value_type &user_event,
+                  user_events)
+    {
+        leftover_user_events.push_back(user_event.second);
+    }
+    BOOST_FOREACH(hpx::opencl::event & leftover_user_event, leftover_user_events)
+    {
+        trigger_user_event_nolock(leftover_user_event);
+    }
+
+    // Release all leftover cl_mems
+    try_delete_cl_mem_nolock();
+    boost::lock_guard<boost::mutex> lock2(pending_cl_mem_deletions_mutex);
+    if(pending_cl_mem_deletions.size() > 0)
+        hpx::cerr << "Unable to release all cl_mem objects!" << hpx::endl;
 
 }
 

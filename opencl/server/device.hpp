@@ -15,7 +15,6 @@
 #include <hpx/runtime/components/server/managed_component_base.hpp>
 
 #include <queue>
-#include <set>
 #include <map>
 
 #include <CL/cl.h>
@@ -102,6 +101,8 @@ namespace hpx { namespace opencl{ namespace server{
         // calling function needs to lock user_events_mutex manually.
         void trigger_user_event_nolock(hpx::opencl::event);
 
+        // cleans up all the possible leftover user events an cl_mems
+        void cleanup_user_events();
 
     private:
         ///////////////////////////////////////////////
@@ -118,7 +119,8 @@ namespace hpx { namespace opencl{ namespace server{
         boost::mutex event_data_mutex;
         
         // List for all the user generated events (e.g. from futures)
-        std::set<hpx::opencl::event> user_events;
+        // Store hpx::opencl::event client with them to keep reference counter up
+        std::map<cl_event, hpx::opencl::event> user_events;
         boost::mutex user_events_mutex;
 
         // List of pending cl_mem deletions
