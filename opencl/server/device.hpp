@@ -11,6 +11,7 @@
 
 #include <hpx/include/iostreams.hpp>
 #include <hpx/util/serialize_buffer.hpp>
+#include <hpx/lcos/local/mutex.hpp>
 
 #include <hpx/runtime/components/server/managed_component_base.hpp>
 
@@ -118,17 +119,17 @@ namespace hpx { namespace opencl{ namespace server{
         // Map for data returned from opencl calls
         // (e.g. from buffer::enqueue_read)
         std::map<cl_event, boost::shared_ptr<std::vector<char>>> event_data;
-        boost::mutex event_data_mutex;
+        hpx::lcos::local::mutex event_data_mutex;
         
         // List for all the user generated events (e.g. from futures)
         // Store hpx::opencl::event client with them to keep reference counter up
         std::map<cl_event, hpx::opencl::event> user_events;
-        boost::mutex user_events_mutex;
+        hpx::lcos::local::mutex user_events_mutex;
 
         // List of pending cl_mem deletions
         // this is a workaround for the clSetEventStatus problem
         std::queue<cl_mem> pending_cl_mem_deletions; 
-        boost::mutex pending_cl_mem_deletions_mutex;
+        hpx::lcos::local::mutex pending_cl_mem_deletions_mutex;
 
     };
 }}}

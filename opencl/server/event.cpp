@@ -41,7 +41,7 @@ event::get_cl_event()
     return event_id;
 }
 
-// Wrapper around the clWaitForEvents.
+// Wrapper around clWaitForEvents.
 // This function will be called by an io-threadpool thread, to prevent the
 // blocking of an hpx thread (deadlock situation)
 static void

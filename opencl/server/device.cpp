@@ -118,7 +118,7 @@ device::put_event_data(cl_event ev, boost::shared_ptr<std::vector<char>> mem)
 {
     
     // Insert buffer to buffer map
-    boost::lock_guard<boost::mutex> lock(event_data_mutex);
+    boost::lock_guard<hpx::lcos::local::mutex> lock(event_data_mutex);
     event_data.insert(
             std::pair<cl_event, boost::shared_ptr<std::vector<char>>>
                         (ev, mem));
@@ -133,7 +133,7 @@ device::release_event_resources(cl_event event_id)
     clWaitForEvents(1, &event_id);
    
     // Delete all associated read buffers
-    boost::lock_guard<boost::mutex> lock(event_data_mutex);
+    boost::lock_guard<hpx::lcos::local::mutex> lock(event_data_mutex);
     event_data.erase(event_id);
     
 }
@@ -146,7 +146,7 @@ device::get_event_data(cl_event event)
     clWaitForEvents(1, &event);
 
     // synchronization
-    boost::lock_guard<boost::mutex> lock(event_data_mutex);
+    boost::lock_guard<hpx::lcos::local::mutex> lock(event_data_mutex);
 
     // retrieve the data
     std::map<cl_event, boost::shared_ptr<std::vector<char>>>::iterator
@@ -170,7 +170,7 @@ device::create_user_event()
     cl_event event;
    
     // lock user_events_mutex, so no cl_mem can be deleted from now on
-    boost::lock_guard<boost::mutex> lock(user_events_mutex);
+    boost::lock_guard<hpx::lcos::local::mutex> lock(user_events_mutex);
 
     // create the user event
     event = clCreateUserEvent(context, &err);
@@ -200,7 +200,7 @@ device::trigger_user_event(hpx::opencl::event event)
 {
 
     // lock user_events_mutex
-    boost::lock_guard<boost::mutex> lock(user_events_mutex);
+    boost::lock_guard<hpx::lcos::local::mutex> lock(user_events_mutex);
    
     trigger_user_event_nolock(event);
 
@@ -249,7 +249,7 @@ device::try_delete_cl_mem()
 {
     
     // lock user_events
-    boost::lock_guard<boost::mutex> lock(user_events_mutex);
+    boost::lock_guard<hpx::lcos::local::mutex> lock(user_events_mutex);
 
     // call nolock function, as we just locked user_events_mutex.
     try_delete_cl_mem_nolock();
@@ -270,7 +270,7 @@ device::try_delete_cl_mem_nolock()
     // generated while deletion.
 
     // lock pending_cl_mem_deletions
-    boost::lock_guard<boost::mutex> lock(pending_cl_mem_deletions_mutex);
+    boost::lock_guard<hpx::lcos::local::mutex> lock(pending_cl_mem_deletions_mutex);
 
     // delete cl_mems
     while(!pending_cl_mem_deletions.empty())
@@ -286,7 +286,7 @@ device::cleanup_user_events()
 {
 
     // trigger all user generated events
-    boost::lock_guard<boost::mutex> lock(user_events_mutex);
+    boost::lock_guard<hpx::lcos::local::mutex> lock(user_events_mutex);
     std::vector<hpx::opencl::event> leftover_user_events;
     leftover_user_events.reserve(user_events.size());
     typedef std::map<cl_event, hpx::opencl::event> user_events_map_type;
@@ -302,7 +302,7 @@ device::cleanup_user_events()
 
     // Release all leftover cl_mems
     try_delete_cl_mem_nolock();
-    boost::lock_guard<boost::mutex> lock2(pending_cl_mem_deletions_mutex);
+    boost::lock_guard<hpx::lcos::local::mutex> lock2(pending_cl_mem_deletions_mutex);
     if(pending_cl_mem_deletions.size() > 0)
         hpx::cerr << "Unable to release all cl_mem objects!" << hpx::endl;
 
