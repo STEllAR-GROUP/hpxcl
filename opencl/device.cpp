@@ -73,3 +73,32 @@ device::create_program_with_source(std::string source)
 
 }
 
+hpx::lcos::future<hpx::opencl::event>
+device::create_user_event()
+{
+    BOOST_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::device::create_user_event_action func;
+
+    return hpx::async<func>(this->get_gid());
+}
+
+void
+device::trigger_user_event(hpx::opencl::event event)
+{
+    BOOST_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::device::trigger_user_event_action func;
+
+    hpx::apply<func>(this->get_gid(), event);
+}
+
+// used for create_future_event, this is the future.then callback
+void
+device::trigger_user_event_externally(hpx::opencl::device device,
+                            hpx::lcos::future<hpx::opencl::event> event)
+{
+    device.trigger_user_event(event.get());
+}
+
+

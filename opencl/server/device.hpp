@@ -81,6 +81,8 @@ namespace hpx { namespace opencl{ namespace server{
         void trigger_user_event(hpx::opencl::event);
 
 
+    HPX_DEFINE_COMPONENT_ACTION(device, create_user_event);
+    HPX_DEFINE_COMPONENT_ACTION(device, trigger_user_event);
 
     private:
         ///////////////////////////////////////////////
@@ -132,6 +134,12 @@ namespace hpx { namespace opencl{ namespace server{
 }}}
 
 //[opencl_management_registration_declarations
+HPX_REGISTER_ACTION_DECLARATION(
+        hpx::opencl::server::device::create_user_event_action,
+        opencl_device_create_user_event_action);
+HPX_REGISTER_ACTION_DECLARATION(
+        hpx::opencl::server::device::trigger_user_event_action,
+        opencl_device_trigger_user_event_action);
 //]
 
 

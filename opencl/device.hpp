@@ -9,6 +9,7 @@
 
 
 #include <hpx/include/components.hpp>
+#include <hpx/lcos/future.hpp>
 
 #include "server/device.hpp"
 #include "buffer.hpp"
@@ -42,6 +43,24 @@ namespace opencl {
             //////////////////////////////////////////
             /// Exposed Component functionality
             /// 
+            
+            // Creates a user event
+            hpx::lcos::future<hpx::opencl::event>
+            create_user_event();
+            
+            // Triggers an event created by create_user_event
+            void
+            trigger_user_event(hpx::opencl::event event);
+
+            // Needed for create_future_event, this is the future.then callback
+            static void
+            trigger_user_event_externally(hpx::opencl::device,
+                                          hpx::lcos::future<hpx::opencl::event>);
+            
+            // Creates an event that depends on a future
+            template<class T>
+            hpx::lcos::future<hpx::opencl::event>
+            create_future_event(hpx::lcos::future<T> future); 
 
             // Creates an OpenCL buffer
             hpx::opencl::buffer
@@ -55,8 +74,27 @@ namespace opencl {
 
     };
 
-}}
 
+    template<class T>
+    hpx::lcos::future<hpx::opencl::event>
+    device::create_future_event(hpx::lcos::future<T> future)
+    {
+    
+        // Create a user event
+        hpx::lcos::future<hpx::opencl::event> event = create_user_event();
+    
+        // Schedule the user event trigger to be called after future
+        future.then(
+                hpx::util::bind(&(device::trigger_user_event_externally),
+                                *this, event)
+                        );
+    
+        // return the event
+        return event;
+    
+    }
+
+}}
 
 
 #endif// HPX_OPENCL_DEVICE_HPP__
