@@ -59,9 +59,15 @@ namespace hpx { namespace opencl{ namespace server{
 
     private:
         ///////////////////////////////////////////////
-        // Private Member Functions
-        //
+        /// Private Member Functions
+        ///
+
+        // returns the build log
         std::string acquire_build_log(); 
+    
+        // checks for build errors
+        void throw_on_build_errors(cl_device_id device_id,
+                                   const char* function_name);
 
     private:
         ///////////////////////////////////////////////

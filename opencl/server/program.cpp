@@ -6,6 +6,7 @@
 #include "program.hpp"
 #include "../tools.hpp"
 #include "device.hpp"
+#include "hpx_cl_interop.hpp"
 
 #include <string>
 #include <sstream>
@@ -89,6 +90,42 @@ program::acquire_build_log()
 
 }
 
+static void CL_CALLBACK build_callback(cl_program program, void* args_)
+{
+
+    // Read input args
+    intptr_t* args = (intptr_t*) args_;
+    hpx::runtime* rt = (hpx::runtime*) args[0];
+    hpx::lcos::local::event* event = (hpx::lcos::local::event*) args[1];
+    
+    // trigger the event
+    hpx::opencl::server::trigger_event_from_external(rt, event);
+
+}
+    
+void
+program::throw_on_build_errors(cl_device_id device_id, const char* function_name)
+{
+
+    cl_int err;
+    cl_build_status build_status;
+
+    // Read build status
+    err = clGetProgramBuildInfo(program_id, device_id, CL_PROGRAM_BUILD_STATUS,
+                                sizeof(build_status), &build_status, NULL);
+    cl_ensure(err, "clGetProgramBuildInfo()");
+
+    // Throw if build did not succeed
+    if(build_status != CL_BUILD_SUCCESS)
+    {
+        // throw beautiful build log exception.
+        HPX_THROW_EXCEPTION(hpx::no_success, function_name,
+                            (std::string("A build error occured!")
+                            + acquire_build_log()).c_str());
+    }
+
+}
+
 void
 program::build(std::string options)
 {
@@ -98,21 +135,29 @@ program::build(std::string options)
     // fetch device id from parent device
     cl_device_id device_id = parent_device->get_device_id();
 
-    // build the program
-    err = clBuildProgram(program_id, 1, &device_id, options.c_str(), NULL, NULL);
+    // initialize event lock for cl synchronization
+    hpx::lcos::local::event event_lock;
     
-    // in case of build error print build log
-    if(err == CL_BUILD_PROGRAM_FAILURE)
-    {
-        // throw beautiful build log exception.
-        HPX_THROW_EXCEPTION(hpx::no_success, "clBuildProgram()",
-                            (std::string(hpx::opencl::cl_err_to_str(err))
-                            + acquire_build_log()).c_str());
-    }
-        
-    // check for other errors
-    cl_ensure(err, "clBuildProgram()");
+    // set up arguments list for callback
+    intptr_t args[2];
+    args[0] = (intptr_t)hpx::get_runtime_ptr();
+    args[1] = (intptr_t)&(event_lock);
 
+    // build the program
+    err = clBuildProgram(program_id, 1, &device_id, options.c_str(),
+                         &build_callback, (void*) args);
+
+    // ignore CL_BUILD_PROGRAM_FAILURE.
+    // we handle this case in throw_on_build_errors()
+    if(err != CL_BUILD_PROGRAM_FAILURE)
+        cl_ensure(err, "clBuildProgram()");
+
+    // wait for build to finish
+    event_lock.wait();
+   
+    // check for build errors
+    throw_on_build_errors(device_id, "clBuildProgram()");
+        
 }
 
 cl_program

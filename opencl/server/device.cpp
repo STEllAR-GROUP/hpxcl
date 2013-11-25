@@ -5,8 +5,9 @@
 
 #include "device.hpp"
 #include "../tools.hpp"
-
 #include "buffer.hpp"
+#include "hpx_cl_interop.hpp"
+
 #include <CL/cl.h>
 
 #include <boost/foreach.hpp>
@@ -340,52 +341,22 @@ device::cleanup_user_events()
 
 }
 
-// This is the number of an OpenCL thread.
-// It gets increased with every OpenCL call, to prevent name collisions
-static boost::atomic<std::size_t> opencl_thread_num(0);
-
 // Callback for clSetEventCallback. Will get called by the OpenCL library.
 static void CL_CALLBACK
 event_callback(cl_event clevent, cl_int event_command_exec_status, void* args_)
 {
-    intptr_t* args = (intptr_t*) args_;
+    // Check wether the callback reason was CL_COMPLETE
+    if(event_command_exec_status != CL_COMPLETE)
+        return;
 
+    // Read input args
+    intptr_t* args = (intptr_t*) args_;
     hpx::runtime* rt = (hpx::runtime*) args[0];
     hpx::lcos::local::event* event = (hpx::lcos::local::event*) args[1];
 
-    // Check wether we are on an HPX or an external OS thread
-    if(rt->get_thread_name() == "<unknown>")
-    {
-        // if we're on an OS thread, register it temporarily.
-        // add the thread id to its name, as there could potentially
-        // be multiple OpenCL threads in this function at the same time
-        BOOST_ASSERT(
-            rt->register_thread("opencl",
-                                opencl_thread_num.fetch_add(1,
-                                                boost::memory_order_relaxed),
-                                false)
-                        );
+    // trigger the event
+    hpx::opencl::server::trigger_event_from_external(rt, event);
 
-        // trigger the event lock
-        if(event_command_exec_status == CL_COMPLETE)
-            event->set();
-
-        // unregister the thread from hpx as we don't have any control over it
-        // any more. ever. (probably)
-        // /* this line is currently commented out.
-        //  * is unregistering necessary?
-        //  * there should be huge speed improvements if we don't unregister.
-        //  * although it would be a potential memory leak.
-        //  * but it would be kind of a memory leak as well, if we register
-        //  * every single callback-call on a different thread name ...
-        //  */
-        //BOOST_ASSERT(rt->unregister_thread());
-    }
-    else
-    {
-        if(event_command_exec_status == CL_COMPLETE)
-            event->set();
-    }
 }
 
 void

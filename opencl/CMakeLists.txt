@@ -34,6 +34,7 @@ add_hpx_component(opencl
             server/buffer.cpp
             server/program.cpp
             server/kernel.cpp
+            server/hpx_cl_interop.cpp
             component_definitions.cpp
    HEADERS  std.hpp
             tools.hpp
@@ -49,6 +50,7 @@ add_hpx_component(opencl
             server/buffer.hpp
             server/program.hpp
             server/kernel.hpp
+            server/hpx_cl_interop.hpp
    COMPONENT_DEPENDENCIES iostreams 
    DEPENDENCIES ${OpenCL_LIBRARY}
    )
