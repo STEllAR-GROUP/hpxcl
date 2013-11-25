@@ -137,7 +137,8 @@ namespace hpx { namespace opencl{ namespace server{
         hpx::lcos::local::mutex pending_cl_mem_deletions_mutex;
 
         // List of waiting events with respective mutexes
-        std::map<cl_event, hpx::lcos::local::event*> cl_event_waitlist;
+        std::map<cl_event, boost::shared_ptr<hpx::lcos::local::event>>
+                                                            cl_event_waitlist;
         hpx::lcos::local::mutex cl_event_waitlist_mutex;
 
     };

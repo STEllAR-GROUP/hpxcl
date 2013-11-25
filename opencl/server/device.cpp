@@ -12,7 +12,7 @@
 #include <boost/foreach.hpp>
 
 //#include <hpx/include/components.hpp>
-
+#include <hpx/include/runtime.hpp>
 
 using hpx::opencl::clx_device_id;
 using namespace hpx::opencl::server;
@@ -153,11 +153,11 @@ device::release_event_resources(cl_event event_id)
 
     // Delete the connected event lock 
     cl_event_waitlist_mutex.lock();
-    std::map<cl_event, hpx::lcos::local::event*>::iterator it
+    std::map<cl_event, boost::shared_ptr<hpx::lcos::local::event>>::iterator it
                                     = cl_event_waitlist.find(event_id);
     if(it != cl_event_waitlist.end())
     {
-        delete(it->second);
+//        delete(it->second);
         cl_event_waitlist.erase(it);
     }
     cl_event_waitlist_mutex.unlock();
@@ -341,12 +341,37 @@ device::cleanup_user_events()
 
 // Callback for clSetEventCallback. Will get called by the OpenCL library.
 static void CL_CALLBACK
-event_callback(cl_event clevent, cl_int event_command_exec_status, void* event)
+event_callback(cl_event clevent, cl_int event_command_exec_status, void* args_)
 {
-    
-    if(event_command_exec_status == CL_COMPLETE)
-        ((hpx::lcos::local::event*) event)->set();
+    intptr_t* args = (intptr_t*) args_;
 
+    hpx::runtime* rt = (hpx::runtime*) args[0];
+    hpx::lcos::local::event* event = (hpx::lcos::local::event*) args[1];
+
+    // Check wether we are on an HPX or an external OS thread
+    if(rt->get_thread_name() == "<unknown>")
+    {
+        // if we're on an OS thread, register it temporarily.
+        // add the thread id to its name, as there could potentially
+        // be multiple OpenCL threads in this function at the same time
+        std::ostringstream thread_name;
+        thread_name << "OpenCL_";
+        thread_name << boost::this_thread::get_id();
+        BOOST_ASSERT(rt->register_thread(thread_name.str().c_str()));
+        
+        // trigger the event lock
+        if(event_command_exec_status == CL_COMPLETE)
+            event->set();
+
+        // unregister the thread from hpx as we don't have any controll over it
+        // any more. ever. (probably)
+        BOOST_ASSERT(rt->unregister_thread());
+    }
+    else
+    {
+        if(event_command_exec_status == CL_COMPLETE)
+            event->set();
+    }
 }
 
 void
@@ -354,7 +379,7 @@ device::wait_for_event(cl_event clevent)
 {
 
     // This will be the event lock.
-    hpx::lcos::local::event* event = NULL;
+    boost::shared_ptr<hpx::lcos::local::event> event;
     
     // will be set to false if the callback isn't registered yet
     bool callback_is_registered = true;
@@ -362,14 +387,16 @@ device::wait_for_event(cl_event clevent)
     // Lock cl_event_waitlist
     cl_event_waitlist_mutex.lock();
 
-    // Check if an event lock exists that is connected to the clevent
+    // Check wether an event lock exists that is connected to the clevent
     if(cl_event_waitlist.count(clevent) < 1)
     {
         // if not, create a new event lock and connect it with the clevent
-        hpx::lcos::local::event *new_event = new hpx::lcos::local::event();
+        boost::shared_ptr<hpx::lcos::local::event> new_event =
+                                boost::make_shared<hpx::lcos::local::event>();
         cl_event_waitlist.insert(
-            std::pair<cl_event, hpx::lcos::local::event*>(clevent, new_event)
-                                    );
+                std::pair<cl_event, boost::shared_ptr<hpx::lcos::local::event>>
+                                (clevent, new_event)
+                                                        );
 
         // set the event to the new event so it doesn't need to be read from
         // cl_event_waitlist again
@@ -378,10 +405,11 @@ device::wait_for_event(cl_event clevent)
         // Schedule callback registration
         callback_is_registered = false;
     }
-
-    // If event is still NULL, we didn't need to create the event lock,
-    // so let's get it from the waitlist...
-    if(event == NULL) event = cl_event_waitlist.find(clevent)->second;
+    else
+    {
+        // otherwise, get event lock from event_waitlist
+        event = cl_event_waitlist.find(clevent)->second;
+    }
 
     // Unlock cl_event_waitlist
     cl_event_waitlist_mutex.unlock();
@@ -389,9 +417,12 @@ device::wait_for_event(cl_event clevent)
     // Register callback if necessary
     if(!callback_is_registered)
     {
-
+        intptr_t args[2];
+        args[0] = (intptr_t)hpx::get_runtime_ptr();
+        args[1] = (intptr_t)&(*event);
+        
         cl_int err = ::clSetEventCallback(clevent, CL_COMPLETE, &event_callback,
-                                          event);
+                                          (void*)args);
         cl_ensure(err, "clSetEventCallback()");
 
     }
