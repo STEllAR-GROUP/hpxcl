@@ -124,8 +124,8 @@ int hpx_main(int argc, char* argv[])
         hpx::opencl::event event4 = kernel.enqueue((cl_uint)1, &offset, &size, (size_t*)NULL, event3.get()).get();
         hpx::cout << "\tdone" << hpx::endl;
         hpx::cout << "read" << hpx::endl;
-//        hpx::opencl::event event5 = buffer2.enqueue_read(datasize-10, 10, event4).get();
-        hpx::opencl::event event5 = buffer2.enqueue_read(datasize-10, 10).get();
+        hpx::opencl::event event5 = buffer2.enqueue_read(datasize-10, 10, event4).get();
+//        hpx::opencl::event event5 = buffer2.enqueue_read(datasize-10, 10).get();
         hpx::cout << "\tdone" << hpx::endl;
         boost::shared_ptr<std::vector<char>> data3
                                         = event5.get_data().get();
