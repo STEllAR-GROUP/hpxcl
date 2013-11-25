@@ -62,6 +62,9 @@ namespace hpx { namespace opencl{ namespace server{
         boost::shared_ptr<std::vector<char>>
         get_event_data(cl_event event);
 
+        // blocks until event triggers
+        void wait_for_event(cl_event event);
+        
         // Schedules mem object for deletion
         //
         // this is a workaround for the clSetEventStatus <-> clReleaseMemObj
@@ -78,6 +81,7 @@ namespace hpx { namespace opencl{ namespace server{
         
         // creates an opencl event that can be triggered by the user
         hpx::opencl::event create_user_event();
+
         // triggers an event previously generated with create_user_event()
         void trigger_user_event(hpx::opencl::event);
 
@@ -107,6 +111,7 @@ namespace hpx { namespace opencl{ namespace server{
         // cleans up all the possible leftover user events an cl_mems
         void cleanup_user_events();
 
+
     private:
         ///////////////////////////////////////////////
         // Private Member Variables
@@ -130,6 +135,10 @@ namespace hpx { namespace opencl{ namespace server{
         // this is a workaround for the clSetEventStatus problem
         std::queue<cl_mem> pending_cl_mem_deletions; 
         hpx::lcos::local::mutex pending_cl_mem_deletions_mutex;
+
+        // List of waiting events with respective mutexes
+        std::map<cl_event, hpx::lcos::local::event*> cl_event_waitlist;
+        hpx::lcos::local::mutex cl_event_waitlist_mutex;
 
     };
 }}}

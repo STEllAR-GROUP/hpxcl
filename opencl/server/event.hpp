@@ -69,7 +69,10 @@ namespace hpx { namespace opencl{ namespace server{
         ///////////////////////////////////////////////
         // Private Member Functions
         //
-        
+        void await_internally();
+
+        // Callback function, will get called from OpenCL internally
+        static void callback(void *event);
 
     private:
         ///////////////////////////////////////////////
@@ -78,6 +81,7 @@ namespace hpx { namespace opencl{ namespace server{
         boost::shared_ptr<device> parent_device;
         cl_event event_id;
         hpx::naming::id_type parent_device_id;
+    
     };
 }}}
 

@@ -129,13 +129,44 @@ void
 device::release_event_resources(cl_event event_id)
 {
    
-    // Wait for events to end
-    clWaitForEvents(1, &event_id);
-   
-    // Delete all associated read buffers
-    boost::lock_guard<hpx::lcos::local::mutex> lock(event_data_mutex);
-    event_data.erase(event_id);
+    // Check whether we need to wait for the event to happen.
+    // Necessary if we have data registered on the event, otherwise
+    // we would create a nullpointer exception on CL level if we delete
+    // the data while it's trying to e.g. write to it.
+    bool needs_to_be_waited_for = false;
     
+    // check for data registered
+    event_data_mutex.lock();
+    if(event_data.count(event_id) > 0)
+        needs_to_be_waited_for = true;
+    event_data_mutex.unlock();
+    
+    // check for pending wait_for_event() calls
+    cl_event_waitlist_mutex.lock();
+    if(cl_event_waitlist.count(event_id) > 0)
+        needs_to_be_waited_for = true;
+    cl_event_waitlist_mutex.unlock();
+
+    // wait if we need to wait for the event
+    if(needs_to_be_waited_for)
+        wait_for_event(event_id);
+
+    // Delete the connected event lock 
+    cl_event_waitlist_mutex.lock();
+    std::map<cl_event, hpx::lcos::local::event*>::iterator it
+                                    = cl_event_waitlist.find(event_id);
+    if(it != cl_event_waitlist.end())
+    {
+        delete(it->second);
+        cl_event_waitlist.erase(it);
+    }
+    cl_event_waitlist_mutex.unlock();
+
+    // Delete all associated buffers
+    event_data_mutex.lock();
+    event_data.erase(event_id);
+    event_data_mutex.unlock();
+
 }
 
 boost::shared_ptr<std::vector<char>>
@@ -143,7 +174,7 @@ device::get_event_data(cl_event event)
 {
 
     // wait for event to finish
-    clWaitForEvents(1, &event);
+    wait_for_event(event);
 
     // synchronization
     boost::lock_guard<hpx::lcos::local::mutex> lock(event_data_mutex);
@@ -307,6 +338,69 @@ device::cleanup_user_events()
         hpx::cerr << "Unable to release all cl_mem objects!" << hpx::endl;
 
 }
+
+// Callback for clSetEventCallback. Will get called by the OpenCL library.
+static void CL_CALLBACK
+event_callback(cl_event clevent, cl_int event_command_exec_status, void* event)
+{
+    
+    if(event_command_exec_status == CL_COMPLETE)
+        ((hpx::lcos::local::event*) event)->set();
+
+}
+
+void
+device::wait_for_event(cl_event clevent)
+{
+
+    // This will be the event lock.
+    hpx::lcos::local::event* event = NULL;
+    
+    // will be set to false if the callback isn't registered yet
+    bool callback_is_registered = true;
+
+    // Lock cl_event_waitlist
+    cl_event_waitlist_mutex.lock();
+
+    // Check if an event lock exists that is connected to the clevent
+    if(cl_event_waitlist.count(clevent) < 1)
+    {
+        // if not, create a new event lock and connect it with the clevent
+        hpx::lcos::local::event *new_event = new hpx::lcos::local::event();
+        cl_event_waitlist.insert(
+            std::pair<cl_event, hpx::lcos::local::event*>(clevent, new_event)
+                                    );
+
+        // set the event to the new event so it doesn't need to be read from
+        // cl_event_waitlist again
+        event = new_event;
+
+        // Schedule callback registration
+        callback_is_registered = false;
+    }
+
+    // If event is still NULL, we didn't need to create the event lock,
+    // so let's get it from the waitlist...
+    if(event == NULL) event = cl_event_waitlist.find(clevent)->second;
+
+    // Unlock cl_event_waitlist
+    cl_event_waitlist_mutex.unlock();
+
+    // Register callback if necessary
+    if(!callback_is_registered)
+    {
+
+        cl_int err = ::clSetEventCallback(clevent, CL_COMPLETE, &event_callback,
+                                          event);
+        cl_ensure(err, "clSetEventCallback()");
+
+    }
+    
+    // Now wait for the event to happen
+    event->wait();
+
+}
+
 
 void CL_CALLBACK
 device::error_callback(const char* errinfo, const void* info, size_t info_size,
