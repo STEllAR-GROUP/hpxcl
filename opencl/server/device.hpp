@@ -12,6 +12,7 @@
 #include <hpx/include/iostreams.hpp>
 #include <hpx/util/serialize_buffer.hpp>
 #include <hpx/lcos/local/mutex.hpp>
+#include <hpx/lcos/local/spinlock.hpp>
 
 #include <hpx/runtime/components/server/managed_component_base.hpp>
 
@@ -120,26 +121,30 @@ namespace hpx { namespace opencl{ namespace server{
         cl_platform_id      platform_id;
         cl_context          context;
         cl_command_queue    command_queue;
-        
+
+        // lock typedefs
+        typedef hpx::lcos::local::mutex mutex_type;
+        typedef hpx::lcos::local::spinlock spinlock_type;
+
         // Map for data returned from opencl calls
         // (e.g. from buffer::enqueue_read)
         std::map<cl_event, boost::shared_ptr<std::vector<char>>> event_data;
-        hpx::lcos::local::mutex event_data_mutex;
+        spinlock_type event_data_mutex;
         
         // List for all the user generated events (e.g. from futures)
         // Store hpx::opencl::event client with them to keep reference counter up
         std::map<cl_event, hpx::opencl::event> user_events;
-        hpx::lcos::local::mutex user_events_mutex;
+        spinlock_type user_events_mutex;
 
         // List of pending cl_mem deletions
         // this is a workaround for the clSetEventStatus problem
         std::queue<cl_mem> pending_cl_mem_deletions; 
-        hpx::lcos::local::mutex pending_cl_mem_deletions_mutex;
+        spinlock_type pending_cl_mem_deletions_mutex;
 
         // List of waiting events with respective mutexes
         std::map<cl_event, boost::shared_ptr<hpx::lcos::local::event>>
                                                             cl_event_waitlist;
-        hpx::lcos::local::mutex cl_event_waitlist_mutex;
+        spinlock_type cl_event_waitlist_mutex;
 
     };
 }}}

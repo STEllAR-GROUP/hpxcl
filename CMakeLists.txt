@@ -31,3 +31,29 @@ if(HPX_BUILD_EXAMPLES)
     include_directories(examples)
     add_subdirectory(examples)
 endif()
+
+###############################################################################
+hpx_option(HPX_BUILD_TESTS BOOL "Build HPX tests (default: ON)" ON ADVANCED)
+
+if(HPX_BUILD_TESTS)
+  hpx_option(HPX_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
+  hpx_option(HPX_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
+  hpx_option(HPX_BUILD_TESTS_UNIT BOOL "Build HPX unit tests (default: ON)" ON ADVANCED)
+
+  add_hpx_pseudo_target(tests)
+
+  enable_testing()
+  include(CTest)
+
+  add_custom_command(TARGET tests POST_BUILD
+    COMMAND ctest --output-on-failure)
+
+  include_directories(tests)
+  add_subdirectory(tests)
+else()
+  unset(HPX_BUILD_TESTS_BENCHMARKS CACHE)
+  unset(HPX_BUILD_TESTS_REGRESSIONS CACHE)
+  unset(HPX_BUILD_TESTS_UNIT CACHE)
+endif()
+
+
