@@ -6,6 +6,7 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 set(tests
+    initialization
 #    promise
    )
 
@@ -17,6 +18,8 @@ set(tests
 foreach(test ${tests})
   set(sources
       ${test}.cpp)
+
+  set(${test}_FLAGS ${${test}_FLAGS} DEPENDENCIES opencl_component)
 
   source_group("Source Files" FILES ${sources})
 

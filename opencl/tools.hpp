@@ -33,7 +33,7 @@ namespace hpx { namespace opencl {
             errorMessage << "CL_ERROR("                         \
                          << (errCode)                           \
                          << "): "                               \
-                         << cl_err_to_str(errCode);             \
+                         << hpx::opencl::cl_err_to_str(errCode);\
             HPX_THROW_EXCEPTION(hpx::no_success,                \
                                 (functionname),                 \
                                 errorMessage.str().c_str());    \
@@ -48,7 +48,7 @@ namespace hpx { namespace opencl {
                       << ": CL_ERROR("                          \
                       << (errCode)                              \
                       << "): "                                  \
-                      << cl_err_to_str(errCode)                 \
+                      << hpx::opencl::cl_err_to_str(errCode)    \
                       << hpx::endl;                             \
         }                                                       \
     }

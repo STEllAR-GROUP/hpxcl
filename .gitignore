@@ -14,3 +14,6 @@
 
 # Accidentally created HPX errorlogs
 *.log
+
+#.nfs files
+.nfs*

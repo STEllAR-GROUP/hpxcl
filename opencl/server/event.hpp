@@ -55,6 +55,9 @@ namespace hpx { namespace opencl{ namespace server{
         // Waits for the event to happen
         void await() const;
 
+        // Returns true if the event already finished
+        bool finished() const;
+
         // Retrieves the data pointer associated with this event
         // Blocks until event has happened
         boost::shared_ptr<std::vector<char>>
@@ -63,6 +66,7 @@ namespace hpx { namespace opencl{ namespace server{
     //[opencl_management_action_types
     HPX_DEFINE_COMPONENT_ACTION(event, await);
     HPX_DEFINE_COMPONENT_ACTION(event, get_data);
+    HPX_DEFINE_COMPONENT_ACTION(event, finished);
     //]
 
     private:
@@ -92,6 +96,9 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
        hpx::opencl::server::event::get_data_action,
     opencl_event_get_data_action);
+HPX_REGISTER_ACTION_DECLARATION(
+       hpx::opencl::server::event::finished_action,
+    opencl_event_finished_action);
 //]
 
 

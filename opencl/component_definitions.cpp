@@ -54,6 +54,8 @@ HPX_REGISTER_ACTION(event_type::wrapped_type::await_action,
                     event_await_action);
 HPX_REGISTER_ACTION(event_type::wrapped_type::get_data_action,
                     event_get_data_action);
+HPX_REGISTER_ACTION(event_type::wrapped_type::finished_action,
+                    event_finished_action);
 
 
 

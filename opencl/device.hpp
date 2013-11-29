@@ -52,10 +52,6 @@ namespace opencl {
             void
             trigger_user_event(hpx::opencl::event event);
 
-            // Needed for create_future_event, this is the future.then callback
-            static void
-            trigger_user_event_externally(hpx::opencl::device,
-                                          hpx::lcos::future<hpx::opencl::event>);
             
             // Creates an event that depends on a future
             template<class T>
@@ -71,6 +67,17 @@ namespace opencl {
             // Creates an OpenCL program object
             hpx::opencl::program
             create_program_with_source(std::string source);
+            
+            
+        private:
+            //////////////////////////////////////////
+            /// Helper Functions
+            /// 
+            
+            // Needed for create_future_event, this is the future.then callback
+            static void
+            trigger_user_event_externally(hpx::opencl::device,
+                                          hpx::lcos::future<hpx::opencl::event>);
 
     };
 

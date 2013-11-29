@@ -91,3 +91,15 @@ event::get_data()
     return hpx::async<func>(this->get_gid());
 }
 
+hpx::lcos::future<bool>
+event::finished()
+{
+    BOOST_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::event::finished_action func;
+
+    return hpx::async<func>(this->get_gid());
+}
+
+
+
