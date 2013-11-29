@@ -19,7 +19,9 @@ hpx::opencl::device cldevice;
 
 hpx::naming::id_type here;
 
-void init(variables_map & vm)
+static void cl_test();
+
+static void init(variables_map & vm)
 {
 
     here = hpx::find_here();
@@ -56,4 +58,28 @@ void init(variables_map & vm)
 
 }
 
+int hpx_main(variables_map & vm)
+{
+    {
+        init(vm);   
+        cl_test();
+    }
+    
+    hpx::finalize();
+    return hpx::util::report_errors();
+}
 
+
+
+///////////////////////////////////////////////////////////////////////////////
+int main(int argc, char* argv[])
+{
+    // Configure application-specific options
+    options_description cmdline("Usage: " HPX_APPLICATION_STRING " [options]");
+    cmdline.add_options()
+        ( "deviceid"
+        , value<std::size_t>()->default_value(0)
+        , "the ID of the device we will run our tests on") ;
+
+    return hpx::init(cmdline, argc, argv);
+}

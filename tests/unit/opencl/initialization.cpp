@@ -6,32 +6,13 @@
 
 #include "cl_tests.hpp"
 
-
-int hpx_main(variables_map & vm)
+static void cl_test()
 {
-    {
-        init(vm);   
+    // do nothing. this file only tests the initialization
 //        buffer_init();
  //       buffer_write();
   //      events();
    //     events_futures();
-    }
-    
-    hpx::finalize();
-    return hpx::util::report_errors();
 }
 
 
-
-///////////////////////////////////////////////////////////////////////////////
-int main(int argc, char* argv[])
-{
-    // Configure application-specific options
-    options_description cmdline("Usage: " HPX_APPLICATION_STRING " [options]");
-    cmdline.add_options()
-        ( "deviceid"
-        , value<std::size_t>()->default_value(0)
-        , "the ID of the device we will run our tests on") ;
-
-    return hpx::init(cmdline, argc, argv);
-}
