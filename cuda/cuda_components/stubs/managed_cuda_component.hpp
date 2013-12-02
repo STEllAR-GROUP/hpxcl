@@ -4,6 +4,7 @@
 #include <hpx/runtime/components/stubs/stub_base.hpp>
 #include <hpx/runtime/applier/apply.hpp>
 #include <hpx/include/async.hpp>
+
 #include "../server/managed_cuda_component.hpp"
 
 namespace cuda_hpx
@@ -39,34 +40,22 @@ namespace cuda_hpx
 				return test2_async(gid).get();
 			}
 
-            static hpx::lcos::future<argument_type>
-            check_if_hit_async(hpx::naming::id_type const& gid,argument_type num_of_sets,int cuda_blocks, int cuda_threads)
-            {
-                typedef server::managed_cuda_component::check_if_hit_action action_type;
-                return hpx::async<action_type>(gid,num_of_sets,cuda_blocks,cuda_threads);
-            }
-
-            static argument_type check_if_hit_sync(hpx::naming::id_type const& gid,argument_type num_of_sets,int cuda_blocks, int cuda_threads)
-            {
-                return check_if_hit_async(gid,num_of_sets,cuda_blocks,cuda_threads).get();
-            }
-
             static void get_cuda_info()
             {
                 server::managed_cuda_component::get_cuda_info();
             }
 
-			/*static hpx::lcos::future<double>
-			calculate_pi_async(hpx::naming::id_type const& gid,uint64_t num_of_iterations,uint64_t num_of_sets,int cuda_blocks,int cuda_threads)
+			static hpx::lcos::future<float>
+			calculate_pi_async(hpx::naming::id_type const& gid,int nthreads, int nblocks)
 			{
                 typedef server::managed_cuda_component::calculate_pi_action action_type;
-                return hpx::async<action_type>(gid,num_of_iterations,num_of_sets,cuda_blocks,cuda_threads);
+                return hpx::async<action_type>(gid,nthreads,nblocks);
 			}
-            */
-			/*static double calculate_pi_sync(hpx::naming::id_type const& gid)
+
+			static float calculate_pi_sync(hpx::naming::id_type const& gid,int nthreads, int nblocks)
 			{
-                return calculate_pi_async(gid).get();
-			}*/
+                return calculate_pi_async(gid,nthreads,nblocks).get();
+			}
 		};
 
 	}

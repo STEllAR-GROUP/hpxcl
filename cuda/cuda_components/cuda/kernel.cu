@@ -11,42 +11,19 @@ __global__ void test_kernel(long* vals)
   vals[threadIdx.x] += 1;
 }
 
-__global__ void calculate_pi_kernel(curandState* states,int trials_per_thread,long* num_of_hits)
+__global__ void calculate_pi_kernel(float *sum, int nbin, float step, int nthreads, int nblocks)
 {
-    unsigned int tid = threadIdx.x * blockDim.x * blockIdx.x;
-    int cur_num_of_hits = 0;
-    int x,y;
-    curand_init(1234,tid,0,&states[tid]);
-    for(int i=0;i<trials_per_thread;i++)
-    {
-        x = curand_uniform(&states[tid]);
-        y = curand_uniform(&states[tid]);
-        cur_num_of_hits += (x*x + y*y < 1.0f);
-    }
-    num_of_hits[tid] = cur_num_of_hits;
-
+	int i;
+	float x;
+	int idx = blockIdx.x*blockDim.x+threadIdx.x;  // Sequential thread index across the blocks
+	for (i=idx; i< nbin; i+=nthreads*nblocks)
+	{
+		x = (i+0.5)*step;
+		sum[idx] += 4.0/(1.0+x*x);
+	}
 }
 
 //functions that call CUDA kernels
-long gpu_num_of_hits(int blocks,int threads,int trials_per_thread)
-{
-    long host[blocks * threads];
-    curandState *devStates;
-    long* num_of_hits ;
-    long  hits = 0;
-
-    cudaMalloc((void**) &num_of_hits,blocks * threads * sizeof(long));
-    cudaMalloc((void**) &devStates,threads * blocks * sizeof(curandState));
-
-    calculate_pi_kernel<<<blocks,threads>>>(devStates,trials_per_thread,num_of_hits);
-    cudaMemcpy(host,num_of_hits,blocks * threads * sizeof(long),cudaMemcpyDeviceToHost);
-
-    for(int i=0;i<trials_per_thread;i++)
-    {
-        hits += host[i];
-    }
-    return hits;
-}
 
 void cuda_test(long int* a)
 {
@@ -56,6 +33,42 @@ void cuda_test(long int* a)
 	test_kernel<<<1,1>>>(a_d);
 	cudaMemcpy(a,a_d,1,cudaMemcpyDeviceToHost);
 	cudaFree(a_d);
+}
+float pi(int nthreads,int nblocks)
+{
+    const int NBIN = 10000000;
+    const int NUM_BLOCK = 30;
+    const int NUM_THREAD = 8;
+    int tid = 0;
+    float pi = 0.0;
+
+    dim3 dimGrid(NUM_BLOCK,1,1);  // Grid dimensions
+	dim3 dimBlock(NUM_THREAD,1,1);  // Block dimensions
+	float *sumHost, *sumDev;  // Pointer to host & device arrays
+
+	float step = 1.0/NBIN;  // Step size
+	size_t size = NUM_BLOCK*NUM_THREAD*sizeof(float);  //Array memory size
+	sumHost = (float *)malloc(size);  //  Allocate array on host
+	cudaMalloc((void **) &sumDev, size);  // Allocate array on device
+	// Initialize array in device to 0
+	cudaMemset(sumDev, 0, size);
+	//declare a stream
+	cudaStream_t stream;
+	cudaStreamCreate(&stream);
+	// Do calculation on device
+	calculate_pi_kernel<<<dimGrid, dimBlock,0,stream>>>(sumDev, NBIN, step, NUM_THREAD, NUM_BLOCK); // call CUDA kernel
+	cudaStreamSynchronize(stream);
+	cudaStreamDestroy(stream);
+	// Retrieve result from device and store it in host array
+	cudaMemcpy(sumHost, sumDev, size, cudaMemcpyDeviceToHost);
+	for(tid=0; tid<NUM_THREAD*NUM_BLOCK; tid++)
+		pi += sumHost[tid];
+	pi *= step;
+
+	free(sumHost);
+	cudaFree(sumDev);
+
+	return pi;
 }
 
 //CUDA API wrapper functions

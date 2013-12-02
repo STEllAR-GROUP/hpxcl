@@ -49,22 +49,21 @@ namespace cuda_hpx
 			return this->base_type::test2_sync(this->get_gid());
 		}
 
-		argument_type check_if_hit_sync(argument_type num_of_sets,int cuda_blocks, int cuda_threads)
-		{
-            BOOST_ASSERT(this->get_gid());
-            return this->base_type::check_if_hit_sync(this->get_gid(),num_of_sets,cuda_blocks,cuda_threads);
-		}
-
         void get_cuda_info()
         {
             base_type::get_cuda_info();
         }
 
-		hpx::lcos::future<argument_type> check_if_hit_async(argument_type num_of_sets,int cuda_blocks,int cuda_threads)
-		{
-            BOOST_ASSERT(this->git_gid());
-            return this->base_type::check_if_hit_async(this->get_gid(),num_of_sets,cuda_blocks,cuda_threads);
-		}
+        hpx::lcos::future<float> calculate_pi_async(int nthreads,int nblocks)
+        {
+            BOOST_ASSERT(this->get_gid());
+            return this->base_type::calculate_pi_async(this->get_gid(),nthreads,nblocks);
+        }
+        float calculate_pi_sync(int nthreads,int nblocks)
+        {
+            BOOST_ASSERT(this->get_gid());
+            return this->base_type::calculate_pi_sync(this->get_gid(),nthreads,nblocks);
+        }
 	};
 }
 #endif //MANAGED_CUDA_COMPONENT_1_HPP

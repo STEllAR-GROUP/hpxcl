@@ -50,41 +50,14 @@ namespace cuda_hpx
                     return a[0];
 				}
 
-                /*double calculate_pi(boost::uint64_t num_of_iterations,boost::uint64_t num_of_sets,int cuda_blocks,int cuda_threads)
-                {
-                    uint64_t hits = 0;
-                    num_of_iterations  /= num_of_sets;
-
-                    for(uint64_t i = 0;i<num_of_iterations;i++)
-                    {
-                        //parallel implementation
-                    }
-                }*/
-				argument_type check_if_hit(boost::uint64_t num_of_sets, int cuda_blocks, int cuda_threads)
+				float calculate_pi(int nthreads,int nblocks)
 				{
-                    boost::atomic<uint64_t> hits_per_set(0);
-                    //split work between cuda and hpx
-                    num_of_sets = num_of_sets / 2;
-                    std::cout<<"num of sets is "<<num_of_sets<<std::endl;
-                    int sets_per_thread = (num_of_sets / cuda_blocks) / cuda_threads;
-                    std::cout<<"sets per thread are "<<sets_per_thread<<std::endl;
-                    uint64_t cuda_hits = gpu_num_of_hits(cuda_blocks,cuda_threads, sets_per_thread);
-                    double x,y,z;
-                    for(boost::uint64_t i=0;i<num_of_sets;i++)
-                    {
-                        x = dist(gen);
-                        y = dist(gen);
-                        z = x*x + y*y;
-                        if(z<=1)
-                        hits_per_set++;
-                    }
-                    return hits_per_set + cuda_hits;
+                    return pi(nthreads,nblocks);
 				}
 
 		 HPX_DEFINE_COMPONENT_ACTION(managed_cuda_component,test1);
 		 HPX_DEFINE_COMPONENT_ACTION(managed_cuda_component,test2);
-		 //HPX_DEFINE_COMPONENT_ACTION(managed_cuda_component,calculate_pi);
-		 HPX_DEFINE_COMPONENT_ACTION(managed_cuda_component,check_if_hit);
+		 HPX_DEFINE_COMPONENT_ACTION(managed_cuda_component,calculate_pi);
 		 HPX_DEFINE_COMPONENT_ACTION(managed_cuda_component,get_cuda_info);
 		};
 	}
@@ -98,12 +71,9 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
 	cuda_hpx::server::managed_cuda_component::test2_action,
 	managed_cuda_component_test2_action);
-/*HPX_REGISTER_ACTION_DECLARATION(
-	cuda_hpx::server::managed_cuda_component::calculate_pi_action,
-	managed_cuda_component_calculate_pi_action);*/
 HPX_REGISTER_ACTION_DECLARATION(
-    cuda_hpx::server::managed_cuda_component::check_if_hit_action,
-    managed_cuda_component_check_if_hit_action);
+	cuda_hpx::server::managed_cuda_component::calculate_pi_action,
+	managed_cuda_component_calculate_pi_action);
 HPX_REGISTER_ACTION_DECLARATION(
     cuda_hpx::server::managed_cuda_component::get_cuda_info_action,
     managed_cuda_component_get_cuda_info_action);

@@ -2,8 +2,10 @@
 #include <hpx/runtime/components/component_factory.hpp>
 #include <hpx/util/portable_binary_iarchive.hpp>
 #include <hpx/util/portable_binary_oarchive.hpp>
+
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/export.hpp>
+
 #include "server/managed_cuda_component.hpp"
 
 HPX_REGISTER_COMPONENT_MODULE();
@@ -20,9 +22,6 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
 	managed_cuda_component_type::wrapped_type::test2_action,
 	managed_cuda_component_test2_action);
-/*HPX_REGISTER_ACTION(
-    managed_cuda_component_type::wrapped_type::calculate_pi_action,
-    managed_cuda_component_calculate_pi_action);*/
 HPX_REGISTER_ACTION(
-    managed_cuda_component_type::wrapped_type::check_if_hit_action,
-    managed_cuda_component_check_if_hit_action);
+    managed_cuda_component_type::wrapped_type::calculate_pi_action,
+    managed_cuda_component_calculate_pi_action);
