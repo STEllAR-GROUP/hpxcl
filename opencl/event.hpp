@@ -45,6 +45,9 @@ namespace opencl {
             // Blocks until the cl_event has happened
             void await();
 
+            // Returns true if the event already happened
+            hpx::lcos::future<bool> finished();
+
             // Returns a future variable that triggers when the cl_event has 
             // happened
             hpx::lcos::future<void> get_future();

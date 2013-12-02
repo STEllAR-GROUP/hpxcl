@@ -48,6 +48,22 @@ event::await() const {
 
 }
 
+bool
+event::finished() const {
+
+    cl_int err;
+    cl_int status;
+
+    // Query the event state
+    err = clGetEventInfo(event_id, CL_EVENT_COMMAND_EXECUTION_STATUS,
+                           sizeof(cl_int), &status, (size_t *) NULL);
+    cl_ensure(err, "clGetEventInfo()");
+
+    // Return true if event is completed
+    return status == CL_COMPLETE;
+
+}
+
 boost::shared_ptr<std::vector<char>>
 event::get_data()
 {
