@@ -1,3 +1,8 @@
+//  (C) Copyright 2013 Damond Howard
+//
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying
+//  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
 #include <cuda_runtime.h>
 #include <cuda.h>
 #include <curand_kernel.h>
@@ -50,15 +55,19 @@ float pi(int nthreads,int nblocks)
 	size_t size = NUM_BLOCK*NUM_THREAD*sizeof(float);  //Array memory size
 	sumHost = (float *)malloc(size);  //  Allocate array on host
 	cudaMalloc((void **) &sumDev, size);  // Allocate array on device
+
 	// Initialize array in device to 0
 	cudaMemset(sumDev, 0, size);
+
 	//declare a stream
 	cudaStream_t stream;
 	cudaStreamCreate(&stream);
+
 	// Do calculation on device
 	calculate_pi_kernel<<<dimGrid, dimBlock,0,stream>>>(sumDev, NBIN, step, NUM_THREAD, NUM_BLOCK); // call CUDA kernel
 	cudaStreamSynchronize(stream);
 	cudaStreamDestroy(stream);
+
 	// Retrieve result from device and store it in host array
 	cudaMemcpy(sumHost, sumDev, size, cudaMemcpyDeviceToHost);
 	for(tid=0; tid<NUM_THREAD*NUM_BLOCK; tid++)
