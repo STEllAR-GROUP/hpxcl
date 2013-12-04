@@ -19,6 +19,8 @@ HPX_REGISTER_PLAIN_ACTION(hpx::opencl::server::get_device_ids_action,
                           opencl_get_device_ids_action);
 HPX_REGISTER_PLAIN_ACTION(hpx::opencl::server::get_device_info_action,
                           opencl_get_device_info_action);
+HPX_REGISTER_PLAIN_ACTION(hpx::opencl::server::get_device_info_string_action,
+                          opencl_get_device_info_string_action);
 
 ///////////////////////////////////////////////////
 /// Local functions
@@ -130,3 +132,25 @@ hpx::opencl::server::get_device_info(clx_device_id id, cl_device_info info_type)
     return info;
 
 }
+
+std::string
+hpx::opencl::server::get_device_info_string(clx_device_id id,
+                                            cl_device_info info_type)
+{
+
+    std::vector<char> char_array = get_device_info(id, info_type);
+
+    // Calculate length of string. Cut short if it has a 0-Termination
+    // (Some queries like CL_DEVICE_NAME always return a size of 64, but 
+    // contain a 0-terminated string)
+    size_t length = 0;
+    while(length < char_array.size())
+    {
+        if(char_array[length] == '\0') break;
+        length++;
+    }
+
+    return std::string(char_array.begin(), char_array.begin() + length);
+
+}
+

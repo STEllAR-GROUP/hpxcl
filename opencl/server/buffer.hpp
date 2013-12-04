@@ -46,6 +46,7 @@ namespace hpx { namespace opencl{ namespace server{
         ///////////////////////////////////////////////////
         /// Exposed functionality of this component
         ///
+        size_t size();
         hpx::opencl::event read(size_t offset, size_t size,
                                       std::vector<hpx::opencl::event> events);
         hpx::opencl::event write(size_t offset, 
@@ -56,6 +57,7 @@ namespace hpx { namespace opencl{ namespace server{
                                 std::vector<hpx::opencl::event> events);
 
     //[
+    HPX_DEFINE_COMPONENT_ACTION(buffer, size);
     HPX_DEFINE_COMPONENT_ACTION(buffer, read);
     HPX_DEFINE_COMPONENT_ACTION(buffer, write);
     HPX_DEFINE_COMPONENT_ACTION(buffer, fill);
@@ -69,7 +71,6 @@ namespace hpx { namespace opencl{ namespace server{
         //////////////////////////////////////////////////
         //  Private Member Variables
         boost::shared_ptr<device> parent_device;
-        size_t size;
         cl_mem device_mem;
         hpx::naming::id_type parent_device_id;
 
@@ -80,6 +81,9 @@ namespace hpx { namespace opencl{ namespace server{
 }}}
 
 //[
+HPX_REGISTER_ACTION_DECLARATION(
+        hpx::opencl::server::buffer::size_action,
+        opencl_buffer_size_action);
 HPX_REGISTER_ACTION_DECLARATION(
         hpx::opencl::server::buffer::read_action,
         opencl_buffer_read_action);

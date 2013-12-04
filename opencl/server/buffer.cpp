@@ -21,13 +21,12 @@ CL_FORBID_EMPTY_CONSTRUCTOR(buffer);
 
 
 // Constructor
-buffer::buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size_)
+buffer::buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size)
 {
 
     this->parent_device_id = device_id;
     this->parent_device = hpx::get_ptr
                           <hpx::opencl::server::device>(parent_device_id).get();
-    this->size = size_;
     this->device_mem = NULL;
 
     // Retrieve the context from parent class
@@ -48,16 +47,15 @@ buffer::buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size_)
 };
 
 // Constructor
-buffer::buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size_,
+buffer::buffer(hpx::naming::id_type device_id, cl_mem_flags flags, size_t size,
                hpx::util::serialize_buffer<char> data)
 {
 
-    BOOST_ASSERT(data.size() == size_);
+    BOOST_ASSERT(data.size() == size);
 
     this->parent_device_id = device_id;
     this->parent_device = hpx::get_ptr
                           <hpx::opencl::server::device>(parent_device_id).get();
-    this->size = size_;
     this->device_mem = NULL;
 
     // Retrieve the context from parent class
@@ -91,7 +89,22 @@ buffer::~buffer()
     }
 }
 
+// Get Buffer Size
+size_t
+buffer::size()
+{
 
+    size_t size;
+    cl_int err;
+
+    // Query size
+    err = clGetMemObjectInfo(device_mem, CL_MEM_SIZE, sizeof(size_t), &size,
+                                                                          NULL);
+    cl_ensure(err, "clGetMemObjectInfo()");
+
+    return size;
+
+}
 
 // Read Buffer
 hpx::opencl::event

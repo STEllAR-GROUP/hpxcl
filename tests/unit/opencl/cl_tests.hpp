@@ -15,11 +15,18 @@ using boost::program_options::options_description;
 using boost::program_options::value;
 
 
-hpx::opencl::device cldevice;
-
-hpx::naming::id_type here;
+static boost::shared_ptr<hpx::opencl::device> cldevice;
+static hpx::opencl::clx_device_id clx_device;
+static hpx::naming::id_type here;
 
 static void cl_test();
+
+static std::string get_cl_info(cl_device_info info_type)
+{
+
+    return hpx::opencl::get_device_info_string(here, clx_device, info_type).get();
+
+}
 
 static void init(variables_map & vm)
 {
@@ -37,25 +44,38 @@ static void init(variables_map & vm)
                 CL_DEVICE_TYPE_ALL, 1.1f).get();
     HPX_TEST(devices.size() >= device_id);
 
-    // Test whether get_device_info works
-    std::vector<char> version_char_array = 
-            hpx::opencl::get_device_info(here, devices[device_id],
-                                         CL_DEVICE_VERSION).get();
+    // Choose device
+    clx_device = devices[device_id];
 
-    // Convert char array to string
-    std::string version(version_char_array.begin(), version_char_array.end());
+    // Test whether get_device_info works
+    std::string version = get_cl_info(CL_DEVICE_VERSION);
 
     // Test whether version is a valid OpenCL version string
     std::string versionstring = std::string("OpenCL ");
     HPX_TEST(0 == version.compare(0, versionstring.length(), versionstring));
 
+    // Write Info Code
+    hpx::cout << "Device ID:  " << device_id << " / " << devices.size() << hpx::endl;
+    hpx::cout << "Version:    " << version << hpx::endl;
+    hpx::cout << "Name:       " << get_cl_info(CL_DEVICE_NAME) << hpx::endl;
+    hpx::cout << "Vendor:     " << get_cl_info(CL_DEVICE_VENDOR) << hpx::endl;
+    hpx::cout << "Profile:    " << get_cl_info(CL_DEVICE_PROFILE) << hpx::endl;
+
     // Create a device
     typedef hpx::opencl::server::device device_type;
-    hpx::opencl::device new_cldevice(
-                        hpx::components::new_<device_type>(here,
-                                                           devices[device_id]));
-    cldevice = new_cldevice;
+    cldevice = boost::make_shared<hpx::opencl::device>(
+                    hpx::components::new_<device_type>(here, devices[device_id])
+                                                                    );
 
+    HPX_TEST(cldevice->get_gid());
+
+}
+
+static void shutdown()
+{
+
+    cldevice.reset();
+    
 }
 
 int hpx_main(variables_map & vm)
@@ -63,6 +83,7 @@ int hpx_main(variables_map & vm)
     {
         init(vm);   
         cl_test();
+        shutdown();
     }
     
     hpx::finalize();

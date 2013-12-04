@@ -31,6 +31,22 @@ hpx::opencl::get_device_info( hpx::naming::id_type  node_id,
     
 }
 
+hpx::lcos::future<std::string>
+hpx::opencl::get_device_info_string( hpx::naming::id_type  node_id,
+                                     clx_device_id         device_id,
+                                     cl_device_info        info_type )
+{
+    
+    // Retrieve info from node
+    typedef hpx::opencl::server::get_device_info_string_action action;
+    return async<action>(node_id, device_id, info_type);
+    
+}
+
+
+
+
+
 
 
 

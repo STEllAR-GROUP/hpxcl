@@ -9,10 +9,6 @@
 static void cl_test()
 {
     // do nothing. this file only tests the initialization
-//        buffer_init();
- //       buffer_write();
-  //      events();
-   //     events_futures();
 }
 
 

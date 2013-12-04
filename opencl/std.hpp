@@ -34,6 +34,12 @@ namespace hpx { namespace opencl{
                      clx_device_id                 device_id,
                      cl_device_info                info_type);
 
+    // Get device information as string
+    hpx::lcos::future<std::string>
+    get_device_info_string( hpx::naming::id_type          node_id,
+                            clx_device_id                 device_id,
+                            cl_device_info                info_type);
+
 }}
 
 

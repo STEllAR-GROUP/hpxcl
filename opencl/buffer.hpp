@@ -43,6 +43,10 @@ namespace opencl {
             /// Exposed Component functionality
             /// 
             
+            // Get buffer size
+            hpx::lcos::future<size_t>
+            size();
+
             // Read Buffer
             hpx::lcos::future<hpx::opencl::event>
             enqueue_read(size_t offset, size_t size);
@@ -88,7 +92,6 @@ namespace opencl {
              * clEnqueueCopyBuffer
              * clEnqueueCopyBufferRect
              */
-
 
     };
 

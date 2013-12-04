@@ -7,12 +7,14 @@
 
 set(tests
     initialization
-#    promise
+    buffer_read_write
+    events_and_futures
    )
 
 
 #set(async_continue_PARAMETERS LOCALITIES 2)
 #set(promise_PARAMETERS THREADS_PER_LOCALITY 4)
+set(events_and_futures_PARAMETERS THREADS_PER_LOCALITY 4)
 
 
 foreach(test ${tests})

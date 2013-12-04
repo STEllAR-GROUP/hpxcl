@@ -17,6 +17,17 @@
 using hpx::opencl::buffer;
 
 
+hpx::lcos::future<size_t>
+buffer::size()
+{
+    
+    BOOST_ASSERT(this->get_gid());
+    typedef hpx::opencl::server::buffer::size_action func;
+
+    return hpx::async<func>(this->get_gid());
+
+}
+
 hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_read(size_t offset, size_t size)
 {
