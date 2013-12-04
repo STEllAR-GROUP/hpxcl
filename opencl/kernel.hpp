@@ -43,31 +43,31 @@ namespace opencl {
 
             // Sets buffer as argument for kernel
             void
-            set_arg(cl_uint arg_index, hpx::opencl::buffer arg);
+            set_arg(cl_uint arg_index, hpx::opencl::buffer arg) const;
 
             hpx::lcos::future<void>
-            set_arg_async(cl_uint arg_index, hpx::opencl::buffer arg);
+            set_arg_async(cl_uint arg_index, hpx::opencl::buffer arg) const;
             
             // Runs the kernel
             hpx::lcos::future<hpx::opencl::event>
             enqueue(cl_uint work_dim,
                     const size_t *global_work_offset,
                     const size_t *global_work_size,
-                    const size_t *local_work_size);
+                    const size_t *local_work_size) const;
 
             hpx::lcos::future<hpx::opencl::event>
             enqueue(cl_uint work_dim,
                     const size_t *global_work_offset,
                     const size_t *global_work_size,
                     const size_t *local_work_size,
-                    hpx::opencl::event event);
+                    hpx::opencl::event event) const;
             
             hpx::lcos::future<hpx::opencl::event>
             enqueue(cl_uint work_dim,
                     const size_t *global_work_offset,
                     const size_t *global_work_size,
                     const size_t *local_work_size,
-                    std::vector<hpx::opencl::event> events);
+                    std::vector<hpx::opencl::event> events) const;
 
 
 

@@ -18,7 +18,8 @@ using hpx::opencl::event;
 
 
 cl_event
-event::get_cl_event(hpx::opencl::event event){
+event::get_cl_event(hpx::opencl::event event)
+{
     
     // TODO implement faster version
     std::vector<hpx::opencl::event> vector(1);
@@ -66,13 +67,13 @@ event::get_cl_events(std::vector<hpx::opencl::event> events)
 }
 
 void
-event::await()
+event::await() const
 {
     get_future().get();
 }
 
 hpx::lcos::future<void>
-event::get_future()
+event::get_future() const
 {
     BOOST_ASSERT(this->get_gid());
 
@@ -82,7 +83,7 @@ event::get_future()
 }
 
 hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
-event::get_data()
+event::get_data() const
 {
     BOOST_ASSERT(this->get_gid());
 
@@ -92,7 +93,7 @@ event::get_data()
 }
 
 hpx::lcos::future<bool>
-event::finished()
+event::finished() const
 {
     BOOST_ASSERT(this->get_gid());
 
@@ -103,7 +104,7 @@ event::finished()
 
 
 void
-event::trigger()
+event::trigger() const
 {
     BOOST_ASSERT(this->get_gid());
 

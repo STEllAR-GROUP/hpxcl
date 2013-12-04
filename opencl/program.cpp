@@ -17,25 +17,25 @@
 using namespace hpx::opencl;
 
 void
-program::build()
+program::build() const
 {
     return build_async("").get();
 }
 
 void
-program::build(std::string build_options)
+program::build(std::string build_options) const
 {
     return build_async(build_options).get();
 }
 
 hpx::lcos::future<void>
-program::build_async()
+program::build_async() const
 {
     return build_async("");
 }
 
 hpx::lcos::future<void>
-program::build_async(std::string build_options)
+program::build_async(std::string build_options) const
 {
 
     BOOST_ASSERT(this->get_gid());
@@ -47,7 +47,7 @@ program::build_async(std::string build_options)
 }
 
 hpx::opencl::kernel
-program::create_kernel(std::string kernel_name)
+program::create_kernel(std::string kernel_name) const
 {
 
     BOOST_ASSERT(this->get_gid());

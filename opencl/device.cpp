@@ -20,7 +20,7 @@
 using hpx::opencl::device;
 
 hpx::opencl::buffer
-device::create_buffer(cl_mem_flags flags, size_t size, const void* data)
+device::create_buffer(cl_mem_flags flags, size_t size, const void* data) const
 {
    
     BOOST_ASSERT(this->get_gid());
@@ -42,7 +42,7 @@ device::create_buffer(cl_mem_flags flags, size_t size, const void* data)
 }
 
 hpx::opencl::buffer
-device::create_buffer(cl_mem_flags flags, size_t size)
+device::create_buffer(cl_mem_flags flags, size_t size) const
 {
 
     BOOST_ASSERT(this->get_gid());
@@ -58,7 +58,7 @@ device::create_buffer(cl_mem_flags flags, size_t size)
 }
 
 hpx::opencl::program
-device::create_program_with_source(std::string source)
+device::create_program_with_source(std::string source) const
 {
 
     BOOST_ASSERT(this->get_gid());
@@ -74,7 +74,7 @@ device::create_program_with_source(std::string source)
 }
 
 hpx::lcos::future<hpx::opencl::event>
-device::create_user_event()
+device::create_user_event() const
 {
     BOOST_ASSERT(this->get_gid());
 
@@ -85,7 +85,8 @@ device::create_user_event()
 
 // used for create_future_event, this is the future.then callback
 void
-device::trigger_user_event_externally(hpx::lcos::future<hpx::opencl::event> event)
+device::trigger_user_event_externally(
+                            hpx::lcos::future<hpx::opencl::event> event)
 {
     event.get().trigger();
 }

@@ -43,23 +43,23 @@ namespace opencl {
             get_cl_event(hpx::opencl::event);
 
             // Blocks until the cl_event has happened
-            void await();
+            void await() const;
 
             // Returns true if the event already happened
-            hpx::lcos::future<bool> finished();
+            hpx::lcos::future<bool> finished() const;
 
             // Returns a future variable that triggers when the cl_event has 
             // happened
-            hpx::lcos::future<void> get_future();
+            hpx::lcos::future<void> get_future() const;
 
             // Triggers the event. This call is only valid if the event is a 
             // user-created event. Calling this function if the event is not
             // user-created will result in undefined behaviour.
-            void trigger();
+            void trigger() const;
 
             // Retrieves the data associated with the event
             hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
-            get_data();
+            get_data() const;
     
     };
 

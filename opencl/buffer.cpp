@@ -18,7 +18,7 @@ using hpx::opencl::buffer;
 
 
 hpx::lcos::future<size_t>
-buffer::size()
+buffer::size() const
 {
     
     BOOST_ASSERT(this->get_gid());
@@ -29,7 +29,7 @@ buffer::size()
 }
 
 hpx::lcos::future<hpx::opencl::event>
-buffer::enqueue_read(size_t offset, size_t size)
+buffer::enqueue_read(size_t offset, size_t size) const
 {
     std::vector<hpx::opencl::event> events(0);
     return enqueue_read(offset, size, events);
@@ -37,7 +37,7 @@ buffer::enqueue_read(size_t offset, size_t size)
 
 hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_read(size_t offset, size_t size,
-                            hpx::opencl::event event)
+                            hpx::opencl::event event) const
 {
     std::vector<hpx::opencl::event> events;
     events.push_back(event);
@@ -46,7 +46,7 @@ buffer::enqueue_read(size_t offset, size_t size,
 
 hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_read(size_t offset, size_t size,
-                            std::vector<hpx::opencl::event> events)
+                            std::vector<hpx::opencl::event> events) const
 {
 
     BOOST_ASSERT(this->get_gid());
@@ -57,7 +57,7 @@ buffer::enqueue_read(size_t offset, size_t size,
 
 
 hpx::lcos::future<hpx::opencl::event>
-buffer::enqueue_write(size_t offset, size_t size, const void* data)
+buffer::enqueue_write(size_t offset, size_t size, const void* data) const
 {
     std::vector<hpx::opencl::event> events(0);
     return enqueue_write(offset, size, data, events);
@@ -65,7 +65,7 @@ buffer::enqueue_write(size_t offset, size_t size, const void* data)
 
 hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_write(size_t offset, size_t size, const void* data,
-                            hpx::opencl::event event)
+                            hpx::opencl::event event) const
 {
     std::vector<hpx::opencl::event> events(1);
     events[0] = event;
@@ -74,7 +74,7 @@ buffer::enqueue_write(size_t offset, size_t size, const void* data,
 
 hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_write(size_t offset, size_t size, const void* data,
-                             std::vector<hpx::opencl::event> events)
+                             std::vector<hpx::opencl::event> events) const
 {
 
     BOOST_ASSERT(this->get_gid());
@@ -95,7 +95,7 @@ buffer::enqueue_write(size_t offset, size_t size, const void* data,
 
 hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
-                     size_t size)
+                     size_t size) const
 {
     std::vector<hpx::opencl::event> events(0);
     return enqueue_fill(pattern, pattern_size, offset, size, events);
@@ -103,7 +103,7 @@ buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
 
 hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
-                     size_t size, hpx::opencl::event event)
+                     size_t size, hpx::opencl::event event) const
 {
     std::vector<hpx::opencl::event> events(1);
     events[0] = event;
@@ -112,7 +112,7 @@ buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
 
 hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
-                     size_t size, std::vector<hpx::opencl::event> events)
+                     size_t size, std::vector<hpx::opencl::event> events) const
 {
 
     BOOST_ASSERT(this->get_gid());

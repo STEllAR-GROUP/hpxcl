@@ -46,7 +46,7 @@ namespace opencl {
             
             // Creates a user event
             hpx::lcos::future<hpx::opencl::event>
-            create_user_event();
+            create_user_event() const;
             
             
             // Creates an event that depends on a future
@@ -56,13 +56,13 @@ namespace opencl {
 
             // Creates an OpenCL buffer
             hpx::opencl::buffer
-            create_buffer(cl_mem_flags flags, size_t size);
+            create_buffer(cl_mem_flags flags, size_t size) const;
             hpx::opencl::buffer
-            create_buffer(cl_mem_flags flags, size_t size, const void* data);
+            create_buffer(cl_mem_flags flags, size_t size, const void* data) const;
 
             // Creates an OpenCL program object
             hpx::opencl::program
-            create_program_with_source(std::string source);
+            create_program_with_source(std::string source) const;
             
             
         private:

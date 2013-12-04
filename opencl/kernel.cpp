@@ -16,7 +16,7 @@
 using namespace hpx::opencl;
 
 void
-kernel::set_arg(cl_uint arg_index, buffer arg)
+kernel::set_arg(cl_uint arg_index, buffer arg) const
 {
 
     set_arg_async(arg_index, arg).get();
@@ -24,7 +24,7 @@ kernel::set_arg(cl_uint arg_index, buffer arg)
 }
 
 hpx::lcos::future<void>
-kernel::set_arg_async(cl_uint arg_index, buffer arg)
+kernel::set_arg_async(cl_uint arg_index, buffer arg) const
 {
     
     BOOST_ASSERT(this->get_gid());
@@ -39,7 +39,7 @@ hpx::lcos::future<hpx::opencl::event>
 kernel::enqueue(cl_uint work_dim,
                 const size_t *global_work_offset_ptr,
                 const size_t *global_work_size_ptr,
-                const size_t *local_work_size_ptr)
+                const size_t *local_work_size_ptr) const
 {
  
     std::vector<hpx::opencl::event> events(0);
@@ -54,7 +54,7 @@ kernel::enqueue(cl_uint work_dim,
                 const size_t *global_work_offset_ptr,
                 const size_t *global_work_size_ptr,
                 const size_t *local_work_size_ptr,
-                hpx::opencl::event event)
+                hpx::opencl::event event) const
 {
  
     std::vector<hpx::opencl::event> events;
@@ -69,7 +69,7 @@ kernel::enqueue(cl_uint work_dim,
                 const size_t *global_work_offset_ptr,
                 const size_t *global_work_size_ptr,
                 const size_t *local_work_size_ptr,
-                std::vector<hpx::opencl::event> events)
+                std::vector<hpx::opencl::event> events) const
 {
     
     BOOST_ASSERT(this->get_gid());

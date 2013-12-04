@@ -41,15 +41,15 @@ namespace opencl {
             /// 
             
             // Build the Program, blocking
-            void build();
-            void build(std::string build_options);
+            void build() const;
+            void build(std::string build_options) const;
             // Build the program, non-blocking
-            hpx::lcos::future<void> build_async();
-            hpx::lcos::future<void> build_async(std::string build_options);
+            hpx::lcos::future<void> build_async() const;
+            hpx::lcos::future<void> build_async(std::string build_options) const;
 
             // Create a kernel
             hpx::opencl::kernel
-            create_kernel(std::string kernel_name);
+            create_kernel(std::string kernel_name) const;
 
     };
 
