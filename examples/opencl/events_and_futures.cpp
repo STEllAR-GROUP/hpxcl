@@ -55,7 +55,7 @@ void wait_and_trigger(event user_event, device cldevice)
     print(1, "                         1 ...");
     sleep(1);
     print(1, "Triggering user_event ...");
-    cldevice.trigger_user_event(user_event);
+    user_event.trigger();
 }
 HPX_PLAIN_ACTION(wait_and_trigger, wait_and_trigger_action);
 

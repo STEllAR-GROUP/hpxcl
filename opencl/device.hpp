@@ -48,10 +48,6 @@ namespace opencl {
             hpx::lcos::future<hpx::opencl::event>
             create_user_event();
             
-            // Triggers an event created by create_user_event
-            void
-            trigger_user_event(hpx::opencl::event event);
-
             
             // Creates an event that depends on a future
             template<class T>
@@ -76,8 +72,7 @@ namespace opencl {
             
             // Needed for create_future_event, this is the future.then callback
             static void
-            trigger_user_event_externally(hpx::opencl::device,
-                                          hpx::lcos::future<hpx::opencl::event>);
+            trigger_user_event_externally(hpx::lcos::future<hpx::opencl::event>);
 
     };
 
@@ -92,8 +87,7 @@ namespace opencl {
     
         // Schedule the user event trigger to be called after future
         future.then(
-                hpx::util::bind(&(device::trigger_user_event_externally),
-                                *this, event)
+                hpx::util::bind(&(device::trigger_user_event_externally), event)
                         );
     
         // return the event

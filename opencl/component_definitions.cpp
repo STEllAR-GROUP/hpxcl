@@ -27,8 +27,6 @@ typedef hpx::components::managed_component<
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(device_type, device);
 HPX_REGISTER_ACTION(device_type::wrapped_type::create_user_event_action,
                     device_create_user_event_action);
-HPX_REGISTER_ACTION(device_type::wrapped_type::trigger_user_event_action,
-                    device_trigger_user_event_action);
 
 
 
@@ -58,6 +56,8 @@ HPX_REGISTER_ACTION(event_type::wrapped_type::get_data_action,
                     event_get_data_action);
 HPX_REGISTER_ACTION(event_type::wrapped_type::finished_action,
                     event_finished_action);
+HPX_REGISTER_ACTION(event_type::wrapped_type::trigger_action,
+                    event_trigger_action);
 
 
 

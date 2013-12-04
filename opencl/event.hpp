@@ -52,6 +52,11 @@ namespace opencl {
             // happened
             hpx::lcos::future<void> get_future();
 
+            // Triggers the event. This call is only valid if the event is a 
+            // user-created event. Calling this function if the event is not
+            // user-created will result in undefined behaviour.
+            void trigger();
+
             // Retrieves the data associated with the event
             hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
             get_data();

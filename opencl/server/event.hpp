@@ -58,6 +58,9 @@ namespace hpx { namespace opencl{ namespace server{
         // Returns true if the event already finished
         bool finished() const;
 
+        // Triggers the event. Only valid for user-created events.
+        void trigger();
+
         // Retrieves the data pointer associated with this event
         // Blocks until event has happened
         boost::shared_ptr<std::vector<char>>
@@ -67,6 +70,7 @@ namespace hpx { namespace opencl{ namespace server{
     HPX_DEFINE_COMPONENT_ACTION(event, await);
     HPX_DEFINE_COMPONENT_ACTION(event, get_data);
     HPX_DEFINE_COMPONENT_ACTION(event, finished);
+    HPX_DEFINE_COMPONENT_ACTION(event, trigger);
     //]
 
     private:
@@ -99,6 +103,9 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
        hpx::opencl::server::event::finished_action,
     opencl_event_finished_action);
+HPX_REGISTER_ACTION_DECLARATION(
+       hpx::opencl::server::event::trigger_action,
+    opencl_event_trigger_action);
 //]
 
 

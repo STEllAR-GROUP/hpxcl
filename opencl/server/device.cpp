@@ -227,7 +227,7 @@ device::create_user_event()
 
 
 void
-device::trigger_user_event(hpx::opencl::event event)
+device::trigger_user_event(cl_event event)
 {
 
     // lock user_events_mutex
@@ -238,21 +238,16 @@ device::trigger_user_event(hpx::opencl::event event)
 }
 
 void
-device::trigger_user_event_nolock(hpx::opencl::event event)
+device::trigger_user_event_nolock(cl_event event)
 {
 
-    // this function assumes that user_events_mutex is already locked
-    
-    // convert event to cl_event
-    cl_event event_ = hpx::opencl::event::get_cl_event(event);
-
-    // check if event is a user event on this device
-    if(user_events.erase(event_) < 1)
+    // check if event is a user event on this device and delete it
+    if(user_events.erase(event) < 1)
         return;
 
     // trigger event
     cl_int err;
-    err = clSetUserEventStatus(event_, CL_COMPLETE);
+    err = clSetUserEventStatus(event, CL_COMPLETE);
     cl_ensure(err, "clSetUserEventStatus()");
 
     // try to delete cl_mems.
@@ -319,15 +314,15 @@ device::cleanup_user_events()
 
     // trigger all user generated events
     boost::lock_guard<spinlock_type> lock(user_events_mutex);
-    std::vector<hpx::opencl::event> leftover_user_events;
+    std::vector<cl_event> leftover_user_events;
     leftover_user_events.reserve(user_events.size());
     typedef std::map<cl_event, hpx::opencl::event> user_events_map_type;
     BOOST_FOREACH(user_events_map_type::value_type &user_event,
                   user_events)
     {
-        leftover_user_events.push_back(user_event.second);
+        leftover_user_events.push_back(user_event.first);
     }
-    BOOST_FOREACH(hpx::opencl::event & leftover_user_event, leftover_user_events)
+    BOOST_FOREACH(cl_event & leftover_user_event, leftover_user_events)
     {
         trigger_user_event_nolock(leftover_user_event);
     }

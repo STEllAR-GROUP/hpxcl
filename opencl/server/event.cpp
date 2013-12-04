@@ -64,6 +64,15 @@ event::finished() const {
 
 }
 
+void
+event::trigger()
+{
+
+    parent_device->trigger_user_event(event_id);
+
+}
+
+
 boost::shared_ptr<std::vector<char>>
 event::get_data()
 {
@@ -71,3 +80,6 @@ event::get_data()
     return parent_device->get_event_data(event_id);
 
 }
+
+
+

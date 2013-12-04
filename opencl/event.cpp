@@ -102,4 +102,12 @@ event::finished()
 }
 
 
+void
+event::trigger()
+{
+    BOOST_ASSERT(this->get_gid());
 
+    typedef hpx::opencl::server::event::trigger_action func;
+
+    hpx::apply<func>(this->get_gid());
+}

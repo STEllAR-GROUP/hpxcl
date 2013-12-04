@@ -74,7 +74,8 @@ namespace hpx { namespace opencl{ namespace server{
         // 
         void schedule_cl_mem_deletion(cl_mem mem);
 
-        
+        // triggers an event previously generated with create_user_event()
+        void trigger_user_event(cl_event event);
         
         //////////////////////////////////////////////////
         /// Exposed functionality of this component
@@ -83,12 +84,8 @@ namespace hpx { namespace opencl{ namespace server{
         // creates an opencl event that can be triggered by the user
         hpx::opencl::event create_user_event();
 
-        // triggers an event previously generated with create_user_event()
-        void trigger_user_event(hpx::opencl::event);
-
 
     HPX_DEFINE_COMPONENT_ACTION(device, create_user_event);
-    HPX_DEFINE_COMPONENT_ACTION(device, trigger_user_event);
 
     private:
         ///////////////////////////////////////////////
@@ -107,7 +104,7 @@ namespace hpx { namespace opencl{ namespace server{
         
         // same as trigger_user_event, but doesn't lock user_events_mutex.
         // calling function needs to lock user_events_mutex manually.
-        void trigger_user_event_nolock(hpx::opencl::event);
+        void trigger_user_event_nolock(cl_event);
 
         // cleans up all the possible leftover user events an cl_mems
         void cleanup_user_events();
@@ -153,9 +150,6 @@ namespace hpx { namespace opencl{ namespace server{
 HPX_REGISTER_ACTION_DECLARATION(
         hpx::opencl::server::device::create_user_event_action,
         opencl_device_create_user_event_action);
-HPX_REGISTER_ACTION_DECLARATION(
-        hpx::opencl::server::device::trigger_user_event_action,
-        opencl_device_trigger_user_event_action);
 //]
 
 

@@ -25,7 +25,7 @@ static void cl_test()
         HPX_TEST(user_event.finished().get() == false);
     
         // trigger user event
-        cldevice->trigger_user_event(user_event);
+        user_event.trigger();
     
         // wait for user event to trigger. if test fails, this will deadlock.
         user_event.await();
@@ -58,7 +58,7 @@ static void cl_test()
         HPX_TEST(user_event_future_event.finished().get() == false);
     
         // trigger user event
-        cldevice->trigger_user_event(user_event);
+        user_event.trigger();
     
         // wait for user event to trigger. if test fails, this will deadlock.
         user_event_future_event.await();
