@@ -21,6 +21,14 @@ static hpx::naming::id_type here;
 
 static void cl_test();
 
+#define TEST_CL_BUFFER(buffer, value)                                          \
+{                                                                              \
+    boost::shared_ptr<std::vector<char>> out1 =                                \
+                       buffer.enqueue_read(0, DATASIZE).get().get_data().get();\
+    HPX_TEST_EQ(std::string((const char*)(value)), std::string(&(*out1)[0]));  \
+}                                                           
+
+
 static std::string get_cl_info(cl_device_info info_type)
 {
 

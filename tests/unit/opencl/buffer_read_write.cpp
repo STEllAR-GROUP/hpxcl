@@ -21,14 +21,6 @@ static const char refdata1[] = "Help, World!";
 static const char refdata2[] = "World";
 
 
-
-#define TEST_CL_BUFFER(buffer, value)                                          \
-{                                                                              \
-    boost::shared_ptr<std::vector<char>> out1 =                                \
-                       buffer.enqueue_read(0, DATASIZE).get().get_data().get();\
-    HPX_TEST_EQ(std::string(value), std::string(&(*out1)[0]));                 \
-}                                                           
-
 static void cl_test()
 {
 

@@ -9,6 +9,7 @@ set(tests
     initialization
     buffer_read_write
     events_and_futures
+    kernel
    )
 
 
