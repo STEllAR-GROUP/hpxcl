@@ -59,10 +59,10 @@ int hpx_main(int argc, char* argv[])
     hello_world_kernel.set_arg(0, outbuffer);
 
     // Run the kernel
-    size_t offset = 0;
-    size_t size = 13;
-    event kernel_event = hello_world_kernel.enqueue(1, &offset, &size,
-                                                          (size_t*) NULL).get(); 
+    hpx::opencl::work_size<1> dim;
+    dim[0].offset = 0;
+    dim[0].size = 13;
+    event kernel_event = hello_world_kernel.enqueue(dim).get(); 
 
     // Start reading the buffer (With kernel_event dependency.
     //                           All hpxcl enqueue calls are nonblocking.)
