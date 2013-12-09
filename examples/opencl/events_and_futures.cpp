@@ -71,34 +71,38 @@ void wait_for_future(hpx::lcos::future<void>* future)
 // hpx_main, is the actual main called by hpx
 int hpx_main(int argc, char* argv[])
 {
-    // Create an OpenCL device
-    print(0, "Creating device ... ");
-    device cldevice = create_cl_device();
 
-    // Create a user event
-    print(0, "Creating user_event ...");
-    event user_event = cldevice.create_user_event().get();
-
-    // Create future from event
-    print(0, "Creating user_event_future from user_event ...");
-    hpx::lcos::future<void> user_event_future = user_event.get_future();
-
-    // Create event from future
-    print(0, "Creating user_event_future_event from user_event_future ...");
-    event user_event_future_event = cldevice.create_future_event(
-                                                           user_event_future
-                                                                    ).get();
-
-    // Run the wait_for_future function
-    print(0, "Starting asynchronous functions ...");
-    hpx::apply(&wait_for_future, &user_event_future);
-    typedef wait_and_trigger_action func2;
-    hpx::apply<func2>(hpx::find_here(), user_event, cldevice);
-
-    // Wait for user event
-    print(0, "Waiting for user_event_future_event to trigger ...");
-    user_event_future_event.await();
-    print(0, "user_event_future_event triggered.");
+    {
+        // Create an OpenCL device
+        print(0, "Creating device ... ");
+        device cldevice = create_cl_device();
+    
+        // Create a user event
+        print(0, "Creating user_event ...");
+        event user_event = cldevice.create_user_event().get();
+    
+        // Create future from event
+        print(0, "Creating user_event_future from user_event ...");
+        hpx::lcos::future<void> user_event_future = user_event.get_future();
+    
+        // Create event from future
+        print(0, "Creating user_event_future_event from user_event_future ...");
+        event user_event_future_event = cldevice.create_future_event(
+                                                               user_event_future
+                                                                        ).get();
+    
+        // Run the wait_for_future function
+        print(0, "Starting asynchronous functions ...");
+        hpx::apply(&wait_for_future, &user_event_future);
+        typedef wait_and_trigger_action func2;
+        hpx::apply<func2>(hpx::find_here(), user_event, cldevice);
+    
+        // Wait for user event
+        print(0, "Waiting for user_event_future_event to trigger ...");
+        user_event_future_event.await();
+        print(0, "user_event_future_event triggered.");
+    
+    }
 
     // End the program
     return hpx::finalize();

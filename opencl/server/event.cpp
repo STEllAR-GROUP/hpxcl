@@ -7,7 +7,7 @@
 #include <CL/cl.h>
 
 #include <hpx/include/runtime.hpp>
-#include <hpx/util/io_service_pool.hpp>
+#include <hpx/apply.hpp>
 
 #include "../tools.hpp"
 #include "device.hpp"
@@ -24,16 +24,43 @@ event::event(hpx::naming::id_type device_id, clx_event event_id_)
     this->event_id = (cl_event) event_id_;
 }
 
-event::~event()
+// Will be used to free event ressources asynchronical.
+// This will get called by ~event(), as the event destructor
+// does not need to be waited for, but could be blocking.
+// So -> async destructor.
+static void
+free_async(hpx::naming::id_type parent_device_id,
+                  clx_event event_id_)
 {
+    
+    std::cout << "Releasing event..." << std::endl;
+
+    cl_event event_id = (cl_event) event_id_;
+    boost::shared_ptr<hpx::opencl::server::device> parent_device =
+              hpx::get_ptr<hpx::opencl::server::device>(parent_device_id).get();
+ 
+
     // Release ressources in device associated with the event
     parent_device->release_event_resources(event_id);
+
 
     // Release the cl_event
     cl_int err;
     err = clReleaseEvent(event_id);
-    cl_ensure_nothrow(err, "clReleaseEvent()");
+    cl_ensure(err, "clReleaseEvent()");
+    
+    std::cout << "Event released." << std::endl;
+
 }
+
+
+event::~event()
+{
+    hpx::apply(
+          hpx::util::bind(free_async, parent_device_id, (clx_event) event_id)
+                    );
+}
+
 
 cl_event
 event::get_cl_event()

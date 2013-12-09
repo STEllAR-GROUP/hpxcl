@@ -75,9 +75,9 @@ namespace hpx { namespace opencl{ namespace server{
 
     private:
         ///////////////////////////////////////////////
-        // Private Member Functions
-        //
-        void await_internally();
+        /// Private Member Functions
+        ///
+
 
         // Callback function, will get called from OpenCL internally
         static void callback(void *event);
