@@ -1,4 +1,20 @@
-implement syncronization between future and kernel
-write a whole bunch of kerenels
-find a way to generalize kernels
-device management
+todo:
+1. Implement device management component
+	A. device management component should be able to
+		1. get all devices
+		2. choose which device to use
+		3. run a kernel on the device
+		4. transfer data between the cpu and gpu
+
+2. Find a way to generalize cuda kernels
+	A. Try to implement cuda kernels with a Template kernel class
+        B. Try to use macro if that is not possible
+
+3. Error handling
+	A. handle hpx errors
+	B. handle cuda errors
+
+4. Worry about concurrency with memory transfers
+   	Note: CUDA kernels are asynchronous by default
+
+5. encapsulate cuda events and streams
