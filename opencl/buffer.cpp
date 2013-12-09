@@ -129,3 +129,48 @@ buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
 
 }
 
+
+// Copy Buffer
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
+                                 size_t size) const
+{
+ 
+     std::vector<hpx::opencl::event> events(0);
+     return enqueue_copy(src, src_offset, dst_offset, size, events);    
+    
+}
+
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
+                                 size_t size,
+                                 hpx::opencl::event event) const
+{
+ 
+     std::vector<hpx::opencl::event> events(1);
+     events[0] = event;
+     return enqueue_copy(src, src_offset, dst_offset, size, events);    
+    
+}
+
+
+
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
+                     size_t size,
+                     std::vector<hpx::opencl::event> events) const
+{
+    BOOST_ASSERT(this->get_gid());
+    BOOST_ASSERT(src.get_gid());
+
+    // Create dimensions vector
+    std::vector<size_t> dim(3);
+    dim[0] = src_offset;
+    dim[1] = dst_offset;
+    dim[2] = size;
+
+    // Run copy_action
+    typedef hpx::opencl::server::buffer::copy_action func;
+    return hpx::async<func>(this->get_gid(), src.get_gid(), dim, events);
+
+}

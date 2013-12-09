@@ -86,6 +86,22 @@ namespace opencl {
                                   size_t offset, size_t size,
                                   std::vector<hpx::opencl::event> events) const;
             
+            // Copy Buffer
+            hpx::lcos::future<hpx::opencl::event>
+            enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
+                                 size_t size) const;
+
+            hpx::lcos::future<hpx::opencl::event>
+            enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
+                                 size_t size,
+                                 hpx::opencl::event event) const;
+
+            hpx::lcos::future<hpx::opencl::event>
+            enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
+                                 size_t size,
+                                 std::vector<hpx::opencl::event> events) const;
+
+
             /* TODO
              * clEnqueueReadBufferRect
              * clEnqueueWriteBufferRect

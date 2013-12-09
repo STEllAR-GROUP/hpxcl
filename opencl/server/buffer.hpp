@@ -55,11 +55,15 @@ namespace hpx { namespace opencl{ namespace server{
         hpx::opencl::event fill(hpx::util::serialize_buffer<char> pattern,
                                 size_t offset, size_t size,
                                 std::vector<hpx::opencl::event> events);
+        hpx::opencl::event copy(hpx::naming::id_type src_buffer, 
+                                std::vector<size_t> dimensions,
+                                std::vector<hpx::opencl::event> events);
 
     //[
     HPX_DEFINE_COMPONENT_ACTION(buffer, size);
     HPX_DEFINE_COMPONENT_ACTION(buffer, read);
     HPX_DEFINE_COMPONENT_ACTION(buffer, write);
+    HPX_DEFINE_COMPONENT_ACTION(buffer, copy);
     HPX_DEFINE_COMPONENT_ACTION(buffer, fill);
     //]
     private:
@@ -90,6 +94,9 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
         hpx::opencl::server::buffer::write_action,
         opencl_buffer_write_action);
+HPX_REGISTER_ACTION_DECLARATION(
+        hpx::opencl::server::buffer::copy_action,
+        opencl_buffer_copy_action);
 HPX_REGISTER_ACTION_DECLARATION(
         hpx::opencl::server::buffer::fill_action,
         opencl_buffer_fill_action);

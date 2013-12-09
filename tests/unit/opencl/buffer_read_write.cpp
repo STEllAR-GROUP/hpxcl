@@ -15,11 +15,12 @@
 static const char initdata[] = "Hello World!";
 #define DATASIZE ((size_t)13)
 
-static const char modifydata[] = "p,";
+static char modifydata[] = "p,";
 static const char refdata1[] = "Help, World!";
 
 static const char refdata2[] = "World";
 
+static const char refdata3[] = "Hello Wolp,!";
 
 static void cl_test()
 {
@@ -36,7 +37,14 @@ static void cl_test()
     TEST_CL_BUFFER(buffer, initdata);
 
     // write to buffer
-    buffer.enqueue_write(3, 2, modifydata).get().await();
+    hpx::lcos::future<hpx::opencl::event> write_event = 
+                        buffer.enqueue_write(3, 2, modifydata);
+
+    // change modifydata to test wether write caches internally 
+    modifydata[1] = '.';
+
+    // wait for write to finish
+    write_event.get().await();
 
     // read and compare
     TEST_CL_BUFFER(buffer, refdata1);
@@ -45,6 +53,20 @@ static void cl_test()
     boost::shared_ptr<std::vector<char>> out = 
                                buffer.enqueue_read(6, 5).get().get_data().get();
     HPX_TEST_EQ(std::string(refdata2), std::string(out->begin(), out->end()));
+
+    
+    
+    // Create second buffer
+    hpx::opencl::buffer buffer2 = cldevice->create_buffer(CL_MEM_READ_WRITE,
+                                                          DATASIZE,
+                                                          initdata);
+
+    // Buffer copy test
+    buffer2.enqueue_copy(buffer, 2, 8, 3).get().await();
+
+    // read and compare
+    TEST_CL_BUFFER(buffer2, refdata3);
+
 
 }
 

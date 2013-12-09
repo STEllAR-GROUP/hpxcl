@@ -44,6 +44,8 @@ HPX_REGISTER_ACTION(buffer_type::wrapped_type::fill_action,
                     buffer_fill_action);
 HPX_REGISTER_ACTION(buffer_type::wrapped_type::size_action,
                     buffer_size_action);
+HPX_REGISTER_ACTION(buffer_type::wrapped_type::copy_action,
+                    buffer_copy_action);
 
 
 // EVENT

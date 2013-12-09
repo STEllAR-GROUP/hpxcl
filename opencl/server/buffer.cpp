@@ -13,6 +13,7 @@
 #include "../tools.hpp"
 #include "device.hpp"
 #include "../event.hpp"
+#include "../buffer.hpp"
 
 using hpx::opencl::server::buffer;
 using namespace hpx::opencl::server;
@@ -222,6 +223,81 @@ buffer::fill(hpx::util::serialize_buffer<char> pattern, size_t offset,
                             ));
 
 }
+
+hpx::opencl::event
+buffer::copy(hpx::naming::id_type src_buffer, std::vector<size_t> dimensions,
+             std::vector<hpx::opencl::event> events)
+{
+
+    // Parse arguments
+    BOOST_ASSERT(dimensions.size() == 3); 
+    size_t src_offset = dimensions[0];
+    size_t dst_offset = dimensions[1];
+    size_t size = dimensions[2];
+
+    // Initialize
+    cl_int err;
+    cl_event returnEvent;
+
+    // Get buffer locations
+    hpx::naming::id_type src_location;
+    hpx::naming::id_type dst_location;
+    {
+        hpx::lcos::future<hpx::naming::id_type>
+        src_location_future = get_colocation_id(src_buffer);
+        hpx::lcos::future<hpx::naming::id_type>
+        dst_location_future = get_colocation_id(get_gid());
+        src_location = src_location_future.get();
+        dst_location = dst_location_future.get();
+    }
+
+    // Decide which way of copying to take
+//    if(src_location != dst_location)
+    {
+        // Brute force copy
+        ///////////////////
+
+        // create src buffer client
+        hpx::opencl::buffer src(hpx::lcos::make_ready_future(src_buffer));
+
+        // read from src buffer
+        hpx::opencl::event read_event = 
+                               src.enqueue_read(src_offset, size, events).get();
+        
+        
+        // transmit the data
+        hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
+            data_future = read_event.get_data();
+
+        // Get the command queue
+        cl_command_queue command_queue = parent_device->get_write_command_queue();
+
+        // Wait for data transmit to finish
+        boost::shared_ptr<std::vector<char>> data = data_future.get();
+
+
+        // write to dst buffer
+        err = ::clEnqueueWriteBuffer(command_queue, device_mem, CL_FALSE,
+                                     dst_offset, size, &(*data)[0], 0, NULL,
+                                     &returnEvent);
+        cl_ensure(err, "clEnqueueWriteBuffer()");
+        
+        // store the data on device as event data to prevent deallocation
+        parent_device->put_event_data(returnEvent, data);
+
+    }
+        
+    
+     // Return the event
+    return hpx::opencl::event(
+           hpx::components::new_<hpx::opencl::server::event>(
+                                hpx::find_here(),
+                                parent_device_id,
+                                (clx_event) returnEvent
+                            ));
+
+}
+
 
 cl_mem
 buffer::get_cl_mem()
