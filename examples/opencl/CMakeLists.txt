@@ -7,6 +7,7 @@ set(example_programs
     hello_world
     _tmp_test
     events_and_futures
+    reference_bug
 )
 
 foreach(example_program ${example_programs})

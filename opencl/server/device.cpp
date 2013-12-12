@@ -59,6 +59,7 @@ device::device(clx_device_id _device_id, bool enable_profiling)
 // Destructor
 device::~device()
 {
+    std::cout << "~device()" << std::endl;
     cl_int err;
 
     // cleanup user events and pending cl_mem deletions
@@ -82,6 +83,7 @@ device::~device()
         context = NULL;
     }
     
+    std::cout << "~device() ended" << std::endl;
 }
 
 

@@ -56,6 +56,7 @@ free_async(hpx::naming::id_type parent_device_id,
 
 event::~event()
 {
+    std::cout << "~event()" << std::endl;
     hpx::apply(
           hpx::util::bind(free_async, parent_device_id, (clx_event) event_id)
                     );

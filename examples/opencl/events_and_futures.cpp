@@ -56,14 +56,15 @@ void wait_and_trigger(event user_event, device cldevice)
     sleep(1);
     print(1, "Triggering user_event ...");
     user_event.trigger();
+    print(1, "user_event triggered.");
 }
 HPX_PLAIN_ACTION(wait_and_trigger, wait_and_trigger_action);
 
 // Waits for future to trigger
-void wait_for_future(hpx::lcos::future<void>* future)
+void wait_for_future(hpx::lcos::future<void> future)
 {
     print(2, "Waiting for user_event_future to trigger ...");
-    ((hpx::lcos::future<void>*)future)->get();
+    future.get();
     print(2, "user_event_future triggered.");
 }
 
@@ -93,7 +94,7 @@ int hpx_main(int argc, char* argv[])
     
         // Run the wait_for_future function
         print(0, "Starting asynchronous functions ...");
-        hpx::apply(&wait_for_future, &user_event_future);
+        hpx::apply(&wait_for_future, user_event_future);
         typedef wait_and_trigger_action func2;
         hpx::apply<func2>(hpx::find_here(), user_event, cldevice);
     
@@ -103,6 +104,8 @@ int hpx_main(int argc, char* argv[])
         print(0, "user_event_future_event triggered.");
     
     }
+
+    print(0, "end of main program");
 
     // End the program
     return hpx::finalize();
