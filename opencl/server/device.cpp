@@ -130,6 +130,18 @@ device::put_event_data(cl_event ev, boost::shared_ptr<std::vector<char>> mem)
 }
 
 void
+device::put_event_const_data(cl_event ev, hpx::util::serialize_buffer<char> buf)
+{
+
+    // Insert buffer to const-buffer map
+    boost::lock_guard<spinlock_type> lock(event_const_data_mutex);
+    event_const_data.insert(
+            std::pair<cl_event, hpx::util::serialize_buffer<char>>
+                        (ev, buf));
+
+}
+
+void
 device::release_event_resources(cl_event event_id)
 {
    
@@ -143,6 +155,13 @@ device::release_event_resources(cl_event event_id)
     {
         boost::lock_guard<spinlock_type> lock(event_data_mutex);
         if(event_data.count(event_id) > 0)
+            needs_to_be_waited_for = true;
+    }
+
+    // check for const data registered
+    {
+        boost::lock_guard<spinlock_type> lock(event_const_data_mutex);
+        if(event_const_data.count(event_id) > 0)
             needs_to_be_waited_for = true;
     }
 
@@ -167,6 +186,12 @@ device::release_event_resources(cl_event event_id)
     {
         boost::lock_guard<spinlock_type> lock(event_data_mutex);
         event_data.erase(event_id);
+    }
+
+    // Delete all const data
+    {
+        boost::lock_guard<spinlock_type> lock(event_const_data_mutex);
+        event_const_data.erase(event_id);
     }
 
 }

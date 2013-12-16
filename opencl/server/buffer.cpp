@@ -177,6 +177,9 @@ buffer::write(size_t offset, hpx::util::serialize_buffer<char> data,
                                  data.size(), data.data(), (cl_uint)events.size(),
                                  cl_events_list_ptr, &returnEvent);
     cl_ensure(err, "clEnqueueWriteBuffer()");
+
+    // Register the input data to prevent deallocation
+    parent_device->put_event_const_data(returnEvent, data);
     
     // Return the event
     return hpx::opencl::event(
@@ -213,6 +216,9 @@ buffer::fill(hpx::util::serialize_buffer<char> pattern, size_t offset,
                                 pattern.size(), offset, size,
                                 (cl_uint)events.size(), cl_events_list_ptr,
                                 &returnEvent);
+
+    // Register the input data to prevent deallocation
+    parent_device->put_event_const_data(returnEvent, pattern);
 
     // Return the event
     return hpx::opencl::event(
@@ -264,7 +270,6 @@ buffer::copy(hpx::naming::id_type src_buffer, std::vector<size_t> dimensions,
         hpx::opencl::event read_event = 
                                src.enqueue_read(src_offset, size, events).get();
         
-        
         // transmit the data
         hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
             data_future = read_event.get_data();
@@ -274,7 +279,6 @@ buffer::copy(hpx::naming::id_type src_buffer, std::vector<size_t> dimensions,
 
         // Wait for data transmit to finish
         boost::shared_ptr<std::vector<char>> data = data_future.get();
-
 
         // write to dst buffer
         err = ::clEnqueueWriteBuffer(command_queue, device_mem, CL_FALSE,

@@ -41,7 +41,7 @@ static void cl_test()
                         buffer.enqueue_write(3, 2, modifydata);
 
     // change modifydata to test wether write caches internally 
-    modifydata[1] = '.';
+//    modifydata[1] = '.';
 
     // wait for write to finish
     write_event.get().await();

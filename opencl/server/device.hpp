@@ -56,6 +56,9 @@ namespace hpx { namespace opencl{ namespace server{
         // Registers a read buffer
         void put_event_data(cl_event, boost::shared_ptr<std::vector<char>>);
 
+        // Registers a const buffer
+        void put_event_const_data(cl_event, hpx::util::serialize_buffer<char>);
+
         // Delete all ressources registered with specific cl_event
         void release_event_resources(cl_event);
 
@@ -127,6 +130,11 @@ namespace hpx { namespace opencl{ namespace server{
         // (e.g. from buffer::enqueue_read)
         std::map<cl_event, boost::shared_ptr<std::vector<char>>> event_data;
         spinlock_type event_data_mutex;
+
+        // Map for the input data needed for opencl calls
+        // (e.g. for buffer::enqueue_write)
+        std::map<cl_event, hpx::util::serialize_buffer<char>> event_const_data;
+        spinlock_type event_const_data_mutex;
         
         // List for all the user generated events (e.g. from futures)
         // Store hpx::opencl::event client with them to keep reference counter up
