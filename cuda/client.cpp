@@ -1,7 +1,7 @@
-//  (C) Copyright 2013 Damond Howard
+// Copyright (c)		2013 Damond Howard
 //
-//  Distributed under the Boost Software License, Version 1.0. (See accompanying
-//  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
 #include <hpx/hpx_init.hpp>
 #include <hpx/include/actions.hpp>
@@ -12,7 +12,10 @@
 
 #include <boost/foreach.hpp>
 
-#include "cuda_components/managed_cuda_component.hpp"
+#include "cuda_components/device.hpp"
+
+std::default_random_engine gen(std::time(0));
+std::uniform_real_distribution<double> dist(0.0,1.0);
 
 double calculate_pi(boost::uint64_t num_of_iterations,boost::uint64_t num_of_sets);
 double check_if_hit(boost::uint64_t num_of_sets);
@@ -77,22 +80,20 @@ int hpx_main(boost::program_options::variables_map& vm)
 {
     {
         bool info = vm["info"].as<bool>();
-        typedef cuda_hpx::server::managed_cuda_component cuda_component_type;
-        typedef cuda_component_type::argument_type argument_type;
+        typedef hpx::cuda::device cuda_device;
 
         std::vector<hpx::id_type> localities = hpx::find_all_localities();
 
-        cuda_hpx::managed_cuda_component client(
-        hpx::components::new_<cuda_component_type>(localities.back()));
+        cuda_device client;
+        client.create(hpx::find_here());
+
         if(info)
         {
             client.get_cuda_info();
         }
-        cuda_hpx::managed_cuda_component client2;
-        client2.create(hpx::find_here());
 
         hpx::util::high_resolution_timer t;
-        hpx::lcos::future<float> pi = client2.calculate_pi_async(200,200);
+        hpx::lcos::future<float> pi = client.calculate_pi_async(200,200);
         float cpu_pi = calculate_pi(10000000,100000);
         std::cout<<cpu_pi<<" and ";
         float gpu_pi = pi.get();

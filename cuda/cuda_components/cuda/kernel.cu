@@ -1,8 +1,3 @@
-//  (C) Copyright 2013 Damond Howard
-//
-//  Distributed under the Boost Software License, Version 1.0. (See accompanying
-//  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-
 #include <cuda_runtime.h>
 #include <cuda.h>
 #include <curand_kernel.h>
@@ -10,7 +5,7 @@
 #include <iostream>
 #include <thrust/version.h>
 
-//kernel definitions
+////cuda kernel definitions
 __global__ void test_kernel(long* vals)
 {
   vals[threadIdx.x] += 1;
@@ -18,26 +13,26 @@ __global__ void test_kernel(long* vals)
 
 __global__ void calculate_pi_kernel(float *sum, int nbin, float step, int nthreads, int nblocks)
 {
-	int i;
-	float x;
-	int idx = blockIdx.x*blockDim.x+threadIdx.x;  // Sequential thread index across the blocks
-	for (i=idx; i< nbin; i+=nthreads*nblocks)
-	{
-		x = (i+0.5)*step;
-		sum[idx] += 4.0/(1.0+x*x);
-	}
+   int i;
+   float x;
+   int idx = blockIdx.x*blockDim.x+threadIdx.x;  // Sequential thread index across the blocks
+   for (i=idx; i< nbin; i+=nthreads*nblocks)
+    {
+	x = (i+0.5)*step;
+	sum[idx] += 4.0/(1.0+x*x);
+    }
 }
 
-//functions that call CUDA kernels
+//CUDA kernel wrapper functions
 
 void cuda_test(long int* a)
 {
-	long int* a_d;
-	cudaMalloc(&a_d,1);
-	cudaMemcpy(a_d,a,1,cudaMemcpyHostToDevice);
-	test_kernel<<<1,1>>>(a_d);
-	cudaMemcpy(a,a_d,1,cudaMemcpyDeviceToHost);
-	cudaFree(a_d);
+   long int* a_d;
+   cudaMalloc(&a_d,1);
+   cudaMemcpy(a_d,a,1,cudaMemcpyHostToDevice);
+   test_kernel<<<1,1>>>(a_d);
+   cudaMemcpy(a,a_d,1,cudaMemcpyDeviceToHost);
+   cudaFree(a_d);
 }
 float pi(int nthreads,int nblocks)
 {
@@ -48,36 +43,32 @@ float pi(int nthreads,int nblocks)
     float pi = 0.0;
 
     dim3 dimGrid(NUM_BLOCK,1,1);  // Grid dimensions
-	dim3 dimBlock(NUM_THREAD,1,1);  // Block dimensions
-	float *sumHost, *sumDev;  // Pointer to host & device arrays
+    dim3 dimBlock(NUM_THREAD,1,1);  // Block dimensions
+    float *sumHost, *sumDev;  // Pointer to host & device arrays
 
-	float step = 1.0/NBIN;  // Step size
-	size_t size = NUM_BLOCK*NUM_THREAD*sizeof(float);  //Array memory size
-	sumHost = (float *)malloc(size);  //  Allocate array on host
-	cudaMalloc((void **) &sumDev, size);  // Allocate array on device
+    float step = 1.0/NBIN;  // Step size
+    size_t size = NUM_BLOCK*NUM_THREAD*sizeof(float);  //Array memory size
+    sumHost = (float *)malloc(size);  //  Allocate array on host
+    cudaMalloc((void **) &sumDev, size);  // Allocate array on device
+    // Initialize array in device to 0
+    cudaMemset(sumDev, 0, size);
+    //declare a stream
+    cudaStream_t stream;
+    cudaStreamCreate(&stream);
+    // Do calculation on device
+    calculate_pi_kernel<<<dimGrid, dimBlock,0,stream>>>(sumDev, NBIN, step, NUM_THREAD, NUM_BLOCK); // call CUDA kernel
+    cudaStreamSynchronize(stream);
+    cudaStreamDestroy(stream);
+    // Retrieve result from device and store it in host array
+    cudaMemcpy(sumHost, sumDev, size, cudaMemcpyDeviceToHost);
+    for(tid=0; tid<NUM_THREAD*NUM_BLOCK; tid++)
+     pi += sumHost[tid];
+    pi *= step;
 
-	// Initialize array in device to 0
-	cudaMemset(sumDev, 0, size);
+    free(sumHost);
+    cudaFree(sumDev);
 
-	//declare a stream
-	cudaStream_t stream;
-	cudaStreamCreate(&stream);
-
-	// Do calculation on device
-	calculate_pi_kernel<<<dimGrid, dimBlock,0,stream>>>(sumDev, NBIN, step, NUM_THREAD, NUM_BLOCK); // call CUDA kernel
-	cudaStreamSynchronize(stream);
-	cudaStreamDestroy(stream);
-
-	// Retrieve result from device and store it in host array
-	cudaMemcpy(sumHost, sumDev, size, cudaMemcpyDeviceToHost);
-	for(tid=0; tid<NUM_THREAD*NUM_BLOCK; tid++)
-		pi += sumHost[tid];
-	pi *= step;
-
-	free(sumHost);
-	cudaFree(sumDev);
-
-	return pi;
+    return pi;
 }
 
 //CUDA API wrapper functions
@@ -88,9 +79,9 @@ int get_devices()
 	return device_count;
 }
 
-void cuda_malloc(void **devPtr, size_t size)
+void set_device(int dev)
 {
-    cudaMalloc(devPtr, size);
+    cudaSetDevice(dev);
 }
 
 void get_device_info()
@@ -123,3 +114,5 @@ void get_device_info()
         std::cout<<std::endl;
     }
 }
+
+  //Device management functions
