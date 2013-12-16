@@ -350,6 +350,41 @@ buffer::copy_local(boost::shared_ptr<hpx::opencl::server::buffer> src,
         return returnEvent;
 }
 
+// Direct copy, buffers are on the same context
+cl_event
+buffer::copy_direct(boost::shared_ptr<hpx::opencl::server::buffer> src,
+                    const size_t & src_offset,
+                    const size_t & dst_offset,
+                    const size_t & size,
+                    std::vector<hpx::opencl::event> & events)
+{
+        cl_int err;
+        cl_event returnEvent;
+
+        // Get the cl_event dependency list
+        std::vector<cl_event> cl_events_list = hpx::opencl::event::
+                                                        get_cl_events(events);
+        cl_event* cl_events_list_ptr = NULL;
+        if(!cl_events_list.empty())
+        {
+            cl_events_list_ptr = &cl_events_list[0];
+        }
+
+        // get command queue
+        cl_command_queue command_queue = 
+                                       parent_device->get_write_command_queue();
+
+        // Perform direct copy
+        err = ::clEnqueueCopyBuffer(command_queue, src->device_mem, device_mem,
+                                    src_offset, dst_offset, size, 
+                                    (cl_uint)events.size(),
+                                    cl_events_list_ptr, &returnEvent);
+        cl_ensure(err, "clEnqueueCopyBuffer()");
+       
+        // return the evetn
+        return returnEvent;
+}
+
 
 hpx::opencl::event
 buffer::copy(hpx::naming::id_type src_buffer, std::vector<size_t> dimensions,
@@ -392,10 +427,15 @@ buffer::copy(hpx::naming::id_type src_buffer, std::vector<size_t> dimensions,
         cl_context src_context = src->parent_device->get_context();
         cl_context dst_context = this->parent_device->get_context();
 
-//      if(src_context != dst_context)
+        if(src_context != dst_context)
         {
             // Data is on the same process, but on different contexts
             returnEvent = copy_local(src, src_offset, dst_offset, size, events);
+        }
+        else
+        {
+            // Data is on the same context, perform direct copy
+            returnEvent = copy_direct(src, src_offset, dst_offset, size, events);
         }
 
     }
