@@ -71,6 +71,20 @@ namespace hpx { namespace opencl{ namespace server{
         /// Private Member Functions
         ///
 
+        // Bruteforce copy, needed for copy between different machines
+        cl_event copy_bruteforce(hpx::naming::id_type & src_buffer,
+                                 const size_t & src_offset,
+                                 const size_t & dst_offset,
+                                 const size_t & size,
+                                 std::vector<hpx::opencl::event> & events);
+
+        // Local copy, buffers are on the same machine but in different contexts
+        cl_event copy_local(boost::shared_ptr<hpx::opencl::server::buffer>,
+                            const size_t & src_offset,
+                            const size_t & dst_offset,
+                            const size_t & size,
+                            std::vector<hpx::opencl::event> & events);
+
     private:
         //////////////////////////////////////////////////
         //  Private Member Variables

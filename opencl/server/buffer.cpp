@@ -14,6 +14,7 @@
 #include "device.hpp"
 #include "../event.hpp"
 #include "../buffer.hpp"
+#include "../device.hpp"
 
 using hpx::opencl::server::buffer;
 using namespace hpx::opencl::server;
@@ -129,8 +130,8 @@ buffer::read(size_t offset, size_t size,
     }
 
     // Create the buffer
-    std::vector<char> *buffer = new std::vector<char>(size);
-    boost::shared_ptr<std::vector<char>> buffer_ptr(buffer);
+    boost::shared_ptr<std::vector<char>> buffer = 
+                                    boost::make_shared<std::vector<char>>(size);
 
     // Read the buffer
     err = ::clEnqueueReadBuffer(command_queue, device_mem, CL_FALSE, offset,
@@ -139,7 +140,7 @@ buffer::read(size_t offset, size_t size,
     cl_ensure(err, "clEnqueueReadBuffer()");
 
     // Send buffer to device class
-    parent_device->put_event_data(returnEvent, buffer_ptr);
+    parent_device->put_event_data(returnEvent, buffer);
     
     // Return the event
     return hpx::opencl::event(
@@ -230,38 +231,16 @@ buffer::fill(hpx::util::serialize_buffer<char> pattern, size_t offset,
 
 }
 
-hpx::opencl::event
-buffer::copy(hpx::naming::id_type src_buffer, std::vector<size_t> dimensions,
-             std::vector<hpx::opencl::event> events)
+// Bruteforce copy, needed for copy between different machines
+cl_event
+buffer::copy_bruteforce(hpx::naming::id_type & src_buffer,
+                        const size_t & src_offset,
+                        const size_t & dst_offset,
+                        const size_t & size,
+                        std::vector<hpx::opencl::event> & events)
 {
-
-    // Parse arguments
-    BOOST_ASSERT(dimensions.size() == 3); 
-    size_t src_offset = dimensions[0];
-    size_t dst_offset = dimensions[1];
-    size_t size = dimensions[2];
-
-    // Initialize
-    cl_int err;
-    cl_event returnEvent;
-
-    // Get buffer locations
-    hpx::naming::id_type src_location;
-    hpx::naming::id_type dst_location;
-    {
-        hpx::lcos::future<hpx::naming::id_type>
-        src_location_future = get_colocation_id(src_buffer);
-        hpx::lcos::future<hpx::naming::id_type>
-        dst_location_future = get_colocation_id(get_gid());
-        src_location = src_location_future.get();
-        dst_location = dst_location_future.get();
-    }
-
-    // Decide which way of copying to take
-//    if(src_location != dst_location)
-    {
-        // Brute force copy
-        ///////////////////
+        cl_int err;
+        cl_event returnEvent;
 
         // create src buffer client
         hpx::opencl::buffer src(hpx::lcos::make_ready_future(src_buffer));
@@ -288,6 +267,136 @@ buffer::copy(hpx::naming::id_type src_buffer, std::vector<size_t> dimensions,
         
         // store the data on device as event data to prevent deallocation
         parent_device->put_event_data(returnEvent, data);
+
+        // return the event
+        return returnEvent;
+}
+
+// Local copy, same process but different context
+cl_event
+buffer::copy_local(boost::shared_ptr<hpx::opencl::server::buffer> src,
+                   const size_t & src_offset,
+                   const size_t & dst_offset,
+                   const size_t & size,
+                   std::vector<hpx::opencl::event> & events)
+{
+        cl_int err;
+        cl_event returnEvent;
+
+        // Get the cl_event dependency list
+        std::vector<cl_event> cl_events_list = hpx::opencl::event::
+                                                        get_cl_events(events);
+        cl_event* cl_events_list_ptr = NULL;
+        if(!cl_events_list.empty())
+        {
+            cl_events_list_ptr = &cl_events_list[0];
+        }
+
+        // create a copy buffer
+        boost::shared_ptr<std::vector<char>> copy_buffer = 
+                                    boost::make_shared<std::vector<char>>(size);
+        
+        // get the read command queue
+        cl_command_queue src_command_queue =
+                                   src->parent_device->get_read_command_queue();
+
+        // Read into buffer
+        cl_event read_event_;
+        err = ::clEnqueueReadBuffer(src_command_queue, src->device_mem,
+                                    CL_FALSE, src_offset, size,
+                                    (void*)&(*copy_buffer)[0],
+                                    (cl_uint)events.size(),
+                                    cl_events_list_ptr, &read_event_);
+        cl_ensure(err, "clEnqueueReadBuffer()");
+
+        // Create hpx::opencl::event from cl_event
+        hpx::opencl::event read_event(
+               hpx::components::new_<hpx::opencl::server::event>(
+                                    hpx::find_here(),
+                                    src->parent_device_id,
+                                    (clx_event) read_event_
+                                ));
+
+        // Create future from event
+        hpx::lcos::future<void> read_future = read_event.get_future();
+
+        // Create device client of dst
+        hpx::opencl::device dst_device(
+                                hpx::lcos::make_ready_future(parent_device_id));
+
+        // Create new event on dst device
+        hpx::opencl::event write_start_event_client = 
+                              dst_device.create_future_event(read_future).get();
+
+        // Convert dst event to cl_event
+        cl_event write_start_event =
+                     hpx::opencl::event::get_cl_event(write_start_event_client);
+
+        // get write command queue
+        cl_command_queue dst_command_queue = 
+                                       parent_device->get_write_command_queue();
+
+        // Write to device
+        err = ::clEnqueueWriteBuffer(dst_command_queue, device_mem, CL_FALSE,
+                                     dst_offset, size, &(*copy_buffer)[0], 
+                                     1, &write_start_event,
+                                     &returnEvent);
+        cl_ensure(err, "clEnqueueWriteBuffer()");
+        
+        // Send buffer to device class to prevent deallocation
+        parent_device->put_event_data(returnEvent, copy_buffer);
+ 
+        // return the event
+        return returnEvent;
+}
+
+
+hpx::opencl::event
+buffer::copy(hpx::naming::id_type src_buffer, std::vector<size_t> dimensions,
+             std::vector<hpx::opencl::event> events)
+{
+
+    // Parse arguments
+    BOOST_ASSERT(dimensions.size() == 3); 
+    size_t src_offset = dimensions[0];
+    size_t dst_offset = dimensions[1];
+    size_t size = dimensions[2];
+
+    // Initialize
+    cl_event returnEvent;
+
+    // Get buffer locations
+    hpx::naming::id_type src_location;
+    hpx::naming::id_type dst_location;
+    {
+        hpx::lcos::future<hpx::naming::id_type>
+        src_location_future = get_colocation_id(src_buffer);
+        hpx::lcos::future<hpx::naming::id_type>
+        dst_location_future = get_colocation_id(get_gid());
+        src_location = src_location_future.get();
+        dst_location = dst_location_future.get();
+    }
+
+    // Decide which way of copying to take
+    if(src_location != dst_location)
+    {
+        // Data is on different machines/processes, brute force copy.
+        returnEvent = copy_bruteforce(src_buffer, src_offset, dst_offset,
+                                      size, events);
+    }
+    else
+    {
+        // Data is on the same machine and process.
+        boost::shared_ptr<hpx::opencl::server::buffer> src = 
+                    hpx::get_ptr<hpx::opencl::server::buffer>(src_buffer).get();
+        cl_context src_context = src->parent_device->get_context();
+        cl_context dst_context = this->parent_device->get_context();
+
+//      if(src_context != dst_context)
+        {
+            // Data is on the same process, but on different contexts
+            returnEvent = copy_local(src, src_offset, dst_offset, size, events);
+        }
 
     }
         
