@@ -5,8 +5,11 @@ todo:
 		2. choose which device to use
 		3. run a kernel on the device
 		4. transfer data between the cpu and gpu
+    B. create device properties member data such as
+        cur_device_id
+        vector full of all devices that you can switch between
 
-2. Find a way to generalize cuda kernels
+2. Find a way to generalize cuda kernels in kernel component
 	A. Try to implement cuda kernels with a Template kernel class
         B. Try to use macro if that is not possible
 
@@ -16,5 +19,8 @@ todo:
 
 4. Worry about concurrency with memory transfers
    	Note: CUDA kernels are asynchronous by default
+   	so I must implement a callback that allows the calling function to track when
+   	the cuda kernel is ready to return so that the future knwos when to return .get()
+   	memcpy is synchronous by default
 
-5. encapsulate cuda events and streams
+5. encapsulate cuda events and streams in kernel component

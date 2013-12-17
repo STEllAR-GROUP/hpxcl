@@ -97,7 +97,7 @@ int hpx_main(boost::program_options::variables_map& vm)
         float cpu_pi = calculate_pi(10000000,100000);
         std::cout<<cpu_pi<<" and ";
         float gpu_pi = pi.get();
-        std::cout<<gpu_pi<<" where calculated at the same time"<<std::endl;
+        std::cout<<std::endl<<gpu_pi<<" were calculated at the same time"<<std::endl;
         std::cout<<"It took "<<t.elapsed()<<" seconds"<<std::endl;
     }
     return hpx::finalize();

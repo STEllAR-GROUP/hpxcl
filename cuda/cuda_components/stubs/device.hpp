@@ -16,36 +16,44 @@ namespace hpx
             struct device
                 : hpx::components::stub_base<server::device>
             {
-                static void test1_non_blocking(hpx::naming::id_type const& gid)
-                {
-                    typedef server::device::test1_action action_type;
-                    hpx::apply<action_type>(gid);
-                }
-
-                static void test1_sync(hpx::naming::id_type const& gid)
-                {
-                    typedef server::device::test1_action action_type;
-                    hpx::async<action_type>(gid).get();
-                }
-
-                static hpx::lcos::future<long>
-                test2_async(hpx::naming::id_type const& gid)
-                {
-                    typedef server::device::test2_action action_type;
-                    return hpx::async<action_type>(gid);
-                }
-
-                static long test2_sync(hpx::naming::id_type const& gid)
-                {
-                    return test2_async(gid).get();
-                }
-
                 static void get_cuda_info(hpx::naming::id_type const& gid)
                 {
                     typedef server::device::get_cuda_info_action action_type;
                     hpx::apply<action_type>(gid);
                 }
 
+                static void set_device(hpx::naming::id_type const& gid,int dev)
+                {
+                    typedef server::device::set_device_action action_type;
+                    hpx::async<action_type>(gid,dev).get();
+                }
+
+                static std::vector<int> get_all_devices(std::vector<hpx::naming::id_type> localities)
+                {
+                    std::vector<int> vec;
+                    typedef server::device::get_all_devices_action action_type;
+                    for(uint64_t i = 0;i<localities.size();i++)
+                    {
+                        vec.push_back(hpx::async<action_type>(localities[i]).get());
+                    }
+                    return vec;
+                }
+
+                template <typename T>
+                static T* device_malloc(hpx::naming::id_type const& gid, size_t mem_size)
+                {
+                    typedef typename server::device::device_malloc_action<T*> action_type;
+                    return hpx::async<action_type>(gid,mem_size).get();
+                }
+
+                template <typename T>
+                static hpx::lcos::future<T*> device_malloc_async(hpx::naming::id_type const& gid,size_t mem_size)
+                {
+                    typedef typename server::device::device_malloc_action<T*> action_type;
+                    return hpx::async<action_type>(gid,mem_size);
+                }
+
+                //functions to run CUDA kernels
                 static hpx::lcos::future<float>
                 calculate_pi_async(hpx::naming::id_type const& gid,int nthreads, int nblocks)
                 {
@@ -58,7 +66,6 @@ namespace hpx
                     return calculate_pi_async(gid,nthreads,nblocks).get();
                 }
             };
-
         }
     }
 }
