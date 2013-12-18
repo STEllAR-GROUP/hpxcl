@@ -39,20 +39,6 @@ namespace hpx
                     return vec;
                 }
 
-                template <typename T>
-                static T* device_malloc(hpx::naming::id_type const& gid, size_t mem_size)
-                {
-                    typedef typename server::device::device_malloc_action<T*> action_type;
-                    return hpx::async<action_type>(gid,mem_size).get();
-                }
-
-                template <typename T>
-                static hpx::lcos::future<T*> device_malloc_async(hpx::naming::id_type const& gid,size_t mem_size)
-                {
-                    typedef typename server::device::device_malloc_action<T*> action_type;
-                    return hpx::async<action_type>(gid,mem_size);
-                }
-
                 //functions to run CUDA kernels
                 static hpx::lcos::future<float>
                 calculate_pi_async(hpx::naming::id_type const& gid,int nthreads, int nblocks)

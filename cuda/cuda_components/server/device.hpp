@@ -40,13 +40,31 @@ namespace hpx
                  int get_device_count()
                  {
                     int device_count = 0;
-                    cudaGetDeviceCount(&device_count);
+                    cudaError_t error;
+                    error = cudaGetDeviceCount(&device_count);
+                    if(error == cudaErrorNoDevice)
+                    {
+                        std::cout<<"There are no cuda devices"<<std::endl;
+                    }
+                    else if(error == cudaErrorInsufficientDriver)
+                    {
+                        std::cout<<"Update the cuda driver"<<std::endl;
+                    }
                     return device_count;
                  }
 
                  void set_device(int dev)
                  {
-                    cudaSetDevice(dev);
+                    cudaError_t error;
+                    error = cudaSetDevice(dev);
+                    if(error == cudaErrorInvalidDevice)
+                    {
+                        std::cout<<"Invalid Device"<<std::endl;
+                    }
+                    else if(error == cudaErrorDeviceAlreadyInUse)
+                    {
+                        std::cout<<"Device is already being used"<<std::endl;
+                    }
                  }
 
                  void get_cuda_info()
@@ -57,8 +75,8 @@ namespace hpx
                     std::cout<<"CUDA version:   v"<<CUDART_VERSION<<std::endl;
                     std::cout<<"Thrust version: v"<<THRUST_MAJOR_VERSION<<"."<<THRUST_MINOR_VERSION<<std::endl<<std::endl;
 
-                    int dev_count;
-                    cudaGetDeviceCount(&dev_count);
+                    int dev_count = this->get_device_count();
+                    //daGetDeviceCount(&dev_count);
 
                     if(dev_count <= 0)
                     {
@@ -71,7 +89,12 @@ namespace hpx
                     for(int i=0;i<dev_count;++i)
                     {
                         cudaDeviceProp props;
-                        cudaGetDeviceProperties(&props,i);
+                        cudaError_t error;
+                        error = cudaGetDeviceProperties(&props,i);
+                        if(error == cudaErrorInvalidDevice)
+                        {   
+                            std::cout<<"Device does not exist"<<std::endl;
+                        }
 
                         std::cout<<i<<": "<< props.name<<": "<<props.major<<"."<<props.minor<<std::endl;
                         std::cout<< "   Global memory:   "<<props.totalGlobalMem / mb<<"mb"<<std::endl;
@@ -97,36 +120,12 @@ namespace hpx
                     return 0;
                  }
 
-                 template <typename T>
-                 T* device_malloc(size_t mem_size)
-                 {
-                    T* loc = NULL;
-                    const int space = mem_size*sizeof(T);
-                    cudaError_t error;
-                    error = cudaMalloc(&loc,space);
-                    if(error == cudaErrorMemoryAllocation)
-                    {
-                        std::cout<<"Error with memory allocation"<<std::endl;
-                    }
-                    else if(error == cudaSuccess)
-                    {
-                        return loc;
-                    }
-                 }
-
                  //private:  //All private data members of a cuda device
 
                  HPX_DEFINE_COMPONENT_ACTION(device,calculate_pi);
                  HPX_DEFINE_COMPONENT_ACTION(device,get_cuda_info);
                  HPX_DEFINE_COMPONENT_ACTION(device,set_device);
                  HPX_DEFINE_COMPONENT_ACTION(device,get_all_devices);
-
-                 template <typename T>
-                 struct device_malloc_action
-                    : hpx::actions::make_action<T* (device::*)(T),
-                        &device::template device_malloc<T*>, device_malloc_action<T*> >
-                 {};
-
             };
 	    }
     }
@@ -146,9 +145,5 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::get_all_devices_action,
     device_get_all_devices_action);
-HPX_REGISTER_ACTION_DECLARATION_TEMPLATE(
-    (template <typename T>),
-    (hpx::cuda::server::device::device_malloc_action<T*>)
-    );
 
 #endif //cuda_device_2_HPP

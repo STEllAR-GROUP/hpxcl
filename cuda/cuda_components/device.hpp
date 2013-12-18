@@ -41,22 +41,6 @@ namespace hpx
                 this->base_type::set_device(this->get_gid(),dev);
             }
 
-            template <typename T>
-            T* device_malloc(size_t mem_size)
-            {
-                BOOST_ASSERT(this->get_gid());
-                /*return this->base_type::device_malloc(this->get_gid(),mem_size);*/
-                return hpx::cuda::stubs::device::device_malloc(this->get_gid(),mem_size);
-            }
-
-            template <typename T>
-            hpx::lcos::future<T*> device_malloc_async(size_t mem_size)
-            {
-                BOOST_ASSERT(this->get_gid());
-                /*return this->base_type::device_malloc_async(this->get_gid(),mem_size);*/
-                return hpx::cuda::stubs::device::device_malloc_async(this->get_gid(),mem_size);
-            }
-
             hpx::lcos::future<float> calculate_pi_async(int nthreads,int nblocks)
             {
                 BOOST_ASSERT(this->get_gid());
