@@ -15,34 +15,32 @@
 
 #include <boost/serialization/vector.hpp>
 
-#include "../name_definitions.hpp"
+namespace hpx { namespace opencl{
+
+    class device;
+
+}}
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
+
 
     ////////////////////////////////////////////////////////
     /// Global opencl functions
     /// 
 
     // Returns the IDs of all devices on current host
-    std::vector<clx_device_id> get_device_ids(cl_device_type, float cl_version);
-    // Returns informations about given device
-    std::vector<char> get_device_info(clx_device_id, cl_device_info);
-    // Returns informations about given device as string
-    std::string get_device_info_string(clx_device_id, cl_device_info);
+    std::vector<hpx::opencl::device>
+    get_devices(cl_device_type, float cl_version);
 
     //[opencl_management_action_types
-    HPX_DEFINE_PLAIN_ACTION(get_device_ids, get_device_ids_action);
-    HPX_DEFINE_PLAIN_ACTION(get_device_info, get_device_info_action);
-    HPX_DEFINE_PLAIN_ACTION(get_device_info_string, get_device_info_string_action);
+    HPX_DEFINE_PLAIN_ACTION(get_devices, get_devices_action);
     //]
 
 }}}
 
 
-HPX_REGISTER_PLAIN_ACTION_DECLARATION(hpx::opencl::server::get_device_ids_action);
-HPX_REGISTER_PLAIN_ACTION_DECLARATION(hpx::opencl::server::get_device_info_action);
-HPX_REGISTER_PLAIN_ACTION_DECLARATION(hpx::opencl::server::get_device_info_string_action);
+HPX_REGISTER_PLAIN_ACTION_DECLARATION(hpx::opencl::server::get_devices_action);
 
 
 #endif

@@ -5,55 +5,15 @@
 
 #include "std.hpp"
 
-using hpx::opencl::clx_device_id;
-
-hpx::lcos::future<std::vector<clx_device_id>>
-hpx::opencl::get_device_ids(hpx::naming::id_type node_id,
-                            cl_device_type device_type,
-                            float required_cl_version)
+hpx::lcos::future<std::vector<hpx::opencl::device>>
+hpx::opencl::get_devices( hpx::naming::id_type node_id,
+                          cl_device_type device_type,
+                          float required_cl_version)
 {
 
-    typedef hpx::opencl::server::get_device_ids_action action;
+    typedef hpx::opencl::server::get_devices_action action;
     return async<action>(node_id, device_type, required_cl_version);
 
 }
-
-
-hpx::lcos::future<std::vector<char>>
-hpx::opencl::get_device_info( hpx::naming::id_type  node_id,
-                              clx_device_id         device_id,
-                              cl_device_info        info_type )
-{
-    
-    // Retrieve info from node
-    typedef hpx::opencl::server::get_device_info_action action;
-    return async<action>(node_id, device_id, info_type);
-    
-}
-
-hpx::lcos::future<std::string>
-hpx::opencl::get_device_info_string( hpx::naming::id_type  node_id,
-                                     clx_device_id         device_id,
-                                     cl_device_info        info_type )
-{
-    
-    // Retrieve info from node
-    typedef hpx::opencl::server::get_device_info_string_action action;
-    return async<action>(node_id, device_id, info_type);
-    
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

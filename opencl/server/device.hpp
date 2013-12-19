@@ -21,7 +21,6 @@
 
 #include <CL/cl.h>
 
-#include "../std.hpp"
 #include "../event.hpp"
 
 // ! This component header may NOT include other component headers !
@@ -30,6 +29,8 @@
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
     
+    typedef intptr_t clx_device_id;
+
     ////////////////////////////////////////////////////////
     /// This class represents an OpenCL accelerator device.
     ///

@@ -16,7 +16,6 @@ namespace hpx { namespace opencl{
     /// Defines costum opencl variables, as the original
     /// are pointers and not serializable
     ///
-    typedef intptr_t clx_device_id;
     typedef intptr_t clx_platform_id;
 
 }}

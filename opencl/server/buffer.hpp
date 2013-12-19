@@ -19,6 +19,7 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
+
 namespace hpx { namespace opencl{ namespace server{
 
     ////////////////////////////////////////////////////////

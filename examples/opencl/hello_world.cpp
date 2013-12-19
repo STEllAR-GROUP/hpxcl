@@ -28,9 +28,9 @@ int hpx_main(int argc, char* argv[])
     {
         
         // Get list of available OpenCL Devices.
-        std::vector<clx_device_id> devices = get_device_ids( hpx::find_here(),
-                                                             CL_DEVICE_TYPE_ALL,
-                                                             1.1f ).get();
+        std::vector<device> devices = get_devices( hpx::find_here(),
+                                                   CL_DEVICE_TYPE_ALL,
+                                                   1.1f ).get();
     
         // Check whether there are any devices
         if(devices.size() < 1)
@@ -40,9 +40,7 @@ int hpx_main(int argc, char* argv[])
         }
     
         // Create a device component from the first device found
-        device cldevice(
-                 hpx::components::new_<server::device>(hpx::find_here(), devices[0])
-                           );
+        device cldevice = devices[0];
     
         // Create a buffer
         buffer outbuffer = cldevice.create_buffer(CL_MEM_WRITE_ONLY, 13);

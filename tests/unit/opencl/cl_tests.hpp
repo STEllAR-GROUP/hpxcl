@@ -16,7 +16,6 @@ using boost::program_options::value;
 
 
 static boost::shared_ptr<hpx::opencl::device> cldevice;
-static hpx::opencl::clx_device_id clx_device;
 static hpx::naming::id_type here;
 
 static void cl_test();

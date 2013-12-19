@@ -16,7 +16,6 @@
 //#include <hpx/include/components.hpp>
 #include <hpx/include/runtime.hpp>
 
-using hpx::opencl::clx_device_id;
 using namespace hpx::opencl::server;
 
 CL_FORBID_EMPTY_CONSTRUCTOR(device);
@@ -24,7 +23,7 @@ CL_FORBID_EMPTY_CONSTRUCTOR(device);
 // Constructor
 device::device(clx_device_id _device_id, bool enable_profiling)
 {
-    this->device_id = (cl_device_id) _device_id;
+    this->device_id = (cl_device_id)_device_id;
     
     cl_int err;
     

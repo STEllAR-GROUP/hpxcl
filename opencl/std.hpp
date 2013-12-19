@@ -16,6 +16,7 @@
 
 #include "server/std.hpp"
 #include "name_definitions.hpp"
+#include "device.hpp"
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{
@@ -24,21 +25,9 @@ namespace hpx { namespace opencl{
     //      It is recommended to only use OpenCL Version >= 1.1f.
     //      Earlier devices seem to be blocking on every enqueue-call, which
     //      seems counter-productive to the general idea of the hpx framework.
-    hpx::lcos::future<std::vector<clx_device_id>>
-    get_device_ids( hpx::naming::id_type node_id, cl_device_type device_type,
-                    float required_cl_version);
-
-    // Get device information
-    hpx::lcos::future<std::vector<char>>
-    get_device_info( hpx::naming::id_type          node_id,
-                     clx_device_id                 device_id,
-                     cl_device_info                info_type);
-
-    // Get device information as string
-    hpx::lcos::future<std::string>
-    get_device_info_string( hpx::naming::id_type          node_id,
-                            clx_device_id                 device_id,
-                            cl_device_info                info_type);
+    hpx::lcos::future<std::vector<device>>
+    get_devices( hpx::naming::id_type node_id, cl_device_type device_type,
+                 float required_cl_version );
 
 }}
 
