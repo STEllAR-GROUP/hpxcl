@@ -43,17 +43,17 @@ static void print(int id, const char* msg)
 // Counts down from 5, then triggers the event
 void wait_and_trigger(event user_event, device cldevice)
 {
-    hpx::this_thread::suspend(boost::posix_time::microseconds(100));
+    hpx::this_thread::sleep_for(boost::posix_time::milliseconds(100));
     print(1, "Triggering user_event in 5 ...");
-    hpx::this_thread::suspend(boost::posix_time::microseconds(100));
+    hpx::this_thread::sleep_for(boost::posix_time::milliseconds(1000));
     print(1, "                         4 ...");
-    hpx::this_thread::suspend(boost::posix_time::microseconds(100));
+    hpx::this_thread::sleep_for(boost::posix_time::milliseconds(1000));
     print(1, "                         3 ...");
-    hpx::this_thread::suspend(boost::posix_time::microseconds(100));
+    hpx::this_thread::sleep_for(boost::posix_time::milliseconds(1000));
     print(1, "                         2 ...");
-    hpx::this_thread::suspend(boost::posix_time::microseconds(100));
+    hpx::this_thread::sleep_for(boost::posix_time::milliseconds(1000));
     print(1, "                         1 ...");
-    hpx::this_thread::suspend(boost::posix_time::microseconds(100));
+    hpx::this_thread::sleep_for(boost::posix_time::milliseconds(1000));
     print(1, "Triggering user_event ...");
     user_event.trigger();
     print(1, "user_event triggered.");

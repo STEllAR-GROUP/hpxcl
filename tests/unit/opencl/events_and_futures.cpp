@@ -50,7 +50,7 @@ static void cl_test()
                           cldevice->create_future_event(user_event_future).get();
 
         // short delay
-        sleep(1);
+        hpx::this_thread::sleep_for(boost::posix_time::milliseconds(100));
     
         // ensure the event did not trigger yet
         HPX_TEST(user_event.finished().get() == false);
