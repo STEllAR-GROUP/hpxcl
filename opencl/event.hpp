@@ -8,10 +8,11 @@
 #ifndef HPX_OPENCL_EVENT_HPP__
 #define HPX_OPENCL_EVENT_HPP__
 
+#include "server/event.hpp"
+
 #include <hpx/include/components.hpp>
 #include <hpx/lcos/future.hpp>
 
-#include "server/event.hpp"
 
 namespace hpx {
 namespace opencl {

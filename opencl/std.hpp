@@ -7,6 +7,8 @@
 #ifndef HPX_OPENCL_STD_HPP__
 #define HPX_OPENCL_STD_HPP__
 
+#include "server/std.hpp"
+
 #include <hpx/include/iostreams.hpp>
 #include <hpx/lcos/future.hpp>
 
@@ -14,9 +16,7 @@
 
 #include <vector>
 
-#include "server/std.hpp"
-#include "name_definitions.hpp"
-#include "device.hpp"
+#include "fwd_declarations.hpp"
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{

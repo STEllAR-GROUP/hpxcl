@@ -15,11 +15,7 @@
 
 #include <boost/serialization/vector.hpp>
 
-namespace hpx { namespace opencl{
-
-    class device;
-
-}}
+#include "../fwd_declarations.hpp"
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{

@@ -3,15 +3,17 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#include "kernel.hpp"
+
 #include <hpx/hpx.hpp>
 #include <hpx/runtime/components/component_factory.hpp>
 
 #include <hpx/util/portable_binary_iarchive.hpp>
 #include <hpx/util/portable_binary_oarchive.hpp>
 
-#include "server/kernel.hpp"
+#include "buffer.hpp"
+#include "event.hpp"
 
-#include "kernel.hpp"
 
 using namespace hpx::opencl;
 

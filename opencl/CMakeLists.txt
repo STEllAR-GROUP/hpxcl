@@ -36,14 +36,14 @@ add_hpx_component(opencl
             server/kernel.cpp
             server/hpx_cl_interop.cpp
             component_definitions.cpp
-   HEADERS  std.hpp
+   HEADERS  fwd_declarations.hpp
+            std.hpp
             tools.hpp
             device.hpp
             event.hpp
             buffer.hpp
             program.hpp
             kernel.hpp
-            name_definitions.hpp
             server/std.hpp
             server/device.hpp
             server/event.hpp

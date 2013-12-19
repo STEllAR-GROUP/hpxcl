@@ -6,8 +6,7 @@
 #include <hpx/hpx_start.hpp>
 #include <hpx/include/iostreams.hpp>
 
-#include "../../opencl/std.hpp"
-#include "../../opencl/device.hpp"
+#include "../../opencl.hpp"
 
 using namespace hpx::opencl;
 

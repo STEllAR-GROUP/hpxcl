@@ -4,6 +4,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "tools.hpp"
+
 #include <hpx/hpx.hpp>
 #include <CL/cl.h>
 #include <sstream>

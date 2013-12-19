@@ -12,10 +12,10 @@
 
 #include <CL/cl.h>
 
+#include "../fwd_declarations.hpp"
+
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
-
-    class device;
 
     ////////////////////////////////////////////////////////
     /// This component represents an OpenCL program object.

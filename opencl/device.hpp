@@ -7,15 +7,14 @@
 #ifndef HPX_OPENCL_DEVICE_HPP__
 #define HPX_OPENCL_DEVICE_HPP__
 
+#include "server/device.hpp"
 
 #include <hpx/include/components.hpp>
 #include <hpx/lcos/future.hpp>
 
-#include "server/device.hpp"
-#include "buffer.hpp"
-#include "program.hpp"
 #include <vector>
 
+#include "fwd_declarations.hpp"
 
 namespace hpx {
 namespace opencl {

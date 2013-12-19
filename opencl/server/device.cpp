@@ -4,7 +4,9 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "device.hpp"
+
 #include "../tools.hpp"
+#include "../event.hpp"
 #include "buffer.hpp"
 #include "hpx_cl_interop.hpp"
 

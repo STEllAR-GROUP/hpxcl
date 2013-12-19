@@ -7,11 +7,11 @@
 #ifndef HPX_OPENCL_PROGRAM_HPP__
 #define HPX_OPENCL_PROGRAM_HPP__
 
+#include "server/program.hpp"
 
 #include <hpx/include/components.hpp>
 
-#include "server/program.hpp"
-#include "kernel.hpp"
+#include "fwd_declarations.hpp"
 
 namespace hpx {
 namespace opencl { 

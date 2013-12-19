@@ -7,12 +7,13 @@
 #ifndef HPX_OPENCL_KERNEL_HPP__
 #define HPX_OPENCL_KERNEL_HPP__
 
+#include "server/kernel.hpp"
 
 #include <hpx/include/components.hpp>
 #include <boost/serialization/vector.hpp>
 
-#include "server/kernel.hpp"
-
+#include "event.hpp"
+#include "fwd_declarations.hpp"
 
 namespace hpx {
 namespace opencl {

@@ -7,14 +7,14 @@
 #ifndef HPX_OPENCL_BUFFER_HPP__
 #define HPX_OPENCL_BUFFER_HPP__
 
+#include "server/buffer.hpp"
 
 #include <hpx/include/components.hpp>
 #include <hpx/lcos/future.hpp>
 
-#include "server/buffer.hpp"
-#include "event.hpp"
-
 #include <vector>
+
+#include "fwd_declarations.hpp"
 
 namespace hpx {
 namespace opencl { 

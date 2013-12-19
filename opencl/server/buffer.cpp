@@ -10,6 +10,7 @@
 #include <CL/cl.h>
 
 #include "buffer.hpp"
+
 #include "../tools.hpp"
 #include "device.hpp"
 #include "../event.hpp"

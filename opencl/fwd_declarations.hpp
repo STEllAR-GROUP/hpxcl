@@ -1,0 +1,45 @@
+
+// Copyright (c)    2013 Martin Stumpf
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+#pragma once
+#ifndef HPX_OPENCL_FWD_DECLARATIONS_HPP__
+#define HPX_OPENCL_FWD_DECLARATIONS_HPP__
+
+
+// This file forward-declares all hpxcl classes.
+// This is important to remove circular dependencies and improve compile speed.
+
+
+
+namespace hpx {
+namespace opencl {
+
+    class device;
+    class buffer;
+    class kernel;
+    class event;
+    class program;
+
+    namespace server {
+        
+        class device;
+        class buffer;
+        class kernel;
+        class event;
+        class program;
+
+    }
+
+}}
+
+
+
+
+
+
+
+#endif
+

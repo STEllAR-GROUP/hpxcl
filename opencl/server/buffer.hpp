@@ -14,18 +14,15 @@
 
 #include <CL/cl.h>
 
-#include "../event.hpp"
-
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
+#include "../fwd_declarations.hpp"
 
 namespace hpx { namespace opencl{ namespace server{
 
     ////////////////////////////////////////////////////////
     /// This class represents an opencl buffer.
-    
-    class device;
 
     class buffer
       : public hpx::components::managed_component_base<buffer>

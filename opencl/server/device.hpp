@@ -21,7 +21,8 @@
 
 #include <CL/cl.h>
 
-#include "../event.hpp"
+#include "../fwd_declarations.hpp"
+
 
 // ! This component header may NOT include other component headers !
 // (To avoid recurcive includes)

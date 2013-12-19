@@ -15,15 +15,14 @@
 
 #include <CL/cl.h>
 
+#include "../fwd_declarations.hpp"
+
 // ! This header may NOT have dependencies to other components !
 // A lot of components link to "../event.h", which links to this.
 // Won't compile with recursive includes!
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
-
-    // Workaround to avoid including "device.hpp"
-    class device;
 
     ////////////////////////////////////////////////////////
     /// This component wraps the cl_event type, to make it

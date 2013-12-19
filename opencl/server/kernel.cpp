@@ -4,8 +4,13 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "kernel.hpp"
+
 #include "program.hpp"
 #include "../tools.hpp"
+#include "../event.hpp"
+#include "device.hpp"
+#include "../buffer.hpp"
+#include "buffer.hpp"
 
 #include <string>
 #include <sstream>

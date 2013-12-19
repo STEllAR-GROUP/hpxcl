@@ -3,12 +3,6 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <hpx/hpx.hpp>
-#include <hpx/runtime/components/component_factory.hpp>
-
-#include <hpx/util/portable_binary_iarchive.hpp>
-#include <hpx/util/portable_binary_oarchive.hpp>
-
 #include "server/buffer.hpp"
 #include "buffer.hpp"
 
@@ -17,6 +11,19 @@
 
 #include "server/kernel.hpp"
 #include "kernel.hpp"
+
+#include "server/event.hpp"
+#include "event.hpp"
+
+#include "server/program.hpp"
+#include "program.hpp"
+
+#include <hpx/hpx.hpp>
+#include <hpx/runtime/components/component_factory.hpp>
+
+#include <hpx/util/portable_binary_iarchive.hpp>
+#include <hpx/util/portable_binary_oarchive.hpp>
+
 
 HPX_REGISTER_COMPONENT_MODULE();
 
