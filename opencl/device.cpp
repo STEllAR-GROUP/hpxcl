@@ -10,6 +10,8 @@
 #include "program.hpp"
 #include "event.hpp"
 
+#include <boost/serialization/vector.hpp>
+
 #include <hpx/hpx.hpp>
 #include <hpx/runtime/components/component_factory.hpp>
 
@@ -85,6 +87,38 @@ device::create_user_event() const
     typedef hpx::opencl::server::device::create_user_event_action func;
 
     return hpx::async<func>(this->get_gid());
+}
+
+hpx::lcos::future<std::vector<char>>
+device::get_device_info(cl_device_info info_type) const
+{
+
+    BOOST_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::device::get_device_info_action func;
+
+    return hpx::async<func>(this->get_gid(), info_type);
+
+}
+
+std::string
+device::device_info_to_string(hpx::lcos::future<std::vector<char>> info)
+{
+
+    std::vector<char> char_array = info.get();
+
+    // Calculate length of string. Cut short if it has a 0-Termination
+    // (Some queries like CL_DEVICE_NAME always return a size of 64, but 
+    // contain a 0-terminated string)
+    size_t length = 0;
+    while(length < char_array.size())
+    {
+        if(char_array[length] == '\0') break;
+        length++;
+    }
+
+    return std::string(char_array.begin(), char_array.begin() + length);
+
 }
 
 // used for create_future_event, this is the future.then callback

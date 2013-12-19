@@ -29,9 +29,9 @@ static const char refdata1[] = {0, 1, 2, 9, 16, 25, 36, 49, 8, 9};
 static void cl_test()
 {
 
-    hpx::opencl::buffer buffer = cldevice->create_buffer(CL_MEM_READ_WRITE,
-                                                        DATASIZE,
-                                                        initdata);
+    hpx::opencl::buffer buffer = cldevice.get().create_buffer(CL_MEM_READ_WRITE,
+                                                              DATASIZE,
+                                                              initdata);
 
     // test if buffer initialization worked
     size_t buffer_size = buffer.size().get();
@@ -41,7 +41,8 @@ static void cl_test()
     TEST_CL_BUFFER(buffer, initdata);
 
     // create program
-    hpx::opencl::program prog = cldevice->create_program_with_source(square_src);
+    hpx::opencl::program prog = cldevice.get().create_program_with_source(
+                                                                    square_src);
 
     // build program
     prog.build();

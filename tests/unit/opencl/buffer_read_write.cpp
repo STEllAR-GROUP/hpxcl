@@ -25,9 +25,9 @@ static const char refdata3[] = "Hello Wolp,!";
 static void cl_test()
 {
 
-    hpx::opencl::buffer buffer = cldevice->create_buffer(CL_MEM_READ_WRITE,
-                                                        DATASIZE,
-                                                        initdata);
+    hpx::opencl::buffer buffer = cldevice.get().create_buffer(CL_MEM_READ_WRITE,
+                                                              DATASIZE,
+                                                              initdata);
 
     // test if buffer initialization worked
     size_t buffer_size = buffer.size().get();
@@ -57,9 +57,9 @@ static void cl_test()
     
     
     // Create second buffer
-    hpx::opencl::buffer buffer2 = cldevice->create_buffer(CL_MEM_READ_WRITE,
-                                                          DATASIZE,
-                                                          initdata);
+    hpx::opencl::buffer buffer2 = cldevice.get().create_buffer(CL_MEM_READ_WRITE,
+                                                               DATASIZE,
+                                                               initdata);
 
     // Buffer copy test
     buffer2.enqueue_copy(buffer, 2, 8, 3).get().await();

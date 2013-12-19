@@ -47,6 +47,13 @@ namespace opencl {
             hpx::lcos::future<hpx::opencl::event>
             create_user_event() const;
             
+            // Queries device infos
+            hpx::lcos::future<std::vector<char>>
+            get_device_info(cl_device_info) const;
+            
+            // Converts the device info to a string
+            static std::string
+            device_info_to_string(hpx::lcos::future<std::vector<char>>);
             
             // Creates an event that depends on a future
             template<class T>

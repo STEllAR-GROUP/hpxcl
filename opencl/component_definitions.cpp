@@ -34,6 +34,8 @@ typedef hpx::components::managed_component<
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(device_type, device);
 HPX_REGISTER_ACTION(device_type::wrapped_type::create_user_event_action,
                     device_create_user_event_action);
+HPX_REGISTER_ACTION(device_type::wrapped_type::get_device_info_action,
+                    device_get_device_info_action);
 
 
 

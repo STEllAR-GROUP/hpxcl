@@ -82,6 +82,8 @@ namespace hpx { namespace opencl{ namespace server{
         // triggers an event previously generated with create_user_event()
         void trigger_user_event(cl_event event);
         
+
+
         //////////////////////////////////////////////////
         /// Exposed functionality of this component
         ///
@@ -89,8 +91,12 @@ namespace hpx { namespace opencl{ namespace server{
         // creates an opencl event that can be triggered by the user
         hpx::opencl::event create_user_event();
 
+        // returns device specific information
+        std::vector<char> get_device_info(cl_device_info info_type);
+
 
     HPX_DEFINE_COMPONENT_ACTION(device, create_user_event);
+    HPX_DEFINE_COMPONENT_ACTION(device, get_device_info);
 
     private:
         ///////////////////////////////////////////////
@@ -160,6 +166,9 @@ namespace hpx { namespace opencl{ namespace server{
 HPX_REGISTER_ACTION_DECLARATION(
         hpx::opencl::server::device::create_user_event_action,
         opencl_device_create_user_event_action);
+HPX_REGISTER_ACTION_DECLARATION(
+        hpx::opencl::server::device::get_device_info_action,
+        opencl_device_get_device_info_action);
 //]
 
 

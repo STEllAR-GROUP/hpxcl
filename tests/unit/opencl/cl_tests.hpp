@@ -7,16 +7,16 @@
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
 #include <hpx/util/lightweight_test.hpp>
+#include <hpx/util/static.hpp>
 
-#include "../../../opencl/device.hpp"
+#include "../../../opencl.hpp"
 
 using boost::program_options::variables_map;
 using boost::program_options::options_description;
 using boost::program_options::value;
 
 
-static boost::shared_ptr<hpx::opencl::device> cldevice;
-static hpx::naming::id_type here;
+static hpx::util::static_<hpx::opencl::device> cldevice;
 
 static void cl_test();
 
@@ -31,14 +31,13 @@ static void cl_test();
 static std::string get_cl_info(cl_device_info info_type)
 {
 
-    return hpx::opencl::get_device_info_string(here, clx_device, info_type).get();
+    return hpx::opencl::device::device_info_to_string(
+                                cldevice.get().get_device_info(info_type));
 
 }
 
 static void init(variables_map & vm)
 {
-
-    here = hpx::find_here();
 
     std::size_t device_id = 0;
 
@@ -46,13 +45,13 @@ static void init(variables_map & vm)
         device_id = vm["deviceid"].as<std::size_t>();
 
     // Query devices
-    std::vector<hpx::opencl::clx_device_id> devices
-            = hpx::opencl::get_device_ids(here,
-                CL_DEVICE_TYPE_ALL, 1.1f).get();
+    std::vector<hpx::opencl::device> devices
+            = hpx::opencl::get_devices(hpx::find_here(),
+                                        CL_DEVICE_TYPE_ALL, 1.1f).get();
     HPX_TEST(devices.size() >= device_id);
-
+/*
     // Choose device
-    clx_device = devices[device_id];
+    cldevice.get() = devices[device_id];
 
     // Test whether get_device_info works
     std::string version = get_cl_info(CL_DEVICE_VERSION);
@@ -68,29 +67,15 @@ static void init(variables_map & vm)
     hpx::cout << "Vendor:     " << get_cl_info(CL_DEVICE_VENDOR) << hpx::endl;
     hpx::cout << "Profile:    " << get_cl_info(CL_DEVICE_PROFILE) << hpx::endl;
 
-    // Create a device
-    typedef hpx::opencl::server::device device_type;
-    cldevice = boost::make_shared<hpx::opencl::device>(
-                    hpx::components::new_<device_type>(here, devices[device_id])
-                                                                    );
-
-    HPX_TEST(cldevice->get_gid());
-
-}
-
-static void shutdown()
-{
-
-    cldevice.reset();
-    
+    //HPX_TEST(cldevice.get().get_gid());
+*/
 }
 
 int hpx_main(variables_map & vm)
 {
     {
         init(vm);   
-        cl_test();
-        shutdown();
+      //  cl_test();
     }
     
     hpx::finalize();

@@ -381,6 +381,29 @@ event_callback(cl_event clevent, cl_int event_command_exec_status, void* args_)
 
 }
 
+std::vector<char>
+device::get_device_info(cl_device_info info_type)
+{
+    
+    // Declairing the cl error code variable
+    cl_int err;
+
+    // Query for size
+    size_t param_size;
+    err = clGetDeviceInfo(device_id, info_type, 0, NULL, &param_size);
+    cl_ensure(err, "clGetDeviceInfo()");
+
+    // Retrieve
+    std::vector<char> info(param_size);
+    err = clGetDeviceInfo(device_id, info_type, param_size, &info[0], 0);
+    cl_ensure(err, "clGetDeviceInfo()");
+
+    // Return
+    return info;
+
+}
+
+
 void
 device::wait_for_event(cl_event clevent)
 {
