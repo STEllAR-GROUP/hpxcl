@@ -91,6 +91,8 @@ int hpx_main(boost::program_options::variables_map& vm)
         {
             client.get_cuda_info();
         }
+        
+        std::cout << hpx::get_locality_id() << " - " << hpx::get_worker_thread_num() << " : " << hpx::find_here() << std::endl;        
 
         hpx::util::high_resolution_timer t;
         hpx::lcos::future<float> pi = client.calculate_pi_async(200,200);

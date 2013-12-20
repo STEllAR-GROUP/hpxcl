@@ -1,10 +1,7 @@
-#include <cuda_runtime.h>
-#include <cuda.h>
-#include <curand_kernel.h>
-
-#include <thrust/version.h>
-
-#include "kernel.cuh"
+// Copyright (c)		2013 Damond Howard
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
 //CUDA Kernels
 __global__ void calculate_pi_kernel(float *sum, int nbin, float step, int nthreads, int nblocks)

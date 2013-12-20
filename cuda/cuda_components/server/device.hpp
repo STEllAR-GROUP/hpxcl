@@ -1,3 +1,8 @@
+// Copyright (c)		2013 Damond Howard
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
+
 #if !defined(DEVICE_2_HPP)
 #define DEVICE_2_HPP
 
@@ -30,12 +35,26 @@ namespace hpx
                  hpx::components::managed_component_base<device>
                  >
              {
-                 public:
+              	 private:
+        	  	 int device_id;
+              	 
+              	 public:
+        	 	 //Constructors
+        	  	 //one constructor takes no argument
+        	  	 //second constructor takes device_id
+        	  	 //third constructor takes a device_info struct
+        	 	 device()
+                 {}
 
-				 device() {}
+        	 	/*device(int device_id)
+        	 	 {
+        	 		 set_device(device_id);
+        	 	 }
+                */
+				 ~device()
+				 {}
+
                  //cuda device managedment functions
-
-                 typedef uint64_t argument_type;
 
                  int get_device_count()
                  {
@@ -55,6 +74,7 @@ namespace hpx
 
                  void set_device(int dev)
                  {
+                	this->device_id = dev;
                     cudaError_t error;
                     error = cudaSetDevice(dev);
                     if(error == cudaErrorInvalidDevice)
@@ -110,6 +130,11 @@ namespace hpx
                     }
                  }
 
+                 int get_device_id()
+                 {
+                	return device_id;
+                 }
+
                  float calculate_pi(int nthreads,int nblocks)
                  {
                     return pi(nthreads,nblocks);
@@ -117,11 +142,10 @@ namespace hpx
 
                  int get_all_devices()
                  {
-                    return 0;
+                	 //return all devices on this locality
+                	 return get_device_count();
                  }
-
-                 //private:  //All private data members of a cuda device
-
+                 
                  HPX_DEFINE_COMPONENT_ACTION(device,calculate_pi);
                  HPX_DEFINE_COMPONENT_ACTION(device,get_cuda_info);
                  HPX_DEFINE_COMPONENT_ACTION(device,set_device);

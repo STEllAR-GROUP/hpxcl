@@ -1,4 +1,8 @@
 todo:
+0. Implement CUDA callback and reference hpx example async_io
+   in order to create callback to cuda and then pass promise to hpx so execution can continue
+   
+   
 1. Implement device management component
 	A. device management component should be able to
 		1. get all devices
@@ -24,3 +28,32 @@ todo:
    	memcpy is synchronous by default
 
 5. encapsulate cuda events and streams in kernel component
+
+
+
+things the kernel needs to do
+
+dim3 dimGrid(1,1,1)  Grid demensions
+dim3 dimBlock(1,1,1) Block demensions
+
+kernel parameters --- variable
+memory allocation for kernel parameters
+
+set the stream to use
+
+run the kernel
+
+context streams are created inside a context
+
+sync the streams  -- streams allow you to do more than one cuda thing at the same time
+
+events
+
+get result
+
+free up the memory
+
+best way -- one context per device the context can only be accessed from the thread that created it
+
+device.push_back(kernel)
+you can push a kernel on to the stack
