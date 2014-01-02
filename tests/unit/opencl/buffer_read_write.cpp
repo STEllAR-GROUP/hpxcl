@@ -22,10 +22,10 @@ static const char refdata2[] = "World";
 
 static const char refdata3[] = "Hello Wolp,!";
 
-static void cl_test()
+static void cl_test(hpx::opencl::device cldevice)
 {
 
-    hpx::opencl::buffer buffer = cldevice.get().create_buffer(CL_MEM_READ_WRITE,
+    hpx::opencl::buffer buffer = cldevice.create_buffer(CL_MEM_READ_WRITE,
                                                               DATASIZE,
                                                               initdata);
 
@@ -57,7 +57,7 @@ static void cl_test()
     
     
     // Create second buffer
-    hpx::opencl::buffer buffer2 = cldevice.get().create_buffer(CL_MEM_READ_WRITE,
+    hpx::opencl::buffer buffer2 = cldevice.create_buffer(CL_MEM_READ_WRITE,
                                                                DATASIZE,
                                                                initdata);
 

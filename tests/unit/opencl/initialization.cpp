@@ -6,7 +6,7 @@
 
 #include "cl_tests.hpp"
 
-static void cl_test()
+static void cl_test(hpx::opencl::device cldevice)
 {
     // do nothing. this file only tests the initialization
 }
