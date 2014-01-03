@@ -33,8 +33,6 @@ free_async(hpx::naming::id_type parent_device_id,
                   clx_event event_id_)
 {
     
-    std::cout << "Releasing event..." << std::endl;
-
     cl_event event_id = (cl_event) event_id_;
     boost::shared_ptr<hpx::opencl::server::device> parent_device =
               hpx::get_ptr<hpx::opencl::server::device>(parent_device_id).get();
@@ -49,14 +47,11 @@ free_async(hpx::naming::id_type parent_device_id,
     err = clReleaseEvent(event_id);
     cl_ensure(err, "clReleaseEvent()");
     
-    std::cout << "Event released." << std::endl;
-
 }
 
 
 event::~event()
 {
-    std::cout << "~event()" << std::endl;
     hpx::apply(
           hpx::util::bind(free_async, parent_device_id, (clx_event) event_id)
                     );

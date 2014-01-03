@@ -12,11 +12,11 @@
  * future->event.
  */
 
-static void cl_test()
+static void cl_test(hpx::opencl::device cldevice)
 {
     {
         // Create user event
-        hpx::opencl::event user_event = cldevice.get().create_user_event().get();
+        hpx::opencl::event user_event = cldevice.create_user_event().get();
     
         // short delay
         sleep(1);
@@ -40,14 +40,14 @@ static void cl_test()
 
     {
         // Create user event
-        hpx::opencl::event user_event = cldevice.get().create_user_event().get();
+        hpx::opencl::event user_event = cldevice.create_user_event().get();
     
         // Create a future from the user event
         hpx::lcos::future<void> user_event_future = user_event.get_future();
 
         // Create user event from future
         hpx::opencl::event user_event_future_event =
-                    cldevice.get().create_future_event(user_event_future).get();
+                    cldevice.create_future_event(user_event_future).get();
 
         // short delay
         hpx::this_thread::sleep_for(boost::posix_time::milliseconds(100));

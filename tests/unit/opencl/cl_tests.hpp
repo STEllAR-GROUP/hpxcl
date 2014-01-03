@@ -15,10 +15,8 @@ using boost::program_options::variables_map;
 using boost::program_options::options_description;
 using boost::program_options::value;
 
-
-static hpx::util::static_<hpx::opencl::device> cldevice;
-
-static void cl_test();
+// the main test function
+static void cl_test(hpx::opencl::device);
 
 #define TEST_CL_BUFFER(buffer, value)                                          \
 {                                                                              \
@@ -28,15 +26,16 @@ static void cl_test();
 }                                                           
 
 
-static std::string get_cl_info(cl_device_info info_type)
+static std::string get_cl_info(hpx::opencl::device cldevice,
+                               cl_device_info info_type)
 {
 
     return hpx::opencl::device::device_info_to_string(
-                                cldevice.get().get_device_info(info_type));
+                                cldevice.get_device_info(info_type));
 
 }
 
-static void init(variables_map & vm)
+static hpx::opencl::device init(variables_map & vm)
 {
 
     std::size_t device_id = 0;
@@ -49,33 +48,41 @@ static void init(variables_map & vm)
             = hpx::opencl::get_devices(hpx::find_here(),
                                         CL_DEVICE_TYPE_ALL, 1.1f).get();
     HPX_TEST(devices.size() >= device_id);
-/*
+
     // Choose device
-    cldevice.get() = devices[device_id];
+    hpx::opencl::device cldevice = devices[device_id];
 
     // Test whether get_device_info works
-    std::string version = get_cl_info(CL_DEVICE_VERSION);
+    std::string version = get_cl_info(cldevice, CL_DEVICE_VERSION);
 
     // Test whether version is a valid OpenCL version string
     std::string versionstring = std::string("OpenCL ");
     HPX_TEST(0 == version.compare(0, versionstring.length(), versionstring));
 
     // Write Info Code
-    hpx::cout << "Device ID:  " << device_id << " / " << devices.size() << hpx::endl;
+    hpx::cout << "Device ID:  " << device_id << " / " << devices.size()
+                                << hpx::endl;
     hpx::cout << "Version:    " << version << hpx::endl;
-    hpx::cout << "Name:       " << get_cl_info(CL_DEVICE_NAME) << hpx::endl;
-    hpx::cout << "Vendor:     " << get_cl_info(CL_DEVICE_VENDOR) << hpx::endl;
-    hpx::cout << "Profile:    " << get_cl_info(CL_DEVICE_PROFILE) << hpx::endl;
+    hpx::cout << "Name:       " << get_cl_info(cldevice, CL_DEVICE_NAME)
+                                << hpx::endl;
+    hpx::cout << "Vendor:     " << get_cl_info(cldevice, CL_DEVICE_VENDOR)
+                                << hpx::endl;
+    hpx::cout << "Profile:    " << get_cl_info(cldevice, CL_DEVICE_PROFILE)
+                                << hpx::endl;
 
-    //HPX_TEST(cldevice.get().get_gid());
-*/
+    // Test for valid device client
+    HPX_TEST(cldevice.get_gid());
+
+    // return the device
+    return cldevice;
+
 }
 
 int hpx_main(variables_map & vm)
 {
     {
-        init(vm);   
-      //  cl_test();
+        hpx::opencl::device cldevice = init(vm);   
+        cl_test(cldevice);
     }
     
     hpx::finalize();

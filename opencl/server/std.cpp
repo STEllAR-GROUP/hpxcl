@@ -10,6 +10,7 @@
 
 #include <hpx/lcos/local/spinlock.hpp>
 #include <hpx/util/static.hpp>
+#include <hpx/runtime.hpp>
 
 #include <vector>
 #include <string>
@@ -18,10 +19,44 @@
 /// STATIC STUFF
 ///
 
-// This variable will hold the device list on every node
 using hpx::lcos::local::spinlock;
-static hpx::util::static_<std::vector<hpx::opencl::device>> devices;
-static hpx::util::static_<spinlock> devices_lock;
+
+// serves as a unique tag to get the device 
+struct global_device_list_tag {};
+
+// Will be set to true once the device list got initialized.
+static bool device_list_initialized = false;
+// Will be set to true once the device shutdown hook is set.
+static bool device_shutdown_hook_initialized = false;
+
+// This defines a static device list type.
+// Generating instances of this type will always give the same list.
+typedef
+hpx::util::static_<std::vector<hpx::opencl::device>,
+                   global_device_list_tag>  static_device_list_type;
+
+// This defines a static device list lock type.
+// Generating instances of this type will always give the same lock.
+typedef
+hpx::util::static_<spinlock,
+                   global_device_list_tag>  static_device_list_lock_type;
+
+// The shutdown hook for clearing the device list on hpx::finalize()
+static void clear_device_list()
+{
+
+    // Lock the list
+    static_device_list_lock_type device_lock;
+    boost::lock_guard<spinlock> lock(device_lock.get());
+
+    // get static device list
+    static_device_list_type devices;
+
+    // clear the devices list
+    devices.get().clear();
+
+}
+
 
 ///////////////////////////////////////////////////
 /// HPX Registration Stuff
@@ -70,10 +105,26 @@ void
 ensure_device_components_initialization()
 {
 
-    boost::lock_guard<spinlock> lock(devices_lock.get());
+    // Lock the list
+    static_device_list_lock_type device_lock;
+    boost::lock_guard<spinlock> lock(device_lock.get());
+
+    // get static device list
+    static_device_list_type devices;
+
+    // Register the shutdown hook to empty the device list before shutdown
+    if(device_shutdown_hook_initialized == false)
+    {
+        hpx::get_runtime_ptr()->add_pre_shutdown_function(&clear_device_list);
+        device_shutdown_hook_initialized = true;
+    }
+
     // Don't initialize if already initialized
-    if(devices.get().size() != 0)
+    if(device_list_initialized != false)
         return;
+
+    // Reset the device list
+    devices.get().clear();
 
     // Declairing the cl error code variable
     cl_int err;
@@ -123,6 +174,8 @@ ensure_device_components_initialization()
         }
     }
 
+    device_list_initialized = true;
+
 }
     
 
@@ -134,7 +187,11 @@ hpx::opencl::server::get_devices(cl_device_type type, float min_cl_version)
     ensure_device_components_initialization();
 
     // Lock the list
-    boost::lock_guard<spinlock> lock(devices_lock.get());
+    static_device_list_lock_type device_lock;
+    boost::lock_guard<spinlock> lock(device_lock.get());
+
+    // get static device list
+    static_device_list_type devices;
 
     // Generate a list of suitable devices
     std::vector<hpx::opencl::device> suitable_devices;

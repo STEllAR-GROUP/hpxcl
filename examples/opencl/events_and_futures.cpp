@@ -7,8 +7,7 @@
 #include <hpx/include/iostreams.hpp>
 #include <hpx/apply.hpp>
 
-#include "../../opencl/std.hpp"
-#include "../../opencl/device.hpp"
+#include "../../opencl.hpp"
 
 using namespace hpx::opencl;
 
@@ -17,9 +16,9 @@ static device create_cl_device()
 {
 
     // Get list of available OpenCL Devices.
-    std::vector<clx_device_id> devices = get_device_ids( hpx::find_here(),
-                                                         CL_DEVICE_TYPE_ALL,
-                                                         1.1f ).get();
+    std::vector<device> devices = get_devices( hpx::find_here(),
+                                               CL_DEVICE_TYPE_ALL,
+                                               1.1f ).get();
 
     // Check whether there are any devices
     if(devices.size() < 1)
@@ -29,9 +28,7 @@ static device create_cl_device()
     }
 
     // Create a device component from the first device found
-    return device(
-             hpx::components::new_<server::device>(hpx::find_here(), devices[0])
-                       );
+    return devices[0];
 
 }
 
