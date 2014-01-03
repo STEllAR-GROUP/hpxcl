@@ -46,11 +46,10 @@ namespace hpx
         	 	 device()
                  {}
 
-        	 	/*device(int device_id)
+        	 	 device(int device_id)
         	 	 {
         	 		 set_device(device_id);
         	 	 }
-                */
 				 ~device()
 				 {}
 
@@ -133,6 +132,17 @@ namespace hpx
                  int get_device_id()
                  {
                 	return device_id;
+                 }
+
+                 int get_context()
+                 {
+                    //returns the current CUDA device context
+                    //Cuda sets the device context automatically
+                 }
+
+                 void wait_for_event()
+                 {
+                    //waits for CUDA event using event component
                  }
 
                  float calculate_pi(int nthreads,int nblocks)

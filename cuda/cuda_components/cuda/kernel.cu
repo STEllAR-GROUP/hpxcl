@@ -4,6 +4,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
 //CUDA Kernels
+
 __global__ void calculate_pi_kernel(float *sum, int nbin, float step, int nthreads, int nblocks)
 {
    int i;
@@ -29,7 +30,7 @@ float pi(int nthreads,int nblocks)
     dim3 dimGrid(NUM_BLOCK,1,1);  // Grid dimensions
     dim3 dimBlock(NUM_THREAD,1,1);  // Block dimensions
     float *sumHost, *sumDev;  // Pointer to host & device arrays
-
+    
     float step = 1.0f/NBIN;  // Step size
     size_t size = NUM_BLOCK*NUM_THREAD*sizeof(float);  //Array memory size
     sumHost = (float *)malloc(size);  //  Allocate array on host
