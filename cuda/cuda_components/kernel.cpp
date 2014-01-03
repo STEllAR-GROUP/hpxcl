@@ -20,3 +20,12 @@ typedef hpx::components::managed_component<
     kernel_type;
 
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(kernel_type,kernel);
+
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_context_action,
+	cuda_kernel_set_context_action);
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_stream_action,
+	cuda_kernel_set_stream_action);
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_diminsions_action,
+	cuda_kernel_set_diminsions_action);
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_args_action,
+	cuda_kernel_set_args_type);

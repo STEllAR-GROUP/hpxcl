@@ -3,32 +3,32 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
-#if !defined(KERNEL_1_HPP)
-#define KERNEL_1_HPP
+#if !defined(EVENT_1_HPP)
+#define EVENT_1_HPP
 
 #include <hpx/include/components.hpp>
-#include "stubs/kernel.hpp"
+#include "stubs/event.hpp"
 
 namespace hpx
 {
     namespace cuda
     {
-        class kernel
+        class event
             : public hpx::components::client_base<
-                kernel, stubs::kernel >
+                event, stubs::event >
         {
             typedef hpx::components::client_base<
-                kernel, stubs::kernel>
+                event, stubs::event>
                 base_type;
 
             public:
-                kernel()
+                event()
                 {}
 
-                kernel(hpx::future<hpx::naming::id_type> const& gid)
+                event(hpx::future<hpx::naming::id_type> const& gid)
                 : base_type(gid)
                 {}
         };
     }
 }
-#endif //KERNEL_1_HPP
+#endif //EVENT_1_HPP
