@@ -21,10 +21,25 @@
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{
 
-    // Get all devices on node.
-    //      It is recommended to only use OpenCL Version >= 1.1f.
-    //      Earlier devices seem to be blocking on every enqueue-call, which
-    //      seems counter-productive to the general idea of the hpx framework.
+    /**
+     * @brief Fetches a list of accelerator devices present on target node.
+     *
+     * It is recommended to only use OpenCL Version >= 1.1f.
+     * Earlier devices seem to be blocking on every enqueue-call, which
+     * is counter-productive to the general idea of the hpx framework.
+     *
+     * @param node_id             The ID of the target node
+     * @param device_type         The device type, according to OpenCL standard.
+     *                            <BR>
+     *                            For further information, look at the official 
+     *                            <A HREF="http://www.khronos.org/registry/cl/sd
+     * k/1.2/docs/man/xhtml/clGetDeviceIDs.html">
+     *                            OpenCL Reference</A>.
+     * @param required_cl_version All devices that don't support this OpenCL
+     *                            version will be ignored.<BR>
+     *                            Recommended value is 1.1f.
+     * @return A list of suitable OpenCL devices on target node
+     */
     hpx::lcos::future<std::vector<device>>
     get_devices( hpx::naming::id_type node_id, cl_device_type device_type,
                  float required_cl_version );

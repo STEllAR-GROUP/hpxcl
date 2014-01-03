@@ -15,6 +15,8 @@
 
 
 namespace hpx {
+
+/// The OpenCL client namespace
 namespace opencl {
 
     class device;
@@ -23,6 +25,7 @@ namespace opencl {
     class event;
     class program;
 
+    /// The OpenCL server namespace
     namespace server {
         
         class device;
