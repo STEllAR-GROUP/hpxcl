@@ -56,6 +56,29 @@ namespace hpx
                 {
                     return calculate_pi_async(gid,nthreads,nblocks).get();
                 }
+
+                static hpx::lcos::future<int>
+                get_device_id_async(hpx::naming::id_type const& gid)
+                {
+                    typedef server::device::get_device_id_action action_type;
+                    return hpx::async<action_type>(gid);
+                }
+
+                static int get_device_id_sync(hpx::naming::id_type const& gid)
+                {
+                    return get_device_id_async(gid).get();
+                }
+
+                static hpx::lcos::future<int> get_context_async(hpx::naming::id_type const& gid)
+                {
+                    typedef server::device::get_context_action action_type;
+                    return hpx::async<action_type>(gid);
+                }
+
+                static int get_context_sync(hpx::naming::id_type const& gid)
+                {
+                    return get_context_async(gid).get();
+                }
             };
         }
     }
