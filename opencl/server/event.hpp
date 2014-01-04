@@ -24,10 +24,10 @@
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
 
-    ////////////////////////////////////////////////////////
-    /// This component wraps the cl_event type, to make it
-    /// serializable and to add a global reference count.
-    ///
+    // /////////////////////////////////////////////////////
+    //  This component wraps the cl_event type, to make it
+    //  serializable and to add a global reference count.
+    // 
     
     typedef intptr_t clx_event;
 

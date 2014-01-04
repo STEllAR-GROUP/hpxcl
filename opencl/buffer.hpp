@@ -101,8 +101,8 @@ namespace opencl {
              *                  The read will be executed after all given events
              *                  are completed.
              *  @return         An \ref event that triggers upon completion.<BR>
-             *                  The actual data will be accessable via the
-             *                  \ref event class.
+             *                  The actual data will be accessable via
+             *                  \ref event::get_data.
              *  @see event
              */
             hpx::lcos::future<hpx::opencl::event>
@@ -248,7 +248,7 @@ namespace opencl {
              *  The buffers do NOT need to be from the same device,
              *  neither do they have to be on the same node.
              *
-             *  @param buffer       The source buffer.
+             *  @param src          The source buffer.
              *  @param src_offset   The offset on the source buffer.
              *  @param dst_offset   The offset on the destination buffer.
              *  @param size         The size of the area to copy.
@@ -269,7 +269,7 @@ namespace opencl {
              *
              *  This overloaded version accepts an event to wait for.
              *  
-             *  @param buffer       The source buffer.
+             *  @param src          The source buffer.
              *  @param src_offset   The offset on the source buffer.
              *  @param dst_offset   The offset on the destination buffer.
              *  @param size         The size of the area to copy.
@@ -298,7 +298,7 @@ namespace opencl {
              *
              *  This overloaded version accepts multiple events to wait for.
              *  
-             *  @param buffer       The source buffer.
+             *  @param src          The source buffer.
              *  @param src_offset   The offset on the source buffer.
              *  @param dst_offset   The offset on the destination buffer.
              *  @param size         The size of the area to copy.

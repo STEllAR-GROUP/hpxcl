@@ -17,7 +17,11 @@
 namespace hpx {
 namespace opencl {
 
-
+    /////////////////////
+    /// @brief An OpenCL event.
+    ///
+    /// This is the main synchronization mechanism of this OpenCL framework.
+    ///
     class event
       : public hpx::components::client_base<
           event, hpx::components::stub_base<server::event>
@@ -43,22 +47,51 @@ namespace opencl {
             static cl_event
             get_cl_event(hpx::opencl::event);
 
-            // Blocks until the cl_event has happened
+            // //////////////////////////////////////////////
+            // Exposed functionality
+            //
+            
+            /**
+             *  @brief Blocks until the event has happened
+             */
             void await() const;
 
-            // Returns true if the event already happened
+            /**
+             *  @brief Queries the state of the event.
+             *
+             *  @return True if the event already happened
+             */
             hpx::lcos::future<bool> finished() const;
 
-            // Returns a future variable that triggers when the cl_event has 
-            // happened
+            /**
+             *  @brief Converts the event to a hpx::lcos::future.
+             *
+             *  With this function and \ref device::create_future_event it is 
+             *  possible to create inter-node-dependencies.
+             *  
+             *  @return A future that triggers when the event has happened.
+             */
             hpx::lcos::future<void> get_future() const;
 
-            // Triggers the event. This call is only valid if the event is a 
-            // user-created event. Calling this function if the event is not
-            // user-created will result in undefined behaviour.
+            /**
+             *  @brief Triggers the event.
+             *  
+             *  This function can ONLY be called if the event is a user-event,
+             *  created with \ref device::create_user_event.
+             *
+             *  Calling it on a non-user-event will result in undefined
+             *  behaviour.
+             */ 
             void trigger() const;
 
-            // Retrieves the data associated with the event
+            /**
+             *  @brief Retrieves the data associated with an event
+             *
+             *  With this method one can retrieve the data of an enqueue_read
+             *  command.
+             *
+             *  @return The data.
+             */
             hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
             get_data() const;
     

@@ -21,9 +21,9 @@
 namespace hpx { namespace opencl{ namespace server{
 
 
-    ////////////////////////////////////////////////////////
-    /// Global opencl functions
-    /// 
+    // /////////////////////////////////////////////////////
+    //  Global opencl functions
+    //  
 
     // Returns the IDs of all devices on current host
     std::vector<hpx::opencl::device>

@@ -21,8 +21,8 @@
 
 namespace hpx { namespace opencl{ namespace server{
 
-    ////////////////////////////////////////////////////////
-    /// This class represents an opencl buffer.
+    // /////////////////////////////////////////////////////
+    //  This class represents an opencl buffer.
 
     class buffer
       : public hpx::components::managed_component_base<buffer>

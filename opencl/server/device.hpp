@@ -32,9 +32,9 @@ namespace hpx { namespace opencl{ namespace server{
     
     typedef intptr_t clx_device_id;
 
-    ////////////////////////////////////////////////////////
-    /// This class represents an OpenCL accelerator device.
-    ///
+    // /////////////////////////////////////////////////////
+    // This class represents an OpenCL accelerator device.
+    //
     class device
       : public hpx::components::managed_component_base<device>
     {

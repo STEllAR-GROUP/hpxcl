@@ -17,9 +17,9 @@
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
 
-    ////////////////////////////////////////////////////////
-    /// This component represents an OpenCL program object.
-    ///
+    // /////////////////////////////////////////////////////
+    //  This component represents an OpenCL program object.
+    // 
     
     class program
       : public hpx::components::managed_component_base<program>
