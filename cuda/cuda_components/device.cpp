@@ -33,4 +33,12 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
     cuda_device_type::wrapped_type::get_all_devices_action,
     cuda_device_get_all_devices_action);
-
+HPX_REGISTER_ACTION(
+    cuda_device_type::wrapped_type::get_device_id_action,
+    cuda_device_get_device_id_aciton);
+HPX_REGISTER_ACTION(
+    cuda_device_type::wrapped_type::get_context_action,
+    cuda_device_get_context_action);
+HPX_REGISTER_ACTION(
+    cuda_device_type::wrapped_type::wait_for_event_action,
+    cuda_device_wait_for_event_action);

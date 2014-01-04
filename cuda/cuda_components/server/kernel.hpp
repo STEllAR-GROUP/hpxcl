@@ -26,7 +26,7 @@ namespace hpx
                 >
             {   //kernel class data members
             	private:
-            	cudaStrream_t stream;
+            	cudaStream_t stream;
             	dim3 dimGrid; 
             	dim3 dimBlock;
                 unsigned int parent_device_id;
@@ -35,9 +35,11 @@ namespace hpx
 
                 //Kernel class member functions
             	public:
-            	kernel(std::string kernel_name)
+            	kernel(std::string kernel_name,unsigned int parent_device_id)
             	{
                     this->kernel_name = kernel_name;
+                    this->parent_device_id = parent_device_id;
+                    
                 }
 
                 //define kernel class actions
@@ -46,6 +48,7 @@ namespace hpx
             		//set the context on which to run the kernel
             		//by default it uses the same context as the
             		//device on which it is called
+                    cudaSetDevice(this->parent_device_id);
             	}
             	
             	void set_stream()
@@ -60,17 +63,25 @@ namespace hpx
             	}
             	
             	void set_diminsions(int gridX,int gridY, int gridZ,
-                                    int blockX,int blockY,int blockZ);
+                                    int blockX,int blockY,int blockZ)
             	{
             		//sets the dimensions the kernel uses for execution
                     dimGrid(gridX,gridY,gridZ);
                     dimBlock(blockX,blockY,blockZ);
             	}
 
-                void set_args(hpx::cuda::buffer args)
+                //sets the arguments of the kernel
+                /*void set_args(hpx::cuda::buffer args)
                 {
 
-                }
+                }*/
+
+                //runs the kernel
+                /*hpx::cuda::event
+                enqueue()
+                {
+
+                }*/
 
                 //HPX ation definitions
                 HPX_DEFINE_COMPONENT_ACTION(kernel,set_context);

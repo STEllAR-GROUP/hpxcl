@@ -36,7 +36,10 @@ namespace hpx
                  >
              {
               	 private:
-        	  	 int device_id;
+        	  	 unsigned int device_id;
+                 unsigned int context_id;
+                 std::string device_name;
+                 cudaDeviceProp props;
               	 
               	 public:
         	 	 //Constructors
@@ -48,7 +51,10 @@ namespace hpx
 
         	 	 device(int device_id)
         	 	 {
-        	 		 set_device(device_id);
+        	 		 this->set_device(device_id);
+                     cudaError_t error;
+                     error = cudaGetDeviceProperties(&props,device_id);
+                     this->device_name = props.name;
         	 	 }
 				 ~device()
 				 {}
@@ -131,16 +137,23 @@ namespace hpx
 
                  int get_device_id()
                  {
-                	return device_id;
+                	return this->device_id;
                  }
 
                  int get_context()
                  {
                     //returns the current CUDA device context
                     //Cuda sets the device context automatically
+                    return this->context_id;
                  }
 
-                 void wait_for_event()
+                 int get_all_devices()
+                 {
+                	 //return all devices on this locality
+                	 return get_device_count();
+                 }
+
+                  void wait_for_event()
                  {
                     //waits for CUDA event using event component
                  }
@@ -149,17 +162,14 @@ namespace hpx
                  {
                     return pi(nthreads,nblocks);
                  }
-
-                 int get_all_devices()
-                 {
-                	 //return all devices on this locality
-                	 return get_device_count();
-                 }
                  
                  HPX_DEFINE_COMPONENT_ACTION(device,calculate_pi);
                  HPX_DEFINE_COMPONENT_ACTION(device,get_cuda_info);
                  HPX_DEFINE_COMPONENT_ACTION(device,set_device);
                  HPX_DEFINE_COMPONENT_ACTION(device,get_all_devices);
+                 HPX_DEFINE_COMPONENT_ACTION(device,get_device_id);
+                 HPX_DEFINE_COMPONENT_ACTION(device,get_context);
+                 HPX_DEFINE_COMPONENT_ACTION(device,wait_for_event);
             };
 	    }
     }
@@ -179,5 +189,14 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::get_all_devices_action,
     device_get_all_devices_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::get_device_id_action,
+    device_get_device_id_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::get_context_action,
+    device__get_context_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::wait_for_event_action,
+    device_wait_for_event_action);
 
 #endif //cuda_device_2_HPP

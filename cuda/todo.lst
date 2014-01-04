@@ -1,59 +1,14 @@
-todo:
-0. Implement CUDA callback and reference hpx example async_io
-   in order to create callback to cuda and then pass promise to hpx so execution can continue
-   
-   
-1. Implement device management component
-	A. device management component should be able to
-		1. get all devices
-		2. choose which device to use
-		3. run a kernel on the device
-		4. transfer data between the cpu and gpu
-    B. create device properties member data such as
-        cur_device_id
-        vector full of all devices that you can switch between
+TODO
+1. device component
+   A. 
+2. kernel component
+   holds parameters used to run kernel 
+3. event component
+   holds all info on events and runs events based off parent device
+4. buffer component
+   A. holds parameters for cuda 
 
-2. Find a way to generalize cuda kernels in kernel component
-	A. Try to implement cuda kernels with a Template kernel class
-        B. Try to use macro if that is not possible
-
-3. Error handling
-	A. handle hpx errors
-	B. handle cuda errors
-
-4. Worry about concurrency with memory transfers
-   	Note: CUDA kernels are asynchronous by default
-   	so I must implement a callback that allows the calling function to track when
-   	the cuda kernel is ready to return so that the future knwos when to return .get()
-   	memcpy is synchronous by default
-
-5. encapsulate cuda events and streams in kernel component
-
-
-
-things the kernel needs to do
-
-dim3 dimGrid(1,1,1)  Grid demensions
-dim3 dimBlock(1,1,1) Block demensions
-
-kernel parameters --- variable
-memory allocation for kernel parameters
-
-set the stream to use
-
-run the kernel
-
-context streams are created inside a context
-
-sync the streams  -- streams allow you to do more than one cuda thing at the same time
-
-events
-
-get result
-
-free up the memory
-
-best way -- one context per device the context can only be accessed from the thread that created it
-
-device.push_back(kernel)
-you can push a kernel on to the stack
+   TODO
+   1. implement callback for event and streams 
+   2. check all cuda hpx and c++ errors
+   3. create a way to define kernel in c++ code

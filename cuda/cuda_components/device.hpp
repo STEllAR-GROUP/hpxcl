@@ -51,10 +51,41 @@ namespace hpx
                 BOOST_ASSERT(this->get_gid());
                 return this->base_type::calculate_pi_async(this->get_gid(),nthreads,nblocks);
             }
+
             float calculate_pi_sync(int nthreads,int nblocks)
             {
                 BOOST_ASSERT(this->get_gid());
                 return this->base_type::calculate_pi_sync(this->get_gid(),nthreads,nblocks);
+            }
+
+            hpx::lcos::future<int>
+            get_device_id_async()
+            {
+                BOOST_ASSERT(this->get_gid());
+                return this->base_type::get_device_id_async(this->get_gid());
+            }
+
+            int get_device_id()
+            {
+                BOOST_ASSERT(this->get_gid());
+                return this->base_type::get_device_id_sync(this->get_gid());
+            }
+
+            hpx::lcos::future<int> get_context_async()
+            {
+                BOOST_ASSERT(this->get_gid());
+                return this->base_type::get_context_async(this->get_gid());
+            }
+
+            int get_context()
+            {
+                BOOST_ASSERT(this->get_gid());
+                return this->base_type::get_context_sync(this->get_gid());
+            }
+
+            void wait_for_event()
+            {
+
             }
         };
 	}
