@@ -21,9 +21,7 @@ namespace hpx
             struct kernel
                 : hpx::components::stub_base<server::kernel>
             {
-            	private:
-                //stubs member functions
-            	public:
+            	
             };
         }
     }

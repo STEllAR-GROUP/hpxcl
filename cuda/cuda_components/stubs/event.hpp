@@ -21,7 +21,38 @@ namespace hpx
             struct event
                 : hpx::components::stub_base<server::event>
             {
-            	
+            	static hpx::lcos::future<void> await_async(hpx::naming::id_type const& gid)
+                {
+                    typedef server::event::await_action action_type;
+                    hpx::async<action_type>(gid);
+                }
+
+                static void await(hpx::naming::id_type const& gid)
+                {
+                    await_async(gid).get();
+                }
+
+                static hpx::lcos::future<bool> finished_async(hpx::naming::id_type const& gid)
+                {
+                    typedef server::event::finished_action action_type;
+                    hpx::async<action_type>(gid);
+                }
+
+                static bool finished(hpx::naming::id_type const& gid)
+                {
+                    finished_async(gid).get();
+                }
+
+                static hpx::lcos::future<void> trigger_async(hpx::naming::id_type const& gid)
+                {
+                    typedef server::event::trigger_action action_type;
+                    hpx::async<action_type>(gid);
+                }
+
+                static void trigger(hpx::naming::id_type const& gid)
+                {
+                    trigger_async(gid).get();
+                }
             };
         }
     }
