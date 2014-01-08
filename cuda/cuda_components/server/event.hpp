@@ -4,16 +4,19 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #if !defined(EVENT_2_HPP)
-#define EVENT_2_HPP
+#define EVENT_2_HPP 
 
 #include <hpx/hpx_fwd.hpp>
 #include <hpx/runtime/components/server/managed_component_base.hpp>
 #include <hpx/runtime/components/server/locking_hook.hpp>
 #include <hpx/runtime/actions/component_action.hpp>
+#include <hpx/util/io_service_pool.hpp>
 
 #include <cuda_runtime.h>
-#include <cuda.h>
+//#include <cuda.h>
 #include <curand_kernel.h>
+
+#include "device.hpp"
 
 namespace hpx
 {
@@ -29,70 +32,56 @@ namespace hpx
             	private:
                 //event class member functions
                 boost::shared_ptr<device> parent_device;
-                hpx::naming::id_type parent_device_id;
-                unsigned int event_id;
-                cudaEvent_t* event;
-                cudaStream_t stream;
+                unsigned int parent_device_id;
                 unsigned int stream_id;
-
+                unsigned int event_id;
+                cudaEvent_t cu_event;
+                cudaStream_t stream;
             	public:
-                void check_error(cudaError_t error)
+       
+                //Event constructors
+                event()
                 {
-                    switch(error)
-                    {
-                        case  cudaErrorInitializationError:
-                            std::cout<<"Initialization error"<<std::endl;
-                        break;
-                        case cudaErrorInvalidValue:
-                            std::cout<<"Invalid value for device"<<std::endl;
-                        break; 
-                        case cudaErrorLaunchFailure:
-                            std::cout<<"Event Launch failure"<<std::endl;
-                        break; 
-                        case cudaErrorMemoryAllocation:
-                            std::cout<<"Event memory allocation error"<<std::endl;
-                        break;
-                    }
+                   cudaEventCreate(&cu_event);
+                   cudaStreamCreate(&stream); 
+                } 
 
-                }
-
-                //Event constructors 
-            	event(int event_id,unsigned int flags,stream_id)
+            	event(int event_id, unsigned int stream_id,unsigned int flag)
             	{
                     this->event_id = event_id;
                     this->stream_id = stream_id;
-                    cudaError_t error = cudaEventCreateWithFlags(&this->event,flags);
+                    cudaEventCreateWithFlags(&cu_event,flag);
                     //Valid flags are 
                     //cudaEventDefault, cudaEventBlockingSync, 
                     //cudaEventDisableTiming, cudaEventInterprocess
-                    check_error(error);
+                    cudaStreamCreate(&stream);
                 }
                 //Create a CUDA Event object with flags
-                event(int event_id,stream_id)
+                event(unsigned int event_id,unsigned int stream_id)
                 {      
                     this->stream_id = stream_id;
                     this->event_id = event_id;
-                    cudaError_t error = cudaEventCreate(&this->event);
-                    check_error(error);
-
+                    cudaEventCreate(&cu_event);
+                    cudaStreamCreate(&stream);
                 }
                 //Destroy the CUDA Event
                 ~event()
                 {
-                    cudaError_t error = cudaEventDestroy(this->event);
-                    check_error(error);
+                    cudaEventDestroy(cu_event);
                 }
 
-                //Wrapper for the cuda wait for events
+                //Wrapper for the cudaEventSynchronize
                 //this function will be called by an io-threadpool thread to prevent the 
                 //blocking of an hpx thread 
-                static void hpx_cudaEventSynchronize(unsigned int event_id,boost::shared_ptr<hpx::lcos::local::promise<int>> p)
+                static void 
+                hpx_cudaEventSynchronize(cudaEvent_t cu_event,
+                    boost::shared_ptr<hpx::lcos::local::promise<int> > p)
                 {
                     //wait for the given event to complete
-                    cudaError_t error = cudaEventSynchronize(this->event);
+                    cudaEventSynchronize(cu_event);
 
                     //return the error code via future
-                    p->set_value(error);
+                    p->set_value(0);
                 }
 
                 //waits for an event to happen
@@ -108,19 +97,17 @@ namespace hpx
 
                     //...and schedule the handler to run the cudaEventSynchronize on one 
                     //of the OS-threads.
-                    pool->get_io_services().post(
-                        hpx::util::bind(&hpx_cudaEventSynchronize,p));
+                    pool->get_io_service().post(
+                        hpx::util::bind(&hpx_cudaEventSynchronize,this->cu_event,p));
 
                     //wait for event to finish
-                    cudaError_t error = p->get_future().get();
-                    check_error(error);
+                    p->get_future();
                 }
 
                 //Retruns true if the event is already finished
                 bool finished() const
                 {
-                    cudaError_t error = cudaEventQuery(this->event);
-                    check_error(error);
+                    cudaError_t error = cudaEventQuery(cu_event);
                     if(error == cudaErrorNotReady)
                         return false;
                     else
@@ -131,13 +118,20 @@ namespace hpx
                 void trigger()
                 {
                     //trigger the event on the parent device
-                    cudaError_t error = cudaEventRecord(&this->event,this->stream_id)
-                    check_error(error);
+                    cudaEventRecord(cu_event,stream);
                 } 
+
+                /*static void CUDART_CB callback(cudaStream_t stream, cudaError_t status, void *data)
+                {
+                }*/
+
+                /*void callback_func()
+                {
+                }*/    
 
                 //define event class actions
                 HPX_DEFINE_COMPONENT_ACTION(event,await);
-                HPX_DEFINE_COMPONENT_ACTION(event,finished):
+                HPX_DEFINE_COMPONENT_ACTION(event,finished);
                 HPX_DEFINE_COMPONENT_ACTION(event,trigger);
 
             };
@@ -146,14 +140,14 @@ namespace hpx
 }
 
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::event::await,
-    event_await_action);
+    hpx::cuda::server::event::await_action,
+    cuda_event_await_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::event::finished,
-    event_finished_action);
+    hpx::cuda::server::event::finished_action,
+    cuda_event_finished_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::event::trigger,
-    event_trigger_action);
+    hpx::cuda::server::event::trigger_action,
+    cuda_event_trigger_action);
 
 //event registration declarations
 #endif

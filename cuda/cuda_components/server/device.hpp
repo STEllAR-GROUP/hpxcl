@@ -14,7 +14,7 @@
 #include <boost/foreach.hpp>
 
 #include <cuda_runtime.h>
-#include <cuda.h>
+//#include <cuda.h>
 #include <curand_kernel.h>
 
 #include <thrust/version.h>
@@ -38,6 +38,7 @@ namespace hpx
               	 private:
         	  	 unsigned int device_id;
                  unsigned int context_id;
+                 //CUcontext *context;
                  std::string device_name;
                  cudaDeviceProp props;
               	 
@@ -55,6 +56,7 @@ namespace hpx
                      cudaError_t error;
                      error = cudaGetDeviceProperties(&props,device_id);
                      this->device_name = props.name;
+                     //cuCtxCreate(&this->context,FLAG)
         	 	 }
 				 ~device()
 				 {}
@@ -155,7 +157,16 @@ namespace hpx
 
                   void wait_for_event()
                  {
-                    //waits for CUDA event using event component
+                   /* //blocks until a CUDA event has been triggered
+                    //This is the event lock
+                    boost::shared_ptr<hpx::lcos::local::event> event;
+                    //will be set to false if the callback isn't registered yet
+                    bool callback_is_registered = true;        
+                    //lock event waitlist
+                    {
+                        boost::lock_guard<spinlock_type> lock()
+                    }
+                   */            
                  }
 
                  float calculate_pi(int nthreads,int nblocks)

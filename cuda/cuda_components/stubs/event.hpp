@@ -21,16 +21,7 @@ namespace hpx
             struct event
                 : hpx::components::stub_base<server::event>
             {
-            	private:
-                //event member functions
-            	public:
-                    //Empty constructor
-                    event(){}
-                    //Constructor
-                    event(hpx::future<hpx::naming::id_type> const& gid)
-                        : base_type(gid)
-                        {}
-
+            	
             };
         }
     }

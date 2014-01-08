@@ -10,7 +10,7 @@
 #include <hpx/runtime/applier/apply.hpp>
 #include <hpx/include/async.hpp>
 
-#include "../sever/kernel.hpp"
+#include "../server/kernel.hpp"
 
 namespace hpx
 {

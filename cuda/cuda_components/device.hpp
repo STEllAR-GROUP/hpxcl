@@ -27,7 +27,15 @@ namespace hpx
 
             device(hpx::future<hpx::naming::id_type> const& gid)
 				: base_type(gid)
-            {}
+            {
+
+            }
+
+            device(hpx::future<hpx::naming::id_type> const& gid,int device_id)
+                : base_type(gid)
+            {
+                
+            }
 
             void get_cuda_info()
             {

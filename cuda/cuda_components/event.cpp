@@ -17,9 +17,9 @@ HPX_REGISTER_COMPONENT_MODULE();
 
 typedef hpx::components::managed_component<
     hpx::cuda::server::event>
-    event_type;
+    cuda_event_type;
 
-HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(event_type,event);
+HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(cuda_event_type,event);
 
 HPX_REGISTER_ACTION(cuda_event_type::wrapped_type::await_action,
 	cuda_event_await_action);

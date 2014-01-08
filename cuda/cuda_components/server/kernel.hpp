@@ -35,11 +35,14 @@ namespace hpx
 
                 //Kernel class member functions
             	public:
+
+                kernel()
+                {}
+
             	kernel(std::string kernel_name,unsigned int parent_device_id)
             	{
                     this->kernel_name = kernel_name;
                     this->parent_device_id = parent_device_id;
-                    
                 }
 
                 //define kernel class actions
@@ -59,28 +62,28 @@ namespace hpx
             		//streams are used to execute multiple kernels
             		//at the same time on the same device
                     cudaStreamCreate(&stream);
-
-            	}
+                }
             	
-            	void set_diminsions(int gridX,int gridY, int gridZ,
-                                    int blockX,int blockY,int blockZ)
+            	void set_diminsions(/*int gridX =1,int gridY = 1, int gridZ = 1,int blockX =1,int blockY =1,int blockZ = 1*/)
             	{
-            		//sets the dimensions the kernel uses for execution
-                    dimGrid(gridX,gridY,gridZ);
-                    dimBlock(blockX,blockY,blockZ);
+            		//sets the grid and block dimensions the kernel uses for execution
+                    /*dimGrid.x = gridX;
+                    dimGrid.y = gridY;
+                    dimGrid.z = gridZ;
+                    dimBlock.x = blockX;
+                    dimBlock.y = blockY;
+                    dimBlock.z = blockZ;*/
             	}
 
-                //sets the arguments of the kernel
-                /*void set_args(hpx::cuda::buffer args)
+                //sets the arguments to run kernel
+                void set_args(/*hpx::cuda::buffer args*/)
                 {
-
-                }*/
+                }
 
                 //runs the kernel
-                /*hpx::cuda::event
-                enqueue()
+                /*hpx::cuda::event enqueue(hpx::cuda::event event)
                 {
-
+                    
                 }*/
 
                 //HPX ation definitions
@@ -88,23 +91,26 @@ namespace hpx
                 HPX_DEFINE_COMPONENT_ACTION(kernel,set_stream);
                 HPX_DEFINE_COMPONENT_ACTION(kernel,set_diminsions);
                 HPX_DEFINE_COMPONENT_ACTION(kernel,set_args);
+                //HPX_DEFINE_COMPONENT_ACTION(kernel,enqueue);
             };
         }
     }
 }
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::set_context_action,
-    kernel_set_context_action);
+    cuda_kernel_set_context_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::set_stream_action,
-    kernel_set_stream_action);
+    cuda_kernel_set_stream_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::kernel::set_diminsions,
-    kernel_set_diminsions_action);
+    hpx::cuda::server::kernel::set_diminsions_action,
+    cuda_kernel_set_diminsions_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::kernel::set_args,
-    kernel_set_args_action);
-
-
+    hpx::cuda::server::kernel::set_args_action,
+    cuda_kernel_set_args_action);
+/*HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::kernel::enqueue,
+    cuda_kernel_enqueu_action);*/
+                                 
 //kernel registration declarations
 #endif

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+echo 'exporting....'
+
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:packages/lib/pkgconfig
+
+echo 'compiling shared libraries...'
+
+echo 'compiling device component'
+
+c++ -o ~/my_hpx_libs/libcuda_device.so hpxcl/cuda/cuda_components/device.cpp \
+`pkg-config --cflags --libs hpx_component` -DHPX_COMPONENT_NAME=cuda_device
+cp ~/my_hpx_libs/libcuda_device.so  ~/packages/lib/hpx/libcuda_device.so 2> errors/device.cpp
+
+echo 'compiling kernel component'
+
+c++ -o ~/my_hpx_libs/libcuda_kernel.so hpxcl/cuda/cuda_components/kernel.cpp \
+ `pkg-config --cflags --libs hpx_component` -DHPX_COMPONENT_NAME=cuda_kernel 2> errors/kernel.cpp
+ cp ~/my_hpx_libs/libcuda_kernel.so  ~/packages/lib/hpx/libcuda_kernel.so
+
+ echo 'compiling event component'
+
+ c++ -o ~/my_hpx_libs/libcuda_event.so hpxcl/cuda/cuda_components/event.cpp \
+ `pkg-config --cflags --libs hpx_component` -DHPX_COMPONENT_NAME=cuda_event 2> errors/event.cpp
+ cp ~/my_hpx_libs/libcuda_event.so  ~/packages/lib/hpx/libcuda_event.so 
+
+echo 'done....'
