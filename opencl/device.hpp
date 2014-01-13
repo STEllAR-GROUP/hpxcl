@@ -171,9 +171,9 @@ namespace opencl {
             
             
         private:
-            //////////////////////////////////////////
-            /// Helper Functions
-            /// 
+            // ///////////////////////////////////////
+            //  Helper Functions
+            //  
             
             // Needed for create_future_event, this is the future.then callback
             static void

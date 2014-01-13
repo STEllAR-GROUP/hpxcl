@@ -25,7 +25,7 @@ namespace opencl {
     class event;
     class program;
 
-    /// The OpenCL server namespace
+    // The OpenCL server namespace
     namespace server {
         
         class device;

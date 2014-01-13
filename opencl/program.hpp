@@ -16,7 +16,12 @@
 namespace hpx {
 namespace opencl { 
 
-
+    //////////////////////////////////////
+    /// @brief A collection of kernels.
+    /// 
+    /// One program represents one or multiple kernels.
+    /// It can be created from one (TODO multiple) source files.
+    ///
     class program
       : public hpx::components::client_base<
           program, hpx::components::stub_base<server::program>
@@ -41,13 +46,51 @@ namespace opencl {
             /// 
             
             // Build the Program, blocking
+            /**
+             *  @brief Builds the program, blocking.
+             */
             void build() const;
+            /**
+             *  @brief Builds the program, blocking.
+             *
+             *  @param build_options    A string with specific build options.<BR>
+             *                          Look at the official 
+             *                          <A HREF="http://www.khronos.org/registry
+             * /cl/sdk/1.2/docs/man/xhtml/clBuildProgram.html">
+             *                          OpenCL Reference</A> for further
+             *                          information.
+             */
             void build(std::string build_options) const;
-            // Build the program, non-blocking
-            hpx::lcos::future<void> build_async() const;
-            hpx::lcos::future<void> build_async(std::string build_options) const;
 
-            // Create a kernel
+            // Build the program, non-blocking
+            /**
+             *  @brief Builds the program, non-blocking.
+             *
+             *  @return A future that will trigger upon build completion.
+             */
+            hpx::lcos::future<void> build_async() const;
+            /**
+             *  @brief Builds the program, non-blocking.
+             *
+             *  @param build_options    A string with specific build options.<BR>
+             *                          Look at the official 
+             *                          <A HREF="http://www.khronos.org/registry
+             * /cl/sdk/1.2/docs/man/xhtml/clBuildProgram.html">
+             *                          OpenCL Reference</A> for further
+             *                          information.
+             *  @return A future that will trigger upon build completion.
+             */
+             hpx::lcos::future<void> build_async(std::string build_options) const;
+
+            /**
+             *  @brief Creates a kernel.
+             *
+             *  The kernel with the name kernel_name has to be defined and
+             *  implemented in the program source code.
+             *
+             *  @param kernel_name  The name of the kernel to be created
+             *  @return             A kernel object.
+             */
             hpx::opencl::kernel
             create_kernel(std::string kernel_name) const;
 
