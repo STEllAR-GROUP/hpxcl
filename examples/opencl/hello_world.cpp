@@ -5,6 +5,7 @@
 
 #include <hpx/hpx_start.hpp>
 #include <hpx/include/iostreams.hpp>
+#include <hpx/lcos/future.hpp>
 
 #include "../../opencl.hpp"
 
@@ -60,8 +61,8 @@ int hpx_main(int argc, char* argv[])
         hpx::opencl::work_size<1> dim;
         dim[0].offset = 0;
         dim[0].size = 13;
-        event kernel_event = hello_world_kernel.enqueue(dim).get(); 
-    
+        hpx::lcos::future<event> kernel_event = hello_world_kernel.enqueue(dim); 
+
         // Start reading the buffer (With kernel_event dependency.
         //                           All hpxcl enqueue calls are nonblocking.)
         event read_event = outbuffer.enqueue_read(0, 13, kernel_event).get();

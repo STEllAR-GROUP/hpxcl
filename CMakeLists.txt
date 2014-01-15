@@ -32,6 +32,15 @@ if(HPX_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
+hpx_option(HPX_BUILD_DOCUMENTATION BOOL "The HPX documentation toolchain is available (default OFF)." OFF)
+if(HPX_BUILD_DOCUMENTATION)
+  hpx_option(HPX_BUILD_DOCUMENTATION_SINGLEPAGE BOOL "The HPX documentation should be build as a single page HTML (default OFF)." OFF)
+  add_subdirectory(docs)
+endif()
+
+
+
+
 ###############################################################################
 hpx_option(HPX_BUILD_TESTS BOOL "Build HPX tests (default: ON)" ON ADVANCED)
 

@@ -5,6 +5,8 @@
 
 #include "buffer.hpp"
 
+#include "future_execution.hpp"
+
 #include <hpx/hpx.hpp>
 #include <hpx/runtime/components/component_factory.hpp>
 
@@ -54,6 +56,30 @@ buffer::enqueue_read(size_t offset, size_t size,
 
     return hpx::async<func>(this->get_gid(), offset, size, events);
 }
+
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_read(size_t offset, size_t size,
+                     hpx::lcos::future<hpx::opencl::event> event) const
+{
+    std::vector<hpx::lcos::future<hpx::opencl::event>> events;
+    events.push_back(event);
+    return enqueue_read(offset, size, events);
+}
+
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_read(size_t offset, size_t size,
+               std::vector<hpx::lcos::future<hpx::opencl::event>> events) const
+{
+    BOOST_ASSERT(this->get_gid());
+
+    // define the async call
+    future_call_def_2(buffer, size_t, size_t, enqueue_read); 
+
+    // run the async call
+    return future_call::run(*this, offset, size, events);
+
+}
+
 
 
 hpx::lcos::future<hpx::opencl::event>

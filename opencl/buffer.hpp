@@ -108,6 +108,49 @@ namespace opencl {
             hpx::lcos::future<hpx::opencl::event>
             enqueue_read(size_t offset, size_t size,
                                   std::vector<hpx::opencl::event> events) const;
+            
+            
+            /**
+             *  @brief Reads data from the buffer
+             *
+             *  This overloaded version accepts a future event to wait for.
+             *
+             *  @param offset   The start position of the area to read.
+             *  @param size     The size of the area to read.
+             *  @param event    A future \ref event that this
+             *                  read depends on. <BR>
+             *                  The read will be executed after the given event
+             *                  is completed.
+             *  @return         An \ref event that triggers upon completion.<BR>
+             *                  The actual data will be accessable via
+             *                  \ref event::get_data.
+             *  @see event
+             */
+             hpx::lcos::future<hpx::opencl::event>
+            enqueue_read(size_t offset, size_t size,
+                             hpx::lcos::future<hpx::opencl::event> event) const;
+
+
+            /**
+             *  @brief Reads data from the buffer
+             *
+             *  This overloaded version accepts multiple future events 
+             *  to wait for.
+             *
+             *  @param offset   The start position of the area to read.
+             *  @param size     The size of the area to read.
+             *  @param events   A list of future \ref event "events" that this
+             *                  read depends on. <BR>
+             *                  The read will be executed after all given events
+             *                  are completed.
+             *  @return         An \ref event that triggers upon completion.<BR>
+             *                  The actual data will be accessable via
+             *                  \ref event::get_data.
+             *  @see event
+             */
+            hpx::lcos::future<hpx::opencl::event>
+            enqueue_read(size_t offset, size_t size,
+               std::vector<hpx::lcos::future<hpx::opencl::event>> events) const;
 
             // Write Buffer
             /**
