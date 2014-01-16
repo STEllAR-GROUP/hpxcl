@@ -71,6 +71,42 @@ kernel::enqueue(cl_uint work_dim,
                 const size_t *global_work_offset_ptr,
                 const size_t *global_work_size_ptr,
                 const size_t *local_work_size_ptr,
+                hpx::lcos::future<hpx::opencl::event> event) const
+{
+    // Create vector with event
+    std::vector<hpx::lcos::future<hpx::opencl::event>> events;
+    events.push_back(event);
+
+    // Forward call
+    return enqueue(work_dim, global_work_offset_ptr,
+                   global_work_size_ptr,
+                   local_work_size_ptr, events);
+}
+
+hpx::lcos::future<hpx::opencl::event>
+kernel::enqueue(cl_uint work_dim,
+                const size_t *global_work_offset_ptr,
+                const size_t *global_work_size_ptr,
+                const size_t *local_work_size_ptr,
+           std::vector<hpx::lcos::future<hpx::opencl::event>> events) const
+{
+    
+    // define the async call
+    future_call_def_4(kernel, cl_uint, const size_t *, const size_t *,
+                      const size_t *, enqueue);
+
+    // run the async call
+    return future_call::run(*this, work_dim, global_work_offset_ptr,
+                            global_work_size_ptr, local_work_size_ptr, events);
+
+}
+
+
+hpx::lcos::future<hpx::opencl::event>
+kernel::enqueue(cl_uint work_dim,
+                const size_t *global_work_offset_ptr,
+                const size_t *global_work_size_ptr,
+                const size_t *local_work_size_ptr,
                 std::vector<hpx::opencl::event> events) const
 {
     

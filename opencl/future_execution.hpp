@@ -23,20 +23,7 @@
 namespace hpx { namespace opencl {
 
     std::vector<event>
-    wait_for_futures(const std::vector<hpx::lcos::future<event>> &future_list){
-
-        // Create list of events that will get filled by futures
-        std::vector<event> event_list(future_list.size());
-
-        // Wait for all futures
-        for(int i = 0; i < future_list.size(); i++)
-        {
-            event_list[i] = future_list[i].get();
-        }
-
-        // Return the filled event list
-        return event_list;
-    }
+    wait_for_futures(const std::vector<hpx::lcos::future<event>> &future_list);
 
 
     #define future_call_def_0(PCLASS, FUNCNAME)                                \

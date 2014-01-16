@@ -118,6 +118,29 @@ buffer::enqueue_write(size_t offset, size_t size, const void* data,
 
 }
 
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_write(size_t offset, size_t size, const void* data,
+                     hpx::lcos::future<hpx::opencl::event> event) const
+{
+    std::vector<hpx::lcos::future<hpx::opencl::event>> events;
+    events.push_back(event);
+    return enqueue_write(offset, size, data, events);
+}
+
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_write(size_t offset, size_t size, const void* data,
+               std::vector<hpx::lcos::future<hpx::opencl::event>> events) const
+{
+    BOOST_ASSERT(this->get_gid());
+
+    // define the async call
+    future_call_def_3(buffer, size_t, size_t, const void*, enqueue_write); 
+
+    // run the async call
+    return future_call::run(*this, offset, size, data, events);
+
+}
+
 
 hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
@@ -152,6 +175,31 @@ buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
     typedef hpx::opencl::server::buffer::fill_action func;
     return hpx::async<func>(this->get_gid(), serializable_pattern, offset, size,
                             events);
+
+}
+
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
+                     size_t size,
+                     hpx::lcos::future<hpx::opencl::event> event) const
+{
+    std::vector<hpx::lcos::future<hpx::opencl::event>> events;
+    events.push_back(event);
+    return enqueue_fill(pattern, pattern_size, offset, size, events);
+}
+
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
+                     size_t size, 
+               std::vector<hpx::lcos::future<hpx::opencl::event>> events) const
+{
+    BOOST_ASSERT(this->get_gid());
+
+    // define the async call
+    future_call_def_4(buffer, const void*, size_t, size_t, size_t, enqueue_fill); 
+
+    // run the async call
+    return future_call::run(*this, pattern, pattern_size, offset, size, events);
 
 }
 
@@ -200,3 +248,30 @@ buffer::enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
     return hpx::async<func>(this->get_gid(), src.get_gid(), dim, events);
 
 }
+
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
+                     size_t size,
+                     hpx::lcos::future<hpx::opencl::event> event) const
+{
+    std::vector<hpx::lcos::future<hpx::opencl::event>> events;
+    events.push_back(event);
+    return enqueue_copy(src, src_offset, dst_offset, size, events);
+}
+
+hpx::lcos::future<hpx::opencl::event>
+buffer::enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
+                     size_t size,
+               std::vector<hpx::lcos::future<hpx::opencl::event>> events) const
+{
+    BOOST_ASSERT(this->get_gid());
+
+    // define the async call
+    future_call_def_4(buffer, buffer, size_t, size_t, size_t, enqueue_copy); 
+
+    // run the async call
+    return future_call::run(*this, src, src_offset, dst_offset, size, events);
+
+}
+
+

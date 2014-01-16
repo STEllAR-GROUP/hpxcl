@@ -15,6 +15,8 @@
 #include "event.hpp"
 #include "fwd_declarations.hpp"
 
+#include "future_execution.hpp"
+
 namespace hpx {
 namespace opencl {
 
@@ -119,7 +121,7 @@ namespace opencl {
             
             // Runs the kernel
             /**
-             *  @brief Starts execution of a kernel.
+             *  @name Starts execution of a kernel.
              *
              *  @param work_dim     The number of dimensions the kernel should
              *                      get executed in.
@@ -139,6 +141,10 @@ namespace opencl {
              *                              OpenCL runtime.
              *  @return             An \ref event that triggers upon completion.
              */
+            //@{
+            /**
+             *  @brief Starts kernel immediately
+             */
             hpx::lcos::future<hpx::opencl::event>
             enqueue(cl_uint work_dim,
                     const size_t *global_work_offset,
@@ -146,7 +152,7 @@ namespace opencl {
                     const size_t *local_work_size) const;
 
             /**
-             *  @brief Starts execution of a kernel.
+             *  @brief Depends on an event
              *
              *  This is an overloaded version of \ref enqueue with the
              *  possibility to add an event as dependency.
@@ -163,7 +169,7 @@ namespace opencl {
                     hpx::opencl::event event) const;
             
             /**
-             *  @brief Starts execution of a kernel.
+             *  @brief Depends on multiple events
              *
              *  This is an overloaded version of \ref enqueue with the
              *  possibility to add multiple events as dependency.
@@ -179,9 +185,38 @@ namespace opencl {
                     const size_t *local_work_size,
                     std::vector<hpx::opencl::event> events) const;
 
+            /**
+             *  @brief Depends on one future event
+             *
+             *  The kernel will not execute before the future event tirggered.
+             *
+             *  @param event    The future \ref event to wait for.
+             */
+            hpx::lcos::future<hpx::opencl::event>
+            enqueue(cl_uint work_dim,
+                    const size_t *global_work_offset,
+                    const size_t *global_work_size,
+                    const size_t *local_work_size,
+                             hpx::lcos::future<hpx::opencl::event> event) const;
+
+            /**
+             *  @brief Depends on multiple future events
+             *
+             *  The kernel will not execute before the future events triggered.
+             *
+             *  @param events   The future \ref event "events" to wait for.
+             */
+            hpx::lcos::future<hpx::opencl::event>
+            enqueue(cl_uint work_dim,
+                    const size_t *global_work_offset,
+                    const size_t *global_work_size,
+                    const size_t *local_work_size,
+               std::vector<hpx::lcos::future<hpx::opencl::event>> events) const;
+             //@}
+
             // Runs the kernel with hpx::opencl::work_size
             /**
-             *  @brief Starts execution of a kernel.
+             *  @name Starts execution of a kernel, using work_size.
              *
              *  This is an overloaded version of \ref enqueue that takes a 
              *  \ref hpx::opencl::work_size for convenience purposes.
@@ -190,16 +225,16 @@ namespace opencl {
              *                  get executed on.
              *  @return         An \ref event that triggers upon completion.
              */
+            //@{
+            /**
+             *  @brief Starts kernel immediately
+             */
             template<size_t DIM>
             hpx::lcos::future<hpx::opencl::event>
             enqueue(hpx::opencl::work_size<DIM> size) const;
             
             /**
-             *  @brief Starts execution of a kernel
-             *
-             *  This is an overloaded version of 
-             *  \ref enqueue(hpx::opencl::work_size<DIM>) const 
-             *  with the possibility to add an event as dependency.
+             *  @brief Depends on an event
              *
              *  The kernel will not execute before the event triggered.
              *
@@ -211,11 +246,7 @@ namespace opencl {
                     hpx::opencl::event event) const;
 
             /**
-             *  @brief Starts execution of a kernel
-             *
-             *  This is an overloaded version of 
-             *  \ref enqueue(hpx::opencl::work_size<DIM>) const 
-             *  with the possibility to add multiple events as dependency.
+             *  @brief Depends on multiple events
              *
              *  The kernel will not execute before the events triggered.
              *
@@ -226,6 +257,30 @@ namespace opencl {
             enqueue(hpx::opencl::work_size<DIM> size,
                     std::vector<hpx::opencl::event> events) const;
 
+            /**
+             *  @brief Depends on one future event
+             *
+             *  The kernel will not execute before the future event tirggered.
+             *
+             *  @param event    The future \ref event to wait for.
+             */
+            template<size_t DIM>
+            hpx::lcos::future<hpx::opencl::event>
+            enqueue(hpx::opencl::work_size<DIM> size,
+                             hpx::lcos::future<hpx::opencl::event> event) const;
+
+            /**
+             *  @brief Depends on multiple future events
+             *
+             *  The kernel will not execute before the future events triggered.
+             *
+             *  @param events   The future \ref event "events" to wait for.
+             */
+            template<size_t DIM>
+            hpx::lcos::future<hpx::opencl::event>
+            enqueue(hpx::opencl::work_size<DIM> size,
+               std::vector<hpx::lcos::future<hpx::opencl::event>> events) const;
+             //@}
 
     };
 
@@ -288,10 +343,35 @@ namespace opencl {
         // Run
         return enqueue(size, events);
     }
+    
+    template<size_t DIM>
+    hpx::lcos::future<hpx::opencl::event>
+    kernel::enqueue(hpx::opencl::work_size<DIM> size,
+    hpx::lcos::future<hpx::opencl::event> event) const
+    {
+        // Create vector with event
+        std::vector<hpx::lcos::future<hpx::opencl::event>> events;
+        events.push_back(event);
+
+        // Forward call
+        return enqueue(size, events);
+    }
 
 
 
+    template<size_t DIM>
+    hpx::lcos::future<hpx::opencl::event>
+    kernel::enqueue(hpx::opencl::work_size<DIM> size,
+               std::vector<hpx::lcos::future<hpx::opencl::event>> events) const
+    {
+        
+        // define the async call
+        future_call_def_1(kernel, hpx::opencl::work_size<DIM>, enqueue);
 
+        // run the async call
+        return future_call::run(*this, size, events);
+
+    }
 
 }}
 
