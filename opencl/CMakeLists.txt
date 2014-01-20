@@ -44,6 +44,7 @@ add_hpx_component(opencl
             buffer.hpp
             program.hpp
             kernel.hpp
+            enqueue_overloads.hpp
             server/std.hpp
             server/device.hpp
             server/event.hpp
