@@ -86,7 +86,7 @@ int hpx_main(int argc, char* argv[])
     
         // Create event from future
         print(0, "Creating user_event_future_event from user_event_future ...");
-        event user_event_future_event =  cldevice.create_future_event(
+        event user_event_future_event = cldevice.create_future_event(
                                                                user_event_future
                                                                         ).get();
     
