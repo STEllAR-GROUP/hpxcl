@@ -37,13 +37,13 @@ device::create_buffer(cl_mem_flags flags, size_t size, const void* data) const
           hpx::util::serialize_buffer<char>::init_mode::reference);
 
     // Create new Buffer Server
-    hpx::lcos::future<hpx::naming::id_type>
+    hpx::lcos::unique_future<hpx::naming::id_type>
     buffer_server = hpx::components::new_<hpx::opencl::server::buffer>
                     (get_colocation_id_sync(get_gid()), get_gid(), flags, size,
                      serializable_data);
     
     // Return Buffer Client wrapped around Buffer Server
-    return buffer(buffer_server);
+    return buffer(std::move(buffer_server));
 
 }
 
@@ -54,12 +54,12 @@ device::create_buffer(cl_mem_flags flags, size_t size) const
     BOOST_ASSERT(this->get_gid());
     
     // Create new Buffer Server
-    hpx::lcos::future<hpx::naming::id_type>
+    hpx::lcos::unique_future<hpx::naming::id_type>
     buffer_server = hpx::components::new_<hpx::opencl::server::buffer>
                     (get_colocation_id_sync(get_gid()), get_gid(), flags, size);
 
     // Return Buffer Client wrapped around Buffer Server
-    return buffer(buffer_server);
+    return buffer(std::move(buffer_server));
 
 }
 
@@ -70,16 +70,16 @@ device::create_program_with_source(std::string source) const
     BOOST_ASSERT(this->get_gid());
 
     // Create new program object server
-    hpx::lcos::future<hpx::naming::id_type>
+    hpx::lcos::unique_future<hpx::naming::id_type>
     program_server = hpx::components::new_<hpx::opencl::server::program>
                      (get_colocation_id_sync(get_gid()), get_gid(), source);
 
     // Return program object client
-    return program(program_server);
+    return program(std::move(program_server));
 
 }
 
-hpx::lcos::future<hpx::opencl::event>
+hpx::lcos::unique_future<hpx::opencl::event>
 device::create_user_event() const
 {
     BOOST_ASSERT(this->get_gid());
@@ -89,7 +89,7 @@ device::create_user_event() const
     return hpx::async<func>(this->get_gid());
 }
 
-hpx::lcos::future<std::vector<char>>
+hpx::lcos::unique_future<std::vector<char>>
 device::get_device_info(cl_device_info info_type) const
 {
 
@@ -102,7 +102,7 @@ device::get_device_info(cl_device_info info_type) const
 }
 
 std::string
-device::device_info_to_string(hpx::lcos::future<std::vector<char>> info)
+device::device_info_to_string(hpx::lcos::unique_future<std::vector<char>> info)
 {
 
     std::vector<char> char_array = info.get();
@@ -124,9 +124,13 @@ device::device_info_to_string(hpx::lcos::future<std::vector<char>> info)
 // used for create_future_event, this is the future.then callback
 void
 device::trigger_user_event_externally(
-                            hpx::lcos::future<hpx::opencl::event> event)
+                      hpx::lcos::shared_future<hpx::opencl::event> event_future)
 {
-    event.get().trigger();
+    // get the event
+    hpx::opencl::event event = event_future.get();
+
+    // trigger the event
+    event.trigger();
 }
 
 

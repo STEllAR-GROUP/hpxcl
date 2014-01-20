@@ -14,8 +14,6 @@
 
 #include <vector>
 
-#include "fwd_declarations.hpp"
-
 namespace hpx {
 namespace opencl { 
 
@@ -40,7 +38,7 @@ namespace opencl {
             buffer(){}
 
             // Constructor
-            buffer(hpx::future<hpx::naming::id_type> const& gid)
+            buffer(hpx::shared_future<hpx::naming::id_type> const& gid)
               : base_type(gid)
             {}
             
@@ -52,7 +50,7 @@ namespace opencl {
              *  @brief Get the size of the buffer
              *  @return The size of the buffer
              */
-            hpx::lcos::future<size_t>
+            hpx::lcos::unique_future<size_t>
             size() const;
 
             // Read buffer
@@ -70,7 +68,7 @@ namespace opencl {
             /**
              *  @brief Starts task immediately.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_read(size_t offset, size_t size) const;
             
             /**
@@ -82,7 +80,7 @@ namespace opencl {
              *                  The task will be executed after this event is
              *                  completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_read(size_t offset, size_t size,
                                        hpx::opencl::event event) const;
 
@@ -97,7 +95,7 @@ namespace opencl {
              *                  The task will be executed after all given events
              *                  are completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_read(size_t offset, size_t size,
                                   std::vector<hpx::opencl::event> events) const;
             
@@ -111,9 +109,9 @@ namespace opencl {
              *                  The task will be executed after the given event
              *                  is completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_read(size_t offset, size_t size,
-                             hpx::lcos::future<hpx::opencl::event> event) const;
+                             hpx::lcos::shared_future<hpx::opencl::event> event) const;
 
             /**
              *  @brief Depends on multiple future events
@@ -126,9 +124,9 @@ namespace opencl {
              *                  The task will be executed after all given events
              *                  are completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_read(size_t offset, size_t size,
-               std::vector<hpx::lcos::future<hpx::opencl::event>> events) const;
+            std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
             //@}
 
             // Write Buffer
@@ -146,7 +144,7 @@ namespace opencl {
             /**
              *  @brief Starts task immediately.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_write(size_t offset, size_t size, const void* data) const;
             
             /**
@@ -158,7 +156,7 @@ namespace opencl {
              *                  The write will be executed after this event is
              *                  completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_write(size_t offset, size_t size, const void* data,
                                        hpx::opencl::event event) const;
             
@@ -173,7 +171,7 @@ namespace opencl {
              *                  The write will be executed after all given
              *                  events are completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_write(size_t offset, size_t size, const void* data,
                                   std::vector<hpx::opencl::event> events) const;
  
@@ -187,9 +185,9 @@ namespace opencl {
              *                  The task will be executed after the given event
              *                  is completed.
              */
-             hpx::lcos::future<hpx::opencl::event>
+             hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_write(size_t offset, size_t size, const void* data,
-                             hpx::lcos::future<hpx::opencl::event> event) const;
+                             hpx::lcos::shared_future<hpx::opencl::event> event) const;
 
             /**
              *  @brief Depends on multiple future events
@@ -202,9 +200,9 @@ namespace opencl {
              *                  The task will be executed after all given events
              *                  are completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_write(size_t offset, size_t size, const void* data,
-               std::vector<hpx::lcos::future<hpx::opencl::event>> events) const;
+               std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
             //@}
 
             // Fill Buffer
@@ -229,7 +227,7 @@ namespace opencl {
             /**
              *  @brief Starts task immediately.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_fill(const void* pattern, size_t pattern_size,
                                        size_t offset, size_t size) const;
             
@@ -242,7 +240,7 @@ namespace opencl {
              *                  The write will be executed after this event is
              *                  completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_fill(const void* pattern, size_t pattern_size,
                                        size_t offset, size_t size,
                                        hpx::opencl::event event) const;
@@ -258,7 +256,7 @@ namespace opencl {
              *                  The write will be executed after all given
              *                  events are completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_fill(const void* pattern, size_t pattern_size,
                                   size_t offset, size_t size,
                                   std::vector<hpx::opencl::event> events) const;
@@ -273,10 +271,10 @@ namespace opencl {
              *                  The task will be executed after the given event
              *                  is completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_fill(const void* pattern, size_t pattern_size,
                                   size_t offset, size_t size,
-                             hpx::lcos::future<hpx::opencl::event> event) const;
+                             hpx::lcos::shared_future<hpx::opencl::event> event) const;
 
             /**
              *  @brief Depends on multiple future events
@@ -289,10 +287,10 @@ namespace opencl {
              *                  The task will be executed after all given events
              *                  are completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_fill(const void* pattern, size_t pattern_size,
                                   size_t offset, size_t size,
-               std::vector<hpx::lcos::future<hpx::opencl::event>> events) const;
+               std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
             //@}
             
             // Copy Buffer
@@ -315,7 +313,7 @@ namespace opencl {
             /**
              *  @brief Starts task immediately.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
                                  size_t size) const;
 
@@ -332,7 +330,7 @@ namespace opencl {
              *                  \ref device!
              *                  </B>
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
                                  size_t size,
                                  hpx::opencl::event event) const;
@@ -352,7 +350,7 @@ namespace opencl {
              *                  \ref device!
              *                  </B>
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
                                  size_t size,
                                  std::vector<hpx::opencl::event> events) const;
@@ -366,10 +364,10 @@ namespace opencl {
              *                  The task will be executed after the given event
              *                  is completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
                                  size_t size,
-                             hpx::lcos::future<hpx::opencl::event> event) const;
+                             hpx::lcos::shared_future<hpx::opencl::event> event) const;
 
             /**
              *  @brief Depends on multiple future events
@@ -382,10 +380,10 @@ namespace opencl {
              *                  The task will be executed after all given events
              *                  are completed.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
                                  size_t size,
-               std::vector<hpx::lcos::future<hpx::opencl::event>> events) const;
+               std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
              //@}
 
             /* TODO

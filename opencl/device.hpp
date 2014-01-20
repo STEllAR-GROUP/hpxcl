@@ -36,7 +36,7 @@ namespace opencl {
         public:
             device(){}
 
-            device(hpx::future<hpx::naming::id_type> const& gid)
+            device(hpx::shared_future<hpx::naming::id_type> const& gid)
               : base_type(gid)
             {}
             
@@ -51,7 +51,7 @@ namespace opencl {
              *
              *  @return The user event.
              */
-            hpx::lcos::future<hpx::opencl::event>
+            hpx::lcos::unique_future<hpx::opencl::event>
             create_user_event() const;
             
             /**
@@ -70,7 +70,7 @@ namespace opencl {
              *          \endcode
              *          or converted to a string via \ref device_info_to_string.
              */
-            hpx::lcos::future<std::vector<char>>
+            hpx::lcos::unique_future<std::vector<char>>
             get_device_info(cl_device_info info_type) const;
             
             /** 
@@ -86,7 +86,7 @@ namespace opencl {
              *  @return         The data, converted to a string.
              */
             static std::string
-            device_info_to_string(hpx::lcos::future<std::vector<char>> info);
+            device_info_to_string(hpx::lcos::unique_future<std::vector<char>> info);
             
             /**
              *  @brief Creates an event that triggers on the completion of
@@ -100,8 +100,8 @@ namespace opencl {
              *                  future is completed.
              */
             template<class T>
-            hpx::lcos::future<hpx::opencl::event>
-            create_future_event(hpx::lcos::future<T> future); 
+            hpx::lcos::shared_future<hpx::opencl::event>
+            create_future_event(hpx::lcos::shared_future<T> future); 
 
             /**
              *  @brief Creates an OpenCL buffer.
@@ -177,27 +177,28 @@ namespace opencl {
             
             // Needed for create_future_event, this is the future.then callback
             static void
-            trigger_user_event_externally(hpx::lcos::future<hpx::opencl::event>);
+            trigger_user_event_externally(hpx::lcos::shared_future<hpx::opencl::event>);
 
     };
 
 
     template<class T>
-    hpx::lcos::future<hpx::opencl::event>
-    device::create_future_event(hpx::lcos::future<T> future)
+    hpx::lcos::shared_future<hpx::opencl::event>
+    device::create_future_event(hpx::lcos::shared_future<T> future)
     {
     
         // Create a user event
-        hpx::lcos::future<hpx::opencl::event> event = create_user_event();
+        hpx::lcos::shared_future<hpx::opencl::event> event = create_user_event();
     
         // Schedule the user event trigger to be called after future
         future.then(
-                hpx::util::bind(&(device::trigger_user_event_externally), event)
-                        );
-    
-        // return the event
+                       hpx::util::bind(&(device::trigger_user_event_externally),
+                                       event)
+                   );
+
+        // Return the event
         return event;
-    
+
     }
 
 }}

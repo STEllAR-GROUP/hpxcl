@@ -43,7 +43,8 @@ static void cl_test(hpx::opencl::device cldevice)
         hpx::opencl::event user_event = cldevice.create_user_event().get();
     
         // Create a future from the user event
-        hpx::lcos::future<void> user_event_future = user_event.get_future();
+        hpx::lcos::shared_future<void> user_event_future =
+                                                        user_event.get_future();
 
         // Create user event from future
         hpx::opencl::event user_event_future_event =

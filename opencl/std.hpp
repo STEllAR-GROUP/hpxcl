@@ -40,7 +40,7 @@ namespace hpx { namespace opencl{
      *                            Recommended value is 1.1f.
      * @return A list of suitable OpenCL devices on target node
      */
-    hpx::lcos::future<std::vector<device>>
+    hpx::lcos::unique_future<std::vector<device>>
     get_devices( hpx::naming::id_type node_id, cl_device_type device_type,
                  float required_cl_version );
 

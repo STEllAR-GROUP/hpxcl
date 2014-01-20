@@ -61,7 +61,8 @@ int hpx_main(int argc, char* argv[])
         hpx::opencl::work_size<1> dim;
         dim[0].offset = 0;
         dim[0].size = 13;
-        hpx::lcos::future<event> kernel_event = hello_world_kernel.enqueue(dim); 
+        hpx::lcos::shared_future<event> kernel_event =
+                                                hello_world_kernel.enqueue(dim); 
 
         // Start reading the buffer (With kernel_event dependency.
         //                           All hpxcl enqueue calls are nonblocking.)

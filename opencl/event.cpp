@@ -33,7 +33,7 @@ event::get_cl_events(std::vector<hpx::opencl::event> events)
 {
 
     // Step 1: Fetch opencl event component pointers
-    std::vector<hpx::lcos::future<boost::shared_ptr
+    std::vector<hpx::lcos::unique_future<boost::shared_ptr
             <hpx::opencl::server::event>>> event_server_futures;
     event_server_futures.reserve(events.size());
     BOOST_FOREACH(hpx::opencl::event & event, events)
@@ -46,7 +46,7 @@ event::get_cl_events(std::vector<hpx::opencl::event> events)
     // Wait for Step 1 to finish
     std::vector<boost::shared_ptr<hpx::opencl::server::event>> event_servers;
     event_servers.reserve(events.size());
-    BOOST_FOREACH(hpx::lcos::future<boost::shared_ptr
+    BOOST_FOREACH(hpx::lcos::unique_future<boost::shared_ptr
                     <hpx::opencl::server::event>> & event_server_future, 
                             event_server_futures)
     {
@@ -72,7 +72,7 @@ event::await() const
     get_future().get();
 }
 
-hpx::lcos::future<void>
+hpx::lcos::unique_future<void>
 event::get_future() const
 {
     BOOST_ASSERT(this->get_gid());
@@ -82,7 +82,7 @@ event::get_future() const
     return hpx::async<func>(this->get_gid());
 }
 
-hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
+hpx::lcos::unique_future<boost::shared_ptr<std::vector<char>>>
 event::get_data() const
 {
     BOOST_ASSERT(this->get_gid());
@@ -92,7 +92,7 @@ event::get_data() const
     return hpx::async<func>(this->get_gid());
 }
 
-hpx::lcos::future<bool>
+hpx::lcos::unique_future<bool>
 event::finished() const
 {
     BOOST_ASSERT(this->get_gid());

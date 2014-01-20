@@ -7,7 +7,7 @@
 
 #include "device.hpp"
 
-hpx::lcos::future<std::vector<hpx::opencl::device>>
+hpx::lcos::unique_future<std::vector<hpx::opencl::device>>
 hpx::opencl::get_devices( hpx::naming::id_type node_id,
                           cl_device_type device_type,
                           float required_cl_version)

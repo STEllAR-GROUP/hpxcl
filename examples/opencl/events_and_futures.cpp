@@ -58,7 +58,7 @@ void wait_and_trigger(event user_event, device cldevice)
 HPX_PLAIN_ACTION(wait_and_trigger, wait_and_trigger_action);
 
 // Waits for future to trigger
-void wait_for_future(hpx::lcos::future<void> future)
+void wait_for_future(hpx::lcos::shared_future<void> future)
 {
     print(2, "Waiting for user_event_future to trigger ...");
     future.get();
@@ -81,11 +81,12 @@ int hpx_main(int argc, char* argv[])
     
         // Create future from event
         print(0, "Creating user_event_future from user_event ...");
-        hpx::lcos::future<void> user_event_future = user_event.get_future();
+        hpx::lcos::shared_future<void> user_event_future =
+                                                        user_event.get_future();
     
         // Create event from future
         print(0, "Creating user_event_future_event from user_event_future ...");
-        event user_event_future_event = cldevice.create_future_event(
+        event user_event_future_event =  cldevice.create_future_event(
                                                                user_event_future
                                                                         ).get();
     

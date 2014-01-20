@@ -28,7 +28,6 @@ add_hpx_component(opencl
             buffer.cpp
             program.cpp
             kernel.cpp
-            future_execution.cpp
             server/std.cpp
             server/device.cpp
             server/event.cpp
@@ -45,7 +44,6 @@ add_hpx_component(opencl
             buffer.hpp
             program.hpp
             kernel.hpp
-            future_execution.hpp
             server/std.hpp
             server/device.hpp
             server/event.hpp

@@ -25,7 +25,7 @@ kernel::set_arg(cl_uint arg_index, buffer arg) const
 
 }
 
-hpx::lcos::future<void>
+hpx::lcos::unique_future<void>
 kernel::set_arg_async(cl_uint arg_index, buffer arg) const
 {
     
@@ -37,7 +37,7 @@ kernel::set_arg_async(cl_uint arg_index, buffer arg) const
 
 }
 
-hpx::lcos::future<hpx::opencl::event>
+hpx::lcos::unique_future<hpx::opencl::event>
 kernel::enqueue(cl_uint work_dim,
                 const size_t *global_work_offset_ptr,
                 const size_t *global_work_size_ptr,
@@ -51,7 +51,7 @@ kernel::enqueue(cl_uint work_dim,
 }
 
 
-hpx::lcos::future<hpx::opencl::event>
+hpx::lcos::unique_future<hpx::opencl::event>
 kernel::enqueue(cl_uint work_dim,
                 const size_t *global_work_offset_ptr,
                 const size_t *global_work_size_ptr,
@@ -66,31 +66,31 @@ kernel::enqueue(cl_uint work_dim,
 
 }
 
-hpx::lcos::future<hpx::opencl::event>
+hpx::lcos::unique_future<hpx::opencl::event>
 kernel::enqueue(cl_uint work_dim,
                 const size_t *global_work_offset_ptr,
                 const size_t *global_work_size_ptr,
                 const size_t *local_work_size_ptr,
-                hpx::lcos::future<hpx::opencl::event> event) const
+                hpx::lcos::shared_future<hpx::opencl::event> event) const
 {
     // Create vector with event
-    std::vector<hpx::lcos::future<hpx::opencl::event>> events;
-    events.push_back(event);
+    std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events;
+    events.push_back(std::move(event));
 
     // Forward call
     return enqueue(work_dim, global_work_offset_ptr,
                    global_work_size_ptr,
-                   local_work_size_ptr, events);
+                   local_work_size_ptr, std::move(events));
 }
 
-hpx::lcos::future<hpx::opencl::event>
+hpx::lcos::unique_future<hpx::opencl::event>
 kernel::enqueue(cl_uint work_dim,
                 const size_t *global_work_offset_ptr,
                 const size_t *global_work_size_ptr,
                 const size_t *local_work_size_ptr,
-           std::vector<hpx::lcos::future<hpx::opencl::event>> events) const
+           std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const
 {
-    
+/*    
     // define the async call
     future_call_def_4(kernel, cl_uint, const size_t *, const size_t *,
                       const size_t *, enqueue);
@@ -99,10 +99,12 @@ kernel::enqueue(cl_uint work_dim,
     return future_call::run(*this, work_dim, global_work_offset_ptr,
                             global_work_size_ptr, local_work_size_ptr, events);
 
+*/
+    return unique_future<hpx::opencl::event>();
 }
 
 
-hpx::lcos::future<hpx::opencl::event>
+hpx::lcos::unique_future<hpx::opencl::event>
 kernel::enqueue(cl_uint work_dim,
                 const size_t *global_work_offset_ptr,
                 const size_t *global_work_size_ptr,

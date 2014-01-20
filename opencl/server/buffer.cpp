@@ -251,7 +251,7 @@ buffer::copy_bruteforce(hpx::naming::id_type & src_buffer,
                                src.enqueue_read(src_offset, size, events).get();
         
         // transmit the data
-        hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
+        hpx::lcos::unique_future<boost::shared_ptr<std::vector<char>>>
             data_future = read_event.get_data();
 
         // Get the command queue
@@ -319,7 +319,7 @@ buffer::copy_local(boost::shared_ptr<hpx::opencl::server::buffer> src,
                                 ));
 
         // Create future from event
-        hpx::lcos::future<void> read_future = read_event.get_future();
+        hpx::lcos::shared_future<void> read_future = read_event.get_future();
 
         // Create device client of dst
         hpx::opencl::device dst_device(
@@ -327,7 +327,7 @@ buffer::copy_local(boost::shared_ptr<hpx::opencl::server::buffer> src,
 
         // Create new event on dst device
         hpx::opencl::event write_start_event_client = 
-                              dst_device.create_future_event(read_future).get();
+                   dst_device.create_future_event(read_future).get();
 
         // Convert dst event to cl_event
         cl_event write_start_event =
@@ -405,9 +405,9 @@ buffer::copy(hpx::naming::id_type src_buffer, std::vector<size_t> dimensions,
     hpx::naming::id_type src_location;
     hpx::naming::id_type dst_location;
     {
-        hpx::lcos::future<hpx::naming::id_type>
+        hpx::lcos::unique_future<hpx::naming::id_type>
         src_location_future = get_colocation_id(src_buffer);
-        hpx::lcos::future<hpx::naming::id_type>
+        hpx::lcos::unique_future<hpx::naming::id_type>
         dst_location_future = get_colocation_id(get_gid());
         src_location = src_location_future.get();
         dst_location = dst_location_future.get();

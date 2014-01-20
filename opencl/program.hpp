@@ -37,7 +37,7 @@ namespace opencl {
             program(){}
 
             // Constructor
-            program(hpx::future<hpx::naming::id_type> const& gid)
+            program(hpx::shared_future<hpx::naming::id_type> const& gid)
               : base_type(gid)
             {}
             
@@ -68,7 +68,7 @@ namespace opencl {
              *
              *  @return A future that will trigger upon build completion.
              */
-            hpx::lcos::future<void> build_async() const;
+            hpx::lcos::unique_future<void> build_async() const;
             /**
              *  @brief Builds the program, non-blocking.
              *
@@ -80,7 +80,7 @@ namespace opencl {
              *                          information.
              *  @return A future that will trigger upon build completion.
              */
-             hpx::lcos::future<void> build_async(std::string build_options) const;
+             hpx::lcos::unique_future<void> build_async(std::string build_options) const;
 
             /**
              *  @brief Creates a kernel.

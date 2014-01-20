@@ -28,13 +28,13 @@ program::build(std::string build_options) const
     return build_async(build_options).get();
 }
 
-hpx::lcos::future<void>
+hpx::lcos::unique_future<void>
 program::build_async() const
 {
     return build_async("");
 }
 
-hpx::lcos::future<void>
+hpx::lcos::unique_future<void>
 program::build_async(std::string build_options) const
 {
 
@@ -53,11 +53,11 @@ program::create_kernel(std::string kernel_name) const
     BOOST_ASSERT(this->get_gid());
 
     // Create new kernel object server
-    hpx::lcos::future<hpx::naming::id_type>
+    hpx::lcos::unique_future<hpx::naming::id_type>
     kernel_server = hpx::components::new_<hpx::opencl::server::kernel>
                     (get_colocation_id_sync(get_gid()), get_gid(), kernel_name);
 
-    return hpx::opencl::kernel(kernel_server);
+    return hpx::opencl::kernel(std::move(kernel_server));
 
 }
 

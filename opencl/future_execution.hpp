@@ -23,7 +23,7 @@
 namespace hpx { namespace opencl {
 
     std::vector<event>
-    wait_for_futures(const std::vector<hpx::lcos::future<event>> &future_list);
+    wait_for_futures(const std::vector<hpx::lcos::unique_future<event>> &future_list);
 
 
     #define future_call_def_0(PCLASS, FUNCNAME)                                \
@@ -31,7 +31,7 @@ namespace hpx { namespace opencl {
     class future_call{                                                         \
         private:                                                               \
         static event future_call_impl(PCLASS pclass,                           \
-                          std::vector<hpx::lcos::future<event>> future_list)   \
+                          std::vector<hpx::lcos::unique_future<event>> future_list)   \
         {                                                                      \
             /* Wait for futures to trigger */                                  \
             std::vector<event> event_list =                                    \
@@ -42,7 +42,7 @@ namespace hpx { namespace opencl {
         }                                                                      \
         public:                                                                \
         static future<event> run(PCLASS pclass,                                \
-                             std::vector<hpx::lcos::future<event>> future_list)\
+                             std::vector<hpx::lcos::unique_future<event>> future_list)\
         {                                                                      \
             /* Call future_call_impl assynchroniously */                       \
             return hpx::async(hpx::util::bind(future_call_impl, pclass,        \
@@ -57,7 +57,7 @@ namespace hpx { namespace opencl {
         private:                                                               \
         static event future_call_impl(PCLASS pclass,                           \
                           ARG0 arg0,                                           \
-                          std::vector<hpx::lcos::future<event>> future_list)   \
+                          std::vector<hpx::lcos::unique_future<event>> future_list)   \
         {                                                                      \
             /* Wait for futures to trigger */                                  \
             std::vector<event> event_list =                                    \
@@ -69,7 +69,7 @@ namespace hpx { namespace opencl {
         public:                                                                \
         static future<event> run(PCLASS pclass,                                \
                                  ARG0 arg0,                                    \
-                             std::vector<hpx::lcos::future<event>> future_list)\
+                             std::vector<hpx::lcos::unique_future<event>> future_list)\
         {                                                                      \
             /* Call future_call_impl assynchroniously */                       \
             return hpx::async(hpx::util::bind(future_call_impl, pclass,        \
@@ -86,7 +86,7 @@ namespace hpx { namespace opencl {
         static event future_call_impl(PCLASS pclass,                           \
                           ARG0 arg0,                                           \
                           ARG1 arg1,                                           \
-                          std::vector<hpx::lcos::future<event>> future_list)   \
+                          std::vector<hpx::lcos::unique_future<event>> future_list)   \
         {                                                                      \
             /* Wait for futures to trigger */                                  \
             std::vector<event> event_list =                                    \
@@ -99,7 +99,7 @@ namespace hpx { namespace opencl {
         static future<event> run(PCLASS pclass,                                \
                                  ARG0 arg0,                                    \
                                  ARG1 arg1,                                    \
-                             std::vector<hpx::lcos::future<event>> future_list)\
+                             std::vector<hpx::lcos::unique_future<event>> future_list)\
         {                                                                      \
             /* Call future_call_impl assynchroniously */                       \
             return hpx::async(hpx::util::bind(future_call_impl, pclass,        \
@@ -118,7 +118,7 @@ namespace hpx { namespace opencl {
                           ARG0 arg0,                                           \
                           ARG1 arg1,                                           \
                           ARG2 arg2,                                           \
-                          std::vector<hpx::lcos::future<event>> future_list)   \
+                          std::vector<hpx::lcos::unique_future<event>> future_list)   \
         {                                                                      \
             /* Wait for futures to trigger */                                  \
             std::vector<event> event_list =                                    \
@@ -132,7 +132,7 @@ namespace hpx { namespace opencl {
                                  ARG0 arg0,                                    \
                                  ARG1 arg1,                                    \
                                  ARG2 arg2,                                    \
-                             std::vector<hpx::lcos::future<event>> future_list)\
+                             std::vector<hpx::lcos::unique_future<event>> future_list)\
         {                                                                      \
             /* Call future_call_impl assynchroniously */                       \
             return hpx::async(hpx::util::bind(future_call_impl, pclass,        \
@@ -153,7 +153,7 @@ namespace hpx { namespace opencl {
                           ARG1 arg1,                                           \
                           ARG2 arg2,                                           \
                           ARG3 arg3,                                           \
-                          std::vector<hpx::lcos::future<event>> future_list)   \
+                          std::vector<hpx::lcos::unique_future<event>> future_list)   \
         {                                                                      \
             /* Wait for futures to trigger */                                  \
             std::vector<event> event_list =                                    \
@@ -168,7 +168,7 @@ namespace hpx { namespace opencl {
                                  ARG1 arg1,                                    \
                                  ARG2 arg2,                                    \
                                  ARG3 arg3,                                    \
-                             std::vector<hpx::lcos::future<event>> future_list)\
+                             std::vector<hpx::lcos::unique_future<event>> future_list)\
         {                                                                      \
             /* Call future_call_impl assynchroniously */                       \
             return hpx::async(hpx::util::bind(future_call_impl, pclass,        \
@@ -190,7 +190,7 @@ namespace hpx { namespace opencl {
                           ARG2 arg2,                                           \
                           ARG3 arg3,                                           \
                           ARG4 arg4,                                           \
-                          std::vector<hpx::lcos::future<event>> future_list)   \
+                          std::vector<hpx::lcos::unique_future<event>> future_list)   \
         {                                                                      \
             /* Wait for futures to trigger */                                  \
             std::vector<event> event_list =                                    \
@@ -207,7 +207,7 @@ namespace hpx { namespace opencl {
                                  ARG2 arg2,                                    \
                                  ARG3 arg3,                                    \
                                  ARG4 arg4,                                    \
-                             std::vector<hpx::lcos::future<event>> future_list)\
+                             std::vector<hpx::lcos::unique_future<event>> future_list)\
         {                                                                      \
             /* Call future_call_impl assynchroniously */                       \
             return hpx::async(hpx::util::bind(future_call_impl, pclass,        \
