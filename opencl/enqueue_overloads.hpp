@@ -52,7 +52,8 @@
 //  manually.
 // 
 
-#define OVERLOAD_FUNCTION(classname, funcname, args, args_without_types)    \
+#define HPX_OPENCL_OVERLOAD_FUNCTION(classname, funcname, args,             \
+                                                     args_without_types)    \
                                                                             \
 /* Creates an empty list and proxies to the normal function */              \
 hpx::lcos::unique_future<hpx::opencl::event>                                \
@@ -75,11 +76,11 @@ classname::funcname(args, hpx::opencl::event event) const                   \
 /* Will get called by future.then().                      */                \
 static                                                                      \
 hpx::lcos::unique_future<hpx::opencl::event>                                \
-funcname ## _future_single_callback(buffer buf, args,                       \
+classname ## _ ## funcname ## _future_single_callback(classname cl, args,   \
                         hpx::lcos::shared_future<hpx::opencl::event> event) \
 {                                                                           \
                                                                             \
-    return buf.funcname(args_without_types, event.get());                   \
+    return cl.funcname(args_without_types, event.get());                    \
                                                                             \
 }                                                                           \
                                                                             \
@@ -89,11 +90,40 @@ classname::funcname(args,                                                   \
 {                                                                           \
     return event.then(                                                      \
             hpx::util::bind(                                                \
-                    &(funcname ## _future_single_callback),                 \
+                    &(classname ## _ ## funcname ##                         \
+                                  _future_single_callback),                 \
                     *this,                                                  \
                     args_without_types,                                     \
-                    util::placeholders::_1)                                 \
-            );                                                              \
+                    util::placeholders::_1                                  \
+            )                                                               \
+    );                                                                      \
+}                                                                           \
+                                                                            \
+static                                                                      \
+hpx::lcos::unique_future<hpx::opencl::event>                                \
+classname ## _ ## funcname ## _future_multi_callback(classname cl, args,    \
+           hpx::lcos::unique_future<std::vector<                            \
+                        hpx::lcos::shared_future<hpx::opencl::event>        \
+                                                            >> futures)     \
+{                                                                           \
+                                                                            \
+    /* Get list of futures */                                               \
+    std::vector<hpx::lcos::shared_future<hpx::opencl::event>>               \
+    futures_list = futures.get();                                           \
+                                                                            \
+    /* Create list of events */                                             \
+    std::vector<hpx::opencl::event> events(futures_list.size());            \
+                                                                            \
+    /* Put events into list */                                              \
+    BOOST_FOREACH(hpx::lcos::shared_future<hpx::opencl::event> & future,    \
+                    futures_list)                                           \
+    {                                                                       \
+        events.push_back(future.get());                                     \
+    }                                                                       \
+                                                                            \
+    /* Call actual function */                                              \
+    return cl.funcname(args_without_types, events);                         \
+                                                                            \
 }                                                                           \
                                                                             \
 hpx::lcos::unique_future<hpx::opencl::event>                                \
@@ -101,16 +131,17 @@ classname::funcname(args,                                                   \
         std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events)   \
                                                                     const   \
 {                                                                           \
-/*    BOOST_ASSERT(this->get_gid());                                        \
                                                                             \
-    // define the async call                                                \
-    future_call_def_2(buffer, size_t, size_t, enqueue_read);                \
+    return hpx::when_all(events).then(                                      \
+        hpx::util::bind(                                                    \
+                *(classname ## _ ## funcname ##                             \
+                              _future_multi_callback),                      \
+                *this,                                                      \
+                args_without_types,                                         \
+                util::placeholders::_1                                      \
+        )                                                                   \
+     );                                                                     \
                                                                             \
-    // run the async call                                                   \
-    return future_call::run(*this, offset, size, events);                   \
-                                                                            \
-*/                                                                          \
-    return unique_future<hpx::opencl::event>();                             \
 }
 
 

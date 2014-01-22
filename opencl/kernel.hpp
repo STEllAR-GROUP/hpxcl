@@ -280,6 +280,24 @@ namespace opencl {
                std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
              //@}
 
+        private:
+            // LOCAL HELPER CALLBACK FUNCTIONS
+            template<size_t DIM>
+            static
+            hpx::lcos::unique_future<hpx::opencl::event>
+            enqueue_future_single_callback_tpl(kernel cl,
+                                              hpx::opencl::work_size<DIM> size,
+                            hpx::lcos::shared_future<hpx::opencl::event> event);
+ 
+            template<size_t DIM>
+            static
+            hpx::lcos::unique_future<hpx::opencl::event>                                
+            enqueue_future_multi_callback_tpl(kernel cl,
+                            hpx::opencl::work_size<DIM> size,
+                            hpx::lcos::unique_future<std::vector<
+                                hpx::lcos::shared_future<hpx::opencl::event>
+                                                          >> futures);
+
     };
 
     template<size_t DIM>
@@ -342,34 +360,75 @@ namespace opencl {
         return enqueue(size, events);
     }
     
+    // Callback for template function for a single future event
+    template<size_t DIM>
+    hpx::lcos::unique_future<hpx::opencl::event>
+    kernel::enqueue_future_single_callback_tpl(kernel cl,
+                                              hpx::opencl::work_size<DIM> size,
+                            hpx::lcos::shared_future<hpx::opencl::event> event)
+    {
+        return cl.enqueue(size, event.get());
+    }
+
+
     template<size_t DIM>
     hpx::lcos::unique_future<hpx::opencl::event>
     kernel::enqueue(hpx::opencl::work_size<DIM> size,
                     hpx::lcos::shared_future<hpx::opencl::event> event) const
     {
-        // Create vector with event
-        std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events;
-        events.push_back(event);
-
-        // Forward call
-        return enqueue(size, events);
+        return event.then(                                                      
+            hpx::util::bind(                                                
+                    &(enqueue_future_single_callback_tpl<DIM>),
+                    *this,                                                  
+                    size,
+                    util::placeholders::_1
+            )                                                               
+        );                                                                      
+    
     }
 
-
+    template<size_t DIM>
+    hpx::lcos::unique_future<hpx::opencl::event>                                
+    kernel::enqueue_future_multi_callback_tpl(kernel cl,
+                hpx::opencl::work_size<DIM> size,    
+               hpx::lcos::unique_future<std::vector<                            
+                            hpx::lcos::shared_future<hpx::opencl::event>        
+                                                                >> futures)     
+    {                                                                           
+                                                                                
+        /* Get list of futures */                                               
+        std::vector<hpx::lcos::shared_future<hpx::opencl::event>>               
+        futures_list = futures.get();                                           
+                                                                                
+        /* Create list of events */                                             
+        std::vector<hpx::opencl::event> events(futures_list.size());            
+                                                                                
+        /* Put events into list */                                              
+        BOOST_FOREACH(hpx::lcos::shared_future<hpx::opencl::event> & future,    
+                        futures_list)                                           
+        {                                                                       
+            events.push_back(future.get());                                     
+        }                                                                       
+                                                                                
+        /* Call actual function */                                              
+        return cl.enqueue(size, events);                         
+                                                                                
+    }                                                                           
+  
 
     template<size_t DIM>
     hpx::lcos::unique_future<hpx::opencl::event>
     kernel::enqueue(hpx::opencl::work_size<DIM> size,
                std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const
     {
-  /*      
-        // define the async call
-        future_call_def_1(kernel, hpx::opencl::work_size<DIM>, enqueue);
-
-        // run the async call
-        return future_call::run(*this, size, events);
-*/
-        return unique_future<hpx::opencl::event>();
+        return hpx::when_all(events).then(                                      
+            hpx::util::bind(                                                    
+                &(enqueue_future_multi_callback_tpl<DIM>),
+                *this,
+                size,
+                util::placeholders::_1
+            )
+        );
     }
 
 }}

@@ -38,23 +38,23 @@ buffer::size() const
 // OVERLOAD DEFINITIONS
 //
 
-OVERLOAD_FUNCTION(buffer, enqueue_read, 
-                  size_t offset COMMA size_t size,
-                  offset COMMA size);
+HPX_OPENCL_OVERLOAD_FUNCTION(buffer, enqueue_read, 
+                             size_t offset COMMA size_t size,
+                             offset COMMA size);
 
-OVERLOAD_FUNCTION(buffer, enqueue_write,
-                  size_t offset COMMA size_t size COMMA const void* data,
-                  offset COMMA size COMMA data);
+HPX_OPENCL_OVERLOAD_FUNCTION(buffer, enqueue_write,
+                         size_t offset COMMA size_t size COMMA const void* data,
+                         offset COMMA size COMMA data);
 
-OVERLOAD_FUNCTION(buffer, enqueue_fill,
-                  const void* pattern COMMA size_t pattern_size COMMA
-                  size_t offset COMMA size_t size,
-                  pattern COMMA pattern_size COMMA offset COMMA size);
+HPX_OPENCL_OVERLOAD_FUNCTION(buffer, enqueue_fill,
+                            const void* pattern COMMA size_t pattern_size COMMA
+                            size_t offset COMMA size_t size,
+                            pattern COMMA pattern_size COMMA offset COMMA size);
 
-OVERLOAD_FUNCTION(buffer, enqueue_copy,
-                  buffer src COMMA size_t src_offset COMMA
-                  size_t dst_offset COMMA size_t size,
-                  src COMMA src_offset COMMA dst_offset COMMA size);
+HPX_OPENCL_OVERLOAD_FUNCTION(buffer, enqueue_copy,
+                             buffer src COMMA size_t src_offset COMMA
+                             size_t dst_offset COMMA size_t size,
+                             src COMMA src_offset COMMA dst_offset COMMA size);
 
 
 
