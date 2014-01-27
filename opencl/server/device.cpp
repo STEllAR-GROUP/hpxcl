@@ -47,11 +47,25 @@ device::device(clx_device_id _device_id, bool enable_profiling)
                               &err);
     cl_ensure(err, "clCreateContext()");
 
-    // Create Command Queue
-    cl_command_queue_properties command_queue_properties =
-                        CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE;
-    if(enable_profiling)
+    // Get supported device queue properties
+    std::vector<char> supported_queue_properties_data = 
+                                    get_device_info(CL_DEVICE_QUEUE_PROPERTIES);
+    cl_command_queue_properties supported_queue_properties =
+        *((cl_command_queue_properties *)(&supported_queue_properties_data[0]));
+
+    // Initialize command queue properties
+    cl_command_queue_properties command_queue_properties = 0;
+
+    // If supported, add OUT_OF_ORDER_EXEC_MODE
+    if(supported_queue_properties & CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE)
+        command_queue_properties |= CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE;
+
+    // If supported and wanted, add PROFILING
+    if(enable_profiling &&
+                       (supported_queue_properties & CL_QUEUE_PROFILING_ENABLE))
         command_queue_properties |= CL_QUEUE_PROFILING_ENABLE;
+
+    // Create Command Queue
     command_queue = clCreateCommandQueue(context, device_id,
                                          command_queue_properties, &err);
     cl_ensure(err, "clCreateCommandQueue()");

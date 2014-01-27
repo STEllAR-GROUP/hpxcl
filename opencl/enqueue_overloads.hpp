@@ -7,6 +7,7 @@
 #ifndef HPX_OPENCL_ENQUEUE_OVERLOADS_HPP__
 #define HPX_OPENCL_ENQUEUE_OVERLOADS_HPP__
 
+#include <hpx/lcos/when_all.hpp>
 
 
 /*
@@ -112,7 +113,8 @@ classname ## _ ## funcname ## _future_multi_callback(classname cl, args,    \
     futures_list = futures.get();                                           \
                                                                             \
     /* Create list of events */                                             \
-    std::vector<hpx::opencl::event> events(futures_list.size());            \
+    std::vector<hpx::opencl::event> events;                                 \
+    events.reserve(futures_list.size());                                    \
                                                                             \
     /* Put events into list */                                              \
     BOOST_FOREACH(hpx::lcos::shared_future<hpx::opencl::event> & future,    \

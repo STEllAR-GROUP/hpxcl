@@ -10,6 +10,7 @@
 #include "server/kernel.hpp"
 
 #include <hpx/include/components.hpp>
+#include <hpx/lcos/when_all.hpp>
 #include <boost/serialization/vector.hpp>
 
 #include "event.hpp"
@@ -401,7 +402,8 @@ namespace opencl {
         futures_list = futures.get();                                           
                                                                                 
         /* Create list of events */                                             
-        std::vector<hpx::opencl::event> events(futures_list.size());            
+        std::vector<hpx::opencl::event> events;
+        events.reserve(futures_list.size());            
                                                                                 
         /* Put events into list */                                              
         BOOST_FOREACH(hpx::lcos::shared_future<hpx::opencl::event> & future,    

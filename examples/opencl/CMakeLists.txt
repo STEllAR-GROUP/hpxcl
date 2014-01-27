@@ -3,9 +3,17 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+set(subdirs
+    #mandelbrot
+    )
+
+foreach(subdir ${subdirs})
+    add_subdirectory(${subdir})
+endforeach()
+
 set(example_programs
     hello_world
-#    _tmp_test
+    _tmp_test
     events_and_futures
 )
 

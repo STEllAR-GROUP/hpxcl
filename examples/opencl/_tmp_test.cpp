@@ -6,15 +6,14 @@
 #include <hpx/hpx_start.hpp>
 #include <hpx/include/iostreams.hpp>
 //#include <hpx/include/components.hpp>
-
+#include <hpx/lcos/future.hpp>
 #include <vector>
 
 #include <boost/foreach.hpp>
 
-#include "../../opencl/device.hpp"
-#include "../../opencl/buffer.hpp"
-#include "../../opencl/program.hpp"
-#include "../../opencl/kernel.hpp"
+#include "../../opencl.hpp"
+
+using namespace hpx::opencl;
 
 void sayhellofunc()
 {
@@ -30,14 +29,14 @@ int hpx_main(int argc, char* argv[])
 {
 
 
-	std::vector<hpx::opencl::clx_device_id> devices
-            = hpx::opencl::get_device_ids(hpx::find_here(),
+	std::vector<device> devices
+            = get_devices(hpx::find_here(),
              //           CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_ACCELERATOR);
                         CL_DEVICE_TYPE_ALL, 1.1f).get();
 
     if(devices.size() < 1)
     {
-        devices = hpx::opencl::get_device_ids(hpx::find_here(),
+        devices = hpx::opencl::get_devices(hpx::find_here(),
                         CL_DEVICE_TYPE_CPU, 1.1f).get();
     }
 
@@ -46,12 +45,14 @@ int hpx_main(int argc, char* argv[])
    
     for(size_t i = 0; i < devices.size(); i++)
     {
-        std::vector<char> name;
-        name = hpx::opencl::get_device_info(hpx::find_here(), devices[i], CL_DEVICE_NAME
-                                     ).get();
-        hpx::cout << "\t" << i << ": " << &name[0] << " ~ ";
-        name = hpx::opencl::get_device_info(hpx::find_here(), devices[i], CL_DEVICE_VERSION
-                                     ).get();
+        std::string name;
+        name = hpx::opencl::device::device_info_to_string(
+                    devices[i].get_device_info(CL_DEVICE_NAME)
+                                     );
+        hpx::cout << "\t" << i << ": " << name << " ~ ";
+        name = hpx::opencl::device::device_info_to_string(
+                    devices[i].get_device_info(CL_DEVICE_VERSION)
+                                     );
         hpx::cout << &name[0] << hpx::endl;
     }
    
@@ -59,9 +60,7 @@ int hpx_main(int argc, char* argv[])
     std::cin >> gpuid;
 
     {
-    	typedef hpx::opencl::server::device device_type;
-    	hpx::opencl::device cldevice(
-              hpx::components::new_<device_type>(hpx::find_here(), devices[gpuid]));
+    	hpx::opencl::device cldevice = devices[gpuid];
 
         #define datasize 10000
         std::vector<char> databuf(datasize);
@@ -80,7 +79,7 @@ int hpx_main(int argc, char* argv[])
         char datain2[] = {3,3};
 
         hpx::opencl::event event2 = buffer.enqueue_write(datasize - 3, 2, datain2, event).get();
-        hpx::lcos::future<hpx::opencl::event> event3 = buffer.enqueue_read(datasize - 10, 10, event2);
+        hpx::lcos::shared_future<hpx::opencl::event> event3 = buffer.enqueue_read(datasize - 10, 10, event2);
 
         boost::shared_ptr<std::vector<char>> data
                                         = event.get_data().get();
