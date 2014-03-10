@@ -115,7 +115,7 @@ static void cl_test(hpx::opencl::device cldevice)
                                                                     startEvent);
     
     // Create dependency lists
-    std::vector<future_event> initABevent(2);
+    std::vector<future_event> initABevent;
     initABevent.push_back(initAevent);
     initABevent.push_back(initBevent);
 
@@ -141,7 +141,7 @@ static void cl_test(hpx::opencl::device cldevice)
     future_event dbl_event = dbl_kernel.enqueue(dim, initCevent);
 
     // combine events
-    std::vector<future_event> add_dbl_event(2);
+    std::vector<future_event> add_dbl_event;
     add_dbl_event.push_back(add_event);
     add_dbl_event.push_back(dbl_event);
 
