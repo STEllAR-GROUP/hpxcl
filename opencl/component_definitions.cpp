@@ -49,8 +49,10 @@ HPX_REGISTER_ACTION(buffer_type::wrapped_type::read_action,
                     buffer_read_action);
 HPX_REGISTER_ACTION(buffer_type::wrapped_type::write_action,
                     buffer_write_action);
+#ifdef CL_VERSION_1_2
 HPX_REGISTER_ACTION(buffer_type::wrapped_type::fill_action,
                     buffer_fill_action);
+#endif
 HPX_REGISTER_ACTION(buffer_type::wrapped_type::size_action,
                     buffer_size_action);
 HPX_REGISTER_ACTION(buffer_type::wrapped_type::copy_action,

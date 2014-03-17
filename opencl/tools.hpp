@@ -11,8 +11,8 @@
 #include <sstream>
 #include <hpx/include/iostreams.hpp>
 
-#ifndef CL_VERSION_1_2
-#error "OpenCL 1.2 required!"
+#ifndef CL_VERSION_1_1
+#error "OpenCL 1.1 required!"
 #endif
 
 namespace hpx { namespace opencl {

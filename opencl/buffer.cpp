@@ -46,10 +46,12 @@ HPX_OPENCL_OVERLOAD_FUNCTION(buffer, enqueue_write,
                          size_t offset COMMA size_t size COMMA const void* data,
                          offset COMMA size COMMA data);
 
+#ifdef CL_VERSION_1_2
 HPX_OPENCL_OVERLOAD_FUNCTION(buffer, enqueue_fill,
                             const void* pattern COMMA size_t pattern_size COMMA
                             size_t offset COMMA size_t size,
                             pattern COMMA pattern_size COMMA offset COMMA size);
+#endif
 
 HPX_OPENCL_OVERLOAD_FUNCTION(buffer, enqueue_copy,
                              buffer src COMMA size_t src_offset COMMA
@@ -95,7 +97,7 @@ buffer::enqueue_write(size_t offset, size_t size, const void* data,
                             events);
 }
 
-
+#ifdef CL_VERSION_1_2
 hpx::lcos::unique_future<hpx::opencl::event>
 buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
                      size_t size, std::vector<hpx::opencl::event> events) const
@@ -114,7 +116,7 @@ buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
                             events);
 
 }
-
+#endif
 
 
 // Copy Buffer

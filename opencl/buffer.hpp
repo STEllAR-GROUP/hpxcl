@@ -205,6 +205,7 @@ namespace opencl {
                std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
             //@}
 
+#ifdef CL_VERSION_1_2
             // Fill Buffer
             /**
              *  @name Fills the buffer with a pattern
@@ -292,7 +293,8 @@ namespace opencl {
                                   size_t offset, size_t size,
                std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
             //@}
-            
+#endif
+
             // Copy Buffer
             /**
              *  @name Copies data from another buffer.

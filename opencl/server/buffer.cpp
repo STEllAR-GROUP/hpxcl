@@ -193,6 +193,7 @@ buffer::write(size_t offset, hpx::util::serialize_buffer<char> data,
 
 }
 
+#ifdef CL_VERSION_1_2
 hpx::opencl::event
 buffer::fill(hpx::util::serialize_buffer<char> pattern, size_t offset,
              size_t size, std::vector<hpx::opencl::event> events)
@@ -231,6 +232,7 @@ buffer::fill(hpx::util::serialize_buffer<char> pattern, size_t offset,
                             ));
 
 }
+#endif
 
 // Bruteforce copy, needed for copy between different machines
 cl_event
