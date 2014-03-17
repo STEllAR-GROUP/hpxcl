@@ -7,6 +7,7 @@
 #define BENCHMARK_HPXCL_SINGLE_HPP__
 
 #include "../../../opencl.hpp"
+#include "timer.hpp"
 
 using namespace hpx::opencl;
 using hpx::lcos::shared_future;
@@ -129,11 +130,16 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
     
 }
 
-static std::vector<char> hpxcl_single_calculate(std::vector<float> a,
-                                                std::vector<float> b,
-                                                std::vector<float> c)
+static std::vector<char> hpxcl_single_calculate(std::vector<float> &a,
+                                                std::vector<float> &b,
+                                                std::vector<float> &c,
+                                                double* t_nonblock,
+                                                double* t_sync,
+                                                double* t_finish)
 {
-
+    // start time measurement
+    timer_start();
+    
     // do nothing if matrices are wrong
     if(a.size() != b.size() || b.size() != c.size())
     {
@@ -186,14 +192,24 @@ static std::vector<char> hpxcl_single_calculate(std::vector<float> a,
                         hpxcl_single_buffer_z.enqueue_read(0, size*sizeof(float),
                                                           kernel_log_event);
 
+    
     ////////// UNTIL HERE ALL CALLS WERE NON-BLOCKING /////////////////////////
+
+    // get time of non-blocking calls
+    *t_nonblock = timer_stop();
 
     // wait for enqueue_read to return the event
     event read_event = read_event_future.get();
 
+    // get time of synchronization
+    *t_sync = timer_stop();
+
     // wait for calculation to complete and return data
     boost::shared_ptr<std::vector<char>> data_ptr = read_event.get_data().get();
 
+    // get total time of execution
+    *t_finish = timer_stop();
+    
     // return the computed data
     return *data_ptr;
 

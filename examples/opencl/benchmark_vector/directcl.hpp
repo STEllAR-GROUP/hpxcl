@@ -30,13 +30,23 @@ static cl_mem              directcl_buffer_o;
 static cl_mem              directcl_buffer_p;
 static cl_mem              directcl_buffer_z;
 
-static void directcl_check(cl_int ret)
+#define directcl_check(ret) {                                   \
+        if((ret) != CL_SUCCESS){                                \
+            hpx::cout << "directcl.hpp:" <<  __LINE__           \
+                      << ": CL ERROR: " << (ret) << hpx::endl;  \
+            exit(1);                                            \
+        }                                                       \
+    }
+
+/*static void directcl_check(cl_int ret)
 {
 
-    if(ret != CL_SUCCESS)
+    if(ret != CL_SUCCESS){
+        hpx::cout << "CL ERROR: " << ret << hpx::endl;
         exit(1);
+    }
 
-}
+}*/
 
 static cl_device_id directcl_choose_device()
 {
@@ -236,8 +246,13 @@ static void directcl_initialize(size_t vector_size)
 
 static std::vector<float> directcl_calculate(std::vector<float> a,
                                              std::vector<float> b,
-                                             std::vector<float> c)
+                                             std::vector<float> c,
+                                             double* t_nonblock,
+                                             double* t_total)
 {
+
+    // start timer
+    timer_start();
 
     // do nothing if matrices are wrong
     if(a.size() != b.size() || b.size() != c.size())
@@ -291,9 +306,15 @@ static std::vector<float> directcl_calculate(std::vector<float> a,
                               &res[0], 0, NULL, NULL);
     directcl_check(err);
 
+    // get time of nonblocking calls
+    *t_nonblock = timer_stop();
+
     // finish
     err = clFinish(directcl_command_queue);
     directcl_check(err);
+
+    // get time of total calculation
+    *t_total = timer_stop();
 
     return res;
 }

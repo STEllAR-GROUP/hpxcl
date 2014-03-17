@@ -10,6 +10,7 @@
 #include "timer.hpp"
 #include "directcl.hpp"
 #include "hpxcl_single.hpp"
+#include "hpx_helpers.hpp"
 
 #include <string>
 
@@ -59,10 +60,12 @@ int hpx_main(int argc, char* argv[])
         directcl_initialize(vector_size);
 
         // main calculation with benchmark
+        double time_directcl_nonblock;
+        double time_directcl_total;
         hpx::cout << "Running calculation ..." << hpx::endl;
-        timer_start();
-        std::vector<float> z_directcl = directcl_calculate(a,b,c);
-        double time_directcl = timer_stop();
+        std::vector<float> z_directcl = directcl_calculate(a,b,c,
+                                                       &time_directcl_nonblock,
+                                                       &time_directcl_total);
 
         // shuts down
         hpx::cout << "Shutting down ..." << hpx::endl;
@@ -74,7 +77,10 @@ int hpx_main(int argc, char* argv[])
         
         // Prints the benchmark statistics
         hpx::cout << hpx::endl;
-        hpx::cout << "    Calculation Time: " << time_directcl << " ms";
+        hpx::cout << "    Nonblocking calls:       " << time_directcl_nonblock
+                  << " ms" << hpx::endl;
+        hpx::cout << "    Total Calculation Time:  " << time_directcl_total
+                  << " ms" << hpx::endl;
         hpx::cout << hpx::endl;
 
 
@@ -92,9 +98,13 @@ int hpx_main(int argc, char* argv[])
 
         // main calculation with benchmark
         hpx::cout << "Running calculation ..." << hpx::endl;
-        timer_start();
-        std::vector<char> z_hpxcl_local = hpxcl_single_calculate(a,b,c);
-        double time_hpxcl_local = timer_stop();
+        double time_hpxcl_local_nonblock;
+        double time_hpxcl_local_sync;
+        double time_hpxcl_local_total;
+        std::vector<char> z_hpxcl_local = hpxcl_single_calculate(a,b,c,
+                                                    &time_hpxcl_local_nonblock,
+                                                    &time_hpxcl_local_sync,
+                                                    &time_hpxcl_local_total);
 
         // shuts down
         hpx::cout << "Shutting down ..." << hpx::endl;
@@ -107,7 +117,12 @@ int hpx_main(int argc, char* argv[])
         
         // Prints the benchmark statistics
         hpx::cout << hpx::endl;
-        hpx::cout << "    Calculation Time: " << time_hpxcl_local << " ms";
+        hpx::cout << "    Nonblocking calls:       " << time_hpxcl_local_nonblock
+                  << " ms" << hpx::endl;
+        hpx::cout << "    Synchronization:         " << time_hpxcl_local_sync
+                  << " ms" << hpx::endl;
+        hpx::cout << "    Total Calculation Time:  " << time_hpxcl_local_total
+                  << " ms" << hpx::endl;
         hpx::cout << hpx::endl;
 
 
@@ -119,6 +134,40 @@ int hpx_main(int argc, char* argv[])
         hpx::cout << "///////////////////////////////////////" << hpx::endl;
         hpx::cout << "// HPXCL remote" << hpx::endl;
         hpx::cout << "//" << hpx::endl;
+        
+        // initializes
+        hpx::cout << "Initializing ..." << hpx::endl;
+        hpxcl_single_initialize(hpx_get_remote_node(), vector_size);
+
+        // main calculation with benchmark
+        hpx::cout << "Running calculation ..." << hpx::endl;
+        double time_hpxcl_remote_nonblock;
+        double time_hpxcl_remote_sync;
+        double time_hpxcl_remote_total;
+        std::vector<char> z_hpxcl_remote = hpxcl_single_calculate(a,b,c,
+                                                    &time_hpxcl_remote_nonblock,
+                                                    &time_hpxcl_remote_sync,
+                                                    &time_hpxcl_remote_total);
+
+        // shuts down
+        hpx::cout << "Shutting down ..." << hpx::endl;
+        hpxcl_single_shutdown();
+
+        // checks for correct result
+        check_for_correct_result((float*)(&z_hpxcl_remote[0]),
+                                 z_hpxcl_remote.size()/sizeof(float),
+                                 &z[0], z.size());
+        
+        // Prints the benchmark statistics
+        hpx::cout << hpx::endl;
+        hpx::cout << "    Nonblocking calls:       " << time_hpxcl_remote_nonblock
+                  << " ms" << hpx::endl;
+        hpx::cout << "    Synchronization:         " << time_hpxcl_remote_sync
+                  << " ms" << hpx::endl;
+        hpx::cout << "    Total Calculation Time:  " << time_hpxcl_remote_total
+                  << " ms" << hpx::endl;
+        hpx::cout << hpx::endl;
+
 
 
         ////////////////////////////////////////////
