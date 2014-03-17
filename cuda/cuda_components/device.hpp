@@ -39,7 +39,8 @@ namespace hpx
                 this->base_type::get_cuda_info(this->get_gid());
             }
 
-            static std::vector<int> get_all_devices(std::vector<hpx::naming::id_type> localities)
+            //takes a vector of localities and returns a vector of devices
+            static std::vector<hpx::cuda::device> get_all_devices(std::vector<hpx::naming::id_type> localities)
             {
                 return base_type::get_all_devices(localities);
             }
@@ -85,6 +86,11 @@ namespace hpx
             {
                 BOOST_ASSERT(this->get_gid());
                 return this->base_type::get_context_sync(this->get_gid());
+            }
+
+            hpx::lcos::unique_future<int> wait()
+            {
+                return this->base_type::wait();
             }
 
             void wait_for_event()
