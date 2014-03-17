@@ -33,9 +33,9 @@ namespace hpx
                     hpx::async<action_type>(gid,dev).get();
                 }
 
-                static std::vector<int> get_all_devices(std::vector<hpx::naming::id_type> localities)
+                static std::vector<hpx::cuda::device> get_all_devices(std::vector<hpx::naming::id_type> localities)
                 {
-                    std::vector<int> vec;
+                    std::vector<hpx::cuda::device> vec;
                     typedef server::device::get_all_devices_action action_type;
                     for(uint64_t i = 0;i<localities.size();i++)
                     {
@@ -78,6 +78,11 @@ namespace hpx
                 static int get_context_sync(hpx::naming::id_type const& gid)
                 {
                     return get_context_async(gid).get();
+                }
+
+                static hpx::lcos::unique_future<int> wait()
+                {
+                    return server::device::wait();
                 }
             };
         }

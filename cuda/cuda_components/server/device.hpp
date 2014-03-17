@@ -10,14 +10,13 @@
 #include <hpx/runtime/components/server/managed_component_base.hpp>
 #include <hpx/runtime/components/server/locking_hook.hpp>
 #include <hpx/runtime/actions/component_action.hpp>
+#include <hpx/include/util.hpp>
 
-#include <boost/foreach.hpp>
-
+#include <cuda.h>
 #include <cuda_runtime.h>
-//#include <cuda.h>
-#include <curand_kernel.h>
-
 #include <thrust/version.h>
+#include <boost/make_shared.hpp>
+#include <string>
 
 #include "../cuda/kernel.cuh"
 
@@ -29,7 +28,6 @@ namespace hpx
         {
          //////////////////////////////////////
          ///This class represents a cuda device
-
          class device
              : public hpx::components::locking_hook<
                  hpx::components::managed_component_base<device>
@@ -38,7 +36,8 @@ namespace hpx
               	 private:
         	  	 unsigned int device_id;
                  unsigned int context_id;
-                 //CUcontext *context;
+                 CUdevice cu_device;
+                 CUcontext cu_context;
                  std::string device_name;
                  cudaDeviceProp props;
               	 
@@ -48,50 +47,42 @@ namespace hpx
         	  	 //second constructor takes device_id
         	  	 //third constructor takes a device_info struct
         	 	 device()
-                 {}
+                 {
+                    cuInit(0); //initializes cuda driver API
+                    cuDeviceGet(&cu_device,0);
+                    cuCtxCreate(&cu_context,0,cu_device);
+                    device_name = props.name;
+                 }
 
         	 	 device(int device_id)
         	 	 {
+                     cuInit(0);
+                     cuDeviceGet(&cu_device,device_id);
+                     cuCtxCreate(&cu_context,0,cu_device);
         	 		 this->set_device(device_id);
                      cudaError_t error;
                      error = cudaGetDeviceProperties(&props,device_id);
                      this->device_name = props.name;
-                     //cuCtxCreate(&this->context,FLAG)
         	 	 }
 				 ~device()
-				 {}
+				 {
+                    cuCtxDetach(cu_context);
+                 }
 
                  //cuda device managedment functions
 
                  int get_device_count()
                  {
                     int device_count = 0;
-                    cudaError_t error;
-                    error = cudaGetDeviceCount(&device_count);
-                    if(error == cudaErrorNoDevice)
-                    {
-                        std::cout<<"There are no cuda devices"<<std::endl;
-                    }
-                    else if(error == cudaErrorInsufficientDriver)
-                    {
-                        std::cout<<"Update the cuda driver"<<std::endl;
-                    }
+                    cuDeviceGetCount(&device_count);
                     return device_count;
                  }
 
                  void set_device(int dev)
                  {
                 	this->device_id = dev;
-                    cudaError_t error;
-                    error = cudaSetDevice(dev);
-                    if(error == cudaErrorInvalidDevice)
-                    {
-                        std::cout<<"Invalid Device"<<std::endl;
-                    }
-                    else if(error == cudaErrorDeviceAlreadyInUse)
-                    {
-                        std::cout<<"Device is already being used"<<std::endl;
-                    }
+                    CUresult error;
+                    error = cuCtxSetCurrent(cu_context);
                  }
 
                  void get_cuda_info()
@@ -146,27 +137,40 @@ namespace hpx
                  {
                     //returns the current CUDA device context
                     //Cuda sets the device context automatically
+                    //return this->context_id;
+                    //CUcontext context;
+                    //cuCtxGetCurrent(&context);
                     return this->context_id;
                  }
 
-                 int get_all_devices()
+                 int /*hpx::cuda::device*/ get_all_devices()
                  {
                 	 //return all devices on this locality
-                	 return get_device_count();
+                	 int num_devices = get_device_count();
+                     return num_devices;
                  }
 
-                  void wait_for_event()
+                 void wait_for_event(/*CUevent cu_event*/)
                  {
-                   /* //blocks until a CUDA event has been triggered
-                    //This is the event lock
-                    boost::shared_ptr<hpx::lcos::local::event> event;
-                    //will be set to false if the callback isn't registered yet
-                    bool callback_is_registered = true;        
-                    //lock event waitlist
-                    {
-                        boost::lock_guard<spinlock_type> lock()
-                    }
-                   */            
+                 }
+
+                 static void  do_wait(boost::shared_ptr<hpx::lcos::local::promise<int> > p)
+                 {
+                    //actual work
+                    pi(100,100);
+                    p->set_value(0); //notify the waiting hpx thread and return a value
+                 }
+
+                 hpx::lcos::unique_future<int> wait()
+                 { 
+                    boost::shared_ptr<hpx::lcos::local::promise<int> > p =
+                        boost::make_shared<hpx::lcos::local::promise<int> >();
+                    //get a reference to IO specific HPX io_service objects
+                    hpx::util::io_service_pool* pool =
+                        hpx::get_runtime().get_thread_pool("io_pool");
+                    pool->get_io_service().post(
+                            hpx::util::bind(&do_wait,p));
+                    return p->get_future();
                  }
 
                  float calculate_pi(int nthreads,int nblocks)
