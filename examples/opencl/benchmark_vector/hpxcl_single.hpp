@@ -38,6 +38,7 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
                                                CL_DEVICE_TYPE_ALL,
                                                1.1f ).get();
 
+/*
     // print devices
     hpx::cout << "Devices:" << hpx::endl;
     for(cl_uint i = 0; i < devices.size(); i++)
@@ -65,6 +66,27 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
 
     // Select a device
     hpxcl_single_device = devices[device_num];
+*/
+
+    // print device
+    hpx::cout << "Device:" << hpx::endl;
+    {
+        
+        device cldevice = devices[0];
+
+        // Query name
+        std::string device_name = device::device_info_to_string(
+                                    cldevice.get_device_info(CL_DEVICE_NAME));
+        std::string device_vendor = device::device_info_to_string(
+                                    cldevice.get_device_info(CL_DEVICE_VENDOR));
+
+        hpx::cout << "    " << device_name << " (" << device_vendor << ")"
+                  << hpx::endl;
+
+    }
+
+    // Select a device
+    hpxcl_single_device = devices[0];
 
     // Create program
     hpxcl_single_program = hpxcl_single_device.create_program_with_source(

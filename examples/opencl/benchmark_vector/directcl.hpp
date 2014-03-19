@@ -63,6 +63,7 @@ static cl_device_id directcl_choose_device()
     ret = clGetPlatformIDs(num_platforms, &platforms[0], NULL);
     directcl_check(ret);
 
+/*
     // Print Platforms
     hpx::cout << "Platforms:" << hpx::endl;
     for(cl_uint i = 0; i < num_platforms; i++)
@@ -87,9 +88,36 @@ static cl_device_id directcl_choose_device()
     std::cin >> platform_num;
     if(platform_num < 0 || platform_num >= num_platforms)
         exit(0);
+*/
 
-    // Select a platform
-    cl_platform_id platform = platforms[platform_num];
+    // Ensure that we found a platforms
+    if(num_platforms < 1)
+    {
+        hpx::cout << "No OpenCL platforms found!" << hpx::endl;
+        exit(1);
+    }
+
+    // Print platform name
+    hpx::cout << "Platform:" << hpx::endl;
+    {
+        char platformName[100];
+        char platformVendor[100];
+
+        ret = clGetPlatformInfo(platforms[0], CL_PLATFORM_NAME, 100,
+                                platformName, NULL);
+        directcl_check(ret);
+        ret = clGetPlatformInfo(platforms[0], CL_PLATFORM_VENDOR, 100,
+                                platformVendor, NULL);
+        directcl_check(ret);
+
+        hpx::cout << "    " << platformName << " (" << platformVendor << ")"
+                  << hpx::endl;
+    }
+    
+    // Select the platform
+    cl_platform_id platform = platforms[0];
+
+
 
     // get number of device ids
     cl_uint num_devices;
@@ -101,27 +129,27 @@ static cl_device_id directcl_choose_device()
     ret = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, num_devices, &devices[0],
                          NULL);
 
+
+    // Ensure that we found a platforms
+    if(num_devices < 1)
+    {
+        hpx::cout << "No OpenCL devices found!" << hpx::endl;
+        exit(1);
+    }
+
     // Print devices
-    hpx::cout << "Devices:" << hpx::endl;
-    for(cl_uint i = 0; i < num_devices; i++)
+    hpx::cout << "Device:" << hpx::endl;
     {
         char deviceName[100];
 
-        ret = clGetDeviceInfo(devices[i], CL_DEVICE_NAME, 100,
+        ret = clGetDeviceInfo(devices[0], CL_DEVICE_NAME, 100,
                                 deviceName, NULL);
         directcl_check(ret);
 
-        hpx::cout << i << ": " << deviceName << hpx::endl;
+        hpx::cout << "    " << deviceName << hpx::endl;
     }
     
-    // Lets you choose a device
-    cl_uint device_num;
-    hpx::cout << "Choose device: " << hpx::endl;
-    std::cin >> device_num;
-    if(device_num < 0 || device_num >= num_devices)
-        exit(0);
-
-    return devices[device_num];
+    return devices[0];
 
 }
 
