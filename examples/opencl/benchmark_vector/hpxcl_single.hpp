@@ -68,11 +68,12 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
     hpxcl_single_device = devices[device_num];
 */
 
+    size_t device_id = 0;
     // print device
     hpx::cout << "Device:" << hpx::endl;
     {
         
-        device cldevice = devices[0];
+        device cldevice = devices[device_id];
 
         // Query name
         std::string device_name = device::device_info_to_string(
@@ -86,7 +87,7 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
     }
 
     // Select a device
-    hpxcl_single_device = devices[0];
+    hpxcl_single_device = devices[device_id];
 
     // Create program
     hpxcl_single_program = hpxcl_single_device.create_program_with_source(

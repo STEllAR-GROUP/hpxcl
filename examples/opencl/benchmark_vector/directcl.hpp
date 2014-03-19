@@ -98,15 +98,16 @@ static cl_device_id directcl_choose_device()
     }
 
     // Print platform name
+    size_t platform_id = 0;
     hpx::cout << "Platform:" << hpx::endl;
     {
         char platformName[100];
         char platformVendor[100];
 
-        ret = clGetPlatformInfo(platforms[0], CL_PLATFORM_NAME, 100,
+        ret = clGetPlatformInfo(platforms[platform_id], CL_PLATFORM_NAME, 100,
                                 platformName, NULL);
         directcl_check(ret);
-        ret = clGetPlatformInfo(platforms[0], CL_PLATFORM_VENDOR, 100,
+        ret = clGetPlatformInfo(platforms[platform_id], CL_PLATFORM_VENDOR, 100,
                                 platformVendor, NULL);
         directcl_check(ret);
 
@@ -115,7 +116,7 @@ static cl_device_id directcl_choose_device()
     }
     
     // Select the platform
-    cl_platform_id platform = platforms[0];
+    cl_platform_id platform = platforms[platform_id];
 
 
 

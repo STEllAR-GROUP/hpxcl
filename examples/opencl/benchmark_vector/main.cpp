@@ -177,9 +177,9 @@ int hpx_main(int argc, char* argv[])
         // HPXCL distributed calculation
         //
         hpx::cout << hpx::endl;
-        hpx::cout << "///////////////////////////////////////" << hpx::endl;
-        hpx::cout << "// HPXCL distributed" << hpx::endl;
-        hpx::cout << "//" << hpx::endl;
+        //hpx::cout << "///////////////////////////////////////" << hpx::endl;
+        //hpx::cout << "// HPXCL distributed" << hpx::endl;
+        //hpx::cout << "//" << hpx::endl;
 
 
 
