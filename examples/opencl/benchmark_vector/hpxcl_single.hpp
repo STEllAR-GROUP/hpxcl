@@ -130,12 +130,13 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
     
 }
 
-static std::vector<char> hpxcl_single_calculate(std::vector<float> &a,
-                                                std::vector<float> &b,
-                                                std::vector<float> &c,
-                                                double* t_nonblock,
-                                                double* t_sync,
-                                                double* t_finish)
+static boost::shared_ptr<std::vector<char>>
+hpxcl_single_calculate(std::vector<float> &a,
+                       std::vector<float> &b,
+                       std::vector<float> &c,
+                       double* t_nonblock,
+                       double* t_sync,
+                       double* t_finish)
 {
     // start time measurement
     timer_start();
@@ -143,7 +144,7 @@ static std::vector<char> hpxcl_single_calculate(std::vector<float> &a,
     // do nothing if matrices are wrong
     if(a.size() != b.size() || b.size() != c.size())
     {
-        return std::vector<char>();
+        return NULL;
     }
 
     size_t size = a.size();
@@ -211,7 +212,7 @@ static std::vector<char> hpxcl_single_calculate(std::vector<float> &a,
     *t_finish = timer_stop();
     
     // return the computed data
-    return *data_ptr;
+    return data_ptr;
 
 
 }

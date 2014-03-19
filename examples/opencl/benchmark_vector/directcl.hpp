@@ -244,11 +244,12 @@ static void directcl_initialize(size_t vector_size)
 }
 
 
-static std::vector<float> directcl_calculate(std::vector<float> a,
-                                             std::vector<float> b,
-                                             std::vector<float> c,
-                                             double* t_nonblock,
-                                             double* t_total)
+static boost::shared_ptr<std::vector<float>>
+directcl_calculate(std::vector<float> a,
+                   std::vector<float> b,
+                   std::vector<float> c,
+                   double* t_nonblock,
+                   double* t_total)
 {
 
     // start timer
@@ -257,7 +258,7 @@ static std::vector<float> directcl_calculate(std::vector<float> a,
     // do nothing if matrices are wrong
     if(a.size() != b.size() || b.size() != c.size())
     {
-        return std::vector<float>();
+        return NULL;
     }
 
     // initialize error test
@@ -298,12 +299,12 @@ static std::vector<float> directcl_calculate(std::vector<float> a,
     directcl_check(err);
 
     // allocate the result buffer
-    std::vector<float> res(a.size());
+    boost::shared_ptr<std::vector<float>> res(new std::vector<float>(a.size()));
 
     // read into result buffer
     err = clEnqueueReadBuffer(directcl_command_queue, directcl_buffer_z,
                               CL_FALSE, 0, a.size() * sizeof(float),
-                              &res[0], 0, NULL, NULL);
+                              &(*res)[0], 0, NULL, NULL);
     directcl_check(err);
 
     // get time of nonblocking calls

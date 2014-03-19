@@ -30,12 +30,11 @@ hpx::opencl::server::trigger_event_from_external(hpx::runtime * rt,
     // if we're on an OS thread, register it temporarily.
     // add the thread id to its name, as there could potentially
     // be multiple OpenCL threads in this function at the same time
-    BOOST_ASSERT(
-        rt->register_thread("opencl",
-                            opencl_thread_num.fetch_add(1,
-                                            boost::memory_order_relaxed),
-                            false)
-                    );
+    rt->register_thread("opencl",
+                        opencl_thread_num.fetch_add(1,
+                                                   boost::memory_order_relaxed),
+                        false);
+    BOOST_ASSERT(succeeded);
 
     // trigger the event lock
     event->set();
@@ -49,6 +48,6 @@ hpx::opencl::server::trigger_event_from_external(hpx::runtime * rt,
     //  * but it would be kind of a memory leak as well, if we register
     //  * every single callback-call on a different thread name ...
     //  */
-    //BOOST_ASSERT(rt->unregister_thread());
+    //rt->unregister_thread();
 
 }

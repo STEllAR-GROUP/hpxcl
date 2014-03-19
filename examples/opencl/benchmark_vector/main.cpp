@@ -63,7 +63,8 @@ int hpx_main(int argc, char* argv[])
         double time_directcl_nonblock;
         double time_directcl_total;
         hpx::cout << "Running calculation ..." << hpx::endl;
-        std::vector<float> z_directcl = directcl_calculate(a,b,c,
+        boost::shared_ptr<std::vector<float>> z_directcl = 
+                                    directcl_calculate(a, b, c,
                                                        &time_directcl_nonblock,
                                                        &time_directcl_total);
 
@@ -72,7 +73,7 @@ int hpx_main(int argc, char* argv[])
         directcl_shutdown();
 
         // checks for correct result
-        check_for_correct_result(&z_directcl[0], z_directcl.size(),
+        check_for_correct_result(&(*z_directcl)[0], (*z_directcl).size(),
                                  &z[0], z.size());
         
         // Prints the benchmark statistics
@@ -101,7 +102,8 @@ int hpx_main(int argc, char* argv[])
         double time_hpxcl_local_nonblock;
         double time_hpxcl_local_sync;
         double time_hpxcl_local_total;
-        std::vector<char> z_hpxcl_local = hpxcl_single_calculate(a,b,c,
+        boost::shared_ptr<std::vector<char>> z_hpxcl_local =
+                             hpxcl_single_calculate(a, b, c,
                                                     &time_hpxcl_local_nonblock,
                                                     &time_hpxcl_local_sync,
                                                     &time_hpxcl_local_total);
@@ -111,8 +113,8 @@ int hpx_main(int argc, char* argv[])
         hpxcl_single_shutdown();
 
         // checks for correct result
-        check_for_correct_result((float*)(&z_hpxcl_local[0]),
-                                 z_hpxcl_local.size()/sizeof(float),
+        check_for_correct_result((float*)(&(*z_hpxcl_local)[0]),
+                                 (*z_hpxcl_local).size()/sizeof(float),
                                  &z[0], z.size());
         
         // Prints the benchmark statistics
@@ -144,7 +146,8 @@ int hpx_main(int argc, char* argv[])
         double time_hpxcl_remote_nonblock;
         double time_hpxcl_remote_sync;
         double time_hpxcl_remote_total;
-        std::vector<char> z_hpxcl_remote = hpxcl_single_calculate(a,b,c,
+        boost::shared_ptr<std::vector<char>> z_hpxcl_remote =
+                             hpxcl_single_calculate(a, b, c,
                                                     &time_hpxcl_remote_nonblock,
                                                     &time_hpxcl_remote_sync,
                                                     &time_hpxcl_remote_total);
@@ -154,8 +157,8 @@ int hpx_main(int argc, char* argv[])
         hpxcl_single_shutdown();
 
         // checks for correct result
-        check_for_correct_result((float*)(&z_hpxcl_remote[0]),
-                                 z_hpxcl_remote.size()/sizeof(float),
+        check_for_correct_result((float*)(&(*z_hpxcl_remote)[0]),
+                                 (*z_hpxcl_remote).size()/sizeof(float),
                                  &z[0], z.size());
         
         // Prints the benchmark statistics
