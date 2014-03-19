@@ -163,35 +163,35 @@ static void directcl_initialize(size_t vector_size)
 
     // Create buffers
     directcl_buffer_a = clCreateBuffer(directcl_context,
-                                       CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
+                                       CL_MEM_READ_ONLY,
                                        vector_size * sizeof(float), NULL, &err);
     directcl_check(err);
     directcl_buffer_b = clCreateBuffer(directcl_context,
-                                       CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
+                                       CL_MEM_READ_ONLY,
                                        vector_size * sizeof(float), NULL, &err);
     directcl_check(err);
     directcl_buffer_c = clCreateBuffer(directcl_context,
-                                       CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
+                                       CL_MEM_READ_ONLY,
                                        vector_size * sizeof(float), NULL, &err);
     directcl_check(err);
     directcl_buffer_m = clCreateBuffer(directcl_context,
-                                       CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
+                                       CL_MEM_READ_WRITE,
                                        vector_size * sizeof(float), NULL, &err);
     directcl_check(err);
     directcl_buffer_n = clCreateBuffer(directcl_context,
-                                       CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
+                                       CL_MEM_READ_WRITE,
                                        vector_size * sizeof(float), NULL, &err);
     directcl_check(err);
     directcl_buffer_o = clCreateBuffer(directcl_context,
-                                       CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
+                                       CL_MEM_READ_WRITE,
                                        vector_size * sizeof(float), NULL, &err);
     directcl_check(err);
     directcl_buffer_p = clCreateBuffer(directcl_context,
-                                       CL_MEM_READ_WRITE | CL_MEM_HOST_NO_ACCESS,
+                                       CL_MEM_READ_WRITE,
                                        vector_size * sizeof(float), NULL, &err);
     directcl_check(err);
     directcl_buffer_z = clCreateBuffer(directcl_context,
-                                       CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
+                                       CL_MEM_WRITE_ONLY,
                                        vector_size * sizeof(float), NULL, &err);
     directcl_check(err);
 
