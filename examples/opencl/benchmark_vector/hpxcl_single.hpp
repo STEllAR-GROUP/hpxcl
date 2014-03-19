@@ -144,7 +144,7 @@ hpxcl_single_calculate(std::vector<float> &a,
     // do nothing if matrices are wrong
     if(a.size() != b.size() || b.size() != c.size())
     {
-        return NULL;
+        return boost::shared_ptr<std::vector<char>>();
     }
 
     size_t size = a.size();
