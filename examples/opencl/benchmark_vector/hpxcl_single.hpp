@@ -161,9 +161,6 @@ hpxcl_single_calculate(std::vector<float> &a,
                        double* t_sync,
                        double* t_finish)
 {
-    // start time measurement
-    timer_start();
-    
     // do nothing if matrices are wrong
     if(a.size() != b.size() || b.size() != c.size())
     {
@@ -179,6 +176,14 @@ hpxcl_single_calculate(std::vector<float> &a,
                hpxcl_single_buffer_b.enqueue_write(0, size*sizeof(float), &b[0]);
     shared_future<event> write_c_event =
                hpxcl_single_buffer_c.enqueue_write(0, size*sizeof(float), &c[0]);
+
+    // wait for write to finish
+    write_a_event.get().await();
+    write_b_event.get().await();
+    write_c_event.get().await();
+
+    // start time measurement
+    timer_start();
 
     // set work dimensions
     work_size<1> dim;
@@ -208,32 +213,37 @@ hpxcl_single_calculate(std::vector<float> &a,
                           hpxcl_single_mul_kernel.enqueue(dim, mul_dependencies);
 
     // run log kernel
-    shared_future<event> kernel_log_event = 
+    shared_future<event> kernel_log_event_future = 
                           hpxcl_single_log_kernel.enqueue(dim, kernel_mul_event);
 
-    // enqueue result read
-    shared_future<event> read_event_future = 
-                        hpxcl_single_buffer_z.enqueue_read(0, size*sizeof(float),
-                                                          kernel_log_event);
-
-    
     ////////// UNTIL HERE ALL CALLS WERE NON-BLOCKING /////////////////////////
 
     // get time of non-blocking calls
     *t_nonblock = timer_stop();
 
-    // wait for enqueue_read to return the event
-    event read_event = read_event_future.get();
+    // wait for all nonblocking calls to finish
+    event kernel_log_event = kernel_log_event_future.get();
 
     // get time of synchronization
     *t_sync = timer_stop();
 
-    // wait for calculation to complete and return data
-    boost::shared_ptr<std::vector<char>> data_ptr = read_event.get_data().get();
+    // wait for the end of the execution
+    kernel_log_event.await();
 
     // get total time of execution
     *t_finish = timer_stop();
-    
+ 
+    // enqueue result read
+    shared_future<event> read_event_future = 
+                       hpxcl_single_buffer_z.enqueue_read(0, size*sizeof(float),
+                                                          kernel_log_event);
+
+    // wait for enqueue_read to return the event
+    event read_event = read_event_future.get();
+
+   // wait for calculation to complete and return data
+    boost::shared_ptr<std::vector<char>> data_ptr = read_event.get_data().get();
+   
     // return the computed data
     return data_ptr;
 

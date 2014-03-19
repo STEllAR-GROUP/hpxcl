@@ -41,9 +41,8 @@ int hpx_main(int argc, char* argv[])
         std::vector<float> c = generate_input_matrix(vector_size);
         
         hpx::cout << "Calculating reference result on CPU ..." << hpx::endl;
-        timer_start();
-        std::vector<float> z = calculate_result(a,b,c);
-        double time_cpu = timer_stop();
+        double time_cpu;
+        std::vector<float> z = calculate_result(a,b,c,&time_cpu);
         hpx::cout << "        ... " << time_cpu << " ms" << hpx::endl;
 
         

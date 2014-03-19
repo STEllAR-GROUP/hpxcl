@@ -11,6 +11,7 @@
 #include <ctime>
 #include <hpx/include/iostreams.hpp>
 
+#include "timer.hpp"
 
 static bool random_initialized = false;
 
@@ -43,8 +44,10 @@ static std::vector<float> generate_input_matrix(size_t size)
 // calculates the result for verification
 static std::vector<float> calculate_result(std::vector<float> a,
                                            std::vector<float> b,
-                                           std::vector<float> c)
+                                           std::vector<float> c,
+                                           double* time)
 {
+
 
     // check for identical vector size
     if(a.size() != b.size() || b.size() != c.size())
@@ -55,6 +58,13 @@ static std::vector<float> calculate_result(std::vector<float> a,
 
     // allocate output matrix
     std::vector<float> res(size);
+    for(size_t i = 0; i < size; i++)
+    {
+        res[i] = 0.0f;
+    }
+
+    // start time measurement
+    timer_start();
 
     // calculate output matrix
     for(size_t i = 0; i < size; i++)
@@ -62,6 +72,9 @@ static std::vector<float> calculate_result(std::vector<float> a,
         //res[i] = (a[i] + b[i]) * (2 * c[i]);
         res[i] = log((a[i] + exp(b[i])) * (2.0f * c[i]));
     }
+
+    // stop time measurement
+    *time = timer_stop();
 
     // return the calculated matrix
     return res;

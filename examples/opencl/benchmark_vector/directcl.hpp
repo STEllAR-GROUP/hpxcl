@@ -281,9 +281,6 @@ directcl_calculate(std::vector<float> a,
                    double* t_total)
 {
 
-    // start timer
-    timer_start();
-
     // do nothing if matrices are wrong
     if(a.size() != b.size() || b.size() != c.size())
     {
@@ -308,6 +305,13 @@ directcl_calculate(std::vector<float> a,
     directcl_check(err);
 
     
+    // wait for writes to finish
+    err = clFinish(directcl_command_queue);
+    directcl_check(err);
+
+    // start timer
+    timer_start();
+
 
     // run kernels
     size_t size = a.size();
@@ -327,15 +331,6 @@ directcl_calculate(std::vector<float> a,
                                  1, NULL, &size, NULL, 0, NULL, NULL);
     directcl_check(err);
 
-    // allocate the result buffer
-    boost::shared_ptr<std::vector<float>> res(new std::vector<float>(a.size()));
-
-    // read into result buffer
-    err = clEnqueueReadBuffer(directcl_command_queue, directcl_buffer_z,
-                              CL_FALSE, 0, a.size() * sizeof(float),
-                              &(*res)[0], 0, NULL, NULL);
-    directcl_check(err);
-
     // get time of nonblocking calls
     *t_nonblock = timer_stop();
 
@@ -345,6 +340,19 @@ directcl_calculate(std::vector<float> a,
 
     // get time of total calculation
     *t_total = timer_stop();
+
+    // allocate the result buffer
+    boost::shared_ptr<std::vector<float>> res(new std::vector<float>(a.size()));
+
+    // read into result buffer
+    err = clEnqueueReadBuffer(directcl_command_queue, directcl_buffer_z,
+                              CL_FALSE, 0, a.size() * sizeof(float),
+                              &(*res)[0], 0, NULL, NULL);
+    directcl_check(err);
+
+    // finish
+    err = clFinish(directcl_command_queue);
+    directcl_check(err);
 
     return res;
 }
