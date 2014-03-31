@@ -7,14 +7,18 @@
 #include <hpx/include/actions.hpp>
 #include <hpx/include/util.hpp>
 
-#include <vector>
-#include <iostream>
-
-#include <boost/foreach.hpp>
-
 #include "cuda_components/device.hpp"
 
-std::default_random_engine gen(std::time(0));
+int main()
+{
+    return hpx::init();
+}
+
+int hpx_main()
+{
+    return hpx::finalize();
+}
+/*std::default_random_engine gen(std::time(0));
 std::uniform_real_distribution<double> dist(0.0,1.0);
 
 double calculate_pi(boost::uint64_t num_of_iterations,boost::uint64_t num_of_sets);
@@ -38,7 +42,6 @@ double calculate_pi(boost::uint64_t num_of_iterations,boost::uint64_t num_of_set
             futures.push_back(hpx::async<check_if_hit_action>(node,num_of_sets));
         }
     }
-
     hpx::wait(futures,
         [&](std::size_t,double d)
         {
@@ -64,41 +67,46 @@ double check_if_hit(boost::uint64_t num_of_sets)
     return hits_per_set;
 }
 
-int main(int argc,char** argv)
-{
-    boost::program_options::options_description
+int main(int argc,char* argv[])
+{   boost::program_options::options_description
         desc_commandline("Usage: " HPX_APPLICATION_STRING "[options]");
     desc_commandline.add_options()
         ("info",
             boost::program_options::value<bool>()->default_value(false)
         );
-
 	return hpx::init(desc_commandline,argc,argv);
 }
 
 int hpx_main(boost::program_options::variables_map& vm)
-{
-    {
-        bool info = vm["info"].as<bool>();
-        typedef hpx::cuda::device cuda_device;
-
-        std::vector<hpx::id_type> localities = hpx::find_all_localities();
-
-        cuda_device client;
-        client.create(hpx::find_here());
-
-        if(info)
-        {
-            client.get_cuda_info();
-        }
-        
-        hpx::util::high_resolution_timer t;
-        hpx::lcos::future<float> pi = client.calculate_pi_async(200,200);
-        float cpu_pi = calculate_pi(10000000,100000);
-        std::cout<<cpu_pi<<" and ";
-        float gpu_pi = pi.get();
-        std::cout<<std::endl<<gpu_pi<<" were calculated at the same time"<<std::endl;
-        std::cout<<"It took "<<t.elapsed()<<" seconds"<<std::endl;
-    }
+{   
+    bool info = vm["info"].as<bool>();
+    typedef hpx::cuda::device cuda_device;
+    std::vector<hpx::id_type> localities = hpx::find_all_localities();
+    cuda_device client;
+    client.create(hpx::find_here());
+    if(info)
+        client.get_cuda_info();
+    hpx::util::high_resolution_timer t;
+    hpx::lcos::unique_future<int> result = client.wait();
+    float cpu_pi = calculate_pi(10000000,100000);
+    std::cout<<cpu_pi<<" and ";
+    float gpu_pi = pi.get();
+    std::cout<<std::endl<<gpu_pi<<" were calculated at the same time"<<std::endl;
+    std::cout<<"It took "<<t.elapsed()<<" seconds"<<std::endl;
     return hpx::finalize();
-}
+
+
+
+
+
+
+
+
+
+
+
+
+    g++ -o ~/my_hpx_libs/libcuda_device.so ~/hpxcl/cuda/cuda_components/device.cpp \
+`pkg-config --cflags --libs hpx_component` -DHPX_COMPONENT_NAME=cuda_device 2> errors/device.cpp
+
+}*/

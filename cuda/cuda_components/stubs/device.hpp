@@ -43,7 +43,6 @@ namespace hpx
                     }
                     return vec;
                 }
-
                 //functions to run CUDA kernels
                 static hpx::lcos::future<float>
                 calculate_pi_async(hpx::naming::id_type const& gid,int nthreads, int nblocks)
@@ -80,7 +79,7 @@ namespace hpx
                     return get_context_async(gid).get();
                 }
 
-                static hpx::lcos::unique_future<int> wait()
+                static hpx::lcos::unique_future<int> wait(hpx::naming::id_type const& gid)
                 {
                     return server::device::wait();
                 }

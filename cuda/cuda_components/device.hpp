@@ -24,15 +24,12 @@ namespace hpx
         public:
             device()
             {}
-
             device(hpx::future<hpx::naming::id_type> const& gid)
 				: base_type(gid)
             {}
-
             device(hpx::future<hpx::naming::id_type> const& gid,int device_id)
                 : base_type(gid)
             {}
-
             void get_cuda_info()
             {
                 BOOST_ASSERT(this->get_gid());
@@ -90,13 +87,13 @@ namespace hpx
 
             hpx::lcos::unique_future<int> wait()
             {
-                return this->base_type::wait();
+                BOOST_ASSERT(this->get_gid());
+                return this->base_type::wait(this->get_gid());
             }
 
-            void wait_for_event()
+            /*void wait_for_event()
             {
-
-            }
+            }*/
         };
 	}
 }

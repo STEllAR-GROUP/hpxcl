@@ -1,14 +1,3 @@
-TODO
-1. device component
-   A. 
-2. kernel component
-   holds parameters used to run kernel 
-3. event component
-   holds all info on events and runs events based off parent device
-4. buffer component
-   A. holds parameters for cuda 
-
-   TODO
-   1. implement callback for event and streams 
-   2. check all cuda hpx and c++ errors
-   3. create a way to define kernel in c++ code
+1.) implement nvcc compilation of cuda kernels at runtime from string be able to load from file
+2.) doxygen stuff
+3.) make sure synchronization works

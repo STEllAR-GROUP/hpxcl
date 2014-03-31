@@ -7,9 +7,8 @@
 #define DEVICE_2_HPP
 
 #include <hpx/hpx_fwd.hpp>
-#include <hpx/runtime/components/server/managed_component_base.hpp>
-#include <hpx/runtime/components/server/locking_hook.hpp>
-#include <hpx/runtime/actions/component_action.hpp>
+#include <hpx/include/runtime.hpp>
+#include <hpx/include/iostreams.hpp>
 #include <hpx/include/util.hpp>
 
 #include <cuda.h>
@@ -29,9 +28,7 @@ namespace hpx
          //////////////////////////////////////
          ///This class represents a cuda device
          class device
-             : public hpx::components::locking_hook<
-                 hpx::components::managed_component_base<device>
-                 >
+             : public hpx::components::locking_hook<hpx::components::managed_component_base<device> >
              {
               	 private:
         	  	 unsigned int device_id;
@@ -85,8 +82,8 @@ namespace hpx
                     error = cuCtxSetCurrent(cu_context);
                  }
 
-                 void get_cuda_info()
-                 {
+                void get_cuda_info()
+                {
                     const int kb = 1024;
                     const int mb = kb * kb;
 
@@ -126,7 +123,7 @@ namespace hpx
                         std::cout<<"   Max grid dimensions:  [ " << props.maxGridSize[0]<<", "<<props.maxGridSize[1]<< ", "<<props.maxGridSize[2]<<" ]"<<std::endl;
                         std::cout<<std::endl;
                     }
-                 }
+                }  
 
                  int get_device_id()
                  {
@@ -150,26 +147,27 @@ namespace hpx
                      return num_devices;
                  }
 
-                 void wait_for_event(/*CUevent cu_event*/)
-                 {
-                 }
+                 //void wait_for_event(/*CUevent cu_event*/)
+                 //{
+                 //}
 
                  static void  do_wait(boost::shared_ptr<hpx::lcos::local::promise<int> > p)
                  {
                     //actual work
-                    pi(100,100);
+                    std::cout << pi(100,100) << endl;
                     p->set_value(0); //notify the waiting hpx thread and return a value
                  }
 
-                 hpx::lcos::unique_future<int> wait()
+                 static hpx::lcos::unique_future<int> wait()
                  { 
-                    boost::shared_ptr<hpx::lcos::local::promise<int> > p =
+                    boost::shared_ptr<hpx::lcos::local::promise<int> >();
                         boost::make_shared<hpx::lcos::local::promise<int> >();
-                    //get a reference to IO specific HPX io_service objects
+
                     hpx::util::io_service_pool* pool =
                         hpx::get_runtime().get_thread_pool("io_pool");
+
                     pool->get_io_service().post(
-                            hpx::util::bind(&do_wait,p));
+                        hpx::util::bind(&do_wait, p));
                     return p->get_future();
                  }
 
@@ -184,7 +182,8 @@ namespace hpx
                  HPX_DEFINE_COMPONENT_ACTION(device,get_all_devices);
                  HPX_DEFINE_COMPONENT_ACTION(device,get_device_id);
                  HPX_DEFINE_COMPONENT_ACTION(device,get_context);
-                 HPX_DEFINE_COMPONENT_ACTION(device,wait_for_event);
+                 //HPX_DEFINE_COMPONENT_ACTION(device,wait_for_event);
+                 HPX_DEFINE_COMPONENT_ACTION(device,wait);
             };
 	    }
     }
@@ -210,8 +209,12 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::get_context_action,
     device__get_context_action);
-HPX_REGISTER_ACTION_DECLARATION(
+/*HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::wait_for_event_action,
     device_wait_for_event_action);
+*/
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::wait_action,
+    device_wait_action);
 
 #endif //cuda_device_2_HPP
