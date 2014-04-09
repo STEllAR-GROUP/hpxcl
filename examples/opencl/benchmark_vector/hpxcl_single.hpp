@@ -129,28 +129,50 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
                                     CL_MEM_WRITE_ONLY,
                                     vector_size * sizeof(float));
 
+    // Initialize a list of future events for asynchronous set_arg calls
+    std::vector<shared_future<void>> set_arg_futures;
+
     // set kernel args for exp
-    hpxcl_single_exp_kernel.set_arg(0, hpxcl_single_buffer_m);
-    hpxcl_single_exp_kernel.set_arg(1, hpxcl_single_buffer_b);
+    set_arg_futures.push_back(
+        hpxcl_single_exp_kernel.set_arg_async(0, hpxcl_single_buffer_m));
+    set_arg_futures.push_back(
+        hpxcl_single_exp_kernel.set_arg_async(1, hpxcl_single_buffer_b));
     
     // set kernel args for add
-    hpxcl_single_add_kernel.set_arg(0, hpxcl_single_buffer_n);
-    hpxcl_single_add_kernel.set_arg(1, hpxcl_single_buffer_a);
-    hpxcl_single_add_kernel.set_arg(2, hpxcl_single_buffer_m);
+    set_arg_futures.push_back(
+        hpxcl_single_add_kernel.set_arg_async(0, hpxcl_single_buffer_n));
+    set_arg_futures.push_back(
+        hpxcl_single_add_kernel.set_arg_async(1, hpxcl_single_buffer_a));
+    set_arg_futures.push_back(
+        hpxcl_single_add_kernel.set_arg_async(2, hpxcl_single_buffer_m));
 
     // set kernel args for dbl
-    hpxcl_single_dbl_kernel.set_arg(0, hpxcl_single_buffer_o);
-    hpxcl_single_dbl_kernel.set_arg(1, hpxcl_single_buffer_c);
+    set_arg_futures.push_back(
+        hpxcl_single_dbl_kernel.set_arg_async(0, hpxcl_single_buffer_o));
+    set_arg_futures.push_back(
+        hpxcl_single_dbl_kernel.set_arg_async(1, hpxcl_single_buffer_c));
     
     // set kernel args for mul
-    hpxcl_single_mul_kernel.set_arg(0, hpxcl_single_buffer_p);
-    hpxcl_single_mul_kernel.set_arg(1, hpxcl_single_buffer_n);
-    hpxcl_single_mul_kernel.set_arg(2, hpxcl_single_buffer_o);
+    set_arg_futures.push_back(
+        hpxcl_single_mul_kernel.set_arg_async(0, hpxcl_single_buffer_p));
+    set_arg_futures.push_back(
+        hpxcl_single_mul_kernel.set_arg_async(1, hpxcl_single_buffer_n));
+    set_arg_futures.push_back(
+        hpxcl_single_mul_kernel.set_arg_async(2, hpxcl_single_buffer_o));
     
     // set kernel args for log
-    hpxcl_single_log_kernel.set_arg(0, hpxcl_single_buffer_z);
-    hpxcl_single_log_kernel.set_arg(1, hpxcl_single_buffer_p);
+    set_arg_futures.push_back(
+        hpxcl_single_log_kernel.set_arg_async(0, hpxcl_single_buffer_z));
+    set_arg_futures.push_back(
+        hpxcl_single_log_kernel.set_arg_async(1, hpxcl_single_buffer_p));
     
+    // wait for function calls to trigger
+    BOOST_FOREACH(shared_future<void> & future, set_arg_futures)
+    {
+        future.wait();
+    }
+    
+
 }
 
 static boost::shared_ptr<std::vector<char>>
