@@ -9,6 +9,7 @@
 
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/components.hpp>
+#include <hpx/util/serialize_buffer.hpp>
 
 #include <CL/cl.h>
 
@@ -28,6 +29,8 @@ namespace hpx { namespace opencl{ namespace server{
         // Constructor
         program();
         program(hpx::naming::id_type device_id, std::string code);
+        program(hpx::naming::id_type device_id,
+                                   hpx::util::serialize_buffer<char> binary);
 
         ~program();
 
@@ -75,9 +78,6 @@ namespace hpx { namespace opencl{ namespace server{
         //
         boost::shared_ptr<device> parent_device;
         hpx::naming::id_type parent_device_id;
-
-        // the program code
-        std::string code;
 
         // the cl_program object
         cl_program program_id;

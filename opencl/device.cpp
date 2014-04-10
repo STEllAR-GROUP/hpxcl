@@ -79,6 +79,28 @@ device::create_program_with_source(std::string source) const
 
 }
 
+hpx::opencl::program
+device::create_program_with_binary(size_t binary_size, const char* binary) const
+{
+
+    BOOST_ASSERT(this->get_gid());
+
+    // Make data pointer serializable
+    hpx::util::serialize_buffer<char>
+    serializable_binary(const_cast<char*>(binary), binary_size,
+                        hpx::util::serialize_buffer<char>::init_mode::reference);
+
+    // Create new program object server
+    hpx::lcos::unique_future<hpx::naming::id_type>
+    program_server = hpx::components::new_<hpx::opencl::server::program>
+                     (get_colocation_id_sync(get_gid()), get_gid(),
+                                                           serializable_binary);
+
+    // Return program object client
+    return program(std::move(program_server));
+
+}
+
 hpx::lcos::unique_future<hpx::opencl::event>
 device::create_user_event() const
 {

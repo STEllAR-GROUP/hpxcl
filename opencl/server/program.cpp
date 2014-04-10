@@ -19,14 +19,12 @@ using namespace hpx::opencl::server;
 CL_FORBID_EMPTY_CONSTRUCTOR(program);
 
 
-program::program(hpx::naming::id_type device_id, std::string _code)
+program::program(hpx::naming::id_type device_id, std::string code)
 {
     this->program_id = NULL;
     this->parent_device_id = device_id;
     this->parent_device = hpx::get_ptr
                          <hpx::opencl::server::device>(parent_device_id).get();
-    this->code = _code;
-
 
     // create variables for clCreateProgram call
     size_t code_size = code.length();
@@ -39,6 +37,33 @@ program::program(hpx::naming::id_type device_id, std::string _code)
     cl_ensure(err, "clCreateProgramWithSource()");
                               
 }
+
+program::program(hpx::naming::id_type device_id,
+                 hpx::util::serialize_buffer<char> binary)
+{
+    this->program_id = NULL;
+    this->parent_device_id = device_id;
+    this->parent_device = hpx::get_ptr
+                         <hpx::opencl::server::device>(parent_device_id).get();
+
+
+    // create variables for clCreateProgram call
+    cl_device_id cl_device_id = parent_device->get_device_id();
+    const unsigned char* binary_ptr = (unsigned char*)(binary.data());
+    size_t binary_size = binary.size(); 
+
+    // initialize the cl_program object
+    cl_int err;
+    cl_int binary_status;
+    program_id = clCreateProgramWithBinary(parent_device->get_context(), 1,
+                                           &cl_device_id, &binary_size,
+                                           &binary_ptr, &binary_status,
+                                           &err);
+    cl_ensure(err, "clCreateProgramWithBinary()");
+    cl_ensure(binary_status, "clCreateProgramWithBinary()");
+                              
+}
+
 
 program::~program()
 {
@@ -64,14 +89,14 @@ program::acquire_build_log()
     // Query size
     err = clGetProgramBuildInfo(program_id, parent_device->get_device_id(),
                                 CL_PROGRAM_BUILD_LOG, 0, NULL, &build_log_size);
-    
+   
     // Create buffer
-    std::vector<char> buf(build_log_size);
+    boost::scoped_array<char> buf(new char[build_log_size]);
 
     // Get log
     err = clGetProgramBuildInfo(program_id, parent_device->get_device_id(),
                                 CL_PROGRAM_BUILD_LOG, build_log_size,
-                                &buf[0], NULL);
+                                buf.get(), NULL);
 
     // make build log look nice in exception
     std::stringstream sstream;
@@ -79,7 +104,7 @@ program::acquire_build_log()
     sstream << "//////////////////////////////////////" << std::endl;
     sstream << "/// OPENCL BUILD LOG" << std::endl;
     sstream << "///" << std::endl;
-    sstream << std::endl << &buf[0] << std::endl;
+    sstream << std::endl << buf.get() << std::endl;
     sstream << "///" << std::endl;
     sstream << "/// OPENCL BUILD LOG END" << std::endl;
     sstream << "//////////////////////////////////////" << std::endl;

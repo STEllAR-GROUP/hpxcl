@@ -127,9 +127,15 @@ namespace opencl {
             // Creates an OpenCL buffer
             hpx::opencl::buffer
             create_buffer(cl_mem_flags flags, size_t size) const;
+
             /**
              *  @brief Creates an OpenCL buffer and initializes it with given
              *         data.
+             *
+             *  The data pointer must NOT get modified until the internal
+             *  future of the buffer triggered.
+             *
+             *  One can wait for the internal future with e.g. buffer::get_gid().
              *
              *  @param flags    Sets properties of the buffer.<BR>
              *                  Possible values are
@@ -169,7 +175,19 @@ namespace opencl {
             hpx::opencl::program
             create_program_with_source(std::string source) const;
             
-            
+            /**
+             *  @brief Creates an OpenCL program object from a prebuilt binary
+             *
+             *  One can create a prebuilt binary from a compiled
+             *  \ref hpx::opencl::program with \ref program::get_binary()
+             *
+             *  @param binary   The binary execution code for the program.
+             *  @return         A program object associated with the calling
+             *                  device.
+             */
+            hpx::opencl::program
+            create_program_with_binary(size_t binary_size, const char* binary) const;
+
         private:
             // ///////////////////////////////////////
             //  Helper Functions
