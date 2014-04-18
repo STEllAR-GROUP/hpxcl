@@ -46,6 +46,18 @@ program::build_async(std::string build_options) const
 
 }
 
+hpx::lcos::unique_future<std::vector<char>>
+program::get_binary() const
+{
+
+    BOOST_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::program::get_binary_action func;
+    
+    return hpx::async<func>(this->get_gid());
+
+}
+
 hpx::opencl::kernel
 program::create_kernel(std::string kernel_name) const
 {
