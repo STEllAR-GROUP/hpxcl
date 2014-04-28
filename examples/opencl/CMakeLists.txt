@@ -6,6 +6,7 @@
 set(subdirs
     #mandelbrot
     benchmark_vector
+    mandelbrot
     )
 
 foreach(subdir ${subdirs})
