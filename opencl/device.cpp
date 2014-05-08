@@ -37,7 +37,7 @@ device::create_buffer(cl_mem_flags flags, size_t size, const void* data) const
           hpx::util::serialize_buffer<char>::init_mode::reference);
 
     // Create new Buffer Server
-    hpx::lcos::unique_future<hpx::naming::id_type>
+    hpx::lcos::future<hpx::naming::id_type>
     buffer_server = hpx::components::new_<hpx::opencl::server::buffer>
                     (get_colocation_id_sync(get_gid()), get_gid(), flags, size,
                      serializable_data);
@@ -54,7 +54,7 @@ device::create_buffer(cl_mem_flags flags, size_t size) const
     BOOST_ASSERT(this->get_gid());
     
     // Create new Buffer Server
-    hpx::lcos::unique_future<hpx::naming::id_type>
+    hpx::lcos::future<hpx::naming::id_type>
     buffer_server = hpx::components::new_<hpx::opencl::server::buffer>
                     (get_colocation_id_sync(get_gid()), get_gid(), flags, size);
 
@@ -70,7 +70,7 @@ device::create_program_with_source(std::string source) const
     BOOST_ASSERT(this->get_gid());
 
     // Create new program object server
-    hpx::lcos::unique_future<hpx::naming::id_type>
+    hpx::lcos::future<hpx::naming::id_type>
     program_server = hpx::components::new_<hpx::opencl::server::program>
                      (get_colocation_id_sync(get_gid()), get_gid(), source);
 
@@ -91,7 +91,7 @@ device::create_program_with_binary(size_t binary_size, const char* binary) const
                         hpx::util::serialize_buffer<char>::init_mode::reference);
 
     // Create new program object server
-    hpx::lcos::unique_future<hpx::naming::id_type>
+    hpx::lcos::future<hpx::naming::id_type>
     program_server = hpx::components::new_<hpx::opencl::server::program>
                      (get_colocation_id_sync(get_gid()), get_gid(),
                                                            serializable_binary);
@@ -101,7 +101,7 @@ device::create_program_with_binary(size_t binary_size, const char* binary) const
 
 }
 
-hpx::lcos::unique_future<hpx::opencl::event>
+hpx::lcos::future<hpx::opencl::event>
 device::create_user_event() const
 {
     BOOST_ASSERT(this->get_gid());
@@ -111,7 +111,7 @@ device::create_user_event() const
     return hpx::async<func>(this->get_gid());
 }
 
-hpx::lcos::unique_future<std::vector<char>>
+hpx::lcos::future<std::vector<char>>
 device::get_device_info(cl_device_info info_type) const
 {
 
@@ -124,7 +124,7 @@ device::get_device_info(cl_device_info info_type) const
 }
 
 std::string
-device::device_info_to_string(hpx::lcos::unique_future<std::vector<char>> info)
+device::device_info_to_string(hpx::lcos::future<std::vector<char>> info)
 {
 
     std::vector<char> char_array = info.get();

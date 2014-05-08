@@ -122,13 +122,19 @@ bool work_queue<T>::request(T* undone_workload)
     // get new work packet
     if(!unfinished_work.pop(undone_workload))
     {
-        // decrease work counter as we couldn't get a work packet
-        num_work--;
-
         // set input queue state to finished.
         // from now on we will only wait for returned packets.
         // as soon as the num_work is zero, we know everything is done.
         finished = true;
+
+        // decrease work counter as we couldn't get a work packet
+        size_t work_left = --num_work;
+
+        // if all work packets got returned, close the result queue
+        if(work_left == 0)
+        {
+            finished_work.finish();
+        }
 
         // stop worker, no more work to be done
         return false;

@@ -6,6 +6,9 @@
 
 set(sources
     main.cpp
+    pngwriter.cpp
+    workload.cpp
+    mandelbrotworker.cpp
 )
 
 
@@ -27,5 +30,8 @@ add_hpx_pseudo_dependencies(examples.opencl
 
 # add dependencies to pseudo-target
 add_hpx_pseudo_dependencies(examples.opencl.mandelbrot
-                            mandelbrot)
+                            mandelbrot_exe)
 
+set_target_properties(mandelbrot_exe
+    PROPERTIES
+    LINK_FLAGS "-lpng")

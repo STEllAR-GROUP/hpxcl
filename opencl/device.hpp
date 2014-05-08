@@ -51,7 +51,7 @@ namespace opencl {
              *
              *  @return The user event.
              */
-            hpx::lcos::unique_future<hpx::opencl::event>
+            hpx::lcos::future<hpx::opencl::event>
             create_user_event() const;
             
             /**
@@ -70,7 +70,7 @@ namespace opencl {
              *          \endcode
              *          or converted to a string via \ref device_info_to_string.
              */
-            hpx::lcos::unique_future<std::vector<char>>
+            hpx::lcos::future<std::vector<char>>
             get_device_info(cl_device_info info_type) const;
             
             /** 
@@ -86,7 +86,7 @@ namespace opencl {
              *  @return         The data, converted to a string.
              */
             static std::string
-            device_info_to_string(hpx::lcos::unique_future<std::vector<char>> info);
+            device_info_to_string(hpx::lcos::future<std::vector<char>> info);
             
             /**
              *  @brief Creates an event that triggers on the completion of

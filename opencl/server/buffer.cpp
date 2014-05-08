@@ -253,7 +253,7 @@ buffer::copy_bruteforce(hpx::naming::id_type & src_buffer,
                                src.enqueue_read(src_offset, size, events).get();
         
         // transmit the data
-        hpx::lcos::unique_future<boost::shared_ptr<std::vector<char>>>
+        hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
             data_future = read_event.get_data();
 
         // Get the command queue
@@ -407,9 +407,9 @@ buffer::copy(hpx::naming::id_type src_buffer, std::vector<size_t> dimensions,
     hpx::naming::id_type src_location;
     hpx::naming::id_type dst_location;
     {
-        hpx::lcos::unique_future<hpx::naming::id_type>
+        hpx::lcos::future<hpx::naming::id_type>
         src_location_future = get_colocation_id(src_buffer);
-        hpx::lcos::unique_future<hpx::naming::id_type>
+        hpx::lcos::future<hpx::naming::id_type>
         dst_location_future = get_colocation_id(get_gid());
         src_location = src_location_future.get();
         dst_location = dst_location_future.get();
