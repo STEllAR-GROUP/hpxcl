@@ -3,9 +3,11 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <hpx/hpx_start.hpp>
+#include <hpx/hpx.hpp>
+#include <hpx/hpx_init.hpp>
 #include <hpx/include/iostreams.hpp>
 #include <hpx/apply.hpp>
+#include <hpx/util/static.hpp>
 
 #include "../../../opencl.hpp"
 
@@ -13,20 +15,19 @@
 #include "workload.hpp"
 #include "work_queue.hpp"
 #include "pngwriter.hpp"
+#include "timer.hpp"
 
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-int hpx_main(int argc, char* argv[])
+int hpx_main(boost::program_options::variables_map & vm)
 {
 
-    // Print help message on wrong argument count
-    if(argc < 1)
-    {
-        hpx::cerr << "Usage: " << argv[0] << hpx::endl;//" matrixsize" << hpx::endl;
-        return hpx::finalize();
-    }
+    std::size_t num_kernels = 0;
 
+    // Print help message on wrong argument count
+    if (vm.count("num_parallel_kernels"))
+        num_kernels = vm["num_parallel_kernels"].as<std::size_t>();
 
     // The main scope
     {
@@ -34,7 +35,7 @@ int hpx_main(int argc, char* argv[])
         // get local devices
         std::vector<hpx::opencl::device> devices =
                                 hpx::opencl::get_devices(hpx::find_here(),
-                                                         CL_DEVICE_TYPE_GPU,
+                                                         CL_DEVICE_TYPE_ALL,
                                                          1.1f).get();
 
         // Check whether there are any devices
@@ -48,16 +49,21 @@ int hpx_main(int argc, char* argv[])
         boost::shared_ptr<work_queue<boost::shared_ptr<workload>>>
                        workqueue(new work_queue<boost::shared_ptr<workload>>()); 
 
-        // create one worker
-        hpx::cout << "starting worker 1 ..." << hpx::endl;
-        mandelbrotworker worker1(devices[0], workqueue);
-        hpx::cout << "starting worker 2 ..." << hpx::endl;
-        mandelbrotworker worker2(devices[0], workqueue);
-        hpx::cout << "starting worker 3 ..." << hpx::endl;
-        mandelbrotworker worker3(devices[0], workqueue);
-        hpx::cout << "starting worker 4 ..." << hpx::endl;
-        mandelbrotworker worker4(devices[0], workqueue);
+        // create workers
+        hpx::cout << "starting workers ..." << hpx::endl;
+        std::vector<boost::shared_ptr<mandelbrotworker>> workers;
+        BOOST_FOREACH(hpx::opencl::device & device, devices)
+        {
+            
+            // create worker
+            boost::shared_ptr<mandelbrotworker> worker(
+                                new mandelbrotworker(device,
+                                                     workqueue,
+                                                     num_kernels));
+            // add worker to workerlist
+            workers.push_back(worker);
 
+        }
         
         double left = -0.743643887070496004085;
         double right = -0.743643887003805995915;
@@ -76,11 +82,20 @@ int hpx_main(int argc, char* argv[])
         hpx::cout << "creating img ..." << hpx::endl;
         unsigned long img = png_create(img_x,img_y);
 
+        // wait for workers to finish initialization
+        hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
+        BOOST_FOREACH(boost::shared_ptr<mandelbrotworker> worker, workers)
+        {
 
+            worker->wait_for_startup_finished();
+
+        }
+
+        timer_start();
         // add workloads for all lines
         for(size_t i = 0; i < img_y; i++)
         {
-  //          hpx::cout << "adding line " << i << " ..." << hpx::endl;
+            // hpx::cout << "adding line " << i << " ..." << hpx::endl;
             boost::shared_ptr<workload> row(
                    new workload(img_x, left, top - (top - bottom)*i/(img_y - 1), right-left, 0.0, 0, i));
             workqueue->add_work(row);
@@ -97,22 +112,25 @@ int hpx_main(int argc, char* argv[])
         while(workqueue->retrieve_finished_work(&done_row))
         {
 
-//            hpx::cout << "taking line " << done_row->pos_in_img << " ... " << hpx::endl;
+            // hpx::cout << "taking line " << done_row->pos_in_img << " ... " << hpx::endl;
             png_set_row(img, done_row->pos_in_img, done_row->pixeldata.data());
 
 
         }
 
         // wait for worker to finish
-        hpx::cout << "waiting for worker 1 to finish ..." << hpx::endl;
-        worker1.join();
-        hpx::cout << "waiting for worker 2 to finish ..." << hpx::endl;
-        worker2.join();
-        hpx::cout << "waiting for worker 3 to finish ..." << hpx::endl;
-        worker3.join();
-        hpx::cout << "waiting for worker 4 to finish ..." << hpx::endl;
-        worker4.join();
+        hpx::cout << "waiting for workers to finish ..." << hpx::endl;
+        BOOST_FOREACH(boost::shared_ptr<mandelbrotworker> worker, workers)
+        {
+
+            worker->join();
+
+        }
        
+        double time = timer_stop();
+
+        hpx::cout << "time: " << time << " ms" << hpx::endl;
+
         // save the png
         hpx::cout << "saving png ..." << hpx::endl;
         png_save_and_close(img, "test.png");
@@ -126,3 +144,18 @@ int hpx_main(int argc, char* argv[])
 
 }
 
+
+
+//////////////////////////////////////////////////////////////////////////////
+int main(int argc, char* argv[])
+{
+    // Configure application-specific options
+    boost::program_options::options_description cmdline(
+                                "Usage: " HPX_APPLICATION_STRING " [options]");
+    cmdline.add_options()
+        ( "num_parallel_kernels"
+        , boost::program_options::value<std::size_t>()->default_value(10)
+        , "the number of parallel kernel invocations") ;
+
+    return hpx::init(cmdline, argc, argv);
+}

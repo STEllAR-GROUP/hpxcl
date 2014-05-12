@@ -8,14 +8,28 @@
 
 #include <cmath>
 
-mandelbrotworker::mandelbrotworker(hpx::opencl::device device_,
+
+#define MAX_IMG_WIDTH 30000
+
+static std::atomic_uint id_counter(0);
+
+mandelbrotworker::mandelbrotworker(hpx::opencl::device device,
                                    boost::shared_ptr<work_queue<
-                                       boost::shared_ptr<workload>>> workqueue_)
-                : workqueue(workqueue_), device(device_)
+                                       boost::shared_ptr<workload>>> workqueue,
+                                   size_t num_workers)
+    : worker_initialized(boost::shared_ptr<hpx::lcos::local::event>(
+                                                new hpx::lcos::local::event()))
 {
 
+    // get a unique id
+    unsigned int id = id_counter++;
+
     // start worker
-    worker_finished = hpx::async(&worker_main, workqueue, device); 
+    worker_finished = hpx::async(&worker_starter,
+                                 workqueue,
+                                 device,
+                                 num_workers,
+                                 worker_initialized, id); 
 
 }
 
@@ -29,43 +43,38 @@ mandelbrotworker::join()
     
 }
 
-
 void
+mandelbrotworker::wait_for_startup_finished()
+{
+
+    // waits until the worker_starter triggers this event
+    worker_initialized->wait();
+
+}
+
+size_t
 mandelbrotworker::worker_main(
            boost::shared_ptr<work_queue<boost::shared_ptr<workload>>> workqueue,
-           hpx::opencl::device device)
+           hpx::opencl::device device,
+           hpx::opencl::kernel kernel,
+           unsigned int id)
 {
-    try{
-        // print device name
-        hpx::cout << device.device_info_to_string(
-                                  device.get_device_info(CL_DEVICE_VENDOR))
-                  << ": "
-                  << device.device_info_to_string(
-                                  device.get_device_info(CL_DEVICE_NAME))
-                  << hpx::endl;
-    
-        // build opencl program
-        hpx::opencl::program mandelbrot_program =
-                             device.create_program_with_source(mandelbrot_kernels);
-        hpx::cout << "compiling" << hpx::endl;
-        mandelbrot_program.build();
-        hpx::cout << "creating kernel" << hpx::endl;
-    
-        // create kernel
-        hpx::opencl::kernel kernel_noalias = 
-                             mandelbrot_program.create_kernel("mandelbrot_noalias");
-        hpx::cout << "kernel ready" << hpx::endl;
-    
+
+        // counts how much wor has been done
+        size_t num_work = 0;
+
         // create output buffer
-        hpx::opencl::buffer output_buffer = device.create_buffer(CL_MEM_WRITE_ONLY,
-                                                               10000*sizeof(double));
+        hpx::opencl::buffer output_buffer =
+                       device.create_buffer(CL_MEM_WRITE_ONLY,
+                                            3 * MAX_IMG_WIDTH * sizeof(double));
         // create input buffer
-        hpx::opencl::buffer input_buffer = device.create_buffer(CL_MEM_READ_ONLY,
-                                                                4 * sizeof(double));
+        hpx::opencl::buffer input_buffer = device.create_buffer(
+                                                  CL_MEM_READ_ONLY,
+                                                  4 * sizeof(double));
     
-    
-        kernel_noalias.set_arg(0, output_buffer);
-        kernel_noalias.set_arg(1, input_buffer);
+        // connect buffers to kernel 
+        kernel.set_arg(0, output_buffer);
+        kernel.set_arg(1, input_buffer);
     
     
         // main loop
@@ -75,95 +84,137 @@ mandelbrotworker::worker_main(
         while(workqueue->request(&next_workload))
         {
             
+            // check for maximum workload size
+            if(next_workload->num_pixels > MAX_IMG_WIDTH)
+            {
+                HPX_THROW_EXCEPTION(hpx::bad_parameter,
+                          "mandelbrotworker::worker_main()",
+                          "ERROR: workload size is larger than MAX_IMG_WIDTH!");
+            }
+
+            // read calculation dimensions
             double args[4];
             args[0] = next_workload->origin_x;
             args[1] = next_workload->origin_y;
             args[2] = next_workload->size_x;
             args[3] = next_workload->size_y;
     
+            // send calculation dimensions to gpu
             hpx::lcos::shared_future<hpx::opencl::event> ev1 = 
-                             input_buffer.enqueue_write(0, 4*sizeof(double), args);
+                          input_buffer.enqueue_write(0, 4*sizeof(double), args);
             
+            // run calculation
             dim[0].size = next_workload->num_pixels;
             hpx::lcos::shared_future<hpx::opencl::event> ev2 = 
-                             kernel_noalias.enqueue(dim, ev1);
+                                                       kernel.enqueue(dim, ev1);
     
-    
+            // query calculation result 
             hpx::opencl::event ev3 =
                 output_buffer.enqueue_read(
                           0, 3*sizeof(unsigned char)*next_workload->num_pixels, ev2).get();
     
+            // wait for calculation result to arrive
             boost::shared_ptr<std::vector<char>> readdata = ev3.get_data().get();
-//            std::cout << readdata->size() << " : " << next_workload->pixeldata.size();
     
+            // copy calculation result to output buffer
             for(size_t i = 0; i < 3 * next_workload->num_pixels; i++)
             {
                 next_workload->pixeldata[i] = ((unsigned char*)readdata->data())[i];
             }
             
-            // compute workload
-            //work(next_workload);
-    
-            // return workload to work manager workload
+            // return calculated workload to work manager workload
             workqueue->deliver(next_workload);
+
+            // count number of workloads
+            num_work++;
     
         }
+
+        return num_work;
+
+}
+
+void
+mandelbrotworker::worker_starter(
+           boost::shared_ptr<work_queue<boost::shared_ptr<workload>>> workqueue,
+           hpx::opencl::device device,
+           size_t num_workers,
+           boost::shared_ptr<hpx::lcos::local::event> worker_initialized,
+           unsigned int id)
+{
+    try{
+        // print device name
+        hpx::cout << "#" << id << ": "
+                  << device.device_info_to_string(
+                                  device.get_device_info(CL_DEVICE_VENDOR))
+                  << ": "
+                  << device.device_info_to_string(
+                                  device.get_device_info(CL_DEVICE_NAME))
+                  << hpx::endl;
+    
+        // build opencl program
+        hpx::opencl::program mandelbrot_program =
+                          device.create_program_with_source(mandelbrot_kernels);
+        hpx::cout << "#" << id << ": " << "compiling" << hpx::endl;
+        mandelbrot_program.build();
+        hpx::cout << "#" << id << ": " << "compiling done." << hpx::endl;
+    
+        
+        // start workers
+        std::vector<hpx::lcos::shared_future<size_t>> worker_futures;
+        for(size_t i = 0; i < num_workers; i++)
+        {
+         
+            // create kernel
+            hpx::opencl::kernel kernel = 
+                         mandelbrot_program.create_kernel("mandelbrot_noalias");
+
+            // start worker
+            hpx::lcos::shared_future<size_t> worker_future = 
+                        hpx::async(&worker_main, workqueue, device, kernel, id);
+
+            // add worker to workerlist
+            worker_futures.push_back(worker_future);
+
+        }
+
+        hpx::cout << "#" << id << ": " << "workers started!" << hpx::endl;
+
+        // trigger event to start main function.
+        // needed for accurate time measurement
+        worker_initialized->set();
+
+        // wait for workers to finish
+        size_t num_work = 0;
+        for(size_t i = 0; i < num_workers; i++)
+        {
+            // finish worker and get number of computed work packets
+            size_t num_work_single = worker_futures[i].get();
+
+            // display work packet count
+            hpx::cout << "#" << id << ": " << "worker " << i 
+                      << ": " << num_work_single << " work packets"
+                      << hpx::endl;
+
+            // count total work packets
+            num_work += num_work_single;
+        }
+         
+        hpx::cout << "#" << id << ": " << "workers finished! ("
+                  << num_work << " work packets)" << hpx::endl;
+
     } catch(hpx::exception const& e) {
         
-        hpx::cout << "ERROR!" << hpx::endl << e.what() << hpx::endl;
+        // write error message. workaround, should not be done like this in 
+        // real application
+        hpx::cout << "#" << id << ": " 
+                  << "ERROR!" << hpx::endl << e.what() << hpx::endl;
+
+        // kill the process. again, not to be done like this in real application.
         exit(1);
 
     }
 
 }
 
-void
-mandelbrotworker::work(boost::shared_ptr<workload> next_workload)
-{
 
-    
-    for(size_t i = 0; i < next_workload->num_pixels; i++)
-    {
-
-        double posx = next_workload->origin_x + next_workload->size_x * i /
-                                        ((double)next_workload->num_pixels - 1);
-        double posy = next_workload->origin_y + next_workload->size_y * i /
-                                        ((double)next_workload->num_pixels - 1);
-
-        double betrag_quadrat = 0.0;
-        unsigned long iter = 0;
-        double x = 0.0;
-        double y = 0.0;
-        
-        double maxiter = 10000;
-        
-        while(betrag_quadrat <= 10000.0 && iter < maxiter )
-        {
-            double xt = x * x - y * y + posx;
-            double yt = 2 * x * y + posy;
-            x = xt;
-            y = yt;
-            iter = iter + 1;
-            betrag_quadrat = x * x + y * y;
-        }
-        
-        double iter_smooth = iter - log(log(betrag_quadrat) / log(4)) / log(2); 
-        double val = fmod(0.42*log(iter_smooth) / log(10), 1);
-        
-        if(iter == maxiter)
-        {
-            next_workload->pixeldata[3*i+0] = (unsigned char)(0);
-            next_workload->pixeldata[3*i+1] = (unsigned char)(0);
-            next_workload->pixeldata[3*i+2] = (unsigned char)(0);
-        }
-        else
-        {
-            next_workload->pixeldata[3*i+0] = (unsigned char)(200 * val);
-            next_workload->pixeldata[3*i+1] = (unsigned char)(200 * val);
-            next_workload->pixeldata[3*i+2] = (unsigned char)(200 * val);
-        }
-
-    }
-
-
-}

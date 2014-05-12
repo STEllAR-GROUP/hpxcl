@@ -49,7 +49,7 @@ static const char* mandelbrot_kernels =
 "        // smoothing                                                        \n"
 "        double iter_smooth =                                                \n"
 "                         iter - log(log(mag_square) / log(4.0)) / log(2.0); \n"
-"        double val = fmod((1/0.42) * log(iter_smooth) / log(10.0), 1);      \n"
+"        double val = fmod((1/0.42) * log(iter_smooth) / log(10.0), 1.0);    \n"
 "                                                                            \n"
 "        if(iter == maxiter)                                                 \n"
 "        {                                                                   \n"
