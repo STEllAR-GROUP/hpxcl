@@ -34,11 +34,11 @@ int hpx_main(int argc, char* argv[])
         // get local devices
         std::vector<hpx::opencl::device> devices =
                                 hpx::opencl::get_devices(hpx::find_here(),
-                                                         CL_DEVICE_TYPE_ALL,
+                                                         CL_DEVICE_TYPE_GPU,
                                                          1.1f).get();
 
         // Check whether there are any devices
-        if(devices.size() < 2)
+        if(devices.size() < 1)
         {
             hpx::cerr << "No OpenCL devices found!" << hpx::endl;
             return hpx::finalize();
@@ -51,26 +51,12 @@ int hpx_main(int argc, char* argv[])
         // create one worker
         hpx::cout << "starting worker 1 ..." << hpx::endl;
         mandelbrotworker worker1(devices[0], workqueue);
-/*        hpx::cout << "starting worker 2 ..." << hpx::endl;
+        hpx::cout << "starting worker 2 ..." << hpx::endl;
         mandelbrotworker worker2(devices[0], workqueue);
         hpx::cout << "starting worker 3 ..." << hpx::endl;
         mandelbrotworker worker3(devices[0], workqueue);
         hpx::cout << "starting worker 4 ..." << hpx::endl;
         mandelbrotworker worker4(devices[0], workqueue);
-        hpx::cout << "starting worker 5 ..." << hpx::endl;
-        mandelbrotworker worker5(devices[0], workqueue);
-        hpx::cout << "starting worker 6 ..." << hpx::endl;
-        mandelbrotworker worker6(devices[0], workqueue);
-        hpx::cout << "starting worker 7 ..." << hpx::endl;
-        mandelbrotworker worker7(devices[0], workqueue);
-        hpx::cout << "starting worker 8 ..." << hpx::endl;
-        mandelbrotworker worker8(devices[0], workqueue);
-        hpx::cout << "starting worker 9 ..." << hpx::endl;
-        mandelbrotworker worker9(devices[0], workqueue);
-        hpx::cout << "starting worker 10 ..." << hpx::endl;
-        mandelbrotworker worker10(devices[0], workqueue);
-*/
-
 
         
         double left = -0.743643887070496004085;
@@ -94,7 +80,7 @@ int hpx_main(int argc, char* argv[])
         // add workloads for all lines
         for(size_t i = 0; i < img_y; i++)
         {
-            hpx::cout << "adding line " << i << " ..." << hpx::endl;
+  //          hpx::cout << "adding line " << i << " ..." << hpx::endl;
             boost::shared_ptr<workload> row(
                    new workload(img_x, left, top - (top - bottom)*i/(img_y - 1), right-left, 0.0, 0, i));
             workqueue->add_work(row);
@@ -111,7 +97,7 @@ int hpx_main(int argc, char* argv[])
         while(workqueue->retrieve_finished_work(&done_row))
         {
 
-            hpx::cout << "taking line " << done_row->pos_in_img << " ... " << hpx::endl;
+//            hpx::cout << "taking line " << done_row->pos_in_img << " ... " << hpx::endl;
             png_set_row(img, done_row->pos_in_img, done_row->pixeldata.data());
 
 
@@ -120,25 +106,13 @@ int hpx_main(int argc, char* argv[])
         // wait for worker to finish
         hpx::cout << "waiting for worker 1 to finish ..." << hpx::endl;
         worker1.join();
-/*        hpx::cout << "waiting for worker 2 to finish ..." << hpx::endl;
+        hpx::cout << "waiting for worker 2 to finish ..." << hpx::endl;
         worker2.join();
         hpx::cout << "waiting for worker 3 to finish ..." << hpx::endl;
         worker3.join();
         hpx::cout << "waiting for worker 4 to finish ..." << hpx::endl;
         worker4.join();
-        hpx::cout << "waiting for worker 5 to finish ..." << hpx::endl;
-        worker5.join();
-        hpx::cout << "waiting for worker 6 to finish ..." << hpx::endl;
-        worker6.join();
-        hpx::cout << "waiting for worker 7 to finish ..." << hpx::endl;
-        worker7.join();
-        hpx::cout << "waiting for worker 8 to finish ..." << hpx::endl;
-        worker8.join();
-        hpx::cout << "waiting for worker 9 to finish ..." << hpx::endl;
-        worker9.join();
-        hpx::cout << "waiting for worker 10 to finish ..." << hpx::endl;
-        worker10.join();
-*/
+       
         // save the png
         hpx::cout << "saving png ..." << hpx::endl;
         png_save_and_close(img, "test.png");

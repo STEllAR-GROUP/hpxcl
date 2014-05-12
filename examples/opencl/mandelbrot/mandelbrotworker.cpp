@@ -35,40 +35,83 @@ mandelbrotworker::worker_main(
            boost::shared_ptr<work_queue<boost::shared_ptr<workload>>> workqueue,
            hpx::opencl::device device)
 {
-    // print device name
-    hpx::cout << device.device_info_to_string(
-                              device.get_device_info(CL_DEVICE_VENDOR))
-              << ": "
-              << device.device_info_to_string(
-                              device.get_device_info(CL_DEVICE_NAME))
-              << hpx::endl;
-
-    // build opencl program
-    hpx::opencl::program mandelbrot_program =
-                         device.create_program_with_source(mandelbrot_kernels);
-    hpx::cout << "compiling" << hpx::endl;
-    hpx::lcos::future<void> build_future = mandelbrot_program.build_async();
-    hpx::cout << "waiting for build to finish" << hpx::endl;
-    build_future.get();
-    hpx::cout << "creating kernel" << hpx::endl;
-
-    // create kernel
-    hpx::opencl::kernel kernel_noalias = 
-                         mandelbrot_program.create_kernel("mandelbrot_noalias");
-    hpx::cout << "kernel ready" << hpx::endl;
-
-//    hpx::this_thread::sleep_for(boost::posix_time::milliseconds(10000)); 
-
-    // main loop
-    boost::shared_ptr<workload> next_workload;
-    while(workqueue->request(&next_workload))
-    {
+    try{
+        // print device name
+        hpx::cout << device.device_info_to_string(
+                                  device.get_device_info(CL_DEVICE_VENDOR))
+                  << ": "
+                  << device.device_info_to_string(
+                                  device.get_device_info(CL_DEVICE_NAME))
+                  << hpx::endl;
+    
+        // build opencl program
+        hpx::opencl::program mandelbrot_program =
+                             device.create_program_with_source(mandelbrot_kernels);
+        hpx::cout << "compiling" << hpx::endl;
+        mandelbrot_program.build();
+        hpx::cout << "creating kernel" << hpx::endl;
+    
+        // create kernel
+        hpx::opencl::kernel kernel_noalias = 
+                             mandelbrot_program.create_kernel("mandelbrot_noalias");
+        hpx::cout << "kernel ready" << hpx::endl;
+    
+        // create output buffer
+        hpx::opencl::buffer output_buffer = device.create_buffer(CL_MEM_WRITE_ONLY,
+                                                               10000*sizeof(double));
+        // create input buffer
+        hpx::opencl::buffer input_buffer = device.create_buffer(CL_MEM_READ_ONLY,
+                                                                4 * sizeof(double));
+    
+    
+        kernel_noalias.set_arg(0, output_buffer);
+        kernel_noalias.set_arg(1, input_buffer);
+    
+    
+        // main loop
+        boost::shared_ptr<workload> next_workload;
+        hpx::opencl::work_size<1> dim;
+        dim[0].offset = 0;
+        while(workqueue->request(&next_workload))
+        {
+            
+            double args[4];
+            args[0] = next_workload->origin_x;
+            args[1] = next_workload->origin_y;
+            args[2] = next_workload->size_x;
+            args[3] = next_workload->size_y;
+    
+            hpx::lcos::shared_future<hpx::opencl::event> ev1 = 
+                             input_buffer.enqueue_write(0, 4*sizeof(double), args);
+            
+            dim[0].size = next_workload->num_pixels;
+            hpx::lcos::shared_future<hpx::opencl::event> ev2 = 
+                             kernel_noalias.enqueue(dim, ev1);
+    
+    
+            hpx::opencl::event ev3 =
+                output_buffer.enqueue_read(
+                          0, 3*sizeof(unsigned char)*next_workload->num_pixels, ev2).get();
+    
+            boost::shared_ptr<std::vector<char>> readdata = ev3.get_data().get();
+//            std::cout << readdata->size() << " : " << next_workload->pixeldata.size();
+    
+            for(size_t i = 0; i < 3 * next_workload->num_pixels; i++)
+            {
+                next_workload->pixeldata[i] = ((unsigned char*)readdata->data())[i];
+            }
+            
+            // compute workload
+            //work(next_workload);
+    
+            // return workload to work manager workload
+            workqueue->deliver(next_workload);
+    
+        }
+    } catch(hpx::exception const& e) {
         
-        // compute workload
-        work(next_workload);
-
-        // return workload to work manager workload
-        workqueue->deliver(next_workload);
+        hpx::cout << "ERROR!" << hpx::endl << e.what() << hpx::endl;
+        exit(1);
 
     }
 
