@@ -71,6 +71,15 @@ int hpx_main(boost::program_options::variables_map & vm)
         double top = 0.131825904230338753064;
         double bottom = 0.131825904180321246936;
         */
+        /*
+        double left = -0.743643887062801003142;
+        double right = -0.743643887011500996858;
+        double top = 0.131825904224567502357;
+        double bottom = 0.131825904186092497643;
+        */
+        
+
+
         ///*
         double left = -2.238461538;
         double right = 0.8384615385;
@@ -93,6 +102,7 @@ int hpx_main(boost::program_options::variables_map & vm)
 
         }
 
+        hpx::cout << "adding workpackets to workqueue ..." << hpx::endl;
         timer_start();
         // add workloads for all lines
         for(size_t i = 0; i < img_y; i++)

@@ -17,3 +17,6 @@
 
 #.nfs files
 .nfs*
+
+# images
+*.png
