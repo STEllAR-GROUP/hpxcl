@@ -35,7 +35,7 @@ int hpx_main(boost::program_options::variables_map & vm)
         // get local devices
         std::vector<hpx::opencl::device> devices =
                                 hpx::opencl::get_devices(hpx::find_here(),
-                                                         CL_DEVICE_TYPE_ALL,
+                                                         CL_DEVICE_TYPE_CPU,
                                                          1.1f).get();
 
         // Check whether there are any devices
@@ -65,29 +65,23 @@ int hpx_main(boost::program_options::variables_map & vm)
 
         }
         
-        /*
-        double left = -0.743643887070496004085;
-        double right = -0.743643887003805995915;
-        double top = 0.131825904230338753064;
-        double bottom = 0.131825904180321246936;
-        */
-        /*
+        ///*
         double left = -0.743643887062801003142;
         double right = -0.743643887011500996858;
         double top = 0.131825904224567502357;
         double bottom = 0.131825904186092497643;
-        */
+        //*/
         
 
 
-        ///*
+        /*
         double left = -2.238461538;
         double right = 0.8384615385;
         double top = 1.153846154;
         double bottom = -1.153846154;
-        //*/
-        size_t img_x = 960;
-        size_t img_y = 720;
+        */
+        size_t img_x = 2560;
+        size_t img_y = 1920;
 
         // create an image
         hpx::cout << "creating img ..." << hpx::endl;
@@ -121,12 +115,13 @@ int hpx_main(boost::program_options::variables_map & vm)
         // enter calculated rows to image
         hpx::cout << "waiting for lines ..." << hpx::endl;
         boost::shared_ptr<workload> done_row;
+        int i = 0;
         while(workqueue->retrieve_finished_work(&done_row))
         {
 
             // hpx::cout << "taking line " << done_row->pos_in_img << " ... " << hpx::endl;
             png_set_row(img, done_row->pos_in_img, done_row->pixeldata.data());
-
+            hpx::cout << "progress: " << (++i) << " / " << img_y << hpx::endl;
 
         }
 

@@ -79,8 +79,13 @@ mandelbrotworker::worker_main(
     
         // main loop
         boost::shared_ptr<workload> next_workload;
-        hpx::opencl::work_size<1> dim;
+        hpx::opencl::work_size<2> dim;
         dim[0].offset = 0;
+        dim[1].offset = 0;
+        dim[1].size = 8;
+        dim[0].local_size = 8;
+        dim[1].local_size = 8;
+
         while(workqueue->request(&next_workload))
         {
             
@@ -104,7 +109,7 @@ mandelbrotworker::worker_main(
                           input_buffer.enqueue_write(0, 4*sizeof(double), args);
             
             // run calculation
-            dim[0].size = next_workload->num_pixels;
+            dim[0].size = next_workload->num_pixels * 8;
             hpx::lcos::shared_future<hpx::opencl::event> ev2 = 
                                                        kernel.enqueue(dim, ev1);
     
@@ -167,7 +172,7 @@ mandelbrotworker::worker_starter(
          
             // create kernel
             hpx::opencl::kernel kernel = 
-                         mandelbrot_program.create_kernel("mandelbrot_noalias");
+                       mandelbrot_program.create_kernel("mandelbrot_alias_8x8");
 
             // start worker
             hpx::lcos::shared_future<size_t> worker_future = 
