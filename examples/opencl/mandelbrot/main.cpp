@@ -32,17 +32,58 @@ int hpx_main(boost::program_options::variables_map & vm)
     // The main scope
     {
 
-        // get local devices
-        std::vector<hpx::opencl::device> devices =
-                                hpx::opencl::get_devices(hpx::find_here(),
-                                                         CL_DEVICE_TYPE_CPU,
-                                                         1.1f).get();
+        // get all HPX localities
+        hpx::cout << "Finding all hpx localities ..." << hpx::endl;
+        std::vector<hpx::naming::id_type> localities = 
+                                            hpx::find_all_localities();
+        hpx::cout << localities.size() << " hpx localities found!" << hpx::endl; 
+
+        // query all devices
+        hpx::cout << "Requesting device lists from localities ..." << hpx::endl;
+        std::vector<hpx::lcos::shared_future<std::vector<hpx::opencl::device>>>
+        locality_device_futures;
+        BOOST_FOREACH(hpx::naming::id_type & locality, localities)
+        {
+
+            // get all devices on locality
+            hpx::lcos::shared_future<std::vector<hpx::opencl::device>>
+            locality_device_future = hpx::opencl::get_devices(locality,
+                                                             CL_DEVICE_TYPE_GPU,
+                                                             1.0f);
+
+            // add locality device future to list of futures
+            locality_device_futures.push_back(locality_device_future);
+
+        }
+        
+        // wait for all localities to respond, then add all devices to devicelist
+        hpx::cout << "Waiting for device lists ..." << hpx::endl;
+        std::vector<hpx::opencl::device> devices;
+        BOOST_FOREACH(
+                    hpx::lcos::shared_future<std::vector<hpx::opencl::device>>
+                    locality_device_future,
+                    locality_device_futures)
+        {
+
+            // wait for device query to finish
+            std::vector<hpx::opencl::device> locality_devices = 
+                                                   locality_device_future.get();
+
+            // add all devices to device list
+            devices.insert(devices.end(), locality_devices.begin(),
+                                          locality_devices.end());
+
+        }
 
         // Check whether there are any devices
         if(devices.size() < 1)
         {
             hpx::cerr << "No OpenCL devices found!" << hpx::endl;
             return hpx::finalize();
+        }
+        else
+        {
+            hpx::cout << devices.size() << " OpenCL devices found!" << hpx::endl;
         }
 
         // create workqueue
