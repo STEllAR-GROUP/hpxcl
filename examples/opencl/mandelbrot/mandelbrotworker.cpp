@@ -155,6 +155,10 @@ mandelbrotworker::worker_starter(
                   << ": "
                   << device.device_info_to_string(
                                   device.get_device_info(CL_DEVICE_NAME))
+                  << " ("
+                  << device.device_info_to_string(
+                                  device.get_device_info(CL_DEVICE_VERSION))
+                  << ")"
                   << hpx::endl;
     
         // build opencl program

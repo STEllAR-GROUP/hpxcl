@@ -106,21 +106,21 @@ int hpx_main(boost::program_options::variables_map & vm)
 
         }
         
-        ///*
+        /*
         double left = -0.743643887062801003142;
         double right = -0.743643887011500996858;
         double top = 0.131825904224567502357;
         double bottom = 0.131825904186092497643;
-        //*/
+        */
         
 
 
-        /*
+        ///*
         double left = -2.238461538;
         double right = 0.8384615385;
         double top = 1.153846154;
         double bottom = -1.153846154;
-        */
+        //*/
         size_t img_x = 2560;
         size_t img_y = 1920;
 
