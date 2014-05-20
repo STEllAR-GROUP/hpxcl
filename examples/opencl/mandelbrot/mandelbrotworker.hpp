@@ -15,8 +15,6 @@
 
 #include <hpx/lcos/local/event.hpp>
 
-#include <atomic>
-
 /* 
  * a worker.
  * will ask the workqueue for new work until the workqueue finishes.

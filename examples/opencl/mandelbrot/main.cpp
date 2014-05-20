@@ -162,7 +162,10 @@ int hpx_main(boost::program_options::variables_map & vm)
 
             // hpx::cout << "taking line " << done_row->pos_in_img << " ... " << hpx::endl;
             png_set_row(img, done_row->pos_in_img, done_row->pixeldata.data());
-            hpx::cout << "progress: " << (++i) << " / " << img_y << hpx::endl;
+            
+            int progress = ++i;
+            if(progress % 10 == 0)
+                hpx::cout << "progress: " << progress << " / " << img_y << hpx::endl;
 
         }
 

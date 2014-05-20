@@ -7,7 +7,7 @@
 #include "mandelbrotkernel.hpp"
 
 #include <cmath>
-
+#include <atomic>
 
 #define MAX_IMG_WIDTH 30000
 

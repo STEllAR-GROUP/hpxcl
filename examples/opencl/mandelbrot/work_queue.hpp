@@ -7,7 +7,7 @@
 #define MANDELBROT_WORK_QUEUE_H_
 
 #include "fifo.hpp"
-
+#include <atomic>
 
 /**
  * @brief A thread safe multi-consumer-buffer
@@ -83,10 +83,10 @@ private:
     fifo<T> finished_work;
     
     // saves how much work is left
-    std::atomic_size_t num_work;
+    boost::atomic_size_t num_work;
 
     // is true as the end-of-work-signal arrives
-    std::atomic_bool finished;
+    boost::atomic_bool finished;
 
 };
 
