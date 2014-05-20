@@ -83,7 +83,7 @@ private:
     fifo<T> finished_work;
     
     // saves how much work is left
-    boost::atomic_size_t num_work;
+    boost::atomic<size_t> num_work;
 
     // is true as the end-of-work-signal arrives
     boost::atomic_bool finished;
