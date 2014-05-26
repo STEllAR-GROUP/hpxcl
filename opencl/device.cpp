@@ -143,16 +143,29 @@ device::device_info_to_string(hpx::lcos::future<std::vector<char>> info)
 
 }
 
-// used for create_future_event, this is the future.then callback
-void
-device::trigger_user_event_externally(
+// used for create_future_event_externally, this is the event_future callback
+static void
+trigger_user_event_activator_callback(
                       hpx::lcos::shared_future<hpx::opencl::event> event_future)
 {
+
     // get the event
     hpx::opencl::event event = event_future.get();
 
     // trigger the event
     event.trigger();
+
+}
+
+// used for create_future_event, this is the future.then callback
+void
+device::trigger_user_event_externally(
+                      hpx::lcos::shared_future<hpx::opencl::event> event_future)
+{
+
+    event_future.then(hpx::util::bind(trigger_user_event_activator_callback,
+                                      util::placeholders::_1));
+                                      
 }
 
 
