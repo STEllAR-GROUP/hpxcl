@@ -12,6 +12,39 @@ ${HPX_ROOT}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules)
 set(CMAKE_MODULE_PATH
 ${HPX_ROOT}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules)
 
+# add our cmake path
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+
+
+###########################
+# Include boost
+#
+find_package(HPX_Boost)
+
+hpx_include_sys_directories("${BOOST_INCLUDE_DIR}")
+hpx_link_sys_directories("${BOOST_LIBRARY_DIR}")
+
+if(NOT MSVC)
+  set(hpx_LIBRARIES ${BOOST_FOUND_LIBRARIES})
+endif()
+
+# Boost preprocessor definitions
+hpx_add_config_define(BOOST_PARAMETER_MAX_ARITY 7)
+hpx_add_config_define(HPX_COROUTINE_ARG_MAX 1)
+if(NOT MSVC)
+  hpx_add_config_define(HPX_COROUTINE_NO_SEPARATE_CALL_SITES)
+endif()
+hpx_add_config_define(HPX_LOG_NO_TSS)
+hpx_add_config_define(HPX_LOG_NO_TS)
+hpx_add_config_define(BOOST_BIGINT_HAS_NATIVE_INT64)
+
+# Disable usage of std::atomics in lockfree
+if(${BOOST_MINOR_VERSION} LESS 53)
+  hpx_add_config_define(BOOST_NO_0X_HDR_ATOMIC)
+endif()
+
+
+
 #Instruct cmake to find the HPX settings
 find_package(HPX REQUIRED)
 set(HPX_RPATH "${CMAKE_BINARY_DIR}/lib/hpx:${HPX_RPATH}:${CMAKE_INSTALL_PREFIX}/lib/hpx")
@@ -37,8 +70,6 @@ if(HPX_BUILD_DOCUMENTATION)
   hpx_option(HPX_BUILD_DOCUMENTATION_SINGLEPAGE BOOL "The HPX documentation should be build as a single page HTML (default OFF)." OFF)
   add_subdirectory(docs)
 endif()
-
-
 
 
 ###############################################################################
