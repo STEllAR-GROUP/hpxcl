@@ -29,7 +29,8 @@ mandelbrotworker::mandelbrotworker(hpx::opencl::device device,
                                  workqueue,
                                  device,
                                  num_workers,
-                                 worker_initialized, id); 
+                                 worker_initialized,
+                                 id); 
 
 }
 
@@ -148,17 +149,21 @@ mandelbrotworker::worker_starter(
            unsigned int id)
 {
     try{
+
+        bool verbose = false;
+
+        std::string device_vendor = device.device_info_to_string(
+                                  device.get_device_info(CL_DEVICE_VENDOR));
+        std::string device_name = device.device_info_to_string(
+                                  device.get_device_info(CL_DEVICE_NAME));
+        std::string device_version = device.device_info_to_string(
+                                  device.get_device_info(CL_DEVICE_VERSION));
+
         // print device name
         hpx::cout << "#" << id << ": "
-                  << device.device_info_to_string(
-                                  device.get_device_info(CL_DEVICE_VENDOR))
-                  << ": "
-                  << device.device_info_to_string(
-                                  device.get_device_info(CL_DEVICE_NAME))
-                  << " ("
-                  << device.device_info_to_string(
-                                  device.get_device_info(CL_DEVICE_VERSION))
-                  << ")"
+                  << device_vendor << ": "
+                  << device_name << " ("
+                  << device_version << ")"
                   << hpx::endl;
     
         // build opencl program
@@ -166,7 +171,7 @@ mandelbrotworker::worker_starter(
                           device.create_program_with_source(mandelbrot_kernels);
         hpx::cout << "#" << id << ": " << "compiling" << hpx::endl;
         mandelbrot_program.build();
-        hpx::cout << "#" << id << ": " << "compiling done." << hpx::endl;
+        if(verbose) hpx::cout << "#" << id << ": " << "compiling done." << hpx::endl;
     
         
         // start workers
@@ -201,23 +206,29 @@ mandelbrotworker::worker_starter(
             size_t num_work_single = worker_futures[i].get();
 
             // display work packet count
-            hpx::cout << "#" << id << ": " << "worker " << i 
+            /*hpx::cout << "#" << id << ": " << "worker " << i 
                       << ": " << num_work_single << " work packets"
                       << hpx::endl;
+            */
 
             // count total work packets
             num_work += num_work_single;
         }
          
-        hpx::cout << "#" << id << ": " << "workers finished! ("
+        if(verbose)
+        {
+            hpx::cout << "#" << id << ": " << "workers finished! ("
                   << num_work << " work packets)" << hpx::endl;
+        }
 
     } catch(hpx::exception const& e) {
         
         // write error message. workaround, should not be done like this in 
         // real application
         hpx::cout << "#" << id << ": " 
-                  << "ERROR!" << hpx::endl << e.what() << hpx::endl;
+                  << "ERROR!" << hpx::endl
+                  << hpx::get_error_backtrace(e) << hpx::endl
+                  << hpx::diagnostic_information(e) << hpx::endl;
 
         // kill the process. again, not to be done like this in real application.
         exit(1);

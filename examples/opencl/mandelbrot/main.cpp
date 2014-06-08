@@ -24,22 +24,25 @@ int hpx_main(boost::program_options::variables_map & vm)
 {
 
     std::size_t num_kernels = 0;
+    bool verbose = false;
 
     // Print help message on wrong argument count
     if (vm.count("num_parallel_kernels"))
         num_kernels = vm["num_parallel_kernels"].as<std::size_t>();
+    if (vm.count("v"))
+        verbose = true;
 
     // The main scope
     {
 
         // get all HPX localities
-        hpx::cout << "Finding all hpx localities ..." << hpx::endl;
+        if(verbose) hpx::cout << "Finding all hpx localities ..." << hpx::endl;
         std::vector<hpx::naming::id_type> localities = 
                                             hpx::find_all_localities();
-        hpx::cout << localities.size() << " hpx localities found!" << hpx::endl; 
+        if(verbose) hpx::cout << localities.size() << " hpx localities found!" << hpx::endl; 
 
         // query all devices
-        hpx::cout << "Requesting device lists from localities ..." << hpx::endl;
+        if(verbose) hpx::cout << "Requesting device lists from localities ..." << hpx::endl;
         std::vector<hpx::lcos::shared_future<std::vector<hpx::opencl::device>>>
         locality_device_futures;
         BOOST_FOREACH(hpx::naming::id_type & locality, localities)
@@ -57,7 +60,7 @@ int hpx_main(boost::program_options::variables_map & vm)
         }
         
         // wait for all localities to respond, then add all devices to devicelist
-        hpx::cout << "Waiting for device lists ..." << hpx::endl;
+        if(verbose) hpx::cout << "Waiting for device lists ..." << hpx::endl;
         std::vector<hpx::opencl::device> devices;
         BOOST_FOREACH(
                     hpx::lcos::shared_future<std::vector<hpx::opencl::device>>
@@ -91,7 +94,7 @@ int hpx_main(boost::program_options::variables_map & vm)
                        workqueue(new work_queue<boost::shared_ptr<workload>>()); 
 
         // create workers
-        hpx::cout << "starting workers ..." << hpx::endl;
+        //hpx::cout << "starting workers ..." << hpx::endl;
         std::vector<boost::shared_ptr<mandelbrotworker>> workers;
         BOOST_FOREACH(hpx::opencl::device & device, devices)
         {
@@ -125,11 +128,11 @@ int hpx_main(boost::program_options::variables_map & vm)
         size_t img_y = 1920;
 
         // create an image
-        hpx::cout << "creating img ..." << hpx::endl;
+        if(verbose) hpx::cout << "creating img ..." << hpx::endl;
         unsigned long img = png_create(img_x,img_y);
 
         // wait for workers to finish initialization
-        hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
+        if(verbose) hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
         BOOST_FOREACH(boost::shared_ptr<mandelbrotworker> worker, workers)
         {
 
@@ -137,7 +140,7 @@ int hpx_main(boost::program_options::variables_map & vm)
 
         }
 
-        hpx::cout << "adding workpackets to workqueue ..." << hpx::endl;
+        if(verbose) hpx::cout << "adding workpackets to workqueue ..." << hpx::endl;
         timer_start();
         // add workloads for all lines
         for(size_t i = 0; i < img_y; i++)
@@ -150,11 +153,11 @@ int hpx_main(boost::program_options::variables_map & vm)
         }
         
         // finish workqueue
-        hpx::cout << "finishing workqueue ..." << hpx::endl;
+        if(verbose) hpx::cout << "finishing workqueue ..." << hpx::endl;
         workqueue->finish();
 
         // enter calculated rows to image
-        hpx::cout << "waiting for lines ..." << hpx::endl;
+        if(verbose) hpx::cout << "waiting for lines ..." << hpx::endl;
         boost::shared_ptr<workload> done_row;
         int i = 0;
         while(workqueue->retrieve_finished_work(&done_row))
@@ -162,15 +165,17 @@ int hpx_main(boost::program_options::variables_map & vm)
 
             // hpx::cout << "taking line " << done_row->pos_in_img << " ... " << hpx::endl;
             png_set_row(img, done_row->pos_in_img, done_row->pixeldata.data());
-            
-            int progress = ++i;
-            if(progress % 10 == 0)
-                hpx::cout << "progress: " << progress << " / " << img_y << hpx::endl;
-
+           
+            if(verbose)
+            { 
+                int progress = ++i;
+                if(progress % 10 == 0)
+                    hpx::cout << "progress: " << progress << " / " << img_y << hpx::endl;
+            }
         }
 
         // wait for worker to finish
-        hpx::cout << "waiting for workers to finish ..." << hpx::endl;
+        if(verbose) hpx::cout << "waiting for workers to finish ..." << hpx::endl;
         BOOST_FOREACH(boost::shared_ptr<mandelbrotworker> worker, workers)
         {
 
@@ -183,12 +188,12 @@ int hpx_main(boost::program_options::variables_map & vm)
         hpx::cout << "time: " << time << " ms" << hpx::endl;
 
         // save the png
-        hpx::cout << "saving png ..." << hpx::endl;
+        if(verbose) hpx::cout << "saving png ..." << hpx::endl;
         png_save_and_close(img, "test.png");
 
     }
 
-    hpx::cout << "Program finished." << hpx::endl;
+    if(verbose) hpx::cout << "Program finished." << hpx::endl;
    
     // End the program
     return hpx::finalize();
@@ -207,6 +212,10 @@ int main(int argc, char* argv[])
         ( "num_parallel_kernels"
         , boost::program_options::value<std::size_t>()->default_value(10)
         , "the number of parallel kernel invocations") ;
+
+    cmdline.add_options()
+        ( "v"
+        , "verbose output") ;
 
     return hpx::init(cmdline, argc, argv);
 }
