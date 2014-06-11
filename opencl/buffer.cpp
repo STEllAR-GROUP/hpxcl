@@ -20,7 +20,7 @@ using hpx::opencl::buffer;
 
 
 
-hpx::lcos::unique_future<size_t>
+hpx::lcos::future<size_t>
 buffer::size() const
 {
     
@@ -65,7 +65,7 @@ HPX_OPENCL_OVERLOAD_FUNCTION(buffer, enqueue_copy,
 //  FUNCTION DEFINITIONS
 //
 
-hpx::lcos::unique_future<hpx::opencl::event>
+hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_read(size_t offset, size_t size,
                             std::vector<hpx::opencl::event> events) const
 {
@@ -78,7 +78,7 @@ buffer::enqueue_read(size_t offset, size_t size,
 
 
 
-hpx::lcos::unique_future<hpx::opencl::event>
+hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_write(size_t offset, size_t size, const void* data,
                              std::vector<hpx::opencl::event> events) const
 {
@@ -98,7 +98,7 @@ buffer::enqueue_write(size_t offset, size_t size, const void* data,
 }
 
 #ifdef CL_VERSION_1_2
-hpx::lcos::unique_future<hpx::opencl::event>
+hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
                      size_t size, std::vector<hpx::opencl::event> events) const
 {
@@ -120,7 +120,7 @@ buffer::enqueue_fill(const void* pattern, size_t pattern_size, size_t offset,
 
 
 // Copy Buffer
-hpx::lcos::unique_future<hpx::opencl::event>
+hpx::lcos::future<hpx::opencl::event>
 buffer::enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
                      size_t size,
                      std::vector<hpx::opencl::event> events) const

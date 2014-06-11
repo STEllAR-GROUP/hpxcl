@@ -37,7 +37,7 @@ static void cl_test(hpx::opencl::device cldevice)
     TEST_CL_BUFFER(buffer, initdata);
 
     // write to buffer
-    hpx::lcos::unique_future<hpx::opencl::event> write_event = 
+    hpx::lcos::future<hpx::opencl::event> write_event = 
                         buffer.enqueue_write(3, 2, modifydata);
 
     // change modifydata to test wether write caches internally 

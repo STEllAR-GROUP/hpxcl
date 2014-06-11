@@ -55,9 +55,12 @@ namespace hpx { namespace opencl{ namespace server{
 //      void link(std::string options,
 //                std::vector<hpx::opencl::program> dependencies);
 
+        // Returns the binary representation of the program
+        std::vector<char> get_binary();
 
     //[opencl_management_action_types
     HPX_DEFINE_COMPONENT_ACTION(program, build);
+    HPX_DEFINE_COMPONENT_ACTION(program, get_binary);
     //]
 
     private:
@@ -89,6 +92,9 @@ namespace hpx { namespace opencl{ namespace server{
 HPX_REGISTER_ACTION_DECLARATION(
        hpx::opencl::server::program::build_action,
     opencl_program_build_action);
+HPX_REGISTER_ACTION_DECLARATION(
+       hpx::opencl::server::program::get_binary_action,
+    opencl_program_get_binary_action);
 //]
 
 

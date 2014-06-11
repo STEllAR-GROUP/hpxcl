@@ -34,7 +34,7 @@ hpx::opencl::server::trigger_event_from_external(hpx::runtime * rt,
                         opencl_thread_num.fetch_add(1,
                                                    boost::memory_order_relaxed),
                         false);
-    BOOST_ASSERT(succeeded);
+    //BOOST_ASSERT(succeeded);
 
     // trigger the event lock
     event->set();

@@ -81,6 +81,8 @@ typedef hpx::components::managed_component<
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(program_type, program);
 HPX_REGISTER_ACTION(program_type::wrapped_type::build_action,
                     program_build_action);
+HPX_REGISTER_ACTION(program_type::wrapped_type::get_binary_action,
+                    program_get_binary_action);
 
 
 // KERNEL

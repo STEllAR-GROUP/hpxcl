@@ -122,12 +122,12 @@ static cl_device_id directcl_choose_device()
 
     // get number of device ids
     cl_uint num_devices;
-    ret = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, 0, NULL, &num_devices);
+    ret = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, NULL, &num_devices);
     directcl_check(ret);
 
     // get device ids
     std::vector<cl_device_id> devices(num_devices);
-    ret = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, num_devices, &devices[0],
+    ret = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, num_devices, &devices[0],
                          NULL);
 
 

@@ -61,7 +61,7 @@ namespace opencl {
              *
              *  @return True if the event already happened
              */
-            hpx::lcos::unique_future<bool> finished() const;
+            hpx::lcos::future<bool> finished() const;
 
             /**
              *  @brief Converts the event to a hpx::lcos::future.
@@ -71,7 +71,7 @@ namespace opencl {
              *  
              *  @return A future that triggers when the event has happened.
              */
-            hpx::lcos::unique_future<void> get_future() const;
+            hpx::lcos::future<void> get_future() const;
 
             /**
              *  @brief Triggers the event.
@@ -92,7 +92,7 @@ namespace opencl {
              *
              *  @return The data.
              */
-            hpx::lcos::unique_future<boost::shared_ptr<std::vector<char>>>
+            hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
             get_data() const;
     
     };

@@ -25,7 +25,7 @@ kernel::set_arg(cl_uint arg_index, buffer arg) const
 
 }
 
-hpx::lcos::unique_future<void>
+hpx::lcos::future<void>
 kernel::set_arg_async(cl_uint arg_index, buffer arg) const
 {
     
@@ -47,7 +47,7 @@ HPX_OPENCL_OVERLOAD_FUNCTION(kernel, enqueue,
 
 
 
-hpx::lcos::unique_future<hpx::opencl::event>
+hpx::lcos::future<hpx::opencl::event>
 kernel::enqueue(cl_uint work_dim,
                 const size_t *global_work_offset_ptr,
                 const size_t *global_work_size_ptr,

@@ -15,7 +15,7 @@
  * that follow the common theme:
  *
  *
- *          hpx::lcos::unique_future<event>
+ *          hpx::lcos::future<event>
  *          class::function([args...], std::vector<event>);
  *
  *      (where function usually starts with enqueue_)
@@ -27,16 +27,16 @@
  *
  * implements the following overloads:
  *          
- *          hpx::lcos::unique_future<event>
+ *          hpx::lcos::future<event>
  *          class::function([args...]);
  *
- *          hpx::lcos::unique_future<event>
+ *          hpx::lcos::future<event>
  *          class::function([args...], event);
  *
- *          hpx::lcos::unique_future<event>
+ *          hpx::lcos::future<event>
  *          class::function([args...], hpx::lcos::shared_future<event>);
  *
- *          hpx::lcos::unique_future<event>
+ *          hpx::lcos::future<event>
  *          class::function([args...],
  *                          std::vector<hpx::lcos::shared_future<event>>);
  *
@@ -57,7 +57,7 @@
                                                      args_without_types)    \
                                                                             \
 /* Creates an empty list and proxies to the normal function */              \
-hpx::lcos::unique_future<hpx::opencl::event>                                \
+hpx::lcos::future<hpx::opencl::event>                                \
 classname::funcname(args) const                                             \
 {                                                                           \
     std::vector<hpx::opencl::event> events(0);                              \
@@ -65,7 +65,7 @@ classname::funcname(args) const                                             \
 }                                                                           \
                                                                             \
 /* Creates a list with just one element and proxies */                      \
-hpx::lcos::unique_future<hpx::opencl::event>                                \
+hpx::lcos::future<hpx::opencl::event>                                \
 classname::funcname(args, hpx::opencl::event event) const                   \
 {                                                                           \
     std::vector<hpx::opencl::event> events;                                 \
@@ -76,7 +76,7 @@ classname::funcname(args, hpx::opencl::event event) const                   \
 /* This is the static async callback for a single future. */                \
 /* Will get called by future.then().                      */                \
 static                                                                      \
-hpx::lcos::unique_future<hpx::opencl::event>                                \
+hpx::lcos::future<hpx::opencl::event>                                \
 classname ## _ ## funcname ## _future_single_callback(classname cl, args,   \
                         hpx::lcos::shared_future<hpx::opencl::event> event) \
 {                                                                           \
@@ -85,7 +85,7 @@ classname ## _ ## funcname ## _future_single_callback(classname cl, args,   \
                                                                             \
 }                                                                           \
                                                                             \
-hpx::lcos::unique_future<hpx::opencl::event>                                \
+hpx::lcos::future<hpx::opencl::event>                                \
 classname::funcname(args,                                                   \
                 hpx::lcos::shared_future<hpx::opencl::event> event) const   \
 {                                                                           \
@@ -101,9 +101,9 @@ classname::funcname(args,                                                   \
 }                                                                           \
                                                                             \
 static                                                                      \
-hpx::lcos::unique_future<hpx::opencl::event>                                \
+hpx::lcos::future<hpx::opencl::event>                                \
 classname ## _ ## funcname ## _future_multi_callback(classname cl, args,    \
-           hpx::lcos::unique_future<std::vector<                            \
+           hpx::lcos::future<std::vector<                            \
                         hpx::lcos::shared_future<hpx::opencl::event>        \
                                                             >> futures)     \
 {                                                                           \
@@ -128,7 +128,7 @@ classname ## _ ## funcname ## _future_multi_callback(classname cl, args,    \
                                                                             \
 }                                                                           \
                                                                             \
-hpx::lcos::unique_future<hpx::opencl::event>                                \
+hpx::lcos::future<hpx::opencl::event>                                \
 classname::funcname(args,                                                   \
         std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events)   \
                                                                     const   \

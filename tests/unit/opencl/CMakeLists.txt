@@ -11,6 +11,7 @@ set(tests
     events_and_futures
     kernel
     future_enqueues
+    program_from_binary
    )
 
 
