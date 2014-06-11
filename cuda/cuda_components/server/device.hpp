@@ -7,17 +7,26 @@
 #define DEVICE_2_HPP
 
 #include <hpx/hpx_fwd.hpp>
-#include <hpx/include/runtime.hpp>
-#include <hpx/include/iostreams.hpp>
+#include <hpx/runtime/components/server/managed_component_base.hpp>
+#include <hpx/runtime/components/server/locking_hook.hpp>
+#include <hpx/runtime/actions/component_action.hpp>
 #include <hpx/include/util.hpp>
+#include <hpx/hpx_init.hpp>
+#include <hpx/include/runtime.hpp>
 
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <thrust/version.h>
 #include <boost/make_shared.hpp>
 #include <string>
+#include <iostream>
+#include <vector>
 
 #include "../cuda/kernel.cuh"
+#include  "../fwd_declarations.hpp"
+
+//#include "../buffer.hpp"
+//#include "../event.hpp"
 
 namespace hpx
 {
@@ -25,24 +34,29 @@ namespace hpx
     {
         namespace server
         {
-         //////////////////////////////////////
-         ///This class represents a cuda device
+         struct Device_ptr
+         {
+            CUdeviceptr device_ptr;
+            size_t byte_count;
+         };
+         /////////////////////////////////////////////////
+         /// This class represents a cuda device /////////
          class device
-             : public hpx::components::locking_hook<hpx::components::managed_component_base<device> >
+             : public hpx::components::locking_hook<
+                    hpx::components::managed_component_base<device> 
+                    >
              {
               	 private:
         	  	 unsigned int device_id;
                  unsigned int context_id;
+                 //std::shared_ptr<CUdevice> cu_device;
                  CUdevice cu_device;
                  CUcontext cu_context;
                  std::string device_name;
-                 cudaDeviceProp props;
-              	 
+                 cudaDeviceProp props;   
+                 std::vector<Device_ptr> device_ptrs;           	 
               	 public:
         	 	 //Constructors
-        	  	 //one constructor takes no argument
-        	  	 //second constructor takes device_id
-        	  	 //third constructor takes a device_info struct
         	 	 device()
                  {
                     cuInit(0); //initializes cuda driver API
@@ -53,20 +67,18 @@ namespace hpx
 
         	 	 device(int device_id)
         	 	 {
-                     cuInit(0);
-                     cuDeviceGet(&cu_device,device_id);
-                     cuCtxCreate(&cu_context,0,cu_device);
-        	 		 this->set_device(device_id);
-                     cudaError_t error;
-                     error = cudaGetDeviceProperties(&props,device_id);
-                     this->device_name = props.name;
+                    cuInit(0);
+                    cuDeviceGet(&cu_device,device_id);
+                    cuCtxCreate(&cu_context,0,cu_device);
+        	 		this->set_device(device_id);
+                    cudaError_t error;
+                    error = cudaGetDeviceProperties(&props,device_id);
+                    this->device_name = props.name;
         	 	 }
 				 ~device()
 				 {
                     cuCtxDetach(cu_context);
                  }
-
-                 //cuda device managedment functions
 
                  int get_device_count()
                  {
@@ -132,58 +144,61 @@ namespace hpx
 
                  int get_context()
                  {
-                    //returns the current CUDA device context
-                    //Cuda sets the device context automatically
-                    //return this->context_id;
-                    //CUcontext context;
-                    //cuCtxGetCurrent(&context);
                     return this->context_id;
                  }
 
-                 int /*hpx::cuda::device*/ get_all_devices()
-                 {
-                	 //return all devices on this locality
-                	 int num_devices = get_device_count();
-                     return num_devices;
+                 int get_all_devices()
+                 {  
+                	int num_devices = get_device_count();
+                    return num_devices;
                  }
 
-                 //void wait_for_event(/*CUevent cu_event*/)
-                 //{
-                 //}
+                static void do_wait(boost::shared_ptr<hpx::lcos::local::promise<int> > p)
+                {
+                    p->set_value(0);    // notify the waiting HPX thread and return a value
+                    float x = pi(10,10);
+                    std::cout << x << std::endl;
+                }
 
-                 static void  do_wait(boost::shared_ptr<hpx::lcos::local::promise<int> > p)
-                 {
-                    //actual work
-                    std::cout << pi(100,100) << endl;
-                    p->set_value(0); //notify the waiting hpx thread and return a value
-                 }
+                // This function will be executed by an HPX thread
+                static hpx::lcos::future<int> wait()
+                {
+                    boost::shared_ptr<hpx::lcos::local::promise<int> > p =
+                    boost::make_shared<hpx::lcos::local::promise<int> >();
 
-                 static hpx::lcos::unique_future<int> wait()
-                 { 
-                    boost::shared_ptr<hpx::lcos::local::promise<int> >();
-                        boost::make_shared<hpx::lcos::local::promise<int> >();
-
+                    // Get a reference to one of the IO specific HPX io_service objects ...
                     hpx::util::io_service_pool* pool =
-                        hpx::get_runtime().get_thread_pool("io_pool");
+                    hpx::get_runtime().get_thread_pool("io_pool");
 
+                    // ... and schedule the handler to run on one of its OS-threads.
                     pool->get_io_service().post(
-                        hpx::util::bind(&do_wait, p));
-                    return p->get_future();
-                 }
+                    hpx::util::bind(&do_wait, p));
 
-                 float calculate_pi(int nthreads,int nblocks)
-                 {
-                    return pi(nthreads,nblocks);
-                 }
-                 
-                 HPX_DEFINE_COMPONENT_ACTION(device,calculate_pi);
-                 HPX_DEFINE_COMPONENT_ACTION(device,get_cuda_info);
-                 HPX_DEFINE_COMPONENT_ACTION(device,set_device);
-                 HPX_DEFINE_COMPONENT_ACTION(device,get_all_devices);
-                 HPX_DEFINE_COMPONENT_ACTION(device,get_device_id);
-                 HPX_DEFINE_COMPONENT_ACTION(device,get_context);
-                 //HPX_DEFINE_COMPONENT_ACTION(device,wait_for_event);
-                 HPX_DEFINE_COMPONENT_ACTION(device,wait);
+                    return p->get_future();
+                }   
+
+                float calculate_pi(int nthreads,int nblocks)
+                {
+                   return pi(nthreads,nblocks);
+                }
+
+                void create_device_ptr(size_t const byte_count)
+                {
+                    //every time a device pointer is created it is added to the deviceptr struct vector
+                    Device_ptr temp;
+                    cuMemAlloc(&temp.device_ptr, byte_count);
+                    temp.byte_count = byte_count;
+                    device_ptrs.push_back(temp);
+                }
+
+                HPX_DEFINE_COMPONENT_ACTION(device,calculate_pi);
+                HPX_DEFINE_COMPONENT_ACTION(device,get_cuda_info);
+                HPX_DEFINE_COMPONENT_ACTION(device,set_device);
+                HPX_DEFINE_COMPONENT_ACTION(device,get_all_devices);
+                HPX_DEFINE_COMPONENT_ACTION(device,get_device_id);
+                HPX_DEFINE_COMPONENT_ACTION(device,get_context);
+                HPX_DEFINE_COMPONENT_ACTION(device,wait);
+                HPX_DEFINE_COMPONENT_ACTION(device, create_device_ptr);
             };
 	    }
     }
@@ -209,12 +224,11 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::get_context_action,
     device__get_context_action);
-/*HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::device::wait_for_event_action,
-    device_wait_for_event_action);
-*/
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::wait_action,
     device_wait_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::create_device_ptr_action,
+    device_create_device_ptr_action);
 
 #endif //cuda_device_2_HPP

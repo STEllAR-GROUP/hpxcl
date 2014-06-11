@@ -23,7 +23,7 @@ namespace hpx
 
         public:
             device()
-            {}
+            {}    
             device(hpx::future<hpx::naming::id_type> const& gid)
 				: base_type(gid)
             {}
@@ -37,7 +37,7 @@ namespace hpx
             }
 
             //takes a vector of localities and returns a vector of devices
-            static std::vector<hpx::cuda::device> get_all_devices(std::vector<hpx::naming::id_type> localities)
+            static std::vector<int> get_all_devices(std::vector<hpx::naming::id_type> localities)
             {
                 return base_type::get_all_devices(localities);
             }
@@ -85,15 +85,23 @@ namespace hpx
                 return this->base_type::get_context_sync(this->get_gid());
             }
 
-            hpx::lcos::unique_future<int> wait()
+            hpx::lcos::future<int> wait()
             {
                 BOOST_ASSERT(this->get_gid());
                 return this->base_type::wait(this->get_gid());
             }
 
-            /*void wait_for_event()
+            hpx::lcos::future<void> create_device_ptr_async(size_t const byte_count)
             {
-            }*/
+                BOOST_ASSERT(this->get_gid());
+                return this->base_type::create_device_ptr_async(this->get_gid(), byte_count);
+            }
+
+            void create_device_ptr(size_t const byte_count)
+            {
+                BOOST_ASSERT(this->get_gid());
+                this->base_type::create_device_ptr(this->get_gid(), byte_count);
+            }
         };
 	}
 }

@@ -53,6 +53,12 @@ namespace hpx
                 {
                     trigger_async(gid).get();
                 }
+
+                static CUevent cuda_event(hpx::naming::id_type const& gid)
+                {
+                    typedef server::event::cuda_event_action action_type;
+                    return hpx::async<action_type>(gid);
+                }
             };
         }
     }

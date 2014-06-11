@@ -33,15 +33,20 @@ namespace hpx
                     hpx::async<action_type>(gid,dev).get();
                 }
 
-                static std::vector<hpx::cuda::device> get_all_devices(std::vector<hpx::naming::id_type> localities)
+                static std::vector<int> get_all_devices(std::vector<hpx::naming::id_type> localities)
                 {
-                    std::vector<hpx::cuda::device> vec;
+                    int num = 0;
+                    std::vector<int> devices;
                     typedef server::device::get_all_devices_action action_type;
-                    for(uint64_t i = 0;i<localities.size();i++)
+                    for (size_t i=0;i<localities.size();i++)
                     {
-                        vec.push_back(hpx::async<action_type>(localities[i]).get());
+                        num+=  hpx::async<action_type>(localities[i]).get();
+                        for (int i=0;i<num;i++)
+                        {
+                         devices.push_back(i);
+                        }
                     }
-                    return vec;
+                    return devices;
                 }
                 //functions to run CUDA kernels
                 static hpx::lcos::future<float>
@@ -79,9 +84,20 @@ namespace hpx
                     return get_context_async(gid).get();
                 }
 
-                static hpx::lcos::unique_future<int> wait(hpx::naming::id_type const& gid)
+                static hpx::lcos::future<int> wait(hpx::naming::id_type const& gid)
                 {
                     return server::device::wait();
+                }
+
+                static hpx::lcos::future<void> create_device_ptr_async(hpx::naming::id_type const &gid, size_t byte_count)
+                {
+                    typedef server::device::create_device_ptr_action action_type;
+                    return hpx::async<action_type>(gid, byte_count);
+                }
+
+                static void create_device_ptr(hpx::naming::id_type const &gid, size_t byte_count)
+                {
+                    create_device_ptr_async(gid, byte_count).get();
                 }
             };
         }

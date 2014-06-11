@@ -28,6 +28,24 @@ namespace hpx
                 buffer(hpx::future<hpx::naming::id_type> const& gid)
                 : base_type(gid)
                 {}
+
+                size_t size()
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    return this->base_type::size(this->get_gid());
+                }
+
+                void push_back(void *arg)
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    this->base_type::push_back(this->get_gid(),arg);
+                }
+
+                void load_args()
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    this->base_type::load_config(this->get_gid());
+                }
         };
     }
 }

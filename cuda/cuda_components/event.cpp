@@ -27,3 +27,5 @@ HPX_REGISTER_ACTION(cuda_event_type::wrapped_type::finished_action,
 	cuda_event_finished_action);
 HPX_REGISTER_ACTION(cuda_event_type::wrapped_type::trigger_action,
 	cuda_event_trigger_action);
+HPX_REGISTER_ACTION(cuda_event_type::wrapped_type::cuda_event_action,
+	cuda_event_cuda_event_action);

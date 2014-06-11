@@ -17,10 +17,16 @@ HPX_REGISTER_COMPONENT_MODULE();
 
 typedef hpx::components::managed_component<
     hpx::cuda::server::buffer>
-    buffer_type;
+    cuda_buffer_type;
 
-HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(buffer_type,buffer);
+HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(cuda_buffer_type,buffer);
 
 HPX_REGISTER_ACTION(
-    cuda_buffer_type::wrapped_type::,
-    );
+    cuda_buffer_type::wrapped_type::size_action,
+	cuda_buffer_size_action);
+HPX_REGISTER_ACTION(
+	cuda_buffer_type::wrapped_type::push_back_action,
+	cuda_buffer_push_back_action);
+HPX_REGISTER_ACTION(
+	cuda_buffer_type::wrapped_type::load_args_action,
+	cuda_buffer_load_args_action);

@@ -21,7 +21,30 @@ namespace hpx
             struct buffer
                 : hpx::components::stub_base<server::kernel>
             {
-            	
+            	static size_t size(hpx::naming::id_type const& gid)
+                {
+                    typedef server::buffer::size_action action_type;
+                    hpx::apply<action_type>(gid);
+                }
+
+                //figure out how to overload these two functions
+                static void push_back(hpx::naming::id_type const& gid)
+                {
+                    typedef server::buffer::push_back action_type;
+                    hpx::apply<action_type>(gid);
+                }
+
+                static void push_back(hpx::naming::id_type const& gid)
+                {
+                    typedef server::buffer::push_back action_type;
+                    hpx::apply<action_type>(gid);
+                }
+    
+                static void load_args(hpx::naming::id_type const& gid)
+                {
+                    typedef server::buffer::load_args action_type;
+                    //return hpx::apply<action_type>(gid);
+                }
             };
         }
     }

@@ -1,7 +1,8 @@
-// Copyright (c)		2013 Damond Howard
+ // Copyright (c)		2013 Damond Howard
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
+
 #if !defined(KERNEL_2_HPP)
 #define KERNEL_2_HPP
 
@@ -14,26 +15,43 @@
 #include <cuda.h>
 #include <curand_kernel.h>
 
+#include  "../fwd_declarations.hpp"
+
 namespace hpx
 {
     namespace cuda
     {
+        class Dim3
+        {
+            public:
+                unsigned int x,y,z;
+                Dim3(const unsigned int _x, const unsigned int _y, const unsigned int _z)
+                : x(_x), y(_y), z(_z)
+                {}
+                Dim3(const unsigned int *_f)
+                : x (_f[0]), y(_f[1]), z(_f[2])
+                {}
+                Dim3(){}
+                ~Dim3() {}
+        };
+
         namespace server
         {
             class kernel
                 : public hpx::components::locking_hook<
                     hpx::components::managed_component_base<kernel>
                 >
-            {   //kernel class data members
+            {  
             	private:
-            	cudaStream_t stream;
-            	dim3 dimGrid; 
-            	dim3 dimBlock;
+            	CUstream cu_stream;
+                CUmodule cu_module;
+                CUfunction cu_function;
+            	Dim3 grid,block;
                 unsigned int parent_device_id;
             	unsigned int kernel_id;
                 std::string  kernel_name;
+                unsigned int grid_x, grid_y, grid_z, block_x, block_y, block_z;
 
-                //Kernel class member functions
             	public:
 
                 kernel()
@@ -44,54 +62,63 @@ namespace hpx
                     this->kernel_name = kernel_name;
                     this->parent_device_id = parent_device_id;
                 }
+                ~kernel()
+                {
+                    cuModuleUnload(cu_module);
+                }
 
-                //define kernel class actions
             	void set_context()
             	{
-            		//set the context on which to run the kernel
-            		//by default it uses the same context as the
-            		//device on which it is called
                     cudaSetDevice(this->parent_device_id);
             	}
             	
             	void set_stream()
             	{
-            		//set the stream on which to run the kernel
-            		//by default it uses the first stream on the 
-            		//device, devices can have multiple streams
-            		//streams are used to execute multiple kernels
-            		//at the same time on the same device
-                    cudaStreamCreate(&stream);
+                    cuStreamCreate(&cu_stream, CU_STREAM_DEFAULT);
                 }
-            	
-            	void set_diminsions(/*int gridX =1,int gridY = 1, int gridZ = 1,int blockX =1,int blockY =1,int blockZ = 1*/)
+                
+                void set_grid_dim(unsigned int grid_x, unsigned int grid_y, unsigned int grid_z)
+                {
+                    this->grid_x = grid_x;
+                    this->grid_y = grid_y;
+                    this->grid_z = grid_z;
+                }
+
+            	void set_block_dim(unsigned int block_x, unsigned int block_y, unsigned int block_z)
             	{
-            		//sets the grid and block dimensions the kernel uses for execution
-                    /*dimGrid.x = gridX;
-                    dimGrid.y = gridY;
-                    dimGrid.z = gridZ;
-                    dimBlock.x = blockX;
-                    dimBlock.y = blockY;
-                    dimBlock.z = blockZ;*/
+                    this->block_x = block_x;
+                    this->block_y = block_y;
+                    this->block_z = block_z;
             	}
 
-                //sets the arguments to run kernel
-                void set_args(/*hpx::cuda::buffer args*/)
+                void load_module(const std::string &file_name)
                 {
+                    std::cout << "module " << file_name << " loaded" << std::endl;
+                    cuModuleLoad(&cu_module, file_name.c_str());
                 }
 
-                //runs the kernel
-                /*hpx::cuda::event enqueue(hpx::cuda::event event)
+                void load_kernel(const std::string &kernal_name)
                 {
-                    
-                }*/
+                    std::cout << "kernel " << kernel_name << " loaded" << std::endl;
+                   cuModuleGetFunction(&cu_function, cu_module, kernel_name.c_str());
+                }
+
+                void launch_kernel()
+
+                {
+                    void* args[] = {0};
+                    cuLaunchKernel(cu_function, grid.x, grid.y, grid.z, 
+                        block.x, block.y, block.z, 0, 0, args, NULL);
+                }
 
                 //HPX ation definitions
-                HPX_DEFINE_COMPONENT_ACTION(kernel,set_context);
-                HPX_DEFINE_COMPONENT_ACTION(kernel,set_stream);
-                HPX_DEFINE_COMPONENT_ACTION(kernel,set_diminsions);
-                HPX_DEFINE_COMPONENT_ACTION(kernel,set_args);
-                //HPX_DEFINE_COMPONENT_ACTION(kernel,enqueue);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, set_context);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, set_stream);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, load_module);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, load_kernel);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, launch_kernel);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, set_grid_dim);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, set_block_dim);
             };
         }
     }
@@ -103,14 +130,19 @@ HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::set_stream_action,
     cuda_kernel_set_stream_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::kernel::set_diminsions_action,
-    cuda_kernel_set_diminsions_action);
+    hpx::cuda::server::kernel::load_module_action,
+    cuda_kernel_load_module_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::kernel::set_args_action,
-    cuda_kernel_set_args_action);
-/*HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::kernel::enqueue,
-    cuda_kernel_enqueu_action);*/
-                                 
-//kernel registration declarations
+    hpx::cuda::server::kernel::load_kernel_action,
+    cuda_kernel_load_kernel_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::kernel::launch_kernel_action,
+    cuda_kernel_launch_kernel_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::kernel::set_grid_dim_action,
+    cuda_kernel_set_grid_dim_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::kernel::set_block_dim_action,
+    cuda_kernel_set_dim_action);
+
 #endif

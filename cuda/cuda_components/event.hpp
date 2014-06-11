@@ -29,6 +29,12 @@ namespace hpx
                 : base_type(gid)
                 {}
 
+                static hpx::lcos::future<float> elapsed_time(hpx::cuda::event event1, hpx::cuda::event event2)
+                {
+                    float *milliseconds;
+                    cuEventElapsedTime(milliseconds, event1.cuda_event(), event2.cuda_event());
+                }
+
                 hpx::lcos::future<void> await_async()
                 {
                    BOOST_ASSERT(this->get_gid());
@@ -63,6 +69,12 @@ namespace hpx
                 {
                    BOOST_ASSERT(this->get_gid());
                    this->base_type::trigger(this->get_gid());
+                }
+
+                CUevent cuda_event()
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    return this->base_type::cuda_event(this->get_gid());
                 }
         };
     }

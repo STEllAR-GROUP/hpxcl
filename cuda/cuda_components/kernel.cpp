@@ -25,9 +25,13 @@ HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_context_action,
 	cuda_kernel_set_context_action);
 HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_stream_action,
 	cuda_kernel_set_stream_action);
-HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_diminsions_action,
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::load_module_action,
+	cuda_kernel_load_module_action);
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::load_kernel_action,
+	cuda_kernel_load_kernel_action);
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_grid_dim_action,
 	cuda_kernel_set_diminsions_action);
-HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_args_action,
-	cuda_kernel_set_args_action);
-/*HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::enqueue_action,
-	cuda_kernel_enqueue_action);*/
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::launch_kernel_action,
+	cuda_kernel_launch_kernel_action);
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_block_dim_action,
+	cuda_kernel_set_block_dim_action);
