@@ -42,3 +42,6 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
     cuda_device_type::wrapped_type::create_device_ptr_action,
     cuda_device_create_device_ptr_action);
+/*HPX_REGISTER_ACTION(
+    cuda_device_type::wrapped_type::launch_kernel_action, 
+    cuda_device_launch_kernel_action);*/  

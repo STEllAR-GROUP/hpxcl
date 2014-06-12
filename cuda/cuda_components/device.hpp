@@ -36,7 +36,6 @@ namespace hpx
                 this->base_type::get_cuda_info(this->get_gid());
             }
 
-            //takes a vector of localities and returns a vector of devices
             static std::vector<int> get_all_devices(std::vector<hpx::naming::id_type> localities)
             {
                 return base_type::get_all_devices(localities);
@@ -102,6 +101,21 @@ namespace hpx
                 BOOST_ASSERT(this->get_gid());
                 this->base_type::create_device_ptr(this->get_gid(), byte_count);
             }
+
+            template <typename T>
+            void create_host_ptr(T value, size_t const byte_count)
+            {
+                BOOST_ASSERT(this->get_gid());
+                this->base_type::create_host_ptr(gid, value, byte_count);
+            }
+
+            template <typename T>
+            void create_host_ptr_non_blocking(T value, size_t const byte_count)
+            {
+                BOOST_ASSERT(this->get_gid());
+                this->base_type::create_host_ptr_non_blocking(gid, value, byte_count);
+            }
+
         };
 	}
 }

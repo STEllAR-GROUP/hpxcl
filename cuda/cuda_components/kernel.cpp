@@ -21,8 +21,6 @@ typedef hpx::components::managed_component<
 
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(cuda_kernel_type,kernel);
 
-HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_context_action,
-	cuda_kernel_set_context_action);
 HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_stream_action,
 	cuda_kernel_set_stream_action);
 HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::load_module_action,
@@ -31,7 +29,13 @@ HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::load_kernel_action,
 	cuda_kernel_load_kernel_action);
 HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_grid_dim_action,
 	cuda_kernel_set_diminsions_action);
-HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::launch_kernel_action,
-	cuda_kernel_launch_kernel_action);
 HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_block_dim_action,
 	cuda_kernel_set_block_dim_action);
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::get_function_action, 
+	cuda_kernel_get_function_action);
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::get_module_action,
+	cuda_kernel_get_module_action);
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::get_grid_action,
+	cuda_kernel_get_grid_action);
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::get_block_action,
+	cuda_kernel_get_block_action);

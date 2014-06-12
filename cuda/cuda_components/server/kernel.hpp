@@ -46,31 +46,23 @@ namespace hpx
             	CUstream cu_stream;
                 CUmodule cu_module;
                 CUfunction cu_function;
-            	Dim3 grid,block;
-                unsigned int parent_device_id;
-            	unsigned int kernel_id;
+            	hpx::cuda::Dim3 grid,block;
                 std::string  kernel_name;
-                unsigned int grid_x, grid_y, grid_z, block_x, block_y, block_z;
+                std::string  module_name;
 
             	public:
 
                 kernel()
                 {}
 
-            	kernel(std::string kernel_name,unsigned int parent_device_id)
+            	kernel(std::string kernel_name)
             	{
                     this->kernel_name = kernel_name;
-                    this->parent_device_id = parent_device_id;
                 }
                 ~kernel()
                 {
                     cuModuleUnload(cu_module);
                 }
-
-            	void set_context()
-            	{
-                    cudaSetDevice(this->parent_device_id);
-            	}
             	
             	void set_stream()
             	{
@@ -79,53 +71,68 @@ namespace hpx
                 
                 void set_grid_dim(unsigned int grid_x, unsigned int grid_y, unsigned int grid_z)
                 {
-                    this->grid_x = grid_x;
-                    this->grid_y = grid_y;
-                    this->grid_z = grid_z;
+                    this->grid.x = grid_x;
+                    this->grid.y = grid_y;
+                    this->grid.z = grid_z;
                 }
 
             	void set_block_dim(unsigned int block_x, unsigned int block_y, unsigned int block_z)
             	{
-                    this->block_x = block_x;
-                    this->block_y = block_y;
-                    this->block_z = block_z;
+                    this->block.x = block_x;
+                    this->block.y = block_y;
+                    this->block.z = block_z;
             	}
 
                 void load_module(const std::string &file_name)
                 {
-                    std::cout << "module " << file_name << " loaded" << std::endl;
-                    cuModuleLoad(&cu_module, file_name.c_str());
+                    //std::cout << "module " << file_name << " loaded" << std::endl;
+                    this->module_name = file_name;
+                    //cuModuleLoad(&cu_module, file_name.c_str());
                 }
 
                 void load_kernel(const std::string &kernal_name)
                 {
-                    std::cout << "kernel " << kernel_name << " loaded" << std::endl;
-                   cuModuleGetFunction(&cu_function, cu_module, kernel_name.c_str());
+                    //std::cout << "kernel " << kernel_name << " loaded" << std::endl;
+                    this->kernel_name = kernel_name;
+                   //cuModuleGetFunction(&cu_function, cu_module, kernel_name.c_str());
                 }
 
-                void launch_kernel()
-
+                std::string get_function()
                 {
-                    void* args[] = {0};
-                    cuLaunchKernel(cu_function, grid.x, grid.y, grid.z, 
-                        block.x, block.y, block.z, 0, 0, args, NULL);
+                    return this->kernel_name;
+                }
+
+                std::string get_module()
+                {
+                    return this->module_name;
+                }
+
+                hpx::cuda::Dim3 get_grid()
+                {
+                    return this->grid;
+                }
+
+                hpx::cuda::Dim3 get_block()
+                {
+                    return this->block;
                 }
 
                 //HPX ation definitions
-                HPX_DEFINE_COMPONENT_ACTION(kernel, set_context);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, set_stream);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, load_module);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, load_kernel);
-                HPX_DEFINE_COMPONENT_ACTION(kernel, launch_kernel);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, set_grid_dim);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, set_block_dim);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, get_function);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, get_module);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, get_grid);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, get_block);
+
             };
         }
     }
 }
-HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::kernel::set_context_action,
-    cuda_kernel_set_context_action);
+
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::set_stream_action,
     cuda_kernel_set_stream_action);
@@ -136,13 +143,22 @@ HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::load_kernel_action,
     cuda_kernel_load_kernel_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::kernel::launch_kernel_action,
-    cuda_kernel_launch_kernel_action);
-HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::set_grid_dim_action,
     cuda_kernel_set_grid_dim_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::set_block_dim_action,
     cuda_kernel_set_dim_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::kernel::get_function_action,
+    cuda_kernel_get_function_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::kernel::get_module_action,
+    cuda_kernel_get_module_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::kernel::get_block_action,
+    cuda_kernel_get_block_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::kernel::get_grid_action,
+    cuda_kernel_get_grid_action);
 
 #endif

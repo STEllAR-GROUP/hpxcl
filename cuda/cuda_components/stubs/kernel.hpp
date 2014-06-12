@@ -21,16 +21,6 @@ namespace hpx
             struct kernel
                 : hpx::components::stub_base<server::kernel>
             {  
-                static hpx::lcos::future<void> set_context_async(hpx::naming::id_type const &gid)
-                {
-                    typedef server::kernel::set_context_action action_type;
-                    return hpx::async<action_type>(gid);
-                }
-
-            	static void set_context(hpx::naming::id_type const &gid)
-                {
-                    set_context_async(gid).get();
-                }
 
                 static hpx::lcos::future<void> set_stream_async(hpx::naming::id_type const &gid)
                 {
@@ -85,6 +75,50 @@ namespace hpx
                 static void load_module(hpx::naming::id_type const &gid, const std::string &file_name)
                 {
                     load_module_async(gid, file_name).get();
+                }
+
+                static hpx::lcos::future<hpx::cuda::Dim3> get_grid_async(hpx::naming::id_type const &gid)
+                {
+                    typedef server::kernel::get_grid_action action_type;
+                    return hpx::async<action_type>(gid);
+                }
+
+                static hpx::cuda::Dim3 get_grid(hpx::naming::id_type const &gid)
+                {
+                    return get_grid_async(gid).get();
+                }
+
+                static hpx::lcos::future<hpx::cuda::Dim3> get_block_async(hpx::naming::id_type const &gid)
+                {
+                    typedef server::kernel::get_block_action action_type;
+                    return hpx::async<action_type>(gid);
+                }
+
+                static hpx::cuda::Dim3 get_block(hpx::naming::id_type const &gid)
+                {
+                    return get_block_async(gid).get();
+                }
+
+                static hpx::lcos::future<std::string> get_function_async(hpx::naming::id_type const &gid)
+                {
+                    typedef server::kernel::get_function_action action_type;
+                    return hpx::async<action_type>(gid);
+                } 
+
+                static std::string get_function(hpx::naming::id_type const &gid)
+                {
+                    return get_function_async(gid).get();
+                }
+
+                static hpx::lcos::future<std::string> get_module_async(hpx::naming::id_type const &gid)
+                {
+                    typedef server::kernel::get_module_action action_type;
+                    return hpx::async<action_type>(gid);
+                }
+
+                static std::string get_module(hpx::naming::id_type const &gid)
+                {
+                    return get_module_async(gid).get(); 
                 }
             };
         }

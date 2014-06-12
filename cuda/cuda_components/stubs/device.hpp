@@ -99,6 +99,20 @@ namespace hpx
                 {
                     create_device_ptr_async(gid, byte_count).get();
                 }
+
+                template <typename T>
+                static void create_host_ptr(hpx::naming::id_type const &gid, T value, size_t const byte_count)
+                {
+                    typedef typename server::device::create_host_ptr_action<T> action_type;
+                    hpx::async<action_type>(gid, value).get();
+                }
+
+                static <typename T>
+                static void create_host_ptr_non_blocking(hpx::naming::id_type const &gid, T value, size_t const byte_count)
+                {
+                   typedef typename server::device::create_host_ptr_action<T> action_type;
+                   hpx::apply<action_type>(gid, value).get();  
+                }
             };
         }
     }

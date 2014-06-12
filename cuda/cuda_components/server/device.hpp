@@ -23,10 +23,9 @@
 #include <vector>
 
 #include "../cuda/kernel.cuh"
+#include "../kernel.hpp"
+#include "../server/kernel.hpp"
 #include  "../fwd_declarations.hpp"
-
-//#include "../buffer.hpp"
-//#include "../event.hpp"
 
 namespace hpx
 {
@@ -39,6 +38,13 @@ namespace hpx
             CUdeviceptr device_ptr;
             size_t byte_count;
          };
+         /*template <typename T>
+         struct Host_ptr
+         {
+            T *host_ptr;
+            size_t byte_count;
+         };*/
+
          /////////////////////////////////////////////////
          /// This class represents a cuda device /////////
          class device
@@ -47,19 +53,20 @@ namespace hpx
                     >
              {
               	 private:
+
         	  	 unsigned int device_id;
                  unsigned int context_id;
-                 //std::shared_ptr<CUdevice> cu_device;
                  CUdevice cu_device;
                  CUcontext cu_context;
                  std::string device_name;
                  cudaDeviceProp props;   
                  std::vector<Device_ptr> device_ptrs;           	 
+                 std::vector<Host_ptr> host_ptrs;
               	 public:
-        	 	 //Constructors
+
         	 	 device()
                  {
-                    cuInit(0); //initializes cuda driver API
+                    cuInit(0); 
                     cuDeviceGet(&cu_device,0);
                     cuCtxCreate(&cu_context,0,cu_device);
                     device_name = props.name;
@@ -77,6 +84,10 @@ namespace hpx
         	 	 }
 				 ~device()
 				 {
+                    for (uint64_t i=0;i<device_ptrs.size();i++)
+                    {
+                        cuMemFree(device_ptrs[i].device_ptr);
+                    }
                     cuCtxDetach(cu_context);
                  }
 
@@ -103,7 +114,6 @@ namespace hpx
                     std::cout<<"Thrust version: v"<<THRUST_MAJOR_VERSION<<"."<<THRUST_MINOR_VERSION<<std::endl<<std::endl;
 
                     int dev_count = this->get_device_count();
-                    //daGetDeviceCount(&dev_count);
 
                     if(dev_count <= 0)
                     {
@@ -155,22 +165,19 @@ namespace hpx
 
                 static void do_wait(boost::shared_ptr<hpx::lcos::local::promise<int> > p)
                 {
-                    p->set_value(0);    // notify the waiting HPX thread and return a value
+                    p->set_value(0);   
                     float x = pi(10,10);
                     std::cout << x << std::endl;
                 }
 
-                // This function will be executed by an HPX thread
                 static hpx::lcos::future<int> wait()
                 {
                     boost::shared_ptr<hpx::lcos::local::promise<int> > p =
                     boost::make_shared<hpx::lcos::local::promise<int> >();
 
-                    // Get a reference to one of the IO specific HPX io_service objects ...
                     hpx::util::io_service_pool* pool =
                     hpx::get_runtime().get_thread_pool("io_pool");
 
-                    // ... and schedule the handler to run on one of its OS-threads.
                     pool->get_io_service().post(
                     hpx::util::bind(&do_wait, p));
 
@@ -184,11 +191,35 @@ namespace hpx
 
                 void create_device_ptr(size_t const byte_count)
                 {
-                    //every time a device pointer is created it is added to the deviceptr struct vector
                     Device_ptr temp;
                     cuMemAlloc(&temp.device_ptr, byte_count);
                     temp.byte_count = byte_count;
                     device_ptrs.push_back(temp);
+                }
+
+                template <typename T>
+                void create_host_ptr(T value, size_t const byte_count)
+                {
+                    //Host_ptr temp<T>;
+                    //temp.host_ptr = (T*)malloc(byte_count);
+                    //temp.byte_count = byte_count;
+                    //host_ptrs.push_back(temp);
+                }
+
+                void launch_kernel(hpx::cuda::kernel cu_kernel)
+                {
+                    hpx::cuda::Dim3 block = cu_kernel.get_block();
+                    hpx::cuda::Dim3 grid = cu_kernel.get_grid();
+
+                    void *args[] = {};
+
+                    CUfunction cu_function;
+                    CUmodule cu_module;
+
+                    cuModuleLoad(&cu_module, cu_kernel.get_module().c_str());
+                    cuModuleGetFunction(&cu_function, cu_module, cu_kernel.get_function().c_str());
+
+                    cuLaunchKernel(cu_function, grid.x, grid.y, grid.z, block.x, block.y, block.z, 0, 0, args, NULL);
                 }
 
                 HPX_DEFINE_COMPONENT_ACTION(device,calculate_pi);
@@ -198,7 +229,14 @@ namespace hpx
                 HPX_DEFINE_COMPONENT_ACTION(device,get_device_id);
                 HPX_DEFINE_COMPONENT_ACTION(device,get_context);
                 HPX_DEFINE_COMPONENT_ACTION(device,wait);
-                HPX_DEFINE_COMPONENT_ACTION(device, create_device_ptr);
+                HPX_DEFINE_COMPONENT_ACTION(device,create_device_ptr);
+                //HPX_DEFINE_COMPONENT_ACTION(device,launch_kernel);
+
+                template <typename T>
+                struct create_host_ptr_action
+                    :  hpx::actions::make_action<void (device::*)(T),
+                            &server::device::template create_host_ptr<T>, create_host_ptr_action<T> >
+                    {};
             };
 	    }
     }
@@ -230,5 +268,13 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::create_device_ptr_action,
     device_create_device_ptr_action);
+/*HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::launch_kernel_action,
+    device_launch_kernel_action);
+*/
+HPX_REGISTER_ACTION_DECLARATION_TEMPLATE(
+    (template <typename T>),
+    (hpx::cuda::server::device::create_host_ptr_action<T>)
+    );
 
 #endif //cuda_device_2_HPP

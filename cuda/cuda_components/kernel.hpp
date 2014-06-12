@@ -29,18 +29,6 @@ namespace hpx
                 : base_type(gid)
                 {}
 
-                hpx::lcos::future<void> set_context_async()
-                { 
-                    BOOST_ASSERT(this->get_gid());
-                    return this->base_type::set_context_async(this->get_gid());
-                }
-
-                void set_context()
-                {
-                    BOOST_ASSERT(this->get_gid());
-                    this->base_type::set_context(this->get_gid());
-                }
-
                 hpx::lcos::future<void> set_stream_async()
                 {
                     BOOST_ASSERT(this->get_gid());
@@ -99,6 +87,54 @@ namespace hpx
                 {
                     BOOST_ASSERT(this->get_gid());
                     this->base_type::load_kernel(this->get_gid(), file_name);
+                }
+
+                hpx::lcos::future<hpx::cuda::Dim3> get_grid_async()
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    return this->base_type::get_grid_async(this->get_gid());
+                }
+
+                hpx::cuda::Dim3 get_grid()
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    return this->base_type::get_grid(this->get_gid());
+                }
+
+                hpx::lcos::future<hpx::cuda::Dim3> get_block_async()
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    return this->base_type::get_block_async(this->get_gid());
+                }
+
+                hpx::cuda::Dim3 get_block()
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    return this->base_type::get_block(this->get_gid());
+                }
+
+                hpx::lcos::future<std::string> get_function_async()
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    return this->base_type::get_function_async(this->get_gid());
+                }
+
+                std::string get_function()
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    return this->base_type::get_function(this->get_gid());
+                }
+
+                hpx::lcos::future<std::string> get_module_async()
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    return this->base_type::get_module_async(this->get_gid());
+                }
+
+                std::string get_module()
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    return this->base_type::get_module(this->get_gid());
                 }
 
         };
