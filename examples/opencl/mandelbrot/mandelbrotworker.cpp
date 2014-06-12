@@ -13,27 +13,34 @@
 
 static std::atomic_uint id_counter(0);
 
-mandelbrotworker::mandelbrotworker(hpx::opencl::device device,
+mandelbrotworker::mandelbrotworker(hpx::opencl::device device_,
                                    boost::shared_ptr<work_queue<
-                                       boost::shared_ptr<workload>>> workqueue,
-                                   size_t num_workers)
-    : worker_initialized(boost::shared_ptr<hpx::lcos::local::event>(
+                                       boost::shared_ptr<workload>>> workqueue_,
+                                   size_t num_workers, bool verbose_)
+    : verbose(verbose_),
+      device(device_),
+      workqueue(workqueue_),
+      worker_initialized(boost::shared_ptr<hpx::lcos::local::event>(
                                                 new hpx::lcos::local::event()))
 {
 
     // get a unique id
-    unsigned int id = id_counter++;
+    id = id_counter++;
 
     // start worker
     worker_finished = hpx::async(&worker_starter,
-                                 workqueue,
-                                 device,
-                                 num_workers,
-                                 worker_initialized,
-                                 id); 
+                                 (intptr_t) this,
+                                 num_workers); 
 
 }
 
+mandelbrotworker::~mandelbrotworker()
+{
+
+    // wait for the worker to finish
+    join();
+
+}
 
 void
 mandelbrotworker::join()
@@ -55,23 +62,28 @@ mandelbrotworker::wait_for_startup_finished()
 
 size_t
 mandelbrotworker::worker_main(
-           boost::shared_ptr<work_queue<boost::shared_ptr<workload>>> workqueue,
-           hpx::opencl::device device,
-           hpx::opencl::kernel kernel,
-           unsigned int id)
+                    intptr_t parent_ptr,
+                    hpx::opencl::kernel kernel
+           )
 {
+
+        // de-serialize parent ptr. dirty hack, but allowed as child WILL
+        // be on the same device as parent, and parent will not be 
+        // deallocated before child terminated
+        mandelbrotworker* parent = (mandelbrotworker*) parent_ptr;
+
 
         // counts how much wor has been done
         size_t num_work = 0;
 
         // create output buffer
         hpx::opencl::buffer output_buffer =
-                       device.create_buffer(CL_MEM_WRITE_ONLY,
+               parent->device.create_buffer(CL_MEM_WRITE_ONLY,
                                             3 * MAX_IMG_WIDTH * sizeof(double));
         // create input buffer
-        hpx::opencl::buffer input_buffer = device.create_buffer(
-                                                  CL_MEM_READ_ONLY,
-                                                  4 * sizeof(double));
+        hpx::opencl::buffer input_buffer = parent->device.create_buffer(
+                                                           CL_MEM_READ_ONLY,
+                                                           4 * sizeof(double));
     
         // connect buffers to kernel 
         kernel.set_arg(0, output_buffer);
@@ -87,7 +99,7 @@ mandelbrotworker::worker_main(
         dim[0].local_size = 8;
         dim[1].local_size = 8;
 
-        while(workqueue->request(&next_workload))
+        while(parent->workqueue->request(&next_workload))
         {
             
             // check for maximum workload size
@@ -129,7 +141,7 @@ mandelbrotworker::worker_main(
             }
             
             // return calculated workload to work manager workload
-            workqueue->deliver(next_workload);
+            parent->workqueue->deliver(next_workload);
 
             // count number of workloads
             num_work++;
@@ -142,25 +154,27 @@ mandelbrotworker::worker_main(
 
 void
 mandelbrotworker::worker_starter(
-           boost::shared_ptr<work_queue<boost::shared_ptr<workload>>> workqueue,
-           hpx::opencl::device device,
-           size_t num_workers,
-           boost::shared_ptr<hpx::lcos::local::event> worker_initialized,
-           unsigned int id)
+           intptr_t parent_ptr,
+           size_t num_workers)
 {
+
+    // get parent pointer
+    mandelbrotworker* parent = (mandelbrotworker*) parent_ptr;
+
+
     try{
 
         bool verbose = false;
 
-        std::string device_vendor = device.device_info_to_string(
-                                  device.get_device_info(CL_DEVICE_VENDOR));
-        std::string device_name = device.device_info_to_string(
-                                  device.get_device_info(CL_DEVICE_NAME));
-        std::string device_version = device.device_info_to_string(
-                                  device.get_device_info(CL_DEVICE_VERSION));
+        std::string device_vendor = parent->device.device_info_to_string(
+                                  parent->device.get_device_info(CL_DEVICE_VENDOR));
+        std::string device_name = parent->device.device_info_to_string(
+                                  parent->device.get_device_info(CL_DEVICE_NAME));
+        std::string device_version = parent->device.device_info_to_string(
+                                  parent->device.get_device_info(CL_DEVICE_VERSION));
 
         // print device name
-        hpx::cout << "#" << id << ": "
+        hpx::cout << "#" << parent->id << ": "
                   << device_vendor << ": "
                   << device_name << " ("
                   << device_version << ")"
@@ -168,10 +182,12 @@ mandelbrotworker::worker_starter(
     
         // build opencl program
         hpx::opencl::program mandelbrot_program =
-                          device.create_program_with_source(mandelbrot_kernels);
-        hpx::cout << "#" << id << ": " << "compiling" << hpx::endl;
+                     parent->device.create_program_with_source(mandelbrot_kernels);
+        if(verbose)
+            hpx::cout << "#" << parent->id << ": " << "compiling" << hpx::endl;
         mandelbrot_program.build();
-        if(verbose) hpx::cout << "#" << id << ": " << "compiling done." << hpx::endl;
+        if(verbose)
+            hpx::cout << "#" << parent->id << ": " << "compiling done." << hpx::endl;
     
         
         // start workers
@@ -185,18 +201,19 @@ mandelbrotworker::worker_starter(
 
             // start worker
             hpx::lcos::shared_future<size_t> worker_future = 
-                        hpx::async(&worker_main, workqueue, device, kernel, id);
+                        hpx::async(&worker_main, parent_ptr, kernel);
 
             // add worker to workerlist
             worker_futures.push_back(worker_future);
 
         }
 
-        hpx::cout << "#" << id << ": " << "workers started!" << hpx::endl;
+        if(verbose)
+            hpx::cout << "#" << parent->id << ": " << "workers started!" << hpx::endl;
 
         // trigger event to start main function.
         // needed for accurate time measurement
-        worker_initialized->set();
+        parent->worker_initialized->set();
 
         // wait for workers to finish
         size_t num_work = 0;
@@ -205,19 +222,13 @@ mandelbrotworker::worker_starter(
             // finish worker and get number of computed work packets
             size_t num_work_single = worker_futures[i].get();
 
-            // display work packet count
-            /*hpx::cout << "#" << id << ": " << "worker " << i 
-                      << ": " << num_work_single << " work packets"
-                      << hpx::endl;
-            */
-
             // count total work packets
             num_work += num_work_single;
         }
          
         if(verbose)
         {
-            hpx::cout << "#" << id << ": " << "workers finished! ("
+            hpx::cout << "#" << parent->id << ": " << "workers finished! ("
                   << num_work << " work packets)" << hpx::endl;
         }
 
@@ -225,7 +236,7 @@ mandelbrotworker::worker_starter(
         
         // write error message. workaround, should not be done like this in 
         // real application
-        hpx::cout << "#" << id << ": " 
+        hpx::cout << "#" << parent->id << ": " 
                   << "ERROR!" << hpx::endl
                   << hpx::get_error_backtrace(e) << hpx::endl
                   << hpx::diagnostic_information(e) << hpx::endl;
