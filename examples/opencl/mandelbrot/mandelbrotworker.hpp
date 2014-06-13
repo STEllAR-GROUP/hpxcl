@@ -29,7 +29,7 @@ class mandelbrotworker
                          boost::shared_ptr<work_queue<
                                       boost::shared_ptr<workload>>> workqueue_,
                          size_t num_workers,
-                         bool verbose);
+                         bool verbose, size_t workpacket_size_hint);
 
         // waits for the worker to finish
         void join();
@@ -44,18 +44,20 @@ class mandelbrotworker
         // the main worker function, runs the main work loop
         static size_t worker_main(
            intptr_t parent_,
-           hpx::opencl::kernel kernel);
+           hpx::opencl::kernel kernel,
+           size_t workpacket_size_hint);
 
         // the startup function, initializes the kernel and starts the workers
         static void worker_starter(
            intptr_t parent_,
-           size_t num_workers
+           size_t num_workers,
+           size_t workpacket_size_hint
            );
 
     // private attributes
     private:
-        bool verbose;
-        unsigned int id;
+        const bool verbose;
+        const unsigned int id;
         hpx::opencl::device device;
         boost::shared_ptr<work_queue<boost::shared_ptr<workload>>> workqueue;
         hpx::lcos::shared_future<void> worker_finished;

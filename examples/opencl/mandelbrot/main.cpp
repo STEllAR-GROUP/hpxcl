@@ -27,8 +27,8 @@ int hpx_main(boost::program_options::variables_map & vm)
     bool verbose = false;
 
     // Print help message on wrong argument count
-    if (vm.count("num_parallel_kernels"))
-        num_kernels = vm["num_parallel_kernels"].as<std::size_t>();
+    if (vm.count("num-parallel-kernels"))
+        num_kernels = vm["num-parallel-kernels"].as<std::size_t>();
     if (vm.count("v"))
         verbose = true;
 
@@ -104,7 +104,8 @@ int hpx_main(boost::program_options::variables_map & vm)
                                 new mandelbrotworker(device,
                                                      workqueue,
                                                      num_kernels,
-                                                     verbose));
+                                                     verbose,
+                                                     30000));
             // add worker to workerlist
             workers.push_back(worker);
 
@@ -218,9 +219,9 @@ int main(int argc, char* argv[])
     boost::program_options::options_description cmdline(
                                 "Usage: " HPX_APPLICATION_STRING " [options]");
     cmdline.add_options()
-        ( "num_parallel_kernels"
+        ( "num-parallel-kernels"
         , boost::program_options::value<std::size_t>()->default_value(10)
-        , "the number of parallel kernel invocations") ;
+        , "the number of parallel kernel invocations per gpu") ;
 
     cmdline.add_options()
         ( "v"

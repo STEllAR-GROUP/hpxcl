@@ -5,6 +5,7 @@
 
 #include "mandelbrotworker.hpp"
 #include "mandelbrotkernel.hpp"
+#include "mandelbrotworker_buffermanager.hpp"
 
 #include <cmath>
 #include <atomic>
@@ -16,21 +17,21 @@ static std::atomic_uint id_counter(0);
 mandelbrotworker::mandelbrotworker(hpx::opencl::device device_,
                                    boost::shared_ptr<work_queue<
                                        boost::shared_ptr<workload>>> workqueue_,
-                                   size_t num_workers, bool verbose_)
+                                   size_t num_workers, bool verbose_,
+                                   size_t workpacket_size_hint)
     : verbose(verbose_),
+      id(id_counter++),
       device(device_),
       workqueue(workqueue_),
       worker_initialized(boost::shared_ptr<hpx::lcos::local::event>(
                                                 new hpx::lcos::local::event()))
 {
 
-    // get a unique id
-    id = id_counter++;
-
     // start worker
     worker_finished = hpx::async(&worker_starter,
                                  (intptr_t) this,
-                                 num_workers); 
+                                 num_workers,
+                                 workpacket_size_hint); 
 
 }
 
@@ -63,7 +64,8 @@ mandelbrotworker::wait_for_startup_finished()
 size_t
 mandelbrotworker::worker_main(
                     intptr_t parent_ptr,
-                    hpx::opencl::kernel kernel
+                    hpx::opencl::kernel kernel,
+                    size_t workpacket_size_hint
            )
 {
 
@@ -72,14 +74,19 @@ mandelbrotworker::worker_main(
         // deallocated before child terminated
         mandelbrotworker* parent = (mandelbrotworker*) parent_ptr;
 
+        // setup device memory management.
+        // initialize default buffer with size of numpixels * 3 (rgb) * sizeof(double)
+        mandelbrotworker_buffermanager buffermanager(
+                                        parent->device,
+                                        workpacket_size_hint * 3 * sizeof(double)); 
 
-        // counts how much wor has been done
+        // counts how much work has been done
         size_t num_work = 0;
 
-        // create output buffer
+        // attach output buffer
         hpx::opencl::buffer output_buffer =
-               parent->device.create_buffer(CL_MEM_WRITE_ONLY,
-                                            3 * MAX_IMG_WIDTH * sizeof(double));
+            buffermanager.get_buffer( workpacket_size_hint * 3 * sizeof(double) );
+
         // create input buffer
         hpx::opencl::buffer input_buffer = parent->device.create_buffer(
                                                            CL_MEM_READ_ONLY,
@@ -152,7 +159,8 @@ mandelbrotworker::worker_main(
 void
 mandelbrotworker::worker_starter(
            intptr_t parent_ptr,
-           size_t num_workers)
+           size_t num_workers,
+           size_t workpacket_size_hint)
 {
 
     // get parent pointer
@@ -196,7 +204,7 @@ mandelbrotworker::worker_starter(
 
             // start worker
             hpx::lcos::shared_future<size_t> worker_future = 
-                        hpx::async(&worker_main, parent_ptr, kernel);
+                        hpx::async(&worker_main, parent_ptr, kernel, workpacket_size_hint);
 
             // add worker to workerlist
             worker_futures.push_back(worker_future);
