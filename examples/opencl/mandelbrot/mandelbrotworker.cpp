@@ -161,8 +161,6 @@ mandelbrotworker::worker_starter(
 
     try{
 
-        bool verbose = false;
-
         std::string device_vendor = parent->device.device_info_to_string(
                                   parent->device.get_device_info(CL_DEVICE_VENDOR));
         std::string device_name = parent->device.device_info_to_string(
@@ -180,10 +178,10 @@ mandelbrotworker::worker_starter(
         // build opencl program
         hpx::opencl::program mandelbrot_program =
                      parent->device.create_program_with_source(mandelbrot_kernels);
-        if(verbose)
+        if(parent->verbose)
             hpx::cout << "#" << parent->id << ": " << "compiling" << hpx::endl;
         mandelbrot_program.build();
-        if(verbose)
+        if(parent->verbose)
             hpx::cout << "#" << parent->id << ": " << "compiling done." << hpx::endl;
     
         
@@ -205,7 +203,7 @@ mandelbrotworker::worker_starter(
 
         }
 
-        if(verbose)
+        if(parent->verbose)
             hpx::cout << "#" << parent->id << ": " << "workers started!" << hpx::endl;
 
         // trigger event to start main function.
@@ -223,7 +221,7 @@ mandelbrotworker::worker_starter(
             num_work += num_work_single;
         }
          
-        if(verbose)
+        if(parent->verbose)
         {
             hpx::cout << "#" << parent->id << ": " << "workers finished! ("
                   << num_work << " work packets)" << hpx::endl;

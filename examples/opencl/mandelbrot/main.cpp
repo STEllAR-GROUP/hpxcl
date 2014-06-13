@@ -52,7 +52,7 @@ int hpx_main(boost::program_options::variables_map & vm)
             hpx::lcos::shared_future<std::vector<hpx::opencl::device>>
             locality_device_future = hpx::opencl::get_devices(locality,
                                                              CL_DEVICE_TYPE_GPU,
-                                                             1.0f);
+                                                             1.1f);
 
             // add locality device future to list of futures
             locality_device_futures.push_back(locality_device_future);
