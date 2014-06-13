@@ -10,6 +10,7 @@ set(sources
     workload.cpp
     mandelbrotworker.cpp
     mandelbrotworker_buffermanager.cpp
+    image_generator.cpp
 )
 
 

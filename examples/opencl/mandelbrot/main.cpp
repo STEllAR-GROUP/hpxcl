@@ -105,7 +105,7 @@ int hpx_main(boost::program_options::variables_map & vm)
                                                      workqueue,
                                                      num_kernels,
                                                      verbose,
-                                                     30000));
+                                                     2560));
             // add worker to workerlist
             workers.push_back(worker);
 
