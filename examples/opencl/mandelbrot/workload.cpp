@@ -8,7 +8,7 @@
 workload::workload(size_t num_pixels_, double origin_x_, double origin_y_,
                     double size_x_, double size_y_, size_t img_id_,
                     size_t pos_in_img_) :
-                    pixeldata(std::vector<unsigned char>(3*num_pixels_)),
+                    pixeldata(boost::shared_ptr<std::vector<char>>()),
                     num_pixels(num_pixels_),
                     origin_x(origin_x_),
                     origin_y(origin_y_),

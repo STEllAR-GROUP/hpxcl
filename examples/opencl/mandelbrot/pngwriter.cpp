@@ -30,7 +30,7 @@ public:
     {
     }
 
-    void set_row(size_t y, unsigned char* data)
+    void set_row(size_t y, const char* data)
     {
         
         // create a row iterator
@@ -39,7 +39,9 @@ public:
         // set data of the row
         for(int x = 0; x < img.width(); x++)
         {
-            *it = rgb8_pixel_t(data[0], data[1], data[2]);
+            *it = rgb8_pixel_t((unsigned char)(data[0]), 
+                               (unsigned char)(data[1]),
+                               (unsigned char)(data[2]));
             data += 3;
             it++;
         }
@@ -81,7 +83,7 @@ unsigned long png_create(size_t x, size_t y)
 
 }
 
-void png_set_row(unsigned long id, size_t y, unsigned char* data)
+void png_set_row(unsigned long id, size_t y, const char* data)
 {
 
     images[id]->set_row(y, data);

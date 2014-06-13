@@ -141,6 +141,10 @@ int hpx_main(boost::program_options::variables_map & vm)
 
         }
 
+        // initialize result array
+        std::vector<boost::shared_ptr<std::vector<char>>> result_data(img_y);
+
+
         if(verbose) hpx::cout << "adding workpackets to workqueue ..." << hpx::endl;
         timer_start();
         // add workloads for all lines
@@ -165,8 +169,8 @@ int hpx_main(boost::program_options::variables_map & vm)
         {
 
             // hpx::cout << "taking line " << done_row->pos_in_img << " ... " << hpx::endl;
-            png_set_row(img, done_row->pos_in_img, done_row->pixeldata.data());
-           
+            result_data[done_row->pos_in_img] = done_row->pixeldata;
+
             if(verbose)
             { 
                 int progress = ++i;
@@ -190,6 +194,10 @@ int hpx_main(boost::program_options::variables_map & vm)
 
         // save the png
         if(verbose) hpx::cout << "saving png ..." << hpx::endl;
+        for(size_t i = 0; i < img_y; i++)
+        {
+            png_set_row(img, i, result_data[i]->data());
+        }
         png_save_and_close(img, "test.png");
 
     }

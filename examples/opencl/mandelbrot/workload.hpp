@@ -9,6 +9,8 @@
 #include <cstdlib>
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+
 /*
  * A workload, defines a mandelbrot line and will be filled by workers with
  * the calculated results
@@ -22,7 +24,7 @@ class workload
                  size_t pos_in_img_);
         
         // Will hold the calculated pixels
-        std::vector<unsigned char> pixeldata;
+        boost::shared_ptr<std::vector<char>> pixeldata;
         // the number of pixels on the line
         size_t num_pixels;
         // the start point of the line

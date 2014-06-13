@@ -135,10 +135,7 @@ mandelbrotworker::worker_main(
             boost::shared_ptr<std::vector<char>> readdata = ev3.get_data().get();
     
             // copy calculation result to output buffer
-            for(size_t i = 0; i < 3 * next_workload->num_pixels; i++)
-            {
-                next_workload->pixeldata[i] = ((unsigned char*)readdata->data())[i];
-            }
+            next_workload->pixeldata = readdata;
             
             // return calculated workload to work manager workload
             parent->workqueue->deliver(next_workload);

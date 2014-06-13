@@ -13,7 +13,7 @@ unsigned long png_create(size_t x, size_t y);
 void test();
 
 // sets a row of the image. data needs to be an array of size 3*x
-void png_set_row(unsigned long id, size_t y, unsigned char * data);
+void png_set_row(unsigned long id, size_t y, const char * data);
 void png_save_and_close(unsigned long id, const char* filename);
 
 #endif
