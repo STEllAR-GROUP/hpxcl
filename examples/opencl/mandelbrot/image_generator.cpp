@@ -220,8 +220,10 @@ compute_image(double posx,
     // calculate image id
     size_t img_id = next_image_id++;
 
-    // create data array to hold finished image
-    boost::shared_ptr<std::vector<char>> img_data (
+    // create data array to hold finished image, if we are not in benchmark mode
+    boost::shared_ptr<std::vector<char>> img_data;
+    if(!benchmark)
+    img_data = boost::shared_ptr<std::vector<char>>(
                 new std::vector<char>(img_width * img_height * 3 * sizeof(char)));
 
     // create a new countdown variable
@@ -234,6 +236,9 @@ compute_image(double posx,
     {
         boost::lock_guard<hpx::lcos::local::spinlock>
         lock(images_lock);
+
+        // do not add data in benchmark mode
+        if(!benchmark)
         images.insert(std::pair<size_t, boost::shared_ptr<std::vector<char>>>
                                                             (img_id, img_data));
         images_countdown.insert(std::pair<size_t,
