@@ -60,8 +60,8 @@ image_generator(boost::shared_ptr<std::vector<hpx::opencl::device>> devices,
     }
 
     // combining all retrievers into one future
-    //retrievers_finished = hpx::when_all(retriever_futures);
-    hpx::when_all(retriever_futures);
+    retrievers_finished = hpx::when_all(retriever_futures);
+    //hpx::when_all(retriever_futures);
     
 }
 
@@ -71,7 +71,7 @@ image_generator::
 {
 
     // wait for work to get finished
-    retrievers_finished.get();
+    shutdown();
 
 }
 
@@ -110,7 +110,7 @@ retrieve_worker_main(intptr_t parent_)
 {
 
     // get parent pointer
-    image_generator* parent = (image_generator*) parent;
+    image_generator* parent = (image_generator*) parent_;
 
     // represents done workload
     boost::shared_ptr<workload> done_workload;

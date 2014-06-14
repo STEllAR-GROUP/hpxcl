@@ -11,11 +11,9 @@
 
 #include "../../../opencl.hpp"
 
-#include "mandelbrotworker.hpp"
-#include "workload.hpp"
-#include "work_queue.hpp"
 #include "pngwriter.hpp"
 #include "timer.hpp"
+#include "image_generator.hpp"
 
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -61,7 +59,8 @@ int hpx_main(boost::program_options::variables_map & vm)
         
         // wait for all localities to respond, then add all devices to devicelist
         if(verbose) hpx::cout << "Waiting for device lists ..." << hpx::endl;
-        std::vector<hpx::opencl::device> devices;
+        boost::shared_ptr<std::vector<hpx::opencl::device>>
+                devices(new std::vector<hpx::opencl::device>());
         BOOST_FOREACH(
                     hpx::lcos::shared_future<std::vector<hpx::opencl::device>>
                     locality_device_future,
@@ -73,50 +72,28 @@ int hpx_main(boost::program_options::variables_map & vm)
                                                    locality_device_future.get();
 
             // add all devices to device list
-            devices.insert(devices.end(), locality_devices.begin(),
+            devices->insert(devices->end(), locality_devices.begin(),
                                           locality_devices.end());
 
         }
 
         // Check whether there are any devices
-        if(devices.size() < 1)
+        if(devices->size() < 1)
         {
             hpx::cerr << "No OpenCL devices found!" << hpx::endl;
             return hpx::finalize();
         }
         else
         {
-            hpx::cout << devices.size() << " OpenCL devices found!" << hpx::endl;
+            hpx::cout << devices->size() << " OpenCL devices found!" << hpx::endl;
         }
 
-        // create workqueue
-        boost::shared_ptr<work_queue<boost::shared_ptr<workload>>>
-                       workqueue(new work_queue<boost::shared_ptr<workload>>()); 
-
-        // create workers
-        //hpx::cout << "starting workers ..." << hpx::endl;
-        std::vector<boost::shared_ptr<mandelbrotworker>> workers;
-        BOOST_FOREACH(hpx::opencl::device & device, devices)
-        {
-            
-            // create worker
-            boost::shared_ptr<mandelbrotworker> worker(
-                                new mandelbrotworker(device,
-                                                     workqueue,
-                                                     num_kernels,
-                                                     verbose,
-                                                     2560));
-            // add worker to workerlist
-            workers.push_back(worker);
-
-        }
-        
-        ///*
+        /*
         double left = -0.743643887062801003142;
         double right = -0.743643887011500996858;
         double top = 0.131825904224567502357;
         double bottom = 0.131825904186092497643;
-        //*/
+        */
         
 
 
@@ -129,77 +106,29 @@ int hpx_main(boost::program_options::variables_map & vm)
         size_t img_x = 2560;
         size_t img_y = 1920;
 
-        // create an image
-        if(verbose) hpx::cout << "creating img ..." << hpx::endl;
-        unsigned long img = png_create(img_x,img_y);
-
+        // create image_generator
+        image_generator img_gen(devices, img_x, num_kernels, verbose);
+        
         // wait for workers to finish initialization
         if(verbose) hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
-        BOOST_FOREACH(boost::shared_ptr<mandelbrotworker> worker, workers)
-        {
+        img_gen.wait_for_startup_finished();
 
-            worker->wait_for_startup_finished();
-
-        }
-
-        // initialize result array
-        std::vector<boost::shared_ptr<std::vector<char>>> result_data(img_y);
-
-
-        if(verbose) hpx::cout << "adding workpackets to workqueue ..." << hpx::endl;
+        if(verbose) hpx::cout << "adding queuing image ..." << hpx::endl;
+        // start timer
         timer_start();
-        // add workloads for all lines
-        for(size_t i = 0; i < img_y; i++)
-        {
-            // hpx::cout << "adding line " << i << " ..." << hpx::endl;
-            boost::shared_ptr<workload> row(
-                   new workload(img_x, left, top - (top - bottom)*i/(img_y - 1), right-left, 0.0, 0, i));
-            workqueue->add_work(row);
 
-        }
+        // queue image
+        img_gen.compute_image(0.0,0.0,0.0,0.0,img_x, img_y, true).get();
         
-        // finish workqueue
-        if(verbose) hpx::cout << "finishing workqueue ..." << hpx::endl;
-        workqueue->finish();
-
-        // enter calculated rows to image
-        if(verbose) hpx::cout << "waiting for lines ..." << hpx::endl;
-        boost::shared_ptr<workload> done_row;
-        int i = 0;
-        while(workqueue->retrieve_finished_work(&done_row))
-        {
-
-            // hpx::cout << "taking line " << done_row->pos_in_img << " ... " << hpx::endl;
-            result_data[done_row->pos_in_img] = done_row->pixeldata;
-
-            if(verbose)
-            { 
-                int progress = ++i;
-                if(progress % 10 == 0)
-                    hpx::cout << "progress: " << progress << " / " << img_y << hpx::endl;
-            }
-        }
-
-        // wait for worker to finish
-        if(verbose) hpx::cout << "waiting for workers to finish ..." << hpx::endl;
-        BOOST_FOREACH(boost::shared_ptr<mandelbrotworker> worker, workers)
-        {
-
-            worker->join();
-
-        }
-       
+        // stop timer
         double time = timer_stop();
 
         hpx::cout << "time: " << time << " ms" << hpx::endl;
 
+        // end the image generator
+        img_gen.shutdown();
+
         // save the png
-        if(verbose) hpx::cout << "saving png ..." << hpx::endl;
-        for(size_t i = 0; i < img_y; i++)
-        {
-            png_set_row(img, i, result_data[i]->data());
-        }
-        png_save_and_close(img, "test.png");
 
     }
 

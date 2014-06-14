@@ -29,7 +29,8 @@ class image_generator
 
     public:
         // initializes the image generator
-        image_generator(boost::shared_ptr<std::vector<hpx::opencl::device>> devices,
+        image_generator(boost::shared_ptr<std::vector<
+                          hpx::opencl::device>> devices,
                         size_t img_size_hint,
                         size_t num_parallel_kernels,
                         bool verbose);
@@ -61,7 +62,7 @@ class image_generator
 
     // private attributes
     private:
-        hpx::lcos::shared_future<void> retrievers_finished;
+        hpx::lcos::shared_future<std::vector<hpx::lcos::shared_future<void> > > retrievers_finished;
         boost::shared_ptr<work_queue<boost::shared_ptr<workload>>> workqueue;
         boost::shared_ptr<std::vector<boost::shared_ptr<mandelbrotworker>>> workers;
         hpx::lcos::local::spinlock images_lock;
