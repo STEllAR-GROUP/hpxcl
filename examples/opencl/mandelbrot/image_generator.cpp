@@ -57,11 +57,12 @@ image_generator(boost::shared_ptr<std::vector<hpx::opencl::device>> devices,
                     hpx::async(retrieve_worker_main,
                                (intptr_t) this);
 
+        retriever_futures.push_back(retriever_future);
+
     }
 
     // combining all retrievers into one future
     retrievers_finished = hpx::when_all(retriever_futures);
-    //hpx::when_all(retriever_futures);
     
 }
 
