@@ -7,14 +7,10 @@
 #define MANDELBROT_PNG_WRITER_H_
 
 #include <cstdlib>
+#include <boost/shared_ptr.hpp>
 
-// creates an image with size x,y
-unsigned long png_create(size_t x, size_t y);
-void test();
-
-// sets a row of the image. data needs to be an array of size 3*x
-void png_set_row(unsigned long id, size_t y, const char * data);
-void png_save_and_close(unsigned long id, const char* filename);
+// writes data to png file
+void save_png(boost::shared_ptr<std::vector<char>> data, size_t width, size_t height, const char* filename);
 
 #endif
 

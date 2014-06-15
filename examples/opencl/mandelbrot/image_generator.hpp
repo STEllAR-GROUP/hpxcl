@@ -57,7 +57,8 @@ class image_generator
     private:
         // the main worker function, runs the main work loop
         static void retrieve_worker_main(
-           intptr_t parent_);
+           intptr_t parent_,
+           bool verbose);
 
 
     // private attributes
@@ -78,6 +79,7 @@ class image_generator
         image_ready_map     images_ready;
 
         std::atomic_size_t  next_image_id;
+        bool verbose;
 
 };
 

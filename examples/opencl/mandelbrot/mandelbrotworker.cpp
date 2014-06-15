@@ -61,6 +61,9 @@ mandelbrotworker::wait_for_startup_finished()
 
 }
 
+
+// TODO 2d-calculation
+// TODO dynamic change of buffersize
 size_t
 mandelbrotworker::worker_main(
                     intptr_t parent_ptr,
@@ -78,14 +81,16 @@ mandelbrotworker::worker_main(
         // initialize default buffer with size of numpixels * 3 (rgb) * sizeof(double)
         mandelbrotworker_buffermanager buffermanager(
                                         parent->device,
-                                        workpacket_size_hint * 3 * sizeof(double)); 
+                                        workpacket_size_hint * 3 * sizeof(double),
+                                        parent->verbose); 
 
         // counts how much work has been done
         size_t num_work = 0;
 
         // attach output buffer
-        hpx::opencl::buffer output_buffer =
-            buffermanager.get_buffer( workpacket_size_hint * 3 * sizeof(double) );
+        size_t current_buffer_size = workpacket_size_hint * 3 * sizeof(char);
+        hpx::opencl::buffer output_buffer = buffermanager.get_buffer( current_buffer_size );
+
 
         // create input buffer
         hpx::opencl::buffer input_buffer = parent->device.create_buffer(
@@ -109,34 +114,44 @@ mandelbrotworker::worker_main(
         while(parent->workqueue->request(&next_workload))
         {
             
-            // check for maximum workload size
-            if(next_workload->num_pixels > MAX_IMG_WIDTH)
+            // calculate output buffer size
+            size_t needed_buffer_size = next_workload->num_pixels_x
+                                        * next_workload->num_pixels_y
+                                        * 3
+                                        * sizeof(char);
+
+            // change output buffer if needed buffersize changed
+            if (current_buffer_size != needed_buffer_size)
             {
-                HPX_THROW_EXCEPTION(hpx::bad_parameter,
-                          "mandelbrotworker::worker_main()",
-                          "ERROR: workload size is larger than MAX_IMG_WIDTH!");
+                // query new buffer
+                output_buffer = buffermanager.get_buffer( needed_buffer_size );
+
+                // attach new buffer
+                kernel.set_arg(0, output_buffer);
+
+                // update current buffer size
+                current_buffer_size = needed_buffer_size;
             }
 
             // read calculation dimensions
             double args[4];
-            args[0] = next_workload->origin_x;
-            args[1] = next_workload->origin_y;
-            args[2] = next_workload->size_x;
-            args[3] = next_workload->size_y;
+            args[0] = next_workload->topleft_x;
+            args[1] = next_workload->topleft_y;
+            args[2] = next_workload->topright_x - args[0];
+            args[3] = next_workload->topright_y - args[1];
     
             // send calculation dimensions to gpu
             hpx::lcos::shared_future<hpx::opencl::event> ev1 = 
                           input_buffer.enqueue_write(0, 4*sizeof(double), args);
             
             // run calculation
-            dim[0].size = next_workload->num_pixels * 8;
+            dim[0].size = next_workload->num_pixels_x * 8;
             hpx::lcos::shared_future<hpx::opencl::event> ev2 = 
                                                        kernel.enqueue(dim, ev1);
     
             // query calculation result 
             hpx::opencl::event ev3 =
-                output_buffer.enqueue_read(
-                          0, 3*sizeof(unsigned char)*next_workload->num_pixels, ev2).get();
+                    output_buffer.enqueue_read(0, current_buffer_size, ev2).get();
     
             // wait for calculation result to arrive
             boost::shared_ptr<std::vector<char>> readdata = ev3.get_data().get();

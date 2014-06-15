@@ -113,12 +113,12 @@ int hpx_main(boost::program_options::variables_map & vm)
         if(verbose) hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
         img_gen.wait_for_startup_finished();
 
-        if(verbose) hpx::cout << "adding queuing image ..." << hpx::endl;
         // start timer
         timer_start();
 
         // queue image
-        img_gen.compute_image(0.0,0.0,0.0,0.0,img_x, img_y, true).get();
+        boost::shared_ptr<std::vector<char>> img_data =
+            img_gen.compute_image(0.0,0.0,0.0,0.0,img_x, img_y, false).get();
         
         // stop timer
         double time = timer_stop();
@@ -129,6 +129,7 @@ int hpx_main(boost::program_options::variables_map & vm)
         img_gen.shutdown();
 
         // save the png
+        save_png(img_data, img_x, img_y, "test.png");
 
     }
 

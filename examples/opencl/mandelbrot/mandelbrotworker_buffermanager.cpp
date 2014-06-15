@@ -8,8 +8,9 @@
 
 mandelbrotworker_buffermanager::
 mandelbrotworker_buffermanager(hpx::opencl::device device_,
-                               size_t initial_buffer_size) 
-                : device(device_)
+                               size_t initial_buffer_size,
+                               bool verbose_) 
+                : device(device_), verbose(verbose_)
 {
 
     // allocate the initial buffer, to improve runtime speed
@@ -46,6 +47,9 @@ void
 mandelbrotworker_buffermanager::
 allocate_buffer(size_t size)
 {
+
+    if(verbose) hpx::cout << "allocating opencl buffer of size " 
+                          << size << " bytes ..." << hpx::endl;
 
     // make sure no buffer of the given size already exists
     BOOST_ASSERT(buffers.find(size) == buffers.end());

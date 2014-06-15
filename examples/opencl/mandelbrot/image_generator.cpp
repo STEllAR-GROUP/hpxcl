@@ -15,7 +15,7 @@ image_generator::
 image_generator(boost::shared_ptr<std::vector<hpx::opencl::device>> devices,
                 size_t img_size_hint,
                 size_t num_parallel_kernels,
-                bool verbose) : next_image_id(0)
+                bool verbose_) : next_image_id(0), verbose(verbose_)
 {
 
     // one retrieve worker for every os thread
@@ -55,7 +55,8 @@ image_generator(boost::shared_ptr<std::vector<hpx::opencl::device>> devices,
 
         hpx::lcos::shared_future<void> retriever_future = 
                     hpx::async(retrieve_worker_main,
-                               (intptr_t) this);
+                               (intptr_t) this,
+                               verbose);
 
         retriever_futures.push_back(retriever_future);
 
@@ -107,7 +108,7 @@ shutdown()
 
 void
 image_generator::
-retrieve_worker_main(intptr_t parent_)
+retrieve_worker_main(intptr_t parent_, bool verbose)
 {
 
     // get parent pointer
@@ -117,8 +118,15 @@ retrieve_worker_main(intptr_t parent_)
     boost::shared_ptr<workload> done_workload;
 
     // main loop
+    if(verbose) hpx::cout << "entering retrieve worker main loop ..." << hpx::endl;
     while(parent->workqueue->retrieve_finished_work(&done_workload))
     {
+
+        if(verbose) hpx::cout << "retrieved workload "
+                              << done_workload->pos_in_img_x
+                              << ":" 
+                              << done_workload->pos_in_img_y
+                              << hpx::endl;
 
         // retrieve id of associated image
         size_t img_id = done_workload->img_id;
@@ -156,7 +164,24 @@ retrieve_worker_main(intptr_t parent_)
             img_ready = parent->images_ready[img_id];
         }
 
-        // TODO copy data to img_data
+        // copy data to img_data
+        size_t start_x = done_workload->pos_in_img_x;
+        size_t start_y = done_workload->pos_in_img_y;
+        size_t size_x = done_workload->num_pixels_x;
+        size_t size_y = done_workload->num_pixels_y;
+        size_t line_offset = done_workload->line_offset;
+        for(size_t y = 0; y < size_y; y++)
+        {
+            for(size_t x = 0; x < size_x; x++)
+            {
+                (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 0] =
+                    (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 0];  
+                (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 1] =
+                    (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 1];  
+                (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 2] =
+                    (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 2];  
+            }
+        }
 
         // decrease the number of work packets left
         size_t current_img_countdown = --(*img_countdown);
@@ -228,7 +253,7 @@ compute_image(double posx,
                 new std::vector<char>(img_width * img_height * 3 * sizeof(char)));
 
     // create a new countdown variable
-    boost::shared_ptr<std::atomic_size_t> img_countdown (new std::atomic_size_t(img_height));
+    boost::shared_ptr<std::atomic_size_t> img_countdown (new std::atomic_size_t(img_height/2));
 
     // create a new ready event lock
     boost::shared_ptr<hpx::lcos::local::event> img_ready (new hpx::lcos::local::event());
@@ -250,18 +275,36 @@ compute_image(double posx,
                             (img_id, img_ready));
     }
 
-    // temporal, will be replaced
+    // TODO temporal, will be replaced
     double left = -0.743643887062801003142;
     double right = -0.743643887011500996858;
     double top = 0.131825904224567502357;
     double bottom = 0.131825904186092497643;
 
     // add the workloads to queue
-    for(size_t i = 0; i < img_height; i++)
+    if (verbose) hpx::cout << "Adding workloads to queue ..." << hpx::endl;
+    for(size_t i = 0; i < img_height; i+=2)
     {
+
+        if (verbose) hpx::cout << "\tAdding workloads # " << i << " ..." << hpx::endl;
+        
+        // calculate line y-position
+        double line_pos_y1 = top - (top - bottom)*i/(img_height - 1);
+        double line_pos_y2 = top - (top - bottom)*(i+1)/(img_height - 1);
         // hpx::cout << "adding line " << i << " ..." << hpx::endl;
         boost::shared_ptr<workload> row(
-               new workload(img_width, left, top - (top - bottom)*i/(img_height - 1), right-left, 0.0, 0, i));
+               new workload(img_width,
+                            2,
+                            left,
+                            line_pos_y1,
+                            right, 
+                            line_pos_y1,
+                            left,
+                            line_pos_y2,
+                            0,
+                            0,
+                            i,
+                            img_width));
         workqueue->add_work(row);
 
     }
