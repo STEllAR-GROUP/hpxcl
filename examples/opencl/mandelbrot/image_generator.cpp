@@ -276,10 +276,14 @@ compute_image(double posx,
     }
 
     // TODO temporal, will be replaced
-    double left = -0.743643887062801003142;
-    double right = -0.743643887011500996858;
-    double top = 0.131825904224567502357;
-    double bottom = 0.131825904186092497643;
+        double left = -2.238461538;
+        double right = 0.8384615385;
+        double top = 1.153846154;
+        double bottom = -1.153846154;
+    double hor_pixdist_x = (right - left) / (img_width - 1);
+    double hor_pixdist_y = 0;
+    double vert_pixdist_x = 0;
+    double vert_pixdist_y = (bottom - top) / (img_height - 1);
 
     // add the workloads to queue
     if (verbose) hpx::cout << "Adding workloads to queue ..." << hpx::endl;
@@ -290,17 +294,16 @@ compute_image(double posx,
         
         // calculate line y-position
         double line_pos_y1 = top - (top - bottom)*i/(img_height - 1);
-        double line_pos_y2 = top - (top - bottom)*(i+1)/(img_height - 1);
         // hpx::cout << "adding line " << i << " ..." << hpx::endl;
         boost::shared_ptr<workload> row(
                new workload(img_width,
                             2,
                             left,
                             line_pos_y1,
-                            right, 
-                            line_pos_y1,
-                            left,
-                            line_pos_y2,
+                            hor_pixdist_x, 
+                            hor_pixdist_y,
+                            vert_pixdist_x,
+                            vert_pixdist_y,
                             0,
                             0,
                             i,

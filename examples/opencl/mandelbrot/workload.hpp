@@ -23,10 +23,10 @@ class workload
                  size_t num_pixels_y_,
                  double topleft_x_,
                  double topleft_y_,
-                 double topright_x_,
-                 double topright_y_,
-                 double botleft_x_,
-                 double botleft_y_,
+                 double hor_pixdist_x_,
+                 double hor_pixdist_y_,
+                 double vert_pixdist_x_,
+                 double vert_pixdist_y_,
                  size_t img_id_,
                  size_t pos_in_img_x_,
                  size_t pos_in_img_y_,
@@ -40,12 +40,12 @@ class workload
         // the top left point of the rectangle
         double topleft_x;
         double topleft_y;
-        // the top right point of the rectangle
-        double topright_x;
-        double topright_y;
-        // the bottom left point of the rectangle
-        double botleft_x;
-        double botleft_y;
+        // the horizontal offset between pixels
+        double hor_pixdist_x;
+        double hor_pixdist_y;
+        // the vertical offset between pixels
+        double vert_pixdist_x;
+        double vert_pixdist_y;
         // metadata for correct mapping to image
         size_t img_id;
         size_t pos_in_img_x;

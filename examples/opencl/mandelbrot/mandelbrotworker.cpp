@@ -107,7 +107,6 @@ mandelbrotworker::worker_main(
         hpx::opencl::work_size<2> dim;
         dim[0].offset = 0;
         dim[1].offset = 0;
-        dim[1].size = 8;
         dim[0].local_size = 8;
         dim[1].local_size = 8;
 
@@ -137,10 +136,10 @@ mandelbrotworker::worker_main(
             double args[KERNEL_INPUT_ARGUMENT_COUNT];
             args[0] = next_workload->topleft_x;
             args[1] = next_workload->topleft_y;
-            args[2] = next_workload->topright_x - args[0];
-            args[3] = next_workload->topright_y - args[1];
-            args[4] = next_workload->botleft_x - args[0];
-            args[5] = next_workload->botleft_y - args[1];
+            args[2] = next_workload->hor_pixdist_x;
+            args[3] = next_workload->hor_pixdist_y;
+            args[4] = next_workload->vert_pixdist_x;
+            args[5] = next_workload->vert_pixdist_y;
     
             // send calculation dimensions to gpu
             hpx::lcos::shared_future<hpx::opencl::event> ev1 = 
@@ -148,6 +147,7 @@ mandelbrotworker::worker_main(
             
             // run calculation
             dim[0].size = next_workload->num_pixels_x * 8;
+            dim[1].size = next_workload->num_pixels_y * 8;
             hpx::lcos::shared_future<hpx::opencl::event> ev2 = 
                                                        kernel.enqueue(dim, ev1);
     
