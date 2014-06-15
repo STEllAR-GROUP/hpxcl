@@ -81,7 +81,7 @@ mandelbrotworker::worker_main(
         // initialize default buffer with size of numpixels * 3 (rgb) * sizeof(double)
         mandelbrotworker_buffermanager buffermanager(
                                         parent->device,
-                                        workpacket_size_hint * 3 * sizeof(double),
+                                        workpacket_size_hint * 3 * sizeof(char),
                                         parent->verbose); 
 
         // counts how much work has been done
