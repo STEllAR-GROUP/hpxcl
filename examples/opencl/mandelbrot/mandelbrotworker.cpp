@@ -61,7 +61,7 @@ mandelbrotworker::wait_for_startup_finished()
 
 }
 
-
+#define KERNEL_INPUT_ARGUMENT_COUNT 6
 // TODO 2d-calculation
 // TODO dynamic change of buffersize
 size_t
@@ -95,7 +95,7 @@ mandelbrotworker::worker_main(
         // create input buffer
         hpx::opencl::buffer input_buffer = parent->device.create_buffer(
                                                            CL_MEM_READ_ONLY,
-                                                           4 * sizeof(double));
+                                                           KERNEL_INPUT_ARGUMENT_COUNT * sizeof(double));
     
         // connect buffers to kernel 
         kernel.set_arg(0, output_buffer);
@@ -134,15 +134,17 @@ mandelbrotworker::worker_main(
             }
 
             // read calculation dimensions
-            double args[4];
+            double args[KERNEL_INPUT_ARGUMENT_COUNT];
             args[0] = next_workload->topleft_x;
             args[1] = next_workload->topleft_y;
             args[2] = next_workload->topright_x - args[0];
             args[3] = next_workload->topright_y - args[1];
+            args[4] = next_workload->botleft_x - args[0];
+            args[5] = next_workload->botleft_y - args[1];
     
             // send calculation dimensions to gpu
             hpx::lcos::shared_future<hpx::opencl::event> ev1 = 
-                          input_buffer.enqueue_write(0, 4*sizeof(double), args);
+                          input_buffer.enqueue_write(0, KERNEL_INPUT_ARGUMENT_COUNT*sizeof(double), args);
             
             // run calculation
             dim[0].size = next_workload->num_pixels_x * 8;
