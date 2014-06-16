@@ -10,6 +10,7 @@
 
 #include <hpx/lcos/when_all.hpp>
 
+#include <cmath>
 
 image_generator::
 image_generator(boost::shared_ptr<std::vector<hpx::opencl::device>> devices,
@@ -246,6 +247,44 @@ compute_image(double posx,
     // calculate image id
     size_t img_id = next_image_id++;
 
+    // calculate aspect ratio
+    double aspect_ratio = (double) img_width / (double) img_height;
+
+    // calculate size of diagonale
+    //double size_diag = exp2(-zoom) * 4.0;
+    double size_diag = 4.0 / zoom;
+    
+    // calculate width and height
+    double size_y = size_diag / sqrt( 1 + aspect_ratio * aspect_ratio );
+    double size_x = aspect_ratio * size_y;
+
+    // calculate horizontal stepwidth
+    double hor_pixdist_nonrot = size_x / (img_width - 1);
+    double hor_pixdist_x = cos(rotation) * hor_pixdist_nonrot;
+    double hor_pixdist_y = sin(rotation) * hor_pixdist_nonrot;
+
+    // calculate vertical stepwidth
+    double vert_pixdist_nonrot = - size_y / (img_height - 1);
+    double vert_pixdist_x = - sin(rotation) * vert_pixdist_nonrot;
+    double vert_pixdist_y = cos(rotation) * vert_pixdist_nonrot;
+
+
+    // calculate top left coords
+    double topleft_x = posx - hor_pixdist_x * ( img_width / 2.0 + 0.5 ) 
+                            - vert_pixdist_x * ( img_height / 2.0 + 0.5 );
+    double topleft_y = posy - hor_pixdist_y * ( img_width / 2.0 + 0.5 ) 
+                            - vert_pixdist_y * ( img_height / 2.0 + 0.5 );
+
+    if(verbose){
+        hpx::cout << "image data" << hpx::endl
+              << "topleft:       " << topleft_x << ":" << topleft_y << hpx::endl
+              << "img_dims:      " << img_width << ":" << img_height << hpx::endl
+              << "pos:           " << posx << ":" << posy << hpx::endl
+              << "size:          " << size_x << ":" << size_y << hpx::endl
+              << "hor_pixdist:   " << hor_pixdist_x << ":" << hor_pixdist_y << hpx::endl
+              << "vert_pixdist:  " << vert_pixdist_x << ":" << vert_pixdist_y << hpx::endl;
+    }
+
     // create data array to hold finished image, if we are not in benchmark mode
     boost::shared_ptr<std::vector<char>> img_data;
     if(!benchmark)
@@ -253,7 +292,7 @@ compute_image(double posx,
                 new std::vector<char>(img_width * img_height * 3 * sizeof(char)));
 
     // create a new countdown variable
-    boost::shared_ptr<std::atomic_size_t> img_countdown (new std::atomic_size_t(img_height));
+    boost::shared_ptr<std::atomic_size_t> img_countdown (new std::atomic_size_t(img_height/2));
 
     // create a new ready event lock
     boost::shared_ptr<hpx::lcos::local::event> img_ready (new hpx::lcos::local::event());
@@ -275,15 +314,6 @@ compute_image(double posx,
                             (img_id, img_ready));
     }
 
-    // TODO temporal, will be replaced
-        double left = -2.238461538;
-        double right = 0.8384615385;
-        double top = 1.153846154;
-        double bottom = -1.153846154;
-    double hor_pixdist_x = (right - left) / (img_width - 1);
-    double hor_pixdist_y = 0;
-    double vert_pixdist_x = 0;
-    double vert_pixdist_y = (bottom - top) / (img_height - 1);
 
     // add the workloads to queue
     if (verbose) hpx::cout << "Adding workloads to queue ..." << hpx::endl;
@@ -292,54 +322,25 @@ compute_image(double posx,
 
         if (verbose) hpx::cout << "\tAdding workloads # " << i << " ..." << hpx::endl;
         
-        // calculate line y-position
-        double line_pos_y1 = top - (top - bottom)*i/(img_height - 1.0);
-        double line_pos_x1 = left - (left - right)*(img_width/2.0)/(img_width - 1.0);
-        // hpx::cout << "adding line " << i << " ..." << hpx::endl;
+        // calculate position of current work packet
+        double workpacket_pos_x = topleft_x + vert_pixdist_x * i;
+        double workpacket_pos_y = topleft_y + vert_pixdist_y * i;
+        // add workload
         boost::shared_ptr<workload> row(
-               new workload(img_width/2,
+               new workload(img_width,
                             2,
-                            line_pos_x1,
-                            line_pos_y1,
+                            workpacket_pos_x,
+                            workpacket_pos_y,
                             hor_pixdist_x, 
                             hor_pixdist_y,
                             vert_pixdist_x,
                             vert_pixdist_y,
                             0,
-                            img_width/2,
+                            0,
                             i,
                             img_width));
         workqueue->add_work(row);
-        boost::shared_ptr<workload> row2(
-               new workload(img_width/2,
-                            2,
-                            left,
-                            line_pos_y1,
-                            hor_pixdist_x, 
-                            hor_pixdist_y,
-                            vert_pixdist_x,
-                            vert_pixdist_y,
-                            0,
-                            0,
-                            i,
-                            img_width));
-        workqueue->add_work(row2);
-/*
-        boost::shared_ptr<workload> row2(
-               new workload(img_width/2,
-                            2,
-                            line_pos_x1,
-                            line_pos_y1,
-                            hor_pixdist_x, 
-                            hor_pixdist_y,
-                            vert_pixdist_x,
-                            vert_pixdist_y,
-                            0,
-                            img_width/2,
-                            i,
-                            img_width));
-        workqueue->add_work(row2);
-*/
+
     }
         
     // return the future to the finished image

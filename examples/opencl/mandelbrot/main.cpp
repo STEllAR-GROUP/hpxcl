@@ -88,26 +88,22 @@ int hpx_main(boost::program_options::variables_map & vm)
             hpx::cout << devices->size() << " OpenCL devices found!" << hpx::endl;
         }
 
-        /*
-        double left = -0.743643887062801003142;
-        double right = -0.743643887011500996858;
-        double top = 0.131825904224567502357;
-        double bottom = 0.131825904186092497643;
-        */
-        
 
+        double posx = -0.7;
+        double posy = 0.0;
+        double zoom = 1.04;
+        ////double zoom = 0.05658352842407526628;
 
-        /*
-        double left = -2.238461538;
-        double right = 0.8384615385;
-        double top = 1.153846154;
-        double bottom = -1.153846154;
-        */
+        //double posx = -0.743643887037151;
+        //double posy = 0.131825904205330;
+        //double zoom = 6.2426215349789484160e10;
+        ////double zoom = 35.8603219463046942295;
+
         size_t img_x = 2560;
         size_t img_y = 1920;
 
         // create image_generator
-        image_generator img_gen(devices, img_x, num_kernels, verbose);
+        image_generator img_gen(devices, img_x * 2, num_kernels, verbose);
         
         // wait for workers to finish initialization
         if(verbose) hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
@@ -118,7 +114,13 @@ int hpx_main(boost::program_options::variables_map & vm)
 
         // queue image
         boost::shared_ptr<std::vector<char>> img_data =
-            img_gen.compute_image(0.0,0.0,0.0,0.0,img_x, img_y, false).get();
+            img_gen.compute_image(posx,
+                                  posy,
+                                  zoom,
+                                  0.0,
+                                  img_x,
+                                  img_y,
+                                  false).get();
         
         // stop timer
         double time = timer_stop();
