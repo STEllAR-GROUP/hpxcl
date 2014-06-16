@@ -166,21 +166,24 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
         }
 
         // copy data to img_data
-        size_t start_x = done_workload->pos_in_img_x;
-        size_t start_y = done_workload->pos_in_img_y;
-        size_t size_x = done_workload->num_pixels_x;
-        size_t size_y = done_workload->num_pixels_y;
-        size_t line_offset = done_workload->line_offset;
-        for(size_t y = 0; y < size_y; y++)
+        if(img_data)
         {
-            for(size_t x = 0; x < size_x; x++)
+            size_t start_x = done_workload->pos_in_img_x;
+            size_t start_y = done_workload->pos_in_img_y;
+            size_t size_x = done_workload->num_pixels_x;
+            size_t size_y = done_workload->num_pixels_y;
+            size_t line_offset = done_workload->line_offset;
+            for(size_t y = 0; y < size_y; y++)
             {
-                (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 0] =
-                    (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 0];  
-                (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 1] =
-                    (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 1];  
-                (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 2] =
-                    (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 2];  
+                for(size_t x = 0; x < size_x; x++)
+                {
+                    (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 0] =
+                        (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 0];  
+                    (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 1] =
+                        (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 1];  
+                    (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 2] =
+                        (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 2];  
+                }
             }
         }
 
