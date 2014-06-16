@@ -240,8 +240,26 @@ compute_image(double posx,
               double zoom,
               double rotation,
               size_t img_width,
+              size_t img_height)
+{
+
+    return compute_image(posx, posy, zoom, rotation,
+                         img_width, img_height,
+                         false, img_width, 1);
+
+}
+
+hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
+image_generator::
+compute_image(double posx,
+              double posy,
+              double zoom,
+              double rotation,
+              size_t img_width,
               size_t img_height,
-              bool benchmark)
+              bool benchmark,
+              size_t tile_width,
+              size_t tile_height)
 {
 
     // calculate image id
@@ -275,6 +293,11 @@ compute_image(double posx,
     double topleft_y = posy - hor_pixdist_y * ( img_width / 2.0 + 0.5 ) 
                             - vert_pixdist_y * ( img_height / 2.0 + 0.5 );
 
+    // calculate number of tiles
+    BOOST_ASSERT(img_width % tile_width == 0 && img_height % tile_height == 0);
+    size_t num_tiles_x = img_width / tile_width;
+    size_t num_tiles_y = img_height / tile_height;
+
     if(verbose){
         hpx::cout << "image data" << hpx::endl
               << "topleft:       " << topleft_x << ":" << topleft_y << hpx::endl
@@ -282,7 +305,8 @@ compute_image(double posx,
               << "pos:           " << posx << ":" << posy << hpx::endl
               << "size:          " << size_x << ":" << size_y << hpx::endl
               << "hor_pixdist:   " << hor_pixdist_x << ":" << hor_pixdist_y << hpx::endl
-              << "vert_pixdist:  " << vert_pixdist_x << ":" << vert_pixdist_y << hpx::endl;
+              << "vert_pixdist:  " << vert_pixdist_x << ":" << vert_pixdist_y << hpx::endl
+              << "num_tiles:     " << num_tiles_x << ":" << num_tiles_y << hpx::endl;
     }
 
     // create data array to hold finished image, if we are not in benchmark mode
@@ -292,7 +316,7 @@ compute_image(double posx,
                 new std::vector<char>(img_width * img_height * 3 * sizeof(char)));
 
     // create a new countdown variable
-    boost::shared_ptr<std::atomic_size_t> img_countdown (new std::atomic_size_t(img_height/2));
+    boost::shared_ptr<std::atomic_size_t> img_countdown (new std::atomic_size_t(num_tiles_x * num_tiles_y));
 
     // create a new ready event lock
     boost::shared_ptr<hpx::lcos::local::event> img_ready (new hpx::lcos::local::event());
@@ -317,30 +341,31 @@ compute_image(double posx,
 
     // add the workloads to queue
     if (verbose) hpx::cout << "Adding workloads to queue ..." << hpx::endl;
-    for(size_t i = 0; i < img_height; i+=2)
+    for(size_t y = 0; y < img_height; y += tile_height)
     {
-
-        if (verbose) hpx::cout << "\tAdding workloads # " << i << " ..." << hpx::endl;
-        
-        // calculate position of current work packet
-        double workpacket_pos_x = topleft_x + vert_pixdist_x * i;
-        double workpacket_pos_y = topleft_y + vert_pixdist_y * i;
-        // add workload
-        boost::shared_ptr<workload> row(
-               new workload(img_width,
-                            2,
-                            workpacket_pos_x,
-                            workpacket_pos_y,
-                            hor_pixdist_x, 
-                            hor_pixdist_y,
-                            vert_pixdist_x,
-                            vert_pixdist_y,
-                            0,
-                            0,
-                            i,
-                            img_width));
-        workqueue->add_work(row);
-
+        for(size_t x = 0; x < img_width; x += tile_width)
+        {
+            if (verbose) hpx::cout << "\tAdding workload " << x << ":" << y << " ..." << hpx::endl;
+            
+            // calculate position of current work packet
+            double workpacket_pos_x = topleft_x + vert_pixdist_x * y + hor_pixdist_x * x;
+            double workpacket_pos_y = topleft_y + vert_pixdist_y * y + hor_pixdist_y * x;
+            // add workload
+            boost::shared_ptr<workload> row(
+                   new workload(tile_width,
+                                tile_height,
+                                workpacket_pos_x,
+                                workpacket_pos_y,
+                                hor_pixdist_x, 
+                                hor_pixdist_y,
+                                vert_pixdist_x,
+                                vert_pixdist_y,
+                                img_id,
+                                x,
+                                y,
+                                img_width));
+            workqueue->add_work(row);
+        }
     }
         
     // return the future to the finished image

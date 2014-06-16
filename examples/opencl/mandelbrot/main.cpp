@@ -120,7 +120,9 @@ int hpx_main(boost::program_options::variables_map & vm)
                                   0.0,
                                   img_x,
                                   img_y,
-                                  false).get();
+                                  false,
+                                  img_x,
+                                  4).get();
         
         // stop timer
         double time = timer_stop();
@@ -152,7 +154,7 @@ int main(int argc, char* argv[])
                                 "Usage: " HPX_APPLICATION_STRING " [options]");
     cmdline.add_options()
         ( "num-parallel-kernels"
-        , boost::program_options::value<std::size_t>()->default_value(10)
+        , boost::program_options::value<std::size_t>()->default_value(4)
         , "the number of parallel kernel invocations per gpu") ;
 
     cmdline.add_options()

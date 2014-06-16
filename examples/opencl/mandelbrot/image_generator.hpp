@@ -51,8 +51,19 @@ class image_generator
                       double zoom,
                       double rotation,
                       size_t img_width,
+                      size_t img_height);
+
+        // computes an image, enhanced version
+        hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
+        compute_image(double pos_x,
+                      double pos_y,
+                      double zoom,
+                      double rotation,
+                      size_t img_width,
                       size_t img_height,
-                      bool benchmark);
+                      bool benchmark, // purges output
+                      size_t tile_width,
+                      size_t tile_height);
 
     private:
         // the main worker function, runs the main work loop
