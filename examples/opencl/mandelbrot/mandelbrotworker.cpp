@@ -62,8 +62,6 @@ mandelbrotworker::wait_for_startup_finished()
 }
 
 #define KERNEL_INPUT_ARGUMENT_COUNT 6
-// TODO 2d-calculation
-// TODO dynamic change of buffersize
 size_t
 mandelbrotworker::worker_main(
                     intptr_t parent_ptr,

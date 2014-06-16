@@ -253,7 +253,7 @@ compute_image(double posx,
                 new std::vector<char>(img_width * img_height * 3 * sizeof(char)));
 
     // create a new countdown variable
-    boost::shared_ptr<std::atomic_size_t> img_countdown (new std::atomic_size_t(img_height/2));
+    boost::shared_ptr<std::atomic_size_t> img_countdown (new std::atomic_size_t(img_height));
 
     // create a new ready event lock
     boost::shared_ptr<hpx::lcos::local::event> img_ready (new hpx::lcos::local::event());
@@ -293,10 +293,25 @@ compute_image(double posx,
         if (verbose) hpx::cout << "\tAdding workloads # " << i << " ..." << hpx::endl;
         
         // calculate line y-position
-        double line_pos_y1 = top - (top - bottom)*i/(img_height - 1);
+        double line_pos_y1 = top - (top - bottom)*i/(img_height - 1.0);
+        double line_pos_x1 = left - (left - right)*(img_width/2.0)/(img_width - 1.0);
         // hpx::cout << "adding line " << i << " ..." << hpx::endl;
         boost::shared_ptr<workload> row(
-               new workload(img_width,
+               new workload(img_width/2,
+                            2,
+                            line_pos_x1,
+                            line_pos_y1,
+                            hor_pixdist_x, 
+                            hor_pixdist_y,
+                            vert_pixdist_x,
+                            vert_pixdist_y,
+                            0,
+                            img_width/2,
+                            i,
+                            img_width));
+        workqueue->add_work(row);
+        boost::shared_ptr<workload> row2(
+               new workload(img_width/2,
                             2,
                             left,
                             line_pos_y1,
@@ -308,8 +323,23 @@ compute_image(double posx,
                             0,
                             i,
                             img_width));
-        workqueue->add_work(row);
-
+        workqueue->add_work(row2);
+/*
+        boost::shared_ptr<workload> row2(
+               new workload(img_width/2,
+                            2,
+                            line_pos_x1,
+                            line_pos_y1,
+                            hor_pixdist_x, 
+                            hor_pixdist_y,
+                            vert_pixdist_x,
+                            vert_pixdist_y,
+                            0,
+                            img_width/2,
+                            i,
+                            img_width));
+        workqueue->add_work(row2);
+*/
     }
         
     // return the future to the finished image
