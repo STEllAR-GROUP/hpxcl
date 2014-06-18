@@ -27,9 +27,6 @@
 static const int inputA[] = {  1,  5,  2,  4,  3};
 static const int inputB[] = {  3,  7,  4,  1,  4};
 static const int inputC[] = {  4,  9,  4,  7,  8};
-static const int refX[]   = {  4, 12,  6,  5,  7};
-static const int refY[]   = {  8, 18,  8, 14, 16};
-static const int refZ[]   = { -8, 72,-18, 25, 49}; 
 static const size_t DATASIZE = 5 * sizeof(int);
 
 static const char gpu_prog[] =
