@@ -55,7 +55,10 @@ find_package(HPX_OpenCL REQUIRED)
 include_directories(${OpenCL_INCLUDE_DIR})
 link_directories(${OpenCL_LIBRARY_DIR})
 
+find_package(CUDA REQUIRED)
+
 add_subdirectory(opencl)
+add_subdirectory(cuda)
 
 hpx_option(HPX_BUILD_EXAMPLES BOOL "Build HPX examples (default: ON)" ON ADVANCED)
 
