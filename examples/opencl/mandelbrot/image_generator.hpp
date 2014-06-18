@@ -74,7 +74,7 @@ class image_generator
 
     // private attributes
     private:
-        hpx::lcos::shared_future<std::vector<hpx::lcos::shared_future<void> > > retrievers_finished;
+        hpx::lcos::shared_future<void> retrievers_finished;
         boost::shared_ptr<work_queue<boost::shared_ptr<workload>>> workqueue;
         boost::shared_ptr<std::vector<boost::shared_ptr<mandelbrotworker>>> workers;
         hpx::lcos::local::spinlock images_lock;

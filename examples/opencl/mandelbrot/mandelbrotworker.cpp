@@ -209,7 +209,7 @@ mandelbrotworker::worker_starter(
     
         
         // start workers
-        std::vector<hpx::lcos::shared_future<size_t>> worker_futures;
+        std::vector<hpx::lcos::future<size_t>> worker_futures;
         for(size_t i = 0; i < num_workers; i++)
         {
          
@@ -218,11 +218,11 @@ mandelbrotworker::worker_starter(
                        mandelbrot_program.create_kernel("mandelbrot_alias_8x8");
 
             // start worker
-            hpx::lcos::shared_future<size_t> worker_future = 
+            hpx::lcos::future<size_t> worker_future = 
                         hpx::async(&worker_main, parent_ptr, kernel, workpacket_size_hint);
 
             // add worker to workerlist
-            worker_futures.push_back(worker_future);
+            worker_futures.push_back(std::move(worker_future));
 
         }
 

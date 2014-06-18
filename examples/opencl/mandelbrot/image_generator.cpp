@@ -50,21 +50,21 @@ image_generator(boost::shared_ptr<std::vector<hpx::opencl::device>> devices,
     }
          
     // starting retrievers
-    std::vector<hpx::lcos::shared_future<void>> retriever_futures;
+    std::vector<hpx::lcos::future<void>> retriever_futures;
     for(size_t i = 0; i < num_retrieve_workers; i++)
     {
 
-        hpx::lcos::shared_future<void> retriever_future = 
+        hpx::lcos::future<void> retriever_future = 
                     hpx::async(retrieve_worker_main,
                                (intptr_t) this,
                                verbose);
 
-        retriever_futures.push_back(retriever_future);
+        retriever_futures.push_back(std::move(retriever_future));
 
     }
 
     // combining all retrievers into one future
-    retrievers_finished = hpx::when_all(retriever_futures);
+    retrievers_finished = hpx::when_all(retriever_futures).share();
     
 }
 
@@ -103,7 +103,7 @@ shutdown()
     workqueue->finish();
 
     // wait for retrievers to finish
-    retrievers_finished.get();
+    retrievers_finished.wait();
 
 }
 

@@ -321,7 +321,7 @@ buffer::copy_local(boost::shared_ptr<hpx::opencl::server::buffer> src,
                                 ));
 
         // Create future from event
-        hpx::lcos::shared_future<void> read_future = read_event.get_future();
+        hpx::lcos::future<void> read_future = read_event.get_future();
 
         // Create device client of dst
         hpx::opencl::device dst_device(
@@ -329,7 +329,7 @@ buffer::copy_local(boost::shared_ptr<hpx::opencl::server::buffer> src,
 
         // Create new event on dst device
         hpx::opencl::event write_start_event_client = 
-                   dst_device.create_future_event(read_future).get();
+                   dst_device.create_future_event(std::move(read_future)).get();
 
         // Convert dst event to cl_event
         cl_event write_start_event =

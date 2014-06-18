@@ -11,7 +11,6 @@
 
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/components.hpp>
-#include <hpx/lcos/future.hpp>
 
 #include <CL/cl.h>
 

@@ -101,7 +101,10 @@ namespace opencl {
              */
             template<class T>
             hpx::lcos::shared_future<hpx::opencl::event>
-            create_future_event(hpx::lcos::shared_future<T> future); 
+            create_future_event(hpx::lcos::shared_future<T> & future); 
+            template<class T>
+            hpx::lcos::shared_future<hpx::opencl::event>
+            create_future_event(hpx::lcos::future<T> && future); 
 
             /**
              *  @brief Creates an OpenCL buffer.
@@ -202,7 +205,26 @@ namespace opencl {
 
     template<class T>
     hpx::lcos::shared_future<hpx::opencl::event>
-    device::create_future_event(hpx::lcos::shared_future<T> future)
+    device::create_future_event(hpx::lcos::shared_future<T> & future)
+    {
+    
+        // Create a user event
+        hpx::lcos::shared_future<hpx::opencl::event> event = create_user_event();
+    
+        // Schedule the user event trigger to be called after future
+        future.then(
+                       hpx::util::bind(&(device::trigger_user_event_externally),
+                                       event)
+                   );
+
+        // Return the event
+        return event;
+
+    }
+
+    template<class T>
+    hpx::lcos::shared_future<hpx::opencl::event>
+    device::create_future_event(hpx::lcos::future<T> && future)
     {
     
         // Create a user event
