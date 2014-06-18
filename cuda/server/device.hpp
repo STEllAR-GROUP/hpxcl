@@ -54,17 +54,17 @@ namespace hpx
              {
               	 private:
 
-        	  	 unsigned int device_id;
+        	  	   unsigned int device_id;
                  unsigned int context_id;
                  CUdevice cu_device;
                  CUcontext cu_context;
                  std::string device_name;
                  cudaDeviceProp props;   
                  std::vector<Device_ptr> device_ptrs;           	 
-                 std::vector<Host_ptr> host_ptrs;
+                 //std::vector<Host_ptr> host_ptrs;
               	 public:
 
-        	 	 device()
+        	 	     device()
                  {
                     cuInit(0); 
                     cuDeviceGet(&cu_device,0);
@@ -72,22 +72,23 @@ namespace hpx
                     device_name = props.name;
                  }
 
-        	 	 device(int device_id)
-        	 	 {
+        	 	     device(int device_id)
+        	 	     {
                     cuInit(0);
                     cuDeviceGet(&cu_device,device_id);
                     cuCtxCreate(&cu_context,0,cu_device);
-        	 		this->set_device(device_id);
+        	 		      this->set_device(device_id);
                     cudaError_t error;
                     error = cudaGetDeviceProperties(&props,device_id);
                     this->device_name = props.name;
-        	 	 }
-				 ~device()
-				 {
+        	 	     }
+  				       ~device()
+	     			     {
                     for (uint64_t i=0;i<device_ptrs.size();i++)
                     {
                         cuMemFree(device_ptrs[i].device_ptr);
                     }
+
                     cuCtxDetach(cu_context);
                  }
 
@@ -208,14 +209,14 @@ namespace hpx
 
                 void launch_kernel(hpx::cuda::kernel cu_kernel)
                 {
-                    hpx::cuda::Dim3 block = cu_kernel.get_block();
-                    hpx::cuda::Dim3 grid = cu_kernel.get_grid();
+                    hpx::cuda::server::kernel::Dim3 block = cu_kernel.get_block();
+                    hpx::cuda::server::kernel::Dim3 grid = cu_kernel.get_grid();
 
                     void *args[] = {};
 
                     CUfunction cu_function;
                     CUmodule cu_module;
-
+                    
                     cuModuleLoad(&cu_module, cu_kernel.get_module().c_str());
                     cuModuleGetFunction(&cu_function, cu_module, cu_kernel.get_function().c_str());
 
@@ -235,14 +236,12 @@ namespace hpx
                 template <typename T>
                 struct create_host_ptr_action
                     :  hpx::actions::make_action<void (device::*)(T),
-                            &server::device::template create_host_ptr<T>, create_host_ptr_action<T> >
+                            &device::template create_host_ptr<T>, create_host_ptr_action<T> >
                     {};
             };
 	    }
     }
 }
-
-//HPX action declarations
 
 HPX_REGISTER_ACTION_DECLARATION(
 	hpx::cuda::server::device::calculate_pi_action,
@@ -270,8 +269,7 @@ HPX_REGISTER_ACTION_DECLARATION(
     device_create_device_ptr_action);
 /*HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::launch_kernel_action,
-    device_launch_kernel_action);
-*/
+    device_launch_kernel_action);*/
 HPX_REGISTER_ACTION_DECLARATION_TEMPLATE(
     (template <typename T>),
     (hpx::cuda::server::device::create_host_ptr_action<T>)

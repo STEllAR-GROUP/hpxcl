@@ -40,7 +40,7 @@ namespace hpx
                     typedef server::device::get_all_devices_action action_type;
                     for (size_t i=0;i<localities.size();i++)
                     {
-                        num+=  hpx::async<action_type>(localities[i]).get();
+                        num +=  hpx::async<action_type>(localities[i]).get();
                         for (int i=0;i<num;i++)
                         {
                          devices.push_back(i);
@@ -107,12 +107,24 @@ namespace hpx
                     hpx::async<action_type>(gid, value).get();
                 }
 
-                static <typename T>
+                template <typename T>
                 static void create_host_ptr_non_blocking(hpx::naming::id_type const &gid, T value, size_t const byte_count)
                 {
                    typedef typename server::device::create_host_ptr_action<T> action_type;
                    hpx::apply<action_type>(gid, value).get();  
                 }
+
+                /*static hpx::lcos::future<void> launch_kernel_async(hpx::naming::id_type const &gid, hpx::cuda::kernel cu_kernel)
+                {
+                    typedef server::device::launch_kernel_action action_type;
+                    return hpx::async<action_type>(gid, cu_kernel);
+                }
+
+                static void launch_kernel(hpx::naming::id_type const &gid, hpx::cuda::kernel cu_kernel)
+                {
+                    launch_kernel_async(gid, cu_kernel).get();
+                }*/
+
             };
         }
     }

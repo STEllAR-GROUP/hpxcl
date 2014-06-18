@@ -55,46 +55,46 @@ namespace hpx
                     set_block_dim_async(gid, block_x, block_y, block_z);
                 }
 
-                static hpx::lcos::future<void> load_kernel_async(hpx::naming::id_type const &gid, const std::string &file_name)
+                static hpx::lcos::future<void> load_kernel_async(hpx::naming::id_type const &gid, const std::string file_name)
                 {
                     typedef server::kernel::load_kernel_action action_type;
                     return hpx::async<action_type>(gid, file_name);
                 }
 
-                static hpx::lcos::future<void> load_module_async(hpx::naming::id_type const &gid, const std::string &kernel_name)
+                static hpx::lcos::future<void> load_module_async(hpx::naming::id_type const &gid, const std::string kernel_name)
                 {
                     typedef server::kernel::load_module_action action_type;
                     return hpx::async<action_type>(gid, kernel_name);
                 }
 
-                static void load_kernel(hpx::naming::id_type const &gid, const std::string &kernel_name)
+                static void load_kernel(hpx::naming::id_type const &gid, const std::string kernel_name)
                 {
                     load_kernel_async(gid, kernel_name).get();
                 }
 
-                static void load_module(hpx::naming::id_type const &gid, const std::string &file_name)
+                static void load_module(hpx::naming::id_type const &gid, const std::string file_name)
                 {
                     load_module_async(gid, file_name).get();
                 }
 
-                static hpx::lcos::future<hpx::cuda::Dim3> get_grid_async(hpx::naming::id_type const &gid)
+                static hpx::lcos::future<hpx::cuda::server::kernel::Dim3> get_grid_async(hpx::naming::id_type const &gid)
                 {
                     typedef server::kernel::get_grid_action action_type;
                     return hpx::async<action_type>(gid);
                 }
 
-                static hpx::cuda::Dim3 get_grid(hpx::naming::id_type const &gid)
+                static hpx::cuda::server::kernel::Dim3 get_grid(hpx::naming::id_type const &gid)
                 {
                     return get_grid_async(gid).get();
                 }
 
-                static hpx::lcos::future<hpx::cuda::Dim3> get_block_async(hpx::naming::id_type const &gid)
+                static hpx::lcos::future<hpx::cuda::server::kernel::Dim3> get_block_async(hpx::naming::id_type const &gid)
                 {
                     typedef server::kernel::get_block_action action_type;
                     return hpx::async<action_type>(gid);
                 }
 
-                static hpx::cuda::Dim3 get_block(hpx::naming::id_type const &gid)
+                static hpx::cuda::server::kernel::Dim3 get_block(hpx::naming::id_type const &gid)
                 {
                     return get_block_async(gid).get();
                 }

@@ -1,6 +1,0 @@
-1.) implement nvcc compilation of cuda kernels at runtime from string be able to load from file
-	aka jit compilation
-
-2.) implement event in event component 
-
-3.) make everything compile

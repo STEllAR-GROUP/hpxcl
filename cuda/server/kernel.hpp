@@ -21,20 +21,6 @@ namespace hpx
 {
     namespace cuda
     {
-        class Dim3
-        {
-            public:
-                unsigned int x,y,z;
-                Dim3(const unsigned int _x, const unsigned int _y, const unsigned int _z)
-                : x(_x), y(_y), z(_z)
-                {}
-                Dim3(const unsigned int *_f)
-                : x (_f[0]), y(_f[1]), z(_f[2])
-                {}
-                Dim3(){}
-                ~Dim3() {}
-        };
-
         namespace server
         {
             class kernel
@@ -42,15 +28,18 @@ namespace hpx
                     hpx::components::managed_component_base<kernel>
                 >
             {  
-            	private:
-            	CUstream cu_stream;
-                CUmodule cu_module;
-                CUfunction cu_function;
-            	hpx::cuda::Dim3 grid,block;
-                std::string  kernel_name;
-                std::string  module_name;
-
-            	public:
+                public:
+                struct Dim3
+                {
+                    unsigned int x, y, z;
+                    template <typename Archive>
+                    void serialize(Archive &ar, unsigned int i)
+                    {
+                        ar &x;
+                        ar &y;
+                        ar &z;
+                    } 
+                };
 
                 kernel()
                 {}
@@ -59,9 +48,10 @@ namespace hpx
             	{
                     this->kernel_name = kernel_name;
                 }
+
                 ~kernel()
                 {
-                    cuModuleUnload(cu_module);
+                    
                 }
             	
             	void set_stream()
@@ -83,18 +73,14 @@ namespace hpx
                     this->block.z = block_z;
             	}
 
-                void load_module(const std::string &file_name)
+                void load_module(const std::string file_name)
                 {
-                    //std::cout << "module " << file_name << " loaded" << std::endl;
                     this->module_name = file_name;
-                    //cuModuleLoad(&cu_module, file_name.c_str());
                 }
 
-                void load_kernel(const std::string &kernal_name)
+                void load_kernel(const std::string kernal_name)
                 {
-                    //std::cout << "kernel " << kernel_name << " loaded" << std::endl;
                     this->kernel_name = kernel_name;
-                   //cuModuleGetFunction(&cu_function, cu_module, kernel_name.c_str());
                 }
 
                 std::string get_function()
@@ -107,17 +93,16 @@ namespace hpx
                     return this->module_name;
                 }
 
-                hpx::cuda::Dim3 get_grid()
+                Dim3 get_grid()
                 {
                     return this->grid;
                 }
 
-                hpx::cuda::Dim3 get_block()
+                Dim3 get_block()
                 {
                     return this->block;
                 }
 
-                //HPX ation definitions
                 HPX_DEFINE_COMPONENT_ACTION(kernel, set_stream);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, load_module);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, load_kernel);
@@ -127,6 +112,13 @@ namespace hpx
                 HPX_DEFINE_COMPONENT_ACTION(kernel, get_module);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, get_grid);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, get_block);
+
+                private:
+                CUstream cu_stream;
+                CUmodule cu_module;
+                Dim3 grid,block;
+                std::string kernel_name;
+                std::string module_name;
 
             };
         }

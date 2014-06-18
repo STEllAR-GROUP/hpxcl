@@ -24,15 +24,14 @@ namespace hpx
         public:
             device()
             {}    
-            device(hpx::future<hpx::naming::id_type> const& gid)
-				: base_type(gid)
+            
+            device(hpx::future<hpx::naming::id_type> && gid)
+				: base_type(std::move(gid))
             {}
-            device(hpx::future<hpx::naming::id_type> const& gid,int device_id)
-                : base_type(gid)
-            {}
+            
             void get_cuda_info()
             {
-                BOOST_ASSERT(this->get_gid());
+                HPX_ASSERT(this->get_gid());
                 this->base_type::get_cuda_info(this->get_gid());
             }
 
@@ -43,79 +42,90 @@ namespace hpx
 
             void set_device(int dev)
             {
-                BOOST_ASSERT(this->get_gid());
+                HPX_ASSERT(this->get_gid());
                 this->base_type::set_device(this->get_gid(),dev);
             }
 
             hpx::lcos::future<float> calculate_pi_async(int nthreads,int nblocks)
             {
-                BOOST_ASSERT(this->get_gid());
+                HPX_ASSERT(this->get_gid());
                 return this->base_type::calculate_pi_async(this->get_gid(),nthreads,nblocks);
             }
 
             float calculate_pi_sync(int nthreads,int nblocks)
             {
-                BOOST_ASSERT(this->get_gid());
+                HPX_ASSERT(this->get_gid());
                 return this->base_type::calculate_pi_sync(this->get_gid(),nthreads,nblocks);
             }
 
             hpx::lcos::future<int>
             get_device_id_async()
             {
-                BOOST_ASSERT(this->get_gid());
+                HPX_ASSERT(this->get_gid());
                 return this->base_type::get_device_id_async(this->get_gid());
             }
 
             int get_device_id()
             {
-                BOOST_ASSERT(this->get_gid());
+                HPX_ASSERT(this->get_gid());
                 return this->base_type::get_device_id_sync(this->get_gid());
             }
 
             hpx::lcos::future<int> get_context_async()
             {
-                BOOST_ASSERT(this->get_gid());
+                HPX_ASSERT(this->get_gid());
                 return this->base_type::get_context_async(this->get_gid());
             }
 
             int get_context()
             {
-                BOOST_ASSERT(this->get_gid());
+                HPX_ASSERT(this->get_gid());
                 return this->base_type::get_context_sync(this->get_gid());
             }
 
             hpx::lcos::future<int> wait()
             {
-                BOOST_ASSERT(this->get_gid());
+                HPX_ASSERT(this->get_gid());
                 return this->base_type::wait(this->get_gid());
             }
 
             hpx::lcos::future<void> create_device_ptr_async(size_t const byte_count)
             {
-                BOOST_ASSERT(this->get_gid());
+                HPX_ASSERT(this->get_gid());
                 return this->base_type::create_device_ptr_async(this->get_gid(), byte_count);
             }
 
             void create_device_ptr(size_t const byte_count)
             {
-                BOOST_ASSERT(this->get_gid());
+                HPX_ASSERT(this->get_gid());
                 this->base_type::create_device_ptr(this->get_gid(), byte_count);
             }
 
             template <typename T>
             void create_host_ptr(T value, size_t const byte_count)
             {
-                BOOST_ASSERT(this->get_gid());
-                this->base_type::create_host_ptr(gid, value, byte_count);
+                HPX_ASSERT(this->get_gid());
+                this->base_type::create_host_ptr(this->get_gid(), value, byte_count);
             }
 
             template <typename T>
             void create_host_ptr_non_blocking(T value, size_t const byte_count)
             {
-                BOOST_ASSERT(this->get_gid());
-                this->base_type::create_host_ptr_non_blocking(gid, value, byte_count);
+                HPX_ASSERT(this->get_gid());
+                this->base_type::create_host_ptr_non_blocking(this->get_gid(), value, byte_count);
             }
 
+            /*hpx::lcos::future<void> launch_kernel_async(hpx::cuda::kernel cu_kernel)
+            {
+                BOOST_ASSERT(this->get_gid());
+                return this->base_type::launch_kernel_async(this->get_gid(), cu_kernel);
+            }
+
+            void launch_kernel(hpx::cuda::kernel cu_kernel)
+            {
+                BOOST_ASSERT(this->get_gid());
+                this->base_type::launch_kernel(this->get_gid(), cu_kernel);
+            }*/
         };
 	}
 }
