@@ -5,8 +5,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
-#ifndef HPX_OPENCL_EVENT_HPP__
-#define HPX_OPENCL_EVENT_HPP__
+#ifndef HPX_OPENCL_EVENT_HPP_
+#define HPX_OPENCL_EVENT_HPP_
 
 #include "server/event.hpp"
 

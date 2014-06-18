@@ -4,8 +4,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
-#ifndef HPX_OPENCL_DEVICE_HPP__
-#define HPX_OPENCL_DEVICE_HPP__
+#ifndef HPX_OPENCL_DEVICE_HPP_
+#define HPX_OPENCL_DEVICE_HPP_
 
 #include "server/device.hpp"
 
@@ -101,7 +101,10 @@ namespace opencl {
              */
             template<class T>
             hpx::lcos::shared_future<hpx::opencl::event>
-            create_future_event(hpx::lcos::shared_future<T> future); 
+            create_future_event(hpx::lcos::shared_future<T> & future); 
+            template<class T>
+            hpx::lcos::shared_future<hpx::opencl::event>
+            create_future_event(hpx::lcos::future<T> && future); 
 
             /**
              *  @brief Creates an OpenCL buffer.
@@ -202,7 +205,26 @@ namespace opencl {
 
     template<class T>
     hpx::lcos::shared_future<hpx::opencl::event>
-    device::create_future_event(hpx::lcos::shared_future<T> future)
+    device::create_future_event(hpx::lcos::shared_future<T> & future)
+    {
+    
+        // Create a user event
+        hpx::lcos::shared_future<hpx::opencl::event> event = create_user_event();
+    
+        // Schedule the user event trigger to be called after future
+        future.then(
+                       hpx::util::bind(&(device::trigger_user_event_externally),
+                                       event)
+                   );
+
+        // Return the event
+        return event;
+
+    }
+
+    template<class T>
+    hpx::lcos::shared_future<hpx::opencl::event>
+    device::create_future_event(hpx::lcos::future<T> && future)
     {
     
         // Create a user event
@@ -222,4 +244,4 @@ namespace opencl {
 }}
 
 
-#endif// HPX_OPENCL_DEVICE_HPP__
+#endif// HPX_OPENCL_DEVICE_HPP_

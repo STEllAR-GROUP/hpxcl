@@ -4,8 +4,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
-#ifndef HPX_OPENCL_BUFFER_HPP__
-#define HPX_OPENCL_BUFFER_HPP__
+#ifndef HPX_OPENCL_BUFFER_HPP_
+#define HPX_OPENCL_BUFFER_HPP_
 
 #include "server/buffer.hpp"
 
@@ -401,4 +401,4 @@ namespace opencl {
 
 
 
-#endif// HPX_OPENCL_BUFFER_HPP__
+#endif// HPX_OPENCL_BUFFER_HPP_

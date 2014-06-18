@@ -3,8 +3,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BENCHMARK_HPX_HELPERS_HPP__
-#define BENCHMARK_HPX_HELPERS_HPP__
+#ifndef BENCHMARK_HPX_HELPERS_HPP_
+#define BENCHMARK_HPX_HELPERS_HPP_
 
 #include "../../../opencl.hpp"
 
@@ -39,5 +39,5 @@ static hpx::naming::id_type hpx_get_remote_node()
 
 
 
-#endif //BENCHMARK_HPX_HELPERS_HPP__
+#endif //BENCHMARK_HPX_HELPERS_HPP_
 

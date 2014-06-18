@@ -12,91 +12,37 @@
 #include <boost/gil/gil_all.hpp>
 #include <boost/gil/extension/io/png_dynamic_io.hpp>
 
-#include <atomic>
-#include <map>
+#include <vector>
 
 using namespace boost::gil;
 
 
+void save_png(boost::shared_ptr<std::vector<char>> data, size_t width, size_t height, const char* filename)
+{
+    
+    // create an image
+    rgb8_image_t img(width, height);
 
+    // create a view to the image
+    rgb8_image_t::view_t v = view(img);
 
-// an image, basically a struct that prevents repeated view creation
-class png_img{
-
-public:
-    // constructor
-    png_img(){}
-    png_img(size_t x_, size_t y_): img(x_, y_), v(view(img))
+    // iterate through all rows
+    for(size_t y = 0; y < height; y++)
     {
-    }
-
-    void set_row(size_t y, unsigned char* data)
-    {
-        
         // create a row iterator
         rgb8_image_t::view_t::x_iterator it = v.row_begin(y);
-        
+            
         // set data of the row
-        for(int x = 0; x < img.width(); x++)
+        for(size_t x = 0; x < width; x++)
         {
-            *it = rgb8_pixel_t(data[0], data[1], data[2]);
-            data += 3;
+            *it = rgb8_pixel_t((unsigned char)((*data)[(y * width + x) * 3 + 0]), 
+                               (unsigned char)((*data)[(y * width + x) * 3 + 1]),
+                               (unsigned char)((*data)[(y * width + x) * 3 + 2]));
             it++;
         }
-
     }
-
-    void save_to_file(const char* filename){
-        
-        boost::gil::png_write_view(filename, const_view(img));
-
-    }
-
-private:
-    // saves the image itself
-    rgb8_image_t img;
-    // view, used to modify the image
-    rgb8_image_t::view_t v;
-
-};
-
-
-static std::atomic_ulong next_id(0);
-static std::map<unsigned long, boost::shared_ptr<png_img>> images;
-
-unsigned long png_create(size_t x, size_t y) 
-{
-    // query new image id
-    int id = next_id++;
-
-    // create image
-    boost::shared_ptr<png_img> img_ptr(new png_img(x,y));
-
-    // store image
-    images.insert(
-             std::pair<unsigned long, boost::shared_ptr<png_img>>(id, img_ptr));
-
-    // return reference id
-    return id;
+ 
+    // write to file
+    boost::gil::png_write_view(filename, const_view(img));
 
 }
-
-void png_set_row(unsigned long id, size_t y, unsigned char* data)
-{
-
-    images[id]->set_row(y, data);
-
-}
-
-void png_save_and_close(unsigned long id, const char* filename)
-{
-
-    // write image to file
-    images[id]->save_to_file(filename);
-
-    // delete the image
-    images.erase(id);
-
-}
-
-

@@ -3,8 +3,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BENCHMARK_HPXCL_SINGLE_HPP__
-#define BENCHMARK_HPXCL_SINGLE_HPP__
+#ifndef BENCHMARK_HPXCL_SINGLE_HPP_
+#define BENCHMARK_HPXCL_SINGLE_HPP_
 
 #include "../../../opencl.hpp"
 #include "timer.hpp"
@@ -320,5 +320,5 @@ static void hpxcl_single_shutdown()
 
 
 
-#endif //BENCHMARK_HPXCL_SINGLE_HPP__
+#endif //BENCHMARK_HPXCL_SINGLE_HPP_
 

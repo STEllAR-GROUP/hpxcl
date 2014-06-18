@@ -3,8 +3,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BENCHMARK_DIRECTCL_H__
-#define BENCHMARK_DIRECTCL_H__
+#ifndef BENCHMARK_DIRECTCL_HPP_
+#define BENCHMARK_DIRECTCL_HPP_
 
 #include "gpu_code.hpp"
 
@@ -413,5 +413,5 @@ static void directcl_shutdown()
 
 
 
-#endif //BENCHMARK_DIRECTCL_H__
+#endif //BENCHMARK_DIRECTCL_HPP_
 

@@ -5,16 +5,32 @@
 
 #include "workload.hpp"
 
-workload::workload(size_t num_pixels_, double origin_x_, double origin_y_,
-                    double size_x_, double size_y_, size_t img_id_,
-                    size_t pos_in_img_) :
-                    pixeldata(std::vector<unsigned char>(3*num_pixels_)),
-                    num_pixels(num_pixels_),
-                    origin_x(origin_x_),
-                    origin_y(origin_y_),
-                    size_x(size_x_),
-                    size_y(size_y_),
-                    img_id(img_id_),
-                    pos_in_img(pos_in_img_){}
-        
+workload::workload(size_t num_pixels_x_,
+                   size_t num_pixels_y_,
+                   double topleft_x_,
+                   double topleft_y_,
+                   double hor_pixdist_x_,
+                   double hor_pixdist_y_,
+                   double vert_pixdist_x_,
+                   double vert_pixdist_y_,
+                   size_t img_id_,
+                   size_t pos_in_img_x_,
+                   size_t pos_in_img_y_,
+                   size_t line_offset_)
+                   : pixeldata(boost::shared_ptr<std::vector<char>>()),
+                     num_pixels_x(num_pixels_x_),
+                     num_pixels_y(num_pixels_y_),
+                     topleft_x(topleft_x_),
+                     topleft_y(topleft_y_),
+                     hor_pixdist_x(hor_pixdist_x_),
+                     hor_pixdist_y(hor_pixdist_y_),
+                     vert_pixdist_x(vert_pixdist_x_),
+                     vert_pixdist_y(vert_pixdist_y_),
+                     img_id(img_id_),
+                     pos_in_img_x(pos_in_img_x_),
+                     pos_in_img_y(pos_in_img_y_),
+                     line_offset(line_offset_)
+                   {};
+
+ 
 
