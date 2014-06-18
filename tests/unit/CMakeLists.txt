@@ -4,9 +4,20 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-set(subdirs
-    opencl
-   )
+set(subdirs "")
+
+if(HPX_USE_OPENCL)
+  set(subdirs
+    ${subdirs} opencl)
+endif()
+
+if(HPX_USE_CUDA)
+  set(subdirs
+    ${subdirs} cuda)
+endif()
+
+
+
 
 if(NOT HPX_HAVE_SECURITY AND SODIUM_FOUND)
     set(subdirs ${subdirs} security)
