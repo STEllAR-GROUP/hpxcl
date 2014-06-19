@@ -89,9 +89,9 @@ kernel::enqueue(cl_uint work_dim, std::vector<std::vector<size_t>> args,
     size_t* global_work_offset = NULL;
     size_t* global_work_size   = NULL;
     size_t* local_work_size    = NULL;
-    if(args[0].size() == work_dim) global_work_offset = &(args[0][0]); 
-    if(args[1].size() == work_dim) global_work_size   = &(args[1][0]); 
-    if(args[2].size() == work_dim) local_work_size    = &(args[2][0]); 
+    if(args[0].size() == work_dim) global_work_offset = args[0].data(); 
+    if(args[1].size() == work_dim) global_work_size   = args[1].data(); 
+    if(args[2].size() == work_dim) local_work_size    = args[2].data(); 
 
     // Get the cl_event dependency list
     std::vector<cl_event> cl_events_list = hpx::opencl::event::
@@ -99,7 +99,7 @@ kernel::enqueue(cl_uint work_dim, std::vector<std::vector<size_t>> args,
     cl_event* cl_events_list_ptr = NULL;
     if(!cl_events_list.empty())
     {
-        cl_events_list_ptr = &cl_events_list[0];
+        cl_events_list_ptr = cl_events_list.data();
     }
 
     // Enqueue the kernel

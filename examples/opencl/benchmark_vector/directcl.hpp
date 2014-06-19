@@ -60,7 +60,7 @@ static cl_device_id directcl_choose_device()
 
     // get platform ids
     std::vector<cl_platform_id> platforms(num_platforms);
-    ret = clGetPlatformIDs(num_platforms, &platforms[0], NULL);
+    ret = clGetPlatformIDs(num_platforms, platforms.data(), NULL);
     directcl_check(ret);
 
 /*
@@ -127,7 +127,7 @@ static cl_device_id directcl_choose_device()
 
     // get device ids
     std::vector<cl_device_id> devices(num_devices);
-    ret = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, num_devices, &devices[0],
+    ret = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, num_devices, devices.data(),
                          NULL);
 
 
@@ -293,15 +293,15 @@ directcl_calculate(std::vector<float> a,
     // copy data to gpu
     err = clEnqueueWriteBuffer(directcl_command_queue, directcl_buffer_a,
                                CL_FALSE, 0, a.size() * sizeof(float),
-                               &a[0], 0, NULL, NULL);
+                               a.data(), 0, NULL, NULL);
     directcl_check(err);
     err = clEnqueueWriteBuffer(directcl_command_queue, directcl_buffer_b,
                                CL_FALSE, 0, a.size() * sizeof(float),
-                               &b[0], 0, NULL, NULL);
+                               b.data(), 0, NULL, NULL);
     directcl_check(err);
     err = clEnqueueWriteBuffer(directcl_command_queue, directcl_buffer_c,
                                CL_FALSE, 0, a.size() * sizeof(float),
-                               &c[0], 0, NULL, NULL);
+                               c.data(), 0, NULL, NULL);
     directcl_check(err);
 
     
@@ -347,7 +347,7 @@ directcl_calculate(std::vector<float> a,
     // read into result buffer
     err = clEnqueueReadBuffer(directcl_command_queue, directcl_buffer_z,
                               CL_FALSE, 0, a.size() * sizeof(float),
-                              &(*res)[0], 0, NULL, NULL);
+                              res->data(), 0, NULL, NULL);
     directcl_check(err);
 
     // finish

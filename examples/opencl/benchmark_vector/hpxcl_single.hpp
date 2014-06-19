@@ -193,11 +193,11 @@ hpxcl_single_calculate(std::vector<float> &a,
 
     // copy data to gpu
     shared_future<event> write_a_event = 
-               hpxcl_single_buffer_a.enqueue_write(0, size*sizeof(float), &a[0]);
+           hpxcl_single_buffer_a.enqueue_write(0, size*sizeof(float), a.data());
     shared_future<event> write_b_event =
-               hpxcl_single_buffer_b.enqueue_write(0, size*sizeof(float), &b[0]);
+           hpxcl_single_buffer_b.enqueue_write(0, size*sizeof(float), b.data());
     shared_future<event> write_c_event =
-               hpxcl_single_buffer_c.enqueue_write(0, size*sizeof(float), &c[0]);
+           hpxcl_single_buffer_c.enqueue_write(0, size*sizeof(float), c.data());
 
     // wait for write to finish
     write_a_event.get().await();

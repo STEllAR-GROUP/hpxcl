@@ -157,7 +157,7 @@ static void cl_test(hpx::opencl::device cldevice)
                                     readZevent.get().get_data().get();
 
     // cast to int
-    int* data = (int*)&(*chardata)[0];
+    int* data = (int*)(chardata->data());
 
     for(size_t i = 0; i < 5; i++)
     {

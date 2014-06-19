@@ -66,12 +66,31 @@ namespace opencl {
              *          This will typically be cast to some other type via
              *          (for example):
              *          \code{.cpp}
-             *          cl_uint *return_uint = (cl_uint*)&return_charvector[0];
+             *          cl_uint *return_uint = (cl_uint*)return_charvector->data();
              *          \endcode
              *          or converted to a string via \ref device_info_to_string.
              */
             hpx::lcos::future<std::vector<char>>
             get_device_info(cl_device_info info_type) const;
+            
+             /**
+             *  @brief Queries platform infos.
+             *  
+             *  @param info_type    The type of information.<BR>
+             *                      A complete list can be found on the official
+             *                      <A HREF="http://www.khronos.org/registry/cl/
+             * sdk/1.2/docs/man/xhtml/clGetPlatformInfo.html">
+             *                      OpenCL Reference</A>.
+             *  @return The info data as char array.<BR>
+             *          This will typically be cast to some other type via
+             *          (for example):
+             *          \code{.cpp}
+             *          cl_uint *return_uint = (cl_uint*)return_charvector->data();
+             *          \endcode
+             *          or converted to a string via \ref device_info_to_string.
+             */
+            hpx::lcos::future<std::vector<char>>
+            get_platform_info(cl_platform_info info_type) const;
             
             /** 
              *  @brief Converts device info data to a string

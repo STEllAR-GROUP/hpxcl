@@ -72,7 +72,7 @@ int hpx_main(int argc, char* argv[])
         boost::shared_ptr<std::vector<char>> data_ptr = read_event.get_data().get();
     
         // Write the data to hpx::cout
-        hpx::cout << &(*data_ptr)[0] << hpx::endl;
+        hpx::cout << data_ptr->data() << hpx::endl;
         
     }
     

@@ -51,7 +51,7 @@ device::device(clx_device_id _device_id, bool enable_profiling)
     std::vector<char> supported_queue_properties_data = 
                                     get_device_info(CL_DEVICE_QUEUE_PROPERTIES);
     cl_command_queue_properties supported_queue_properties =
-        *((cl_command_queue_properties *)(&supported_queue_properties_data[0]));
+        *((cl_command_queue_properties *)(supported_queue_properties_data.data()));
 
     // Initialize command queue properties
     cl_command_queue_properties command_queue_properties = 0;
@@ -407,8 +407,31 @@ device::get_device_info(cl_device_info info_type)
 
     // Retrieve
     std::vector<char> info(param_size);
-    err = clGetDeviceInfo(device_id, info_type, param_size, &info[0], 0);
+    err = clGetDeviceInfo(device_id, info_type, param_size, info.data(), 0);
     cl_ensure(err, "clGetDeviceInfo()");
+
+    // Return
+    return info;
+
+}
+
+
+std::vector<char>
+device::get_platform_info(cl_platform_info info_type)
+{
+    
+    // Declairing the cl error code variable
+    cl_int err;
+
+    // Query for size
+    size_t param_size;
+    err = clGetPlatformInfo(platform_id, info_type, 0, NULL, &param_size);
+    cl_ensure(err, "clGetPlatformInfo()");
+
+    // Retrieve
+    std::vector<char> info(param_size);
+    err = clGetPlatformInfo(platform_id, info_type, param_size, info.data(), 0);
+    cl_ensure(err, "clGetPlatformInfo()");
 
     // Return
     return info;

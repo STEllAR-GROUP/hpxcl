@@ -74,7 +74,7 @@ static float cl_version_to_float(std::vector<char> version_str_)
     try{
        
         // Make String out of char array
-        std::string version_str (&version_str_[0]);
+        std::string version_str (version_str_.data());
     
         // Cut away the "OpenCL " in front of the version string
         version_str = version_str.substr(7);
@@ -136,7 +136,7 @@ ensure_device_components_initialization()
 
     // Retrieve platforms
     std::vector<cl_platform_id> platforms(num_platforms);
-    err = clGetPlatformIDs(num_platforms, &platforms[0], NULL);
+    err = clGetPlatformIDs(num_platforms, platforms.data(), NULL);
     cl_ensure(err, "clGetPlatformIDs()");
 
     // Search on every platform
@@ -154,7 +154,7 @@ ensure_device_components_initialization()
         std::vector<cl_device_id> devices_on_platform(num_devices_on_platform);
         err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL,
                                   num_devices_on_platform,
-                                  &devices_on_platform[0], NULL);
+                                  devices_on_platform.data(), NULL);
         cl_ensure(err, "clGetDeviceIDs()");
 
         // Add devices_on_platform to devices
@@ -208,7 +208,7 @@ hpx::opencl::server::get_devices(cl_device_type type, float min_cl_version)
         std::vector<char> device_type_string = 
                                    device.get_device_info(CL_DEVICE_TYPE).get();
         cl_device_type device_type = *((cl_device_type*)
-                                                     (&device_type_string[0]));
+                                                     (device_type_string.data()));
         if(!(device_type & type)) continue;
 
         // TODO filter devices
