@@ -36,20 +36,20 @@ link_directories(${HPX_LIBRARY_DIR})
 hpx_option(HPX_BUILD_EXAMPLES BOOL "Build HPX examples (default: ON)" ON ADVANCED)
 hpx_option(HPX_BUILD_TESTS BOOL "Build HPX tests (default: ON)" ON ADVANCED)
 hpx_option(HPX_BUILD_DOCUMENTATION BOOL "The HPX documentation toolchain is available (default OFF)." OFF)
-hpx_option(HPXCL_USE_OPENCL BOOL "Builds the CUDA part of HPXCL (default ON)." ON)
-hpx_option(HPXCL_USE_CUDA BOOL "Builds the CUDA part of HPXCL (default OFF)." OFF)
+hpx_option(HPXCL_WITH_OPENCL BOOL "Builds the CUDA part of HPXCL (default ON)." ON)
+hpx_option(HPXCL_WITH_CUDA BOOL "Builds the CUDA part of HPXCL (default OFF)." OFF)
 
 
 ########################################################################
 # further includes, depending on config
 # 
-if(HPXCL_USE_OPENCL)
+if(HPXCL_WITH_OPENCL)
     find_package(HPX_OpenCL REQUIRED)
     include_directories(${OpenCL_INCLUDE_DIR})
     link_directories(${OpenCL_LIBRARY_DIR})
 endif()
 
-if(HPXCL_USE_CUDA)
+if(HPXCL_WITH_CUDA)
     find_package(CUDA REQUIRED)
 endif()
 
@@ -59,12 +59,12 @@ endif()
 # 
 
 # build opencl
-if(HPXCL_USE_OPENCL)
+if(HPXCL_WITH_OPENCL)
     add_subdirectory(opencl)
 endif()
 
 # build cuda
-if(HPXCL_USE_CUDA)
+if(HPXCL_WITH_CUDA)
     add_subdirectory(cuda)
 endif()
 

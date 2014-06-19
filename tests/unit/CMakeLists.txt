@@ -6,12 +6,12 @@
 
 set(subdirs "")
 
-if(HPXCL_USE_OPENCL)
+if(HPXCL_WITH_OPENCL)
   set(subdirs
     ${subdirs} opencl)
 endif()
 
-if(HPXCL_USE_CUDA)
+if(HPXCL_WITH_CUDA)
   set(subdirs
     ${subdirs} cuda)
 endif()
