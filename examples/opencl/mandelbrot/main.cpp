@@ -33,59 +33,19 @@ int hpx_main(boost::program_options::variables_map & vm)
     // The main scope
     {
 
-        // get all HPX localities
-        if(verbose) hpx::cout << "Finding all hpx localities ..." << hpx::endl;
-        std::vector<hpx::naming::id_type> localities = 
-                                            hpx::find_all_localities();
-        if(verbose) hpx::cout << localities.size() << " hpx localities found!" << hpx::endl; 
-
-        // query all devices
-        if(verbose) hpx::cout << "Requesting device lists from localities ..." << hpx::endl;
-        std::vector<hpx::lcos::shared_future<std::vector<hpx::opencl::device>>>
-        locality_device_futures;
-        BOOST_FOREACH(hpx::naming::id_type & locality, localities)
-        {
-
-            // get all devices on locality
-            hpx::lcos::shared_future<std::vector<hpx::opencl::device>>
-            locality_device_future = hpx::opencl::get_devices(locality,
-                                                             CL_DEVICE_TYPE_GPU,
-                                                             1.1f);
-
-            // add locality device future to list of futures
-            locality_device_futures.push_back(locality_device_future);
-
-        }
-        
-        // wait for all localities to respond, then add all devices to devicelist
-        if(verbose) hpx::cout << "Waiting for device lists ..." << hpx::endl;
-        boost::shared_ptr<std::vector<hpx::opencl::device>>
-                devices(new std::vector<hpx::opencl::device>());
-        BOOST_FOREACH(
-                    hpx::lcos::shared_future<std::vector<hpx::opencl::device>>
-                    locality_device_future,
-                    locality_device_futures)
-        {
-
-            // wait for device query to finish
-            std::vector<hpx::opencl::device> locality_devices = 
-                                                   locality_device_future.get();
-
-            // add all devices to device list
-            devices->insert(devices->end(), locality_devices.begin(),
-                                          locality_devices.end());
-
-        }
+        // get all devices
+        std::vector<hpx::opencl::device> devices = 
+                   hpx::opencl::get_all_devices(CL_DEVICE_TYPE_GPU, 1.1f).get();
 
         // Check whether there are any devices
-        if(devices->size() < 1)
+        if(devices.size() < 1)
         {
             hpx::cerr << "No OpenCL devices found!" << hpx::endl;
             return hpx::finalize();
         }
         else
         {
-            hpx::cout << devices->size() << " OpenCL devices found!" << hpx::endl;
+            hpx::cout << devices.size() << " OpenCL devices found!" << hpx::endl;
         }
 
 

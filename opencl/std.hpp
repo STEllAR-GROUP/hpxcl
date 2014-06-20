@@ -24,7 +24,7 @@ namespace hpx { namespace opencl{
     /**
      * @brief Fetches a list of accelerator devices present on target node.
      *
-     * It is recommended to only use OpenCL Version >= 1.1f.
+     * It is recommended to only use OpenCL Version >= 1.1.
      * Earlier devices seem to be blocking on every enqueue-call, which
      * is counter-productive to the general idea of the hpx framework.
      *
@@ -43,6 +43,29 @@ namespace hpx { namespace opencl{
     hpx::lcos::future<std::vector<device>>
     get_devices( hpx::naming::id_type node_id, cl_device_type device_type,
                  float required_cl_version );
+
+    /**
+     * @brief Fetches a list of all accelerator devices present in the current 
+     *        hpx environment.
+     *
+     * It is recommended to only use OpenCL Version >= 1.1.
+     * Earlier devices seem to be blocking on every enqueue-call, which
+     * is counter-productive to the general idea of the hpx framework.
+     *
+     * @param device_type         The device type, according to OpenCL standard.
+     *                            <BR>
+     *                            For further information, look at the official 
+     *                            <A HREF="http://www.khronos.org/registry/cl/sd
+     * k/1.2/docs/man/xhtml/clGetDeviceIDs.html">
+     *                            OpenCL Reference</A>.
+     * @param required_cl_version All devices that don't support this OpenCL
+     *                            version will be ignored.<BR>
+     *                            Recommended value is 1.1f.
+     * @return A list of suitable OpenCL devices
+     */
+    hpx::lcos::future<std::vector<device>>
+    get_all_devices( cl_device_type device_type,
+                     float required_cl_version );
 
 }}
 

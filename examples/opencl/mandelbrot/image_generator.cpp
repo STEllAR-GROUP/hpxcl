@@ -13,7 +13,7 @@
 #include <cmath>
 
 image_generator::
-image_generator(boost::shared_ptr<std::vector<hpx::opencl::device>> devices,
+image_generator(std::vector<hpx::opencl::device> & devices,
                 size_t img_size_hint_x,
                 size_t img_size_hint_y,
                 size_t num_parallel_kernels,
@@ -34,7 +34,7 @@ image_generator(boost::shared_ptr<std::vector<hpx::opencl::device>> devices,
              (new std::vector<boost::shared_ptr<mandelbrotworker>>());
 
     // starting workers
-    BOOST_FOREACH(hpx::opencl::device & device, *devices)
+    BOOST_FOREACH(hpx::opencl::device & device, devices)
     {
 
         // create worker

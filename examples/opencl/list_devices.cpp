@@ -78,55 +78,6 @@ device_type_to_string(hpx::future<std::vector<char>> type_future)
 
 }
 
-
-static std::vector<device> get_all_devices( cl_device_type type, float version)
-{
-
-    // get all HPX localities
-    std::vector<hpx::naming::id_type> localities = 
-                                        hpx::find_all_localities();
-
-    // query all devices
-    std::vector<hpx::lcos::future<std::vector<hpx::opencl::device>>>
-    locality_device_futures;
-    BOOST_FOREACH(hpx::naming::id_type & locality, localities)
-    {
-
-        // get all devices on locality
-        hpx::lcos::future<std::vector<hpx::opencl::device>>
-        locality_device_future = hpx::opencl::get_devices(locality,
-                                                         type,
-                                                         version);
-
-        // add locality device future to list of futures
-        locality_device_futures.push_back(std::move(locality_device_future));
-
-    }
-    
-    // wait for all localities to respond, then add all devices to devicelist
-    std::vector<hpx::opencl::device> devices;
-    BOOST_FOREACH(
-                hpx::lcos::future<std::vector<hpx::opencl::device>> &
-                locality_device_future,
-                locality_device_futures)
-    {
-
-        // wait for device query to finish
-        std::vector<hpx::opencl::device> locality_devices = 
-                                               locality_device_future.get();
-
-        // add all devices to device list
-        devices.insert(devices.end(), locality_devices.begin(),
-                                      locality_devices.end());
-
-    }
-
-    // return the device list
-    return devices;
-
-}
-
-
 // hpx_main, is the actual main called by hpx
 int hpx_main(int argc, char* argv[])
 {
@@ -134,7 +85,7 @@ int hpx_main(int argc, char* argv[])
         
         // Get list of available OpenCL Devices.
         std::vector<device> devices = get_all_devices(CL_DEVICE_TYPE_ALL,
-                                                   0.0f );
+                                                   0.0f ).get();
     
         // Check whether there are any devices
         if(devices.size() < 1)
