@@ -9,10 +9,12 @@ cuda_add_library(cuda_kernels cuda/kernel.cu)
 
 add_hpx_component(cuda
    ESSENTIAL
-   SOURCES  buffer.cpp
+   SOURCES  #buffer.cpp
             device.cpp
-            event.cpp
+            server/device.cpp
+            #event.cpp
             kernel.cpp
+            server/kernel.cpp
    HEADERS  fwd_declarations.hpp
             buffer.hpp
             device.hpp

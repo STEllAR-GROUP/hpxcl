@@ -10,6 +10,8 @@
 #include <hpx/runtime/applier/apply.hpp>
 #include <hpx/include/async.hpp>
 
+#include <iostream>
+
 #include "../server/device.hpp"
 
 namespace hpx
@@ -104,14 +106,15 @@ namespace hpx
                 static void create_host_ptr(hpx::naming::id_type const &gid, T value, size_t const byte_count)
                 {
                     typedef typename server::device::create_host_ptr_action<T> action_type;
-                    hpx::async<action_type>(gid, value).get();
+                    std::cout << "hello from create_host_ptr stubs" <<std::endl;
+                    hpx::async<action_type>(gid, value, byte_count).get();
                 }
 
                 template <typename T>
                 static void create_host_ptr_non_blocking(hpx::naming::id_type const &gid, T value, size_t const byte_count)
                 {
                    typedef typename server::device::create_host_ptr_action<T> action_type;
-                   hpx::apply<action_type>(gid, value).get();  
+                   hpx::apply<action_type>(gid, value, byte_count).get();  
                 }
 
                 /*static hpx::lcos::future<void> launch_kernel_async(hpx::naming::id_type const &gid, hpx::cuda::kernel cu_kernel)

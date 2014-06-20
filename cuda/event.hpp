@@ -37,19 +37,19 @@ namespace hpx
 
                 hpx::lcos::future<void> await_async()
                 {
-                   BOOST_ASSERT(this->get_gid());
+                   HPX_ASSERT(this->get_gid());
                    return this->base_type::await_async(this->get_gid());
                 }
 
                 void await()
                 {
-                    BOOST_ASSERT(this->get_gid());
+                    HPX_ASSERT(this->get_gid());
                     this->base_type::await(this->get_gid());
                 }
 
                 hpx::lcos::future<bool> finished_async()
                 {
-                    BOOST_ASSERT(this->get_gid());
+                    HPX_ASSERT(this->get_gid());
                     return this->base_type::finished_async(this->get_gid());
                 }
 

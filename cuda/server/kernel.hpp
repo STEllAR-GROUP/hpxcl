@@ -11,9 +11,7 @@
 #include <hpx/runtime/components/server/locking_hook.hpp>
 #include <hpx/runtime/actions/component_action.hpp>
 
-#include <cuda_runtime.h>
 #include <cuda.h>
-#include <curand_kernel.h>
 
 #include  "../fwd_declarations.hpp"
 
@@ -41,67 +39,29 @@ namespace hpx
                     } 
                 };
 
-                kernel()
-                {}
+                kernel();
 
-            	kernel(std::string kernel_name)
-            	{
-                    this->kernel_name = kernel_name;
-                }
+                kernel(std::string kernel_name);
 
-                ~kernel()
-                {
-                    
-                }
-            	
-            	void set_stream()
-            	{
-                    cuStreamCreate(&cu_stream, CU_STREAM_DEFAULT);
-                }
+                ~kernel();
                 
-                void set_grid_dim(unsigned int grid_x, unsigned int grid_y, unsigned int grid_z)
-                {
-                    this->grid.x = grid_x;
-                    this->grid.y = grid_y;
-                    this->grid.z = grid_z;
-                }
+                void set_stream();
 
-            	void set_block_dim(unsigned int block_x, unsigned int block_y, unsigned int block_z)
-            	{
-                    this->block.x = block_x;
-                    this->block.y = block_y;
-                    this->block.z = block_z;
-            	}
+                void set_grid_dim(unsigned int grid_x, unsigned int grid_y, unsigned int grid_z);
 
-                void load_module(const std::string file_name)
-                {
-                    this->module_name = file_name;
-                }
+                void set_block_dim(unsigned int block_x, unsigned int block_y, unsigned int block_z);
 
-                void load_kernel(const std::string kernal_name)
-                {
-                    this->kernel_name = kernel_name;
-                }
+                void load_module(const std::string file_name);
 
-                std::string get_function()
-                {
-                    return this->kernel_name;
-                }
+                void load_kernel(const std::string kernal_name);
 
-                std::string get_module()
-                {
-                    return this->module_name;
-                }
+                std::string get_function();
 
-                Dim3 get_grid()
-                {
-                    return this->grid;
-                }
+                std::string get_module();
 
-                Dim3 get_block()
-                {
-                    return this->block;
-                }
+                Dim3 get_grid();
+
+                Dim3 get_block();
 
                 HPX_DEFINE_COMPONENT_ACTION(kernel, set_stream);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, load_module);
