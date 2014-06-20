@@ -103,7 +103,7 @@ int hpx_main(boost::program_options::variables_map & vm)
         size_t img_y = 1920;
 
         // create image_generator
-        image_generator img_gen(devices, img_x * 2, num_kernels, verbose);
+        image_generator img_gen(devices, img_x, 4, num_kernels, verbose);
         
         // wait for workers to finish initialization
         if(verbose) hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
