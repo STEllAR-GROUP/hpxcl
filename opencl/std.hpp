@@ -37,12 +37,14 @@ namespace hpx { namespace opencl{
      *                            OpenCL Reference</A>.
      * @param required_cl_version All devices that don't support this OpenCL
      *                            version will be ignored.<BR>
-     *                            Recommended value is 1.1f.
+     *                            Version number must have the following format:
+     *                            "OpenCL <major>.<minor>"<BR>
+     *                            Recommended value is "OpenCL 1.1".
      * @return A list of suitable OpenCL devices on target node
      */
     hpx::lcos::future<std::vector<device>>
     get_devices( hpx::naming::id_type node_id, cl_device_type device_type,
-                 float required_cl_version );
+                 std::string required_cl_version );
 
     /**
      * @brief Fetches a list of all accelerator devices present in the current 
@@ -60,12 +62,14 @@ namespace hpx { namespace opencl{
      *                            OpenCL Reference</A>.
      * @param required_cl_version All devices that don't support this OpenCL
      *                            version will be ignored.<BR>
-     *                            Recommended value is 1.1f.
+     *                            Version number must have the following format:
+     *                            "OpenCL <major>.<minor>"<BR>
+     *                            Recommended value is "OpenCL 1.1".
      * @return A list of suitable OpenCL devices
      */
     hpx::lcos::future<std::vector<device>>
     get_all_devices( cl_device_type device_type,
-                     float required_cl_version );
+                     std::string required_cl_version );
 
 }}
 

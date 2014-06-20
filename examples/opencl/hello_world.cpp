@@ -30,7 +30,7 @@ int hpx_main(int argc, char* argv[])
         // Get list of available OpenCL Devices.
         std::vector<device> devices = get_devices( hpx::find_here(),
                                                    CL_DEVICE_TYPE_ALL,
-                                                   1.1f ).get();
+                                                   "OpenCL 1.1" ).get();
     
         // Check whether there are any devices
         if(devices.size() < 1)

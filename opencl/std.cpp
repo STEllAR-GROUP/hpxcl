@@ -12,7 +12,7 @@
 hpx::lcos::future<std::vector<hpx::opencl::device>>
 hpx::opencl::get_devices( hpx::naming::id_type node_id,
                           cl_device_type device_type,
-                          float required_cl_version)
+                          std::string required_cl_version)
 {
 
     typedef hpx::opencl::server::get_devices_action action;
@@ -22,7 +22,7 @@ hpx::opencl::get_devices( hpx::naming::id_type node_id,
 
 hpx::lcos::future<std::vector<hpx::opencl::device>>
 hpx::opencl::get_all_devices( cl_device_type device_type,
-                              float required_cl_version)
+                              std::string required_cl_version)
 {
 
     // get all HPX localities

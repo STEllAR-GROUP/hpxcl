@@ -67,30 +67,42 @@ HPX_REGISTER_PLAIN_ACTION(hpx::opencl::server::get_devices_action,
 ///////////////////////////////////////////////////
 /// Local functions
 ///
-static float cl_version_to_float(std::vector<char> version_str_)
+static std::vector<int> 
+parse_version_string(std::string version_str)
 {
-
 
     try{
        
-        // Make String out of char array
-        std::string version_str (version_str_.data());
-    
+        // Make sure the version string starts with "OpenCL "
+        BOOST_ASSERT(version_str.compare(0, 7, "OpenCL ") == 0);
+
         // Cut away the "OpenCL " in front of the version string
         version_str = version_str.substr(7);
     
         // Cut away everything behind the version number
         version_str = version_str.substr(0, version_str.find(" "));
         
+        // Get major version string
+        std::string version_str_major = 
+                           version_str.substr(0, version_str.find("."));
+
+        // Get minor version string
+        std::string version_str_minor = 
+                           version_str.substr(version_str_major.size() + 1);
+
+        // create output vector
+        std::vector<int> version_numbers(2);
+
         // Parse version number
-        float version_number = (float) ::atof(version_str.c_str());
+        version_numbers[0] = ::atoi(version_str_major.c_str());
+        version_numbers[1] = ::atoi(version_str_minor.c_str());
 
         // Return the parsed version number
-        return version_number;
+        return version_numbers;
 
     } catch (const std::exception & ex) {
         hpx::cerr << "Error while parsing OpenCL Version!" << hpx::endl;
-        return -1.0f;
+        return std::vector<int>({-1, 0});
     }
 
 }
@@ -180,8 +192,12 @@ ensure_device_components_initialization()
     
 
 std::vector<hpx::opencl::device>
-hpx::opencl::server::get_devices(cl_device_type type, float min_cl_version)
+hpx::opencl::server::get_devices(cl_device_type type,
+                                 std::string min_cl_version)
 {
+
+    // Parse required OpenCL version
+    std::vector<int> required_version = parse_version_string(min_cl_version);
 
     // Create the list of device clients
     ensure_device_components_initialization();
@@ -198,17 +214,30 @@ hpx::opencl::server::get_devices(cl_device_type type, float min_cl_version)
     BOOST_FOREACH( const std::vector<hpx::opencl::device>::value_type& device,
                    devices.get())
     {
-        // Check for required opencl version
-        std::vector<char> cl_version_string =
+        // Get device OpenCL version
+        std::vector<char> cl_version_string_vec =
                                 device.get_device_info(CL_DEVICE_VERSION).get();
-        float device_cl_version = cl_version_to_float(cl_version_string);
-        if(device_cl_version < min_cl_version) continue;
+
+        // Make String out of char array
+        std::string cl_version_string (cl_version_string_vec.begin(),
+                                       cl_version_string_vec.end());
+    
+        // Parse OpenCL version
+        std::vector<int> device_cl_version = 
+                                        parse_version_string(cl_version_string);
+
+        // Check if device supports required version
+        if(device_cl_version[0] < required_version[0]) continue;
+        if(device_cl_version[0] == required_version[0])
+        {
+            if(device_cl_version[1] < required_version[1]) continue;
+        }
 
         // Check for requested device type
         std::vector<char> device_type_string = 
                                    device.get_device_info(CL_DEVICE_TYPE).get();
         cl_device_type device_type = *((cl_device_type*)
-                                                     (device_type_string.data()));
+                                                   (device_type_string.data()));
         if(!(device_type & type)) continue;
 
         // TODO filter devices

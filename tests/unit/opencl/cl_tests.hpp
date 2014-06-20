@@ -46,7 +46,7 @@ static hpx::opencl::device init(variables_map & vm)
     // Query devices
     std::vector<hpx::opencl::device> devices
             = hpx::opencl::get_devices(hpx::find_here(),
-                                        CL_DEVICE_TYPE_ALL, 1.1f).get();
+                                        CL_DEVICE_TYPE_ALL, "OpenCL 1.1").get();
     HPX_TEST(devices.size() >= device_id);
 
     // Choose device
