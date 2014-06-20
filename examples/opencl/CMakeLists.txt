@@ -17,6 +17,7 @@ set(example_programs
     hello_world
     _tmp_test
     events_and_futures
+    list_devices
 )
 
 foreach(example_program ${example_programs})
