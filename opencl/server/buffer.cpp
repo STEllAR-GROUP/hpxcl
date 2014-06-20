@@ -127,7 +127,7 @@ buffer::read(size_t offset, size_t size,
     cl_event* cl_events_list_ptr = NULL;
     if(!cl_events_list.empty())
     {
-        cl_events_list_ptr = &cl_events_list[0];
+        cl_events_list_ptr = cl_events_list.data();
     }
 
     // Create the buffer
@@ -136,7 +136,7 @@ buffer::read(size_t offset, size_t size,
 
     // Read the buffer
     err = ::clEnqueueReadBuffer(command_queue, device_mem, CL_FALSE, offset,
-                              size, (void*)&(*buffer)[0], (cl_uint)events.size(),
+                              size, (void*)(buffer->data()), (cl_uint)events.size(),
                               cl_events_list_ptr, &returnEvent);
     cl_ensure(err, "clEnqueueReadBuffer()");
 
@@ -171,7 +171,7 @@ buffer::write(size_t offset, hpx::util::serialize_buffer<char> data,
     cl_event* cl_events_list_ptr = NULL;
     if(!cl_events_list.empty())
     {
-        cl_events_list_ptr = &cl_events_list[0];
+        cl_events_list_ptr = cl_events_list.data();
     }
 
     // Write to the buffer
@@ -211,7 +211,7 @@ buffer::fill(hpx::util::serialize_buffer<char> pattern, size_t offset,
     cl_event* cl_events_list_ptr = NULL;
     if(!cl_events_list.empty())
     {
-        cl_events_list_ptr = &cl_events_list[0];
+        cl_events_list_ptr = cl_events_list.data();
     }
 
     // Fill the buffer
@@ -264,7 +264,7 @@ buffer::copy_bruteforce(hpx::naming::id_type & src_buffer,
 
         // write to dst buffer
         err = ::clEnqueueWriteBuffer(command_queue, device_mem, CL_FALSE,
-                                     dst_offset, size, &(*data)[0], 0, NULL,
+                                     dst_offset, size, data->data(), 0, NULL,
                                      &returnEvent);
         cl_ensure(err, "clEnqueueWriteBuffer()");
         
@@ -292,7 +292,7 @@ buffer::copy_local(boost::shared_ptr<hpx::opencl::server::buffer> src,
         cl_event* cl_events_list_ptr = NULL;
         if(!cl_events_list.empty())
         {
-            cl_events_list_ptr = &cl_events_list[0];
+            cl_events_list_ptr = cl_events_list.data();
         }
 
         // create a copy buffer
@@ -307,7 +307,7 @@ buffer::copy_local(boost::shared_ptr<hpx::opencl::server::buffer> src,
         cl_event read_event_;
         err = ::clEnqueueReadBuffer(src_command_queue, src->device_mem,
                                     CL_FALSE, src_offset, size,
-                                    (void*)&(*copy_buffer)[0],
+                                    (void*)(copy_buffer->data()),
                                     (cl_uint)events.size(),
                                     cl_events_list_ptr, &read_event_);
         cl_ensure(err, "clEnqueueReadBuffer()");
@@ -341,7 +341,7 @@ buffer::copy_local(boost::shared_ptr<hpx::opencl::server::buffer> src,
 
         // Write to device
         err = ::clEnqueueWriteBuffer(dst_command_queue, device_mem, CL_FALSE,
-                                     dst_offset, size, &(*copy_buffer)[0], 
+                                     dst_offset, size, copy_buffer->data(), 
                                      1, &write_start_event,
                                      &returnEvent);
         cl_ensure(err, "clEnqueueWriteBuffer()");
@@ -370,7 +370,7 @@ buffer::copy_direct(boost::shared_ptr<hpx::opencl::server::buffer> src,
         cl_event* cl_events_list_ptr = NULL;
         if(!cl_events_list.empty())
         {
-            cl_events_list_ptr = &cl_events_list[0];
+            cl_events_list_ptr = cl_events_list.data();
         }
 
         // get command queue

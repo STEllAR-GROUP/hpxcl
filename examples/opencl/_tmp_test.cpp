@@ -53,7 +53,7 @@ int hpx_main(int argc, char* argv[])
         name = hpx::opencl::device::device_info_to_string(
                     devices[i].get_device_info(CL_DEVICE_VERSION)
                                      );
-        hpx::cout << &name[0] << hpx::endl;
+        hpx::cout << name.data() << hpx::endl;
     }
    
     size_t gpuid;
@@ -64,7 +64,7 @@ int hpx_main(int argc, char* argv[])
 
         #define datasize 10000
         std::vector<char> databuf(datasize);
-        char *datain = &databuf[0];
+        char *datain = databuf.data();
         for(int i = 0; i < datasize; i++)
         {
             datain[i] = i;

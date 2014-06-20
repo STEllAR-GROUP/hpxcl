@@ -22,7 +22,7 @@ static void cl_test(hpx::opencl::device);
 {                                                                              \
     boost::shared_ptr<std::vector<char>> out1 =                                \
                        buffer.enqueue_read(0, DATASIZE).get().get_data().get();\
-    HPX_TEST_EQ(std::string((const char*)(value)), std::string(&(*out1)[0]));  \
+    HPX_TEST_EQ(std::string((const char*)(value)), std::string(out1->data()));  \
 }                                                           
 
 

@@ -31,7 +31,8 @@ class image_generator
         // initializes the image generator
         image_generator(boost::shared_ptr<std::vector<
                           hpx::opencl::device>> devices,
-                        size_t img_size_hint,
+                        size_t img_size_hint_x,
+                        size_t img_size_hint_y,
                         size_t num_parallel_kernels,
                         bool verbose);
 

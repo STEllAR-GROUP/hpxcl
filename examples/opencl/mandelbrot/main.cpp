@@ -99,11 +99,11 @@ int hpx_main(boost::program_options::variables_map & vm)
         //double zoom = 6.2426215349789484160e10;
         ////double zoom = 35.8603219463046942295;
 
-        size_t img_x = 2560;
-        size_t img_y = 1920;
+        size_t img_x = 1920;
+        size_t img_y = 1080;
 
         // create image_generator
-        image_generator img_gen(devices, img_x * 2, num_kernels, verbose);
+        image_generator img_gen(devices, img_x, 4, num_kernels, verbose);
         
         // wait for workers to finish initialization
         if(verbose) hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;

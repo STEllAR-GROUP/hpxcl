@@ -30,7 +30,6 @@
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
     
-    typedef intptr_t clx_device_id;
 
     // /////////////////////////////////////////////////////
     // This class represents an OpenCL accelerator device.
@@ -93,10 +92,14 @@ namespace hpx { namespace opencl{ namespace server{
 
         // returns device specific information
         std::vector<char> get_device_info(cl_device_info info_type);
+        
+        // returns platform specific information
+        std::vector<char> get_platform_info(cl_platform_info info_type);
 
 
     HPX_DEFINE_COMPONENT_ACTION(device, create_user_event);
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_info);
+    HPX_DEFINE_COMPONENT_ACTION(device, get_platform_info);
 
     private:
         ///////////////////////////////////////////////
@@ -169,6 +172,9 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
         hpx::opencl::server::device::get_device_info_action,
         opencl_device_get_device_info_action);
+HPX_REGISTER_ACTION_DECLARATION(
+        hpx::opencl::server::device::get_platform_info_action,
+        opencl_device_get_platform_info_action);
 //]
 
 

@@ -28,6 +28,7 @@ namespace opencl {
     // The OpenCL server namespace
     namespace server {
         
+        typedef intptr_t clx_device_id;
         class device;
         class buffer;
         class kernel;

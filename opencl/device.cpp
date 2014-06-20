@@ -123,6 +123,18 @@ device::get_device_info(cl_device_info info_type) const
 
 }
 
+hpx::lcos::future<std::vector<char>>
+device::get_platform_info(cl_platform_info info_type) const
+{
+
+    BOOST_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::device::get_platform_info_action func;
+
+    return hpx::async<func>(this->get_gid(), info_type);
+
+}
+
 std::string
 device::device_info_to_string(hpx::lcos::future<std::vector<char>> info)
 {

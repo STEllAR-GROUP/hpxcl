@@ -72,8 +72,8 @@ int hpx_main(int argc, char* argv[])
         directcl_shutdown();
 
         // checks for correct result
-        check_for_correct_result(&(*z_directcl)[0], (*z_directcl).size(),
-                                 &z[0], z.size());
+        check_for_correct_result(z_directcl->data(), (*z_directcl).size(),
+                                 z.data(), z.size());
         
         // Prints the benchmark statistics
         hpx::cout << hpx::endl;
@@ -112,9 +112,9 @@ int hpx_main(int argc, char* argv[])
         hpxcl_single_shutdown();
 
         // checks for correct result
-        check_for_correct_result((float*)(&(*z_hpxcl_local)[0]),
+        check_for_correct_result((float*)(z_hpxcl_local->data()),
                                  (*z_hpxcl_local).size()/sizeof(float),
-                                 &z[0], z.size());
+                                 z.data(), z.size());
         
         // Prints the benchmark statistics
         hpx::cout << hpx::endl;
@@ -156,9 +156,9 @@ int hpx_main(int argc, char* argv[])
         hpxcl_single_shutdown();
 
         // checks for correct result
-        check_for_correct_result((float*)(&(*z_hpxcl_remote)[0]),
+        check_for_correct_result((float*)(z_hpxcl_remote->data()),
                                  (*z_hpxcl_remote).size()/sizeof(float),
-                                 &z[0], z.size());
+                                 z.data(), z.size());
         
         // Prints the benchmark statistics
         hpx::cout << hpx::endl;

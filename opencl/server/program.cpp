@@ -219,7 +219,7 @@ program::get_binary()
 
     // get binary code
     std::vector<char> binary(binary_size);
-    char* binary_ptr = &binary[0];//.data();
+    char* binary_ptr = binary.data();
     err = clGetProgramInfo(program_id, CL_PROGRAM_BINARIES,
                             sizeof(unsigned char*),
                             (unsigned char**) &binary_ptr,
