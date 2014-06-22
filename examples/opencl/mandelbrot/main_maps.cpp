@@ -59,8 +59,8 @@ int hpx_main(boost::program_options::variables_map & vm)
         //double zoom = 6.2426215349789484160e10;
         ////double zoom = 35.8603219463046942295;
 
-        size_t tilesize_x = 512;
-        size_t tilesize_y = 512;
+        size_t tilesize_x = 256;
+        size_t tilesize_y = 256;
         size_t lines_per_gpu = 8;
 
         // create image_generator
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
                                 "Usage: " HPX_APPLICATION_STRING " [options]");
     cmdline.add_options()
         ( "num-parallel-kernels"
-        , boost::program_options::value<std::size_t>()->default_value(4)
+        , boost::program_options::value<std::size_t>()->default_value(3)
         , "the number of parallel kernel invocations per gpu") ;
 
     cmdline.add_options()
