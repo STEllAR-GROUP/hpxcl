@@ -13,40 +13,33 @@
 #include <cmath>
 
 image_generator::
-image_generator(std::vector<hpx::opencl::device> & devices,
-                size_t img_size_hint_x,
-                size_t img_size_hint_y,
+image_generator(size_t img_size_hint_x_,
+                size_t img_size_hint_y_,
                 size_t num_parallel_kernels,
-                bool verbose_) : next_image_id(0), verbose(verbose_)
+                bool verbose_,
+                std::vector<hpx::opencl::device> devices)
+                 : next_image_id(0), verbose(verbose_),
+                   img_size_hint_x(img_size_hint_x_),
+                   img_size_hint_y(img_size_hint_y_)
 {
 
     // one retrieve worker for every os thread
     size_t num_retrieve_workers = hpx::get_os_thread_count();
    
     // create workqueue
-    workqueue = boost::shared_ptr<work_queue<
-                        boost::shared_ptr<workload>>>
-                (new work_queue<boost::shared_ptr<workload>>());
+    workqueue = boost::make_shared
+                       <work_queue <boost::shared_ptr <workload> > >();
                                 
     // initialize worker list
-    workers = boost::shared_ptr<std::vector<
-                                boost::shared_ptr<mandelbrotworker>>>
-             (new std::vector<boost::shared_ptr<mandelbrotworker>>());
+    workers = boost::make_shared 
+                       <std::vector <boost::shared_ptr <mandelbrotworker> > >();
 
     // starting workers
     BOOST_FOREACH(hpx::opencl::device & device, devices)
     {
 
-        // create worker
-        boost::shared_ptr<mandelbrotworker> worker(
-            new mandelbrotworker(device,
-                                 workqueue,
-                                 num_parallel_kernels,
-                                 verbose,
-                                 img_size_hint_x * img_size_hint_y));
-
-        // add worker to workerlist
-        workers->push_back(worker);
+        // add a worker
+        add_worker(device, num_parallel_kernels);
 
     }
          
@@ -76,6 +69,25 @@ image_generator::
 
     // wait for work to get finished
     shutdown();
+
+}
+
+void
+image_generator::
+add_worker(hpx::opencl::device & device, size_t num_parallel_kernels)
+{
+
+        // create worker
+        boost::shared_ptr<mandelbrotworker> worker = 
+            boost::make_shared<mandelbrotworker>
+                                (device,
+                                 workqueue,
+                                 num_parallel_kernels,
+                                 verbose,
+                                 img_size_hint_x * img_size_hint_y);
+
+        // add worker to workerlist
+        workers->push_back(worker);
 
 }
 
@@ -316,14 +328,16 @@ compute_image(double posx,
     // create data array to hold finished image, if we are not in benchmark mode
     boost::shared_ptr<std::vector<char>> img_data;
     if(!benchmark)
-    img_data = boost::shared_ptr<std::vector<char>>(
-                new std::vector<char>(img_width * img_height * 3 * sizeof(char)));
+    img_data = boost::make_shared <std::vector <char> >
+                                    (img_width * img_height * 3 * sizeof(char));
 
     // create a new countdown variable
-    boost::shared_ptr<std::atomic_size_t> img_countdown (new std::atomic_size_t(num_tiles_x * num_tiles_y));
+    boost::shared_ptr<std::atomic_size_t> img_countdown = 
+              boost::make_shared<std::atomic_size_t>(num_tiles_x * num_tiles_y);
 
     // create a new ready event lock
-    boost::shared_ptr<hpx::lcos::local::event> img_ready (new hpx::lcos::local::event());
+    boost::shared_ptr<hpx::lcos::local::event> img_ready =
+              boost::make_shared<hpx::lcos::local::event>();
 
     // add the created variables to their lists
     {
@@ -355,19 +369,19 @@ compute_image(double posx,
             double workpacket_pos_x = topleft_x + vert_pixdist_x * y + hor_pixdist_x * x;
             double workpacket_pos_y = topleft_y + vert_pixdist_y * y + hor_pixdist_y * x;
             // add workload
-            boost::shared_ptr<workload> row(
-                   new workload(tile_width,
-                                tile_height,
-                                workpacket_pos_x,
-                                workpacket_pos_y,
-                                hor_pixdist_x, 
-                                hor_pixdist_y,
-                                vert_pixdist_x,
-                                vert_pixdist_y,
-                                img_id,
-                                x,
-                                y,
-                                img_width));
+            boost::shared_ptr<workload> row =
+                       boost::make_shared<workload>(tile_width,
+                                                    tile_height,
+                                                    workpacket_pos_x,
+                                                    workpacket_pos_y,
+                                                    hor_pixdist_x, 
+                                                    hor_pixdist_y,
+                                                    vert_pixdist_x,
+                                                    vert_pixdist_y,
+                                                    img_id,
+                                                    x,
+                                                    y,
+                                                    img_width);
             workqueue->add_work(row);
         }
     }

@@ -23,12 +23,15 @@ int hpx_main(boost::program_options::variables_map & vm)
 
     std::size_t num_kernels = 0;
     bool verbose = false;
+    bool benchmark = false;
 
     // Print help message on wrong argument count
     if (vm.count("num-parallel-kernels"))
         num_kernels = vm["num-parallel-kernels"].as<std::size_t>();
     if (vm.count("v"))
         verbose = true;
+    if (vm.count("bench"))
+        benchmark = true;
 
     // The main scope
     {
@@ -49,51 +52,105 @@ int hpx_main(boost::program_options::variables_map & vm)
         }
 
 
-        double posx = -0.7;
-        double posy = 0.0;
-        double zoom = 1.04;
+        //double posx = -0.7;
+        //double posy = 0.0;
+        //double zoom = 1.04;
         ////double zoom = 0.05658352842407526628;
 
-        //double posx = -0.743643887037151;
-        //double posy = 0.131825904205330;
-        //double zoom = 6.2426215349789484160e10;
-        ////double zoom = 35.8603219463046942295;
+        double posx = -0.743643887037151;
+        double posy = 0.131825904205330;
+        double zoom = 6.2426215349789484160e10;
+        //double zoom = 35.8603219463046942295;
 
-        size_t img_x = 1920;
-        size_t img_y = 1080;
+        size_t img_x = 3840;
+        size_t img_y = 2160;
 
-        // create image_generator
-        image_generator img_gen(devices, img_x, 4, num_kernels, verbose);
+        if(!benchmark)
+        {
+            // create image_generator
+            image_generator img_gen(img_x, 8, num_kernels, verbose, devices);
+            
+            // wait for workers to finish initialization
+            if(verbose) hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
+            img_gen.wait_for_startup_finished();
+    
+            // start timer
+            timer_start();
+    
+            // queue image
+            boost::shared_ptr<std::vector<char>> img_data =
+                img_gen.compute_image(posx,
+                                      posy,
+                                      zoom,
+                                      0.0,
+                                      img_x,
+                                      img_y,
+                                      false,
+                                      img_x,
+                                      4).get();
+            
+            // stop timer
+            double time = timer_stop();
+    
+            hpx::cout << "time: " << time << " ms" << hpx::endl;
+    
+            // end the image generator
+            img_gen.shutdown();
+    
+            // save the png
+            save_png(img_data, img_x, img_y, "test.png");
         
-        // wait for workers to finish initialization
-        if(verbose) hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
-        img_gen.wait_for_startup_finished();
+        } else {
 
-        // start timer
-        timer_start();
+            size_t chunksize = 8;
 
-        // queue image
-        boost::shared_ptr<std::vector<char>> img_data =
-            img_gen.compute_image(posx,
-                                  posy,
-                                  zoom,
-                                  0.0,
-                                  img_x,
-                                  img_y,
-                                  false,
-                                  img_x,
-                                  4).get();
-        
-        // stop timer
-        double time = timer_stop();
+            // create image generator without gpus
+            image_generator img_gen(img_x, chunksize, num_kernels, verbose);
 
-        hpx::cout << "time: " << time << " ms" << hpx::endl;
+            for(size_t num_gpus = 0; num_gpus < devices.size(); num_gpus++)
+            {
+                hpx::cerr << "Starting test with " << num_gpus << " gpus ..."
+                          << hpx::endl;
+               
+                // Add another worker
+                if(verbose){
+                     hpx::cout << "adding worker ..."
+                               << hpx::endl;
+                }
+                img_gen.add_worker(devices[num_gpus], 3); 
 
-        // end the image generator
-        img_gen.shutdown();
+                // Wait for the worker to initialize
+                if(verbose){
+                     hpx::cout << "waiting for worker to finish startup ..."
+                               << hpx::endl;
+                }
+                img_gen.wait_for_startup_finished();
 
-        // save the png
-        save_png(img_data, img_x, img_y, "test.png");
+                // Start timing
+                timer_start();
+
+                // Add image
+                img_gen.compute_image(posx,
+                                      posy,
+                                      zoom,
+                                      0.0,
+                                      img_x,
+                                      img_y,
+                                      true,
+                                      img_x,
+                                      chunksize).get();
+                
+                // stop timer
+                double time = timer_stop();
+                hpx::cerr << "Time: " << time << " ms" << hpx::endl;
+                hpx::cout << num_gpus << "\t" << time << hpx::endl;
+
+            }
+
+            hpx::cerr << "Done." << hpx::endl;
+            img_gen.shutdown();
+
+        }
 
     }
 
@@ -120,6 +177,10 @@ int main(int argc, char* argv[])
     cmdline.add_options()
         ( "v"
         , "verbose output") ;
+
+    cmdline.add_options()
+        ( "bench"
+        , "disables writing to files") ;
 
     return hpx::init(cmdline, argc, argv);
 }

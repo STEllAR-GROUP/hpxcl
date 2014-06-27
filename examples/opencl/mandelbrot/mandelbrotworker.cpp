@@ -23,8 +23,7 @@ mandelbrotworker::mandelbrotworker(hpx::opencl::device device_,
       id(id_counter++),
       device(device_),
       workqueue(workqueue_),
-      worker_initialized(boost::shared_ptr<hpx::lcos::local::event>(
-                                                new hpx::lcos::local::event()))
+      worker_initialized(boost::make_shared<hpx::lcos::local::event>())
 {
 
     // start worker

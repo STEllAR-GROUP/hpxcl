@@ -9,10 +9,13 @@
 #include <hpx/apply.hpp>
 #include <hpx/util/static.hpp>
 
-#include "../../../opencl.hpp"
+#include "../../../../opencl.hpp"
 
-#include "image_generator.hpp"
-#include "maps_webserver.hpp"
+#include "../image_generator.hpp"
+
+#include "requesthandler.hpp"
+#include "webserver.hpp"
+//#include "../maps_webserver.hpp"
 
 
 #include <string>
@@ -49,22 +52,12 @@ int hpx_main(boost::program_options::variables_map & vm)
         }
 
 
-        /*double posx = -0.7;
-        double posy = 0.0;
-        double zoom = 1.04;
-        ////double zoom = 0.05658352842407526628;
-        */
-        //double posx = -0.743643887037151;
-        //double posy = 0.131825904205330;
-        //double zoom = 6.2426215349789484160e10;
-        ////double zoom = 35.8603219463046942295;
-
         size_t tilesize_x = 256;
         size_t tilesize_y = 256;
         size_t lines_per_gpu = 8;
 
         // create image_generator
-        image_generator img_gen(devices, tilesize_x, lines_per_gpu, num_kernels, verbose);
+        image_generator img_gen(tilesize_x, lines_per_gpu, num_kernels, verbose, devices);
         
         // wait for workers to finish initialization
         if(verbose) hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
@@ -72,9 +65,28 @@ int hpx_main(boost::program_options::variables_map & vm)
 
         hpx::cout << "Starting webservers ..." << hpx::endl;
    
-        // Start the webserver
-        run_webserver("8080", &img_gen, tilesize_x, tilesize_y, lines_per_gpu, 8);
+        // generate requesthandler, will order requests and convert coordinates
+        hpx::opencl::examples::mandelbrot::requesthandler requesthandler(
+                                                            &img_gen,
+                                                            tilesize_x,
+                                                            tilesize_y,
+                                                            lines_per_gpu);
 
+        // generate webserver
+        hpx::opencl::examples::mandelbrot::webserver webserver(8080,
+                                                               &requesthandler);
+
+
+        // start the webserver
+        webserver.start();
+
+        while(true)
+        {
+            hpx::this_thread::sleep_for(boost::posix_time::milliseconds(1000));
+        }
+        
+//        webserver.stop();
+        
     }
 
     if(verbose) hpx::cout << "Program finished." << hpx::endl;

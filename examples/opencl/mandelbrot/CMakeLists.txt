@@ -17,9 +17,12 @@ set(sources_main
 )
 
 set(sources_maps
-    mongoose.cpp
-    maps_webserver.cpp
-    main_maps.cpp
+    maps/main_maps.cpp
+    maps/webserver.cpp
+    maps/requesthandler.cpp
+#    main_maps.cpp
+#    mongoose.cpp
+#    maps_webserver.cpp
 )
     
 

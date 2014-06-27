@@ -29,17 +29,22 @@ class image_generator
 
     public:
         // initializes the image generator
-        image_generator(std::vector<hpx::opencl::device> & devices,
-                        size_t img_size_hint_x,
+        image_generator(size_t img_size_hint_x,
                         size_t img_size_hint_y,
                         size_t num_parallel_kernels,
-                        bool verbose);
+                        bool verbose,
+                        std::vector<hpx::opencl::device> devices
+                                = std::vector<hpx::opencl::device>());
 
         // destructor
         ~image_generator();
 
         // waits for the worker to finish
         void shutdown();
+        
+        // adds a worker
+        void add_worker(hpx::opencl::device & device,
+                        size_t num_parallel_kernels);
 
         // waits for the worker to finish initialization
         void wait_for_startup_finished();
@@ -91,6 +96,9 @@ class image_generator
 
         std::atomic_size_t  next_image_id;
         bool verbose;
+
+        size_t img_size_hint_x;
+        size_t img_size_hint_y;
 
 };
 
