@@ -74,17 +74,12 @@ mandelbrotworker::worker_main(
            )
 {
 
-        // de-serialize parent ptr. dirty hack, but allowed as child WILL
-        // be on the same device as parent, and parent will not be 
-        // deallocated before child terminated
-        mandelbrotworker* parent = this;
-
         // setup device memory management.
         // initialize default buffer with size of numpixels * 3 (rgb) * sizeof(double)
         mandelbrotworker_buffermanager buffermanager(
-                                        parent->device,
+                                        device,
                                         workpacket_size_hint * 3 * sizeof(char),
-                                        parent->verbose); 
+                                        verbose); 
 
         // counts how much work has been done
         size_t num_work = 0;
@@ -95,9 +90,9 @@ mandelbrotworker::worker_main(
 
 
         // create input buffer
-        hpx::opencl::buffer input_buffer = parent->device.create_buffer(
-                                                           CL_MEM_READ_ONLY,
-                                                           KERNEL_INPUT_ARGUMENT_COUNT * sizeof(double));
+        hpx::opencl::buffer input_buffer = device.create_buffer(
+                                                     CL_MEM_READ_ONLY,
+                                                     KERNEL_INPUT_ARGUMENT_COUNT * sizeof(double));
     
         // connect buffers to kernel 
         kernel.set_arg(0, output_buffer);
@@ -181,21 +176,18 @@ mandelbrotworker::worker_starter(
            size_t workpacket_size_hint)
 {
 
-    // get parent pointer
-    mandelbrotworker* parent = this;
-
 
     try{
 
-        std::string device_vendor = parent->device.device_info_to_string(
-                                  parent->device.get_device_info(CL_DEVICE_VENDOR));
-        std::string device_name = parent->device.device_info_to_string(
-                                  parent->device.get_device_info(CL_DEVICE_NAME));
-        std::string device_version = parent->device.device_info_to_string(
-                                  parent->device.get_device_info(CL_DEVICE_VERSION));
+        std::string device_vendor = device.device_info_to_string(
+                                    device.get_device_info(CL_DEVICE_VENDOR));
+        std::string device_name = device.device_info_to_string(
+                                  device.get_device_info(CL_DEVICE_NAME));
+        std::string device_version = device.device_info_to_string(
+                                     device.get_device_info(CL_DEVICE_VERSION));
 
         // print device name
-        hpx::cout << "#" << parent->id << ": "
+        hpx::cout << "#" << id << ": "
                   << device_vendor << ": "
                   << device_name << " ("
                   << device_version << ")"
@@ -203,12 +195,12 @@ mandelbrotworker::worker_starter(
     
         // build opencl program
         hpx::opencl::program mandelbrot_program =
-                     parent->device.create_program_with_source(mandelbrot_kernels);
-        if(parent->verbose)
-            hpx::cout << "#" << parent->id << ": " << "compiling" << hpx::endl;
+                     device.create_program_with_source(mandelbrot_kernels);
+        if(verbose)
+            hpx::cout << "#" << id << ": " << "compiling" << hpx::endl;
         mandelbrot_program.build();
-        if(parent->verbose)
-            hpx::cout << "#" << parent->id << ": " << "compiling done." << hpx::endl;
+        if(verbose)
+            hpx::cout << "#" << id << ": " << "compiling done." << hpx::endl;
     
         
         // start workers
@@ -232,12 +224,12 @@ mandelbrotworker::worker_starter(
 
         }
 
-        if(parent->verbose)
-            hpx::cout << "#" << parent->id << ": " << "workers started!" << hpx::endl;
+        if(verbose)
+            hpx::cout << "#" << id << ": " << "workers started!" << hpx::endl;
 
         // trigger event to start main function.
         // needed for accurate time measurement
-        parent->worker_initialized->set();
+        worker_initialized->set();
 
         // wait for workers to finish
         size_t num_work = 0;
@@ -250,9 +242,9 @@ mandelbrotworker::worker_starter(
             num_work += num_work_single;
         }
          
-        if(parent->verbose)
+        if(verbose)
         {
-            hpx::cout << "#" << parent->id << ": " << "workers finished! ("
+            hpx::cout << "#" << id << ": " << "workers finished! ("
                   << num_work << " work packets)" << hpx::endl;
         }
 
@@ -260,7 +252,7 @@ mandelbrotworker::worker_starter(
         
         // write error message. workaround, should not be done like this in 
         // real application
-        hpx::cout << "#" << parent->id << ": " 
+        hpx::cout << "#" << id << ": " 
                   << "ERROR!" << hpx::endl
                   << hpx::get_error_backtrace(e) << hpx::endl
                   << hpx::diagnostic_information(e) << hpx::endl;
