@@ -20,6 +20,7 @@ set(sources_maps
     maps/main_maps.cpp
     maps/webserver.cpp
     maps/requesthandler.cpp
+    maps/maps_image_generator.cpp
 #    main_maps.cpp
 #    mongoose.cpp
 #    maps_webserver.cpp

@@ -11,7 +11,7 @@
 
 #include "../../../../opencl.hpp"
 
-#include "../image_generator.hpp"
+#include "maps_image_generator.hpp"
 
 #include "requesthandler.hpp"
 #include "webserver.hpp"
@@ -56,8 +56,23 @@ int hpx_main(boost::program_options::variables_map & vm)
         size_t tilesize_y = 256;
         size_t lines_per_gpu = 8;
 
+        // generate requesthandler, will order requests and convert coordinates
+        hpx::opencl::examples::mandelbrot::requesthandler requesthandler(
+                                                            tilesize_x,
+                                                            tilesize_y,
+                                                            lines_per_gpu);
+
+   
         // create image_generator
-        image_generator img_gen(tilesize_x, lines_per_gpu, num_kernels, verbose, devices);
+        hpx::opencl::examples::mandelbrot::maps_image_generator
+           img_gen(tilesize_x,
+                   lines_per_gpu,
+                   num_kernels,
+                   verbose,
+                   boost::bind(
+                     &hpx::opencl::examples::mandelbrot::requesthandler::query_request,
+                     &requesthandler),
+                   devices);
         
         // wait for workers to finish initialization
         if(verbose) hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
@@ -65,17 +80,9 @@ int hpx_main(boost::program_options::variables_map & vm)
 
         hpx::cout << "Starting webservers ..." << hpx::endl;
    
-        // generate requesthandler, will order requests and convert coordinates
-        hpx::opencl::examples::mandelbrot::requesthandler requesthandler(
-                                                            &img_gen,
-                                                            tilesize_x,
-                                                            tilesize_y,
-                                                            lines_per_gpu);
-
         // generate webserver
         hpx::opencl::examples::mandelbrot::webserver webserver(8080,
                                                                &requesthandler);
-
 
         // start the webserver
         webserver.start();
@@ -85,7 +92,7 @@ int hpx_main(boost::program_options::variables_map & vm)
             hpx::this_thread::sleep_for(boost::posix_time::milliseconds(1000));
         }
         
-//        webserver.stop();
+        webserver.stop();
         
     }
 

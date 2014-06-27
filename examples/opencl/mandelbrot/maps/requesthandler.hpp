@@ -9,7 +9,8 @@
 #include <hpx/hpx.hpp>
 #include <string>
 
-#include "../image_generator.hpp"
+#include "maps_image_generator.hpp"
+#include "../fifo.hpp"
 
 #include <boost/shared_ptr.hpp>
 
@@ -26,6 +27,11 @@ public:
     long posx;
     long posy;
     std::string user_ip;
+    boost::shared_ptr<std::vector<char>> data;
+    size_t tilesize_x;
+    size_t tilesize_y;
+    size_t lines_per_gpu;
+    size_t img_countdown;
 };
 
 
@@ -34,17 +40,21 @@ class requesthandler
 
 public:
     // constructor
-    requesthandler(image_generator * img_gen_,
-                   size_t tilesize_x_,
+    requesthandler(size_t tilesize_x_,
                    size_t tilesize_y_,
                    size_t lines_per_gpu);
 
     void submit_request(boost::shared_ptr<request> request);
 
-     
+    boost::shared_ptr<request> query_request();     
 
 
-
+private:
+    size_t tilesize_x;
+    size_t tilesize_y;
+    size_t lines_per_gpu;
+    fifo<boost::shared_ptr<request>> new_requests;
+    
 
 };
 
