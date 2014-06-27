@@ -14,21 +14,26 @@
 
 static std::atomic_uint id_counter(0);
 
-mandelbrotworker::mandelbrotworker(hpx::opencl::device device_,
-                                   boost::shared_ptr<work_queue<
-                                       boost::shared_ptr<workload>>> workqueue_,
-                                   size_t num_workers, bool verbose_,
-                                   size_t workpacket_size_hint)
+mandelbrotworker::mandelbrotworker(
+                         hpx::opencl::device device_,
+                         size_t num_workers, 
+                         boost::function<bool(boost::shared_ptr<workload>*)>
+                         request_new_work_,
+                         boost::function<void(boost::shared_ptr<workload> &)>
+                         deliver_done_work_,
+                         bool verbose_,
+                         size_t workpacket_size_hint)
     : verbose(verbose_),
       id(id_counter++),
       device(device_),
-      workqueue(workqueue_),
-      worker_initialized(boost::make_shared<hpx::lcos::local::event>())
+      worker_initialized(boost::make_shared<hpx::lcos::local::event>()),
+      request_new_work(request_new_work_),
+      deliver_done_work(deliver_done_work_)
 {
 
     // start worker
-    worker_finished = hpx::async(&worker_starter,
-                                 (intptr_t) this,
+    worker_finished = hpx::async(&mandelbrotworker::worker_starter,
+                                 this,
                                  num_workers,
                                  workpacket_size_hint); 
 
@@ -47,7 +52,8 @@ mandelbrotworker::join()
 {
 
     // wait for worker to finish
-    worker_finished.get();
+    hpx::shared_future<void> tmp = worker_finished;
+    tmp.wait();
     
 }
 
@@ -63,7 +69,6 @@ mandelbrotworker::wait_for_startup_finished()
 #define KERNEL_INPUT_ARGUMENT_COUNT 6
 size_t
 mandelbrotworker::worker_main(
-                    intptr_t parent_ptr,
                     hpx::opencl::kernel kernel,
                     size_t workpacket_size_hint
            )
@@ -72,7 +77,7 @@ mandelbrotworker::worker_main(
         // de-serialize parent ptr. dirty hack, but allowed as child WILL
         // be on the same device as parent, and parent will not be 
         // deallocated before child terminated
-        mandelbrotworker* parent = (mandelbrotworker*) parent_ptr;
+        mandelbrotworker* parent = this;
 
         // setup device memory management.
         // initialize default buffer with size of numpixels * 3 (rgb) * sizeof(double)
@@ -107,7 +112,7 @@ mandelbrotworker::worker_main(
         dim[0].local_size = 8;
         dim[1].local_size = 8;
 
-        while(parent->workqueue->request(&next_workload))
+        while(request_new_work(&next_workload))
         {
             
             // calculate output buffer size
@@ -159,7 +164,7 @@ mandelbrotworker::worker_main(
             next_workload->pixeldata = readdata;
             
             // return calculated workload to work manager workload
-            parent->workqueue->deliver(next_workload);
+            deliver_done_work(next_workload);
 
             // count number of workloads
             num_work++;
@@ -172,13 +177,12 @@ mandelbrotworker::worker_main(
 
 void
 mandelbrotworker::worker_starter(
-           intptr_t parent_ptr,
            size_t num_workers,
            size_t workpacket_size_hint)
 {
 
     // get parent pointer
-    mandelbrotworker* parent = (mandelbrotworker*) parent_ptr;
+    mandelbrotworker* parent = this;
 
 
     try{
@@ -218,7 +222,10 @@ mandelbrotworker::worker_starter(
 
             // start worker
             hpx::lcos::future<size_t> worker_future = 
-                        hpx::async(&worker_main, parent_ptr, kernel, workpacket_size_hint);
+                                      hpx::async(&mandelbrotworker::worker_main,
+                                                 this,
+                                                 kernel,
+                                                 workpacket_size_hint);
 
             // add worker to workerlist
             worker_futures.push_back(std::move(worker_future));

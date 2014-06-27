@@ -77,12 +77,26 @@ image_generator::
 add_worker(hpx::opencl::device & device, size_t num_parallel_kernels)
 {
 
+        // create request callback function for worker
+        boost::function<bool(boost::shared_ptr<workload>*)> request_new_work = 
+               boost::bind(&work_queue<boost::shared_ptr<workload>>::request,
+                           &(*workqueue),
+                           _1); 
+
+        // create deliver callback function for worker
+        boost::function<void(boost::shared_ptr<workload>&)> deliver_done_work = 
+               boost::bind(&work_queue<boost::shared_ptr<workload>>::deliver,
+                           &(*workqueue),
+                           _1); 
+
+
         // create worker
         boost::shared_ptr<mandelbrotworker> worker = 
             boost::make_shared<mandelbrotworker>
                                 (device,
-                                 workqueue,
                                  num_parallel_kernels,
+                                 request_new_work,
+                                 deliver_done_work,
                                  verbose,
                                  img_size_hint_x * img_size_hint_y);
 
