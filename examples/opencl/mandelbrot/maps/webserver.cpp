@@ -7,6 +7,7 @@
 
 #include <hpx/include/runtime.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <sstream>
 
@@ -52,6 +53,12 @@ struct registration_wrapper
 }; 
 
 void
+webserver::dont_close_socket(boost::shared_ptr<std::vector<char>> keepalive_data)
+{
+
+}
+
+void
 webserver::close_socket(boost::shared_ptr<tcp::socket> socket)
 {
 
@@ -73,7 +80,7 @@ webserver::send_server_error_and_close(boost::shared_ptr<tcp::socket> socket)
 {
 
     std::string response(
-        "HTTP/1.0 500 Server Error\r\n"
+        "HTTP/1.1 500 Server Error\r\n"
         "Connection: Close\r\n"
         "\r\n");
 
@@ -90,7 +97,7 @@ webserver::send_not_found_and_close(boost::shared_ptr<tcp::socket> socket)
 {
 
     std::string response(
-        "HTTP/1.0 404 Not Found\r\n"
+        "HTTP/1.1 404 Not Found\r\n"
         "Connection: Close\r\n"
         "\r\n");
 
@@ -107,7 +114,7 @@ webserver::send_bad_request_and_close(boost::shared_ptr<tcp::socket> socket)
 {
 
     std::string response(
-        "HTTP/1.0 400 Bad Request\r\n"
+        "HTTP/1.1 400 Bad Request\r\n"
         "Connection: Close\r\n"
         "\r\n");
 
@@ -163,9 +170,9 @@ webserver::read_filename_from_request(std::string line)
 }
 
 void
-webserver::send_data_and_close(boost::shared_ptr<tcp::socket> socket,
-                               const char* content_type,
-                               boost::shared_ptr<std::vector<char>> data)
+webserver::send_data(boost::shared_ptr<tcp::socket> socket,
+                     const char* content_type,
+                     boost::shared_ptr<std::vector<char>> data)
 {
     
     // generate header
@@ -173,34 +180,44 @@ webserver::send_data_and_close(boost::shared_ptr<tcp::socket> socket,
     ss << "HTTP/1.1 200 OK\r\n"                                        
        << "Content-Type: " << content_type << "\r\n"                 
        << "Content-Length: " << data->size() << "\r\n"                                      
-       << "Connection: Close\r\n" 
+       << "Connection: Keep-Alive\r\n" 
        << "\r\n";
     std::string header = ss.str();
     
     // generate footer
     std::string footer("\r\n\r\n");
 
+    // generate 100 continue string
+    std::string continue_msg("HTTP/1.1 100 Continue\r\n\r\n");
+
     // put everything in buffers
     std::vector<boost::asio::const_buffer> buffers;
     buffers.push_back( boost::asio::buffer(header) );
     buffers.push_back( boost::asio::buffer(data->data(), data->size()) );
     buffers.push_back( boost::asio::buffer(footer) );
+    buffers.push_back( boost::asio::buffer(continue_msg) );
 
     boost::asio::async_write( *socket,
                               buffers,
-                              strand.wrap(boost::bind(&webserver::close_socket,
-                                                      this,
-                                                      socket,
-                                                      data)));
+                              strand.wrap(boost::bind(
+                                            &webserver::dont_close_socket,
+                                            this,
+                                            data)));
 
 }
 
+// dummy callback for async call
+static void
+do_nothing()
+{
+    
+}
 
 void
-webserver::send_data_and_close(boost::shared_ptr<tcp::socket> socket,
-                               const char* content_type,
-                               const char* data,
-                               size_t data_size)
+webserver::send_data(boost::shared_ptr<tcp::socket> socket,
+                     const char* content_type,
+                     const char* data,
+                     size_t data_size)
 {
     
     // generate header
@@ -208,12 +225,15 @@ webserver::send_data_and_close(boost::shared_ptr<tcp::socket> socket,
     ss << "HTTP/1.1 200 OK\r\n"                                        
        << "Content-Type: " << content_type << "\r\n"                 
        << "Content-Length: " << data_size << "\r\n"                                      
-       << "Connection: Close\r\n" 
+       << "Connection: Keep-Alive\r\n" 
        << "\r\n";
     std::string header = ss.str();
     
     // generate footer
     std::string footer("\r\n\r\n");
+
+    // generate 100 continue string
+    std::string continue_msg("HTTP/1.1 100 Continue\r\n\r\n");
 
     // put everything in buffers
     std::vector<boost::asio::const_buffer> buffers;
@@ -223,9 +243,7 @@ webserver::send_data_and_close(boost::shared_ptr<tcp::socket> socket,
 
     boost::asio::async_write( *socket,
                               buffers,
-                              strand.wrap(boost::bind(&webserver::close_socket,
-                                                      this,
-                                                      socket)));
+                              boost::bind(&do_nothing));
 
 }
 
@@ -291,21 +309,21 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
                            std::string filename)
 {
 
-    //std::cout << "process_request: " << filename << std::endl;
+    std::cout << "process_request: " << filename << std::endl;
 
     // send main website if requested
     if(filename == "/")
     {
-        send_data_and_close(socket, "text/html; charset=utf-8",
-                            mandelbrot_html, mandelbrot_html_len); 
+        send_data(socket, "text/html; charset=utf-8",
+                  mandelbrot_html, mandelbrot_html_len); 
         return;
     }
 
     // send favicon if requested
     if(filename == "/favicon.ico")
     {
-        send_data_and_close(socket, "image/x-icon",
-                            (const char*)mandelbrot_ico, mandelbrot_ico_len);
+        send_data(socket, "image/x-icon",
+                  (const char*)mandelbrot_ico, mandelbrot_ico_len);
         return;
     }
 
@@ -351,7 +369,7 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
 
     // set done callback
     img_request->done = strand.wrap(boost::bind(
-                                        &webserver::send_data_and_close,
+                                        &webserver::send_data,
                                         this,
                                         socket,
                                         "image/png",
@@ -361,6 +379,7 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
     req_handler->submit_request(img_request);
 
 }
+
 
 bool
 webserver::is_socket_still_connected(boost::shared_ptr<tcp::socket> socket)

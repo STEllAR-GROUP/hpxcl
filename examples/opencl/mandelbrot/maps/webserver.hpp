@@ -66,6 +66,9 @@ private:
     void close_socket(boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
                       boost::shared_ptr<std::vector<char>> data);
 
+    // keeps data alive until the write finishes
+    void dont_close_socket(boost::shared_ptr<std::vector<char>> data);
+
     // sends '500 Server Error' and closes the socket
     void send_server_error_and_close(
                         boost::shared_ptr<boost::asio::ip::tcp::socket> socket);
@@ -87,15 +90,14 @@ private:
     void process_request(boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
                          std::string filename);
 
-    // sends data to the client and closes the socket
-    void send_data_and_close(
-                         boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
-                         const char* content_type,
-                         const char* data,
-                         size_t data_size);
+    // sends data to the client and sends '100 Continue'
+    void send_data(boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
+                   const char* content_type,
+                   const char* data,
+                   size_t data_size);
     
-    // sends data to the client and closes the socket
-    void send_data_and_close(
+    // sends data to the client and sends '100 Continue'
+    void send_data(
                          boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
                          const char* content_type,
                          boost::shared_ptr<std::vector<char>> data);

@@ -22,11 +22,18 @@ void
 requesthandler::submit_request(boost::shared_ptr<request> request)
 {
  
-    std::cout << "Request from " << request->user_ip
-              << ": " << request->zoom 
-              << " - (" << request->posx
-              << "," << request->posy
-              << ")" << std::endl; 
+    if(request->stillValid()) 
+    {
+        std::cout << "Request from " << request->user_ip
+                  << ": " << request->zoom 
+                  << " - (" << request->posx
+                  << "," << request->posy
+                  << ")" << std::endl; 
+    }
+    else
+    {
+        request->abort();
+    }
 
     boost::shared_ptr<std::vector<char>> res = 
                             boost::make_shared<std::vector<char>>();
