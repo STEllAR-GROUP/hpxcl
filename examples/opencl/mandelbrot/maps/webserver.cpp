@@ -17,6 +17,10 @@
 using namespace hpx::opencl::examples::mandelbrot;
 using boost::asio::ip::tcp;
 
+static size_t num_requests = 0;
+static size_t num_answers = 0;
+static size_t num_aborted = 0;
+
 webserver::webserver(unsigned short port, requesthandler * req_handler_) :
           req_handler(req_handler_),
           io_service(),
@@ -55,7 +59,10 @@ struct registration_wrapper
 void
 webserver::dont_close_socket(boost::shared_ptr<std::vector<char>> keepalive_data)
 {
-
+    std::cout << "Packets: " << num_answers << "/" << num_aborted
+              << "/" << num_requests << " - "
+              << (num_requests - num_answers - num_aborted) << " lost"
+              << std::endl;
 }
 
 void
@@ -80,9 +87,10 @@ webserver::send_server_error_and_close(boost::shared_ptr<tcp::socket> socket)
 {
 
     //std::cout << "aborted" << std::endl;
+    num_aborted ++;
 
     std::string response(
-        "HTTP/1.1 500 Server Error\r\n"
+        "HTTP/1.0 500 Server Error\r\n"
         "Connection: Close\r\n"
         "\r\n");
 
@@ -99,7 +107,7 @@ webserver::send_not_found_and_close(boost::shared_ptr<tcp::socket> socket)
 {
 
     std::string response(
-        "HTTP/1.1 404 Not Found\r\n"
+        "HTTP/1.0 404 Not Found\r\n"
         "Connection: Close\r\n"
         "\r\n");
 
@@ -116,7 +124,7 @@ webserver::send_bad_request_and_close(boost::shared_ptr<tcp::socket> socket)
 {
 
     std::string response(
-        "HTTP/1.1 400 Bad Request\r\n"
+        "HTTP/1.0 400 Bad Request\r\n"
         "Connection: Close\r\n"
         "\r\n");
 
@@ -177,12 +185,15 @@ webserver::send_data(boost::shared_ptr<tcp::socket> socket,
                      boost::shared_ptr<std::vector<char>> data)
 {
     
+    num_answers ++;
+
     // generate header
     std::stringstream ss;
-    ss << "HTTP/1.1 200 OK\r\n"                                        
+    ss << "HTTP/1.0 200 OK\r\n"                                        
        << "Content-Type: " << content_type << "\r\n"                 
        << "Content-Length: " << data->size() << "\r\n"                                      
        << "Connection: Keep-Alive\r\n" 
+       //<< "Connection: Close\r\n" 
        << "\r\n";
     std::string header = ss.str();
     
@@ -190,14 +201,14 @@ webserver::send_data(boost::shared_ptr<tcp::socket> socket,
     std::string footer("\r\n\r\n");
 
     // generate 100 continue string
-    std::string continue_msg("HTTP/1.1 100 Continue\r\n\r\n");
+    std::string continue_msg("HTTP/1.0 100 Continue\r\n\r\n");
 
     // put everything in buffers
     std::vector<boost::asio::const_buffer> buffers;
     buffers.push_back( boost::asio::buffer(header) );
     buffers.push_back( boost::asio::buffer(data->data(), data->size()) );
     buffers.push_back( boost::asio::buffer(footer) );
-    buffers.push_back( boost::asio::buffer(continue_msg) );
+//    buffers.push_back( boost::asio::buffer(continue_msg) );
 
     boost::asio::async_write( *socket,
                               buffers,
@@ -224,10 +235,11 @@ webserver::send_data(boost::shared_ptr<tcp::socket> socket,
     
     // generate header
     std::stringstream ss;
-    ss << "HTTP/1.1 200 OK\r\n"                                        
+    ss << "HTTP/1.0 200 OK\r\n"                                        
        << "Content-Type: " << content_type << "\r\n"                 
        << "Content-Length: " << data_size << "\r\n"                                      
        << "Connection: Keep-Alive\r\n" 
+//       << "Connection: Close\r\n" 
        << "\r\n";
     std::string header = ss.str();
     
@@ -235,7 +247,7 @@ webserver::send_data(boost::shared_ptr<tcp::socket> socket,
     std::string footer("\r\n\r\n");
 
     // generate 100 continue string
-    std::string continue_msg("HTTP/1.1 100 Continue\r\n\r\n");
+    std::string continue_msg("HTTP/1.0 100 Continue\r\n\r\n");
 
     // put everything in buffers
     std::vector<boost::asio::const_buffer> buffers;
@@ -377,6 +389,7 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
                                         "image/png",
                                         _1));
 
+    num_requests ++;
     // submit the request
     req_handler->submit_request(img_request);
 

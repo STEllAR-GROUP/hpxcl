@@ -11,6 +11,7 @@
 
 #include "maps_image_generator.hpp"
 #include "../fifo.hpp"
+#include <atomic>
 
 #include <boost/shared_ptr.hpp>
 
@@ -31,7 +32,7 @@ public:
     size_t tilesize_x;
     size_t tilesize_y;
     size_t lines_per_gpu;
-    size_t img_countdown;
+    std::atomic_size_t img_countdown;
 };
 
 

@@ -54,7 +54,7 @@ int hpx_main(boost::program_options::variables_map & vm)
 
         size_t tilesize_x = 256;
         size_t tilesize_y = 256;
-        size_t lines_per_gpu = 8;
+        size_t lines_per_gpu = 16;
 
         // generate requesthandler, will order requests and convert coordinates
         hpx::opencl::examples::mandelbrot::requesthandler requesthandler(

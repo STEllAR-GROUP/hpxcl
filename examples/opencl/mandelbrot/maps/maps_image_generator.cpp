@@ -498,7 +498,9 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
     
                 // send data
                 img_request->done(img_request->data);
-            }                
+            } else {
+                img_request->abort();   
+            }
 
             // lock the data lists
             boost::lock_guard<hpx::lcos::local::spinlock>
@@ -511,6 +513,7 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
             if(img_it != parent->images.end())
                 parent->images.erase(img_it);
 
+            std::cout << "Left in map: " << parent->images.size() << std::endl;
         }
 
     }
