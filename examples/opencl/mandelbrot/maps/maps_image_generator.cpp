@@ -241,7 +241,8 @@ add_worker(hpx::opencl::device & device, size_t num_parallel_kernels)
                                  request_new_work,
                                  deliver_done_work,
                                  verbose,
-                                 img_size_hint_x * img_size_hint_y);
+                                 img_size_hint_x,
+                                 img_size_hint_y);
 
         // add worker to workerlist
         workers.push_back(worker);

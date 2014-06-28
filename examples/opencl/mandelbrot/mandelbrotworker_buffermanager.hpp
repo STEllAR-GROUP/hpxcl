@@ -22,7 +22,8 @@ class mandelbrotworker_buffermanager
         // initializes the buffermanager
         mandelbrotworker_buffermanager(hpx::opencl::device device_,
                                        size_t initial_buffer_size,
-                                       bool verbose);
+                                       bool verbose,
+                                       cl_mem_flags memflags);
 
         // get a buffer
         hpx::opencl::buffer
@@ -39,6 +40,7 @@ class mandelbrotworker_buffermanager
         typedef std::map<size_t, hpx::opencl::buffer> buffer_map_type;
         buffer_map_type buffers;
         bool verbose;
+        cl_mem_flags memflags;
 };
 
 #endif

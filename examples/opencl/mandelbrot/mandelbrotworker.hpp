@@ -33,7 +33,9 @@ class mandelbrotworker
                          request_new_work,
                          boost::function<void(boost::shared_ptr<workload>&)>
                          deliver_done_work,
-                         bool verbose, size_t workpacket_size_hint);
+                         bool verbose,
+                         size_t workpacket_size_hint_x,
+                         size_t workpacket_size_hint_y);
 
         // waits for the worker to finish
         void join();
@@ -47,13 +49,17 @@ class mandelbrotworker
     private:
         // the main worker function, runs the main work loop
         size_t worker_main(
+           hpx::opencl::kernel precalc_kernel,
            hpx::opencl::kernel kernel,
-           size_t workpacket_size_hint);
+           size_t workpacket_size_hint_x,
+           size_t workpacket_size_hint_y
+           );
 
         // the startup function, initializes the kernel and starts the workers
         void worker_starter(
            size_t num_workers,
-           size_t workpacket_size_hint
+           size_t workpacket_size_hint_x,
+           size_t workpacket_size_hint_y
            );
 
     // private attributes

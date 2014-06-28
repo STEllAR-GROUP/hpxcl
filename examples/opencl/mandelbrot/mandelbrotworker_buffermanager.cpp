@@ -9,8 +9,9 @@
 mandelbrotworker_buffermanager::
 mandelbrotworker_buffermanager(hpx::opencl::device device_,
                                size_t initial_buffer_size,
-                               bool verbose_) 
-                : device(device_), verbose(verbose_)
+                               bool verbose_,
+                               cl_mem_flags memflags_) 
+                : device(device_), verbose(verbose_), memflags(memflags_)
 {
 
     // allocate the initial buffer, to improve runtime speed
@@ -56,7 +57,7 @@ allocate_buffer(size_t size)
     
     // allocate a buffer
     hpx::opencl::buffer new_buffer =
-                            device.create_buffer(CL_MEM_WRITE_ONLY, size);
+                            device.create_buffer(memflags, size);
     
     // add the buffer to the map
     buffers.insert( std::pair<size_t, hpx::opencl::buffer>(size, new_buffer) );
