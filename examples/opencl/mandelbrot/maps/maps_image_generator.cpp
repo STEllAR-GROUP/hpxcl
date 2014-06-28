@@ -339,21 +339,21 @@ get_new_image()
 
     // calculate horizontal stepwidth
     double rotation = 0.0;
-    double hor_pixdist_nonrot = size_x / (img_width - 1);
+    double hor_pixdist_nonrot = size_x / img_width;
     current_hor_pixdist_x = cos(rotation) * hor_pixdist_nonrot;
     current_hor_pixdist_y = sin(rotation) * hor_pixdist_nonrot;
 
     // calculate vertical stepwidth
-    double vert_pixdist_nonrot = - size_y / (img_height - 1);
+    double vert_pixdist_nonrot = - size_y / img_height;
     current_vert_pixdist_x = - sin(rotation) * vert_pixdist_nonrot;
     current_vert_pixdist_y = cos(rotation) * vert_pixdist_nonrot;
 
 
     // calculate top left coords
-    current_topleft_x = posx - current_hor_pixdist_x * ( img_width / 2.0 + 0.5 ) 
-                          - current_vert_pixdist_x * ( img_height / 2.0 + 0.5 );
-    current_topleft_y = posy - current_hor_pixdist_y * ( img_width / 2.0 + 0.5 ) 
-                          - current_vert_pixdist_y * ( img_height / 2.0 + 0.5 );
+    current_topleft_x = posx - current_hor_pixdist_x * ( img_width / 2.0 - 0.5 ) 
+                          - current_vert_pixdist_x * ( img_height / 2.0 - 0.5 );
+    current_topleft_y = posy - current_hor_pixdist_y * ( img_width / 2.0 - 0.5 ) 
+                          - current_vert_pixdist_y * ( img_height / 2.0 - 0.5 );
 
 
     // signal waiting threads
