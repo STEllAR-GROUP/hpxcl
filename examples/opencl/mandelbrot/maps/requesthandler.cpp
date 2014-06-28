@@ -24,35 +24,20 @@ void
 requesthandler::submit_request(boost::shared_ptr<request> request)
 {
  
-    std::cout << "Checking for request still valid ..." << std::endl;
-
+    // Check if still valid
     if(!request->stillValid())
     {
-
         request->abort();
         return;
-
     }
 
-    std::cout << "Request from " << request->user_ip
-                  << ": " << request->zoom 
-                  << " - (" << request->posx
-                  << "," << request->posy
-                  << ")" << std::endl; 
-
-    boost::shared_ptr<std::vector<char>> res = 
-                            boost::make_shared<std::vector<char>>();
-/*
-    res->push_back('A');
-    res->push_back('B');
-    res->push_back('C');
-    res->push_back('\n');
-
-    request->done(res);
-
-//    request->abort();
-*/
-
+    // add missing data in request
+    request->tilesize_x = tilesize_x;
+    request->tilesize_y = tilesize_y;
+    request->lines_per_gpu = lines_per_gpu;
+    request->img_countdown = tilesize_y/lines_per_gpu;
+      
+    // hand the request to an hpx thread    
     new_requests.push(request);
     
 }
@@ -64,17 +49,16 @@ requesthandler::query_request()
     boost::shared_ptr<request> ret;
 
     // take a new request out of the queue
-    if(new_requests.pop(&ret))
+    while(true)
     {
-        ret->tilesize_x = tilesize_x;
-        ret->tilesize_y = tilesize_y;
-        ret->lines_per_gpu = lines_per_gpu;
-        ret->img_countdown = tilesize_y/lines_per_gpu;
-        return ret;
+        if(!new_requests.pop(&ret))
+            return boost::shared_ptr<request>(); 
+        if(ret->stillValid())
+        {
+            return ret;
+        }
+        ret->abort();
     }
-    else
-        // if queue ended, return an empty request to signal shutdown
-        return boost::shared_ptr<request>();
 
 }
 

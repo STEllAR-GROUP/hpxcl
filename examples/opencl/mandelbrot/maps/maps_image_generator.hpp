@@ -75,6 +75,10 @@ class maps_image_generator
         // asynchroneously starts get_new_image().
         void start_getting_new_image();
 
+        // tests the current request, if it's invalid it deletes it and queries
+        // a new image
+        void dispose_current_request_if_invalid();
+
     // private attributes
     private:
         // for synchronization of workers and retrievers
@@ -104,6 +108,12 @@ class maps_image_generator
         hpx::lcos::local::condition_variable new_request_available;
         size_t current_request_id;
         size_t current_img_pos;
+        double current_topleft_x;
+        double current_topleft_y;
+        double current_vert_pixdist_x;
+        double current_vert_pixdist_y;
+        double current_hor_pixdist_x;
+        double current_hor_pixdist_y;
 
         volatile bool shutdown_requested;
 

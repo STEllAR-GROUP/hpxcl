@@ -76,6 +76,36 @@ maps_image_generator::
 
 }
 
+// current_request_lock must be locked BEFORE entering this function!
+void 
+maps_image_generator::
+dispose_current_request_if_invalid()
+{
+
+    if(current_request)
+    {
+        if(!current_request->stillValid())
+        {
+            current_request->abort();
+            
+            {                                           
+                // lock the data list
+                boost::lock_guard<hpx::lcos::local::spinlock>
+                lock2(images_lock);
+        
+                // insert new request to images list
+                images.erase(current_request_id);
+            }
+    
+            current_request = boost::shared_ptr<request>();
+    
+            start_getting_new_image();
+        }
+    }
+
+
+}
+
 bool
 maps_image_generator::
 worker_request_new_work(boost::shared_ptr<workload>* new_work)
@@ -87,41 +117,61 @@ worker_request_new_work(boost::shared_ptr<workload>* new_work)
 
     if(shutdown_requested) return false;
 
+    if(verbose) hpx::cout << "started new work request" << hpx::endl;
+
+    // test if current request is still valid
+    dispose_current_request_if_invalid();
+
     // wait for new request if necessary
     while(!current_request)
     {
 
-       new_request_available.wait(current_request_lock); 
-       if(shutdown_requested) return false;
+        if(verbose) hpx::cout << "no new work. waiting ..." << hpx::endl;
         
+        new_request_available.wait(current_request_lock); 
+        if(shutdown_requested) return false;
+        
+        dispose_current_request_if_invalid();
+        if(verbose) hpx::cout << "new work! trying again ..." << hpx::endl;
     }
+
+    if(verbose) hpx::cout << "new work aquired. calculating new workload ..." << hpx::endl;
+
+    // calculate current coords
+    double workpacket_pos_x = current_topleft_x 
+                              + current_vert_pixdist_x * current_img_pos * 
+                              current_request->lines_per_gpu;
+    double workpacket_pos_y = current_topleft_y 
+                              + current_vert_pixdist_y * current_img_pos * 
+                              current_request->lines_per_gpu;
 
     // TODO calculate new workload
     *new_work = boost::make_shared<workload>(
                             current_request->tilesize_x,
                             current_request->lines_per_gpu,
-                            -2,
-                            1,
-                            0.005,
-                            0.0,
-                            0.0,
-                            -0.005,
+                            workpacket_pos_x,
+                            workpacket_pos_y,
+                            current_hor_pixdist_x,
+                            current_hor_pixdist_y,
+                            current_vert_pixdist_x,
+                            current_vert_pixdist_y,
                             current_request_id,
                             0,
                             current_img_pos*current_request->lines_per_gpu,
                             current_request->tilesize_x);
-
-
+    
     // set the next position in image
     current_img_pos++;
 
     // delete workload if we are the last bit
     if(current_img_pos * current_request->lines_per_gpu >=
                                                     current_request->tilesize_y)
+    {
         current_request = boost::shared_ptr<request>();
 
-    // fetch new image
-    start_getting_new_image();
+        // fetch new image
+        start_getting_new_image();
+    }
 
     return true;
 
@@ -158,7 +208,10 @@ maps_image_generator::
 worker_deliver(boost::shared_ptr<workload>& done_work)
 {
 
+    
+    if(verbose) hpx::cout << "got delivery from worker." << hpx::endl;
     done_work_queue.push(done_work);
+    if(verbose) hpx::cout << "finished delivery from worker." << hpx::endl;
 
 }
 
@@ -174,7 +227,7 @@ add_worker(hpx::opencl::device & device, size_t num_parallel_kernels)
                            _1); 
 
         // create deliver callback function for worker
-        boost::function<void(boost::shared_ptr<workload>&)> deliver_done_work;// = 
+        boost::function<void(boost::shared_ptr<workload>&)> deliver_done_work = 
                boost::bind(&maps_image_generator::worker_deliver,
                            this,
                            _1); 
@@ -213,6 +266,14 @@ get_new_image()
 
     // shutdown if acquire_new_request returned an invalid value
     if(!new_request) return false;
+    
+    // if image is already dead, abort image and query another one
+    if(!new_request->stillValid())
+    {
+        new_request->abort();
+        start_getting_new_image();
+        return true;
+    }
 
     // allocate image data
     new_request->data = boost::make_shared<std::vector<char>>(
@@ -241,9 +302,65 @@ get_new_image()
 
     // set current image position
     current_img_pos = 0;
+    
+    ///////////////////////////////////////////////
+    // map raw values to double values 
+
+    // calculate actual zoom
+    double zoom = exp2((double)new_request->zoom);
+
+    // calculate sidelength
+    double sqrt_2 = sqrt(2.0);
+    double tilesidelength = (4.0/sqrt_2) / zoom;
+
+    // calculate actual positions
+    double bound = exp2(new_request->zoom);
+    double posx = (new_request->posx - bound/2.0 + 0.5) * tilesidelength;
+    double posy = -(new_request->posy - bound/2.0 + 0.5) * tilesidelength;
+
+    ///////////////////////////////////////////
+    // calculate image coords
+
+    size_t img_width = new_request->tilesize_x;
+    size_t img_height = new_request->tilesize_y;
+
+    // calculate aspect ratio
+    double aspect_ratio = (double) img_width 
+                            / (double) img_height;
+
+    // calculate size of diagonale
+    //double size_diag = exp2(-zoom) * 4.0;
+    double size_diag = 4.0 / zoom;
+    
+    // calculate width and height
+    double size_y = size_diag / sqrt( 1 + aspect_ratio * aspect_ratio );
+    double size_x = aspect_ratio * size_y;
+
+    // calculate horizontal stepwidth
+    double rotation = 0.0;
+    double hor_pixdist_nonrot = size_x / (img_width - 1);
+    current_hor_pixdist_x = cos(rotation) * hor_pixdist_nonrot;
+    current_hor_pixdist_y = sin(rotation) * hor_pixdist_nonrot;
+
+    // calculate vertical stepwidth
+    double vert_pixdist_nonrot = - size_y / (img_height - 1);
+    current_vert_pixdist_x = - sin(rotation) * vert_pixdist_nonrot;
+    current_vert_pixdist_y = cos(rotation) * vert_pixdist_nonrot;
+
+
+    // calculate top left coords
+    current_topleft_x = posx - current_hor_pixdist_x * ( img_width / 2.0 + 0.5 ) 
+                          - current_vert_pixdist_x * ( img_height / 2.0 + 0.5 );
+    current_topleft_y = posy - current_hor_pixdist_y * ( img_width / 2.0 + 0.5 ) 
+                          - current_vert_pixdist_y * ( img_height / 2.0 + 0.5 );
+
 
     // signal waiting threads
     new_request_available.notify_all();
+    
+    std::cout << "Started working on " << current_request->zoom
+              << " - (" << posx << ", " << posy << ")" << std::endl;
+
 
     return true;
 

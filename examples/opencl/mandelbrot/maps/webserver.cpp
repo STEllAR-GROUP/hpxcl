@@ -79,6 +79,8 @@ void
 webserver::send_server_error_and_close(boost::shared_ptr<tcp::socket> socket)
 {
 
+    //std::cout << "aborted" << std::endl;
+
     std::string response(
         "HTTP/1.1 500 Server Error\r\n"
         "Connection: Close\r\n"
@@ -309,7 +311,7 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
                            std::string filename)
 {
 
-    std::cout << "process_request: " << filename << std::endl;
+    //std::cout << "process_request: " << filename << std::endl;
 
     // send main website if requested
     if(filename == "/")
