@@ -514,7 +514,6 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
             if(img_it != parent->images.end())
                 parent->images.erase(img_it);
 
-            std::cout << "Left in map: " << parent->images.size() << std::endl;
         }
 
     }

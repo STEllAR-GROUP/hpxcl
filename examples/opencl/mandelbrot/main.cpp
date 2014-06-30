@@ -102,26 +102,27 @@ int hpx_main(boost::program_options::variables_map & vm)
         
         } else {
 
+            std::cerr << "Starting in benchmark mode." << std::endl;
             size_t chunksize = 8;
 
             // create image generator without gpus
             image_generator img_gen(img_x, chunksize, num_kernels, verbose);
 
-            for(size_t num_gpus = 0; num_gpus < devices.size(); num_gpus++)
+            for(size_t num_gpus = 1; num_gpus <= devices.size(); num_gpus++)
             {
-                hpx::cerr << "Starting test with " << num_gpus << " gpus ..."
-                          << hpx::endl;
+                std::cerr << "Starting test with " << num_gpus << " gpus ..."
+                          << std::endl;
                
                 // Add another worker
                 if(verbose){
-                     hpx::cout << "adding worker ..."
+                     hpx::cerr << "adding worker ..."
                                << hpx::endl;
                 }
-                img_gen.add_worker(devices[num_gpus], 3); 
+                img_gen.add_worker(devices[num_gpus - 1], 3); 
 
                 // Wait for the worker to initialize
                 if(verbose){
-                     hpx::cout << "waiting for worker to finish startup ..."
+                     hpx::cerr << "waiting for worker to finish startup ..."
                                << hpx::endl;
                 }
                 img_gen.wait_for_startup_finished();
@@ -142,12 +143,12 @@ int hpx_main(boost::program_options::variables_map & vm)
                 
                 // stop timer
                 double time = timer_stop();
-                hpx::cerr << "Time: " << time << " ms" << hpx::endl;
+                std::cerr << "Time: " << time << " ms" << hpx::endl;
                 hpx::cout << num_gpus << "\t" << time << hpx::endl;
 
             }
 
-            hpx::cerr << "Done." << hpx::endl;
+            std::cerr << "Done." << hpx::endl;
             img_gen.shutdown();
 
         }
