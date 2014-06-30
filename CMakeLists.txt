@@ -45,8 +45,8 @@ hpx_option(HPXCL_WITH_CUDA BOOL "Builds the CUDA part of HPXCL (default OFF)." O
 # 
 if(HPXCL_WITH_OPENCL)
     find_package(HPX_OpenCL REQUIRED)
-    include_directories(${OpenCL_INCLUDE_DIR})
-    link_directories(${OpenCL_LIBRARY_DIR})
+    include_directories(${OPENCL_INCLUDE_DIRS})
+    link_directories(${OPENCL_LIBRARIES})
 endif()
 
 if(HPXCL_WITH_CUDA)
