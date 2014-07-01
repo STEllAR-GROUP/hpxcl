@@ -32,7 +32,7 @@ public:
     size_t tilesize_x;
     size_t tilesize_y;
     size_t lines_per_gpu;
-    std::atomic_size_t img_countdown;
+    std::atomic<size_t> img_countdown;
 };
 
 

@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <vector>
 
+#include <hpx/config.hpp>
 #include <boost/shared_ptr.hpp>
 
 /*

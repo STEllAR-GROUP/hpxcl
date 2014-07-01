@@ -17,6 +17,7 @@
 #include "work_queue.hpp"
 #include "workload.hpp"
 #include "mandelbrotworker.hpp"
+#include <atomic>
 
 /* 
  * this class is the main observer of the image generation.
@@ -86,7 +87,7 @@ class image_generator
 
         typedef std::map<size_t, boost::shared_ptr<std::vector<char>>> 
                     image_data_map;
-        typedef std::map<size_t, boost::shared_ptr<std::atomic_size_t>>
+        typedef std::map<size_t, boost::shared_ptr<std::atomic<size_t>>>
                     image_countdown_map;
         typedef std::map<size_t, boost::shared_ptr<hpx::lcos::local::event>>
                     image_ready_map;
@@ -94,7 +95,7 @@ class image_generator
         image_countdown_map images_countdown;
         image_ready_map     images_ready;
 
-        std::atomic_size_t  next_image_id;
+        std::atomic<size_t>  next_image_id;
         bool verbose;
 
         size_t img_size_hint_x;

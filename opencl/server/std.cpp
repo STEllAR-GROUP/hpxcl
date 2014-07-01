@@ -102,7 +102,10 @@ parse_version_string(std::string version_str)
 
     } catch (const std::exception & ex) {
         hpx::cerr << "Error while parsing OpenCL Version!" << hpx::endl;
-        return std::vector<int>({-1, 0});
+        std::vector<int> version_numbers(2);
+        version_numbers[0] = -1;
+        version_numbers[1] = 0;
+        return version_numbers;
     }
 
 }

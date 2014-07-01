@@ -91,7 +91,7 @@ class maps_image_generator
         image_request_map          images;
         hpx::lcos::local::spinlock images_lock;
 
-        std::atomic_size_t  next_image_id;
+        std::atomic<size_t>  next_image_id;
 
         // other stuff
         bool verbose;

@@ -61,7 +61,8 @@ hpx::opencl::get_all_devices( cl_device_type device_type,
                 hpx::lcos::future< std::vector<
                     hpx::lcos::future< std::vector< hpx::opencl::device > >
                 > > parent_future
-            ) {
+            ) -> std::vector< hpx::opencl::device >
+            {
                 
                 // initialize the result list
                 std::vector< hpx::opencl::device > devices;

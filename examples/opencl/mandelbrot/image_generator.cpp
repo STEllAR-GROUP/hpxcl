@@ -164,7 +164,7 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
         boost::shared_ptr<std::vector<char>> img_data;
 
         // image countdown
-        boost::shared_ptr<std::atomic_size_t> img_countdown;
+        boost::shared_ptr<std::atomic<size_t>> img_countdown;
 
         // image event lock
         boost::shared_ptr<hpx::lcos::local::event> img_ready;
@@ -347,8 +347,8 @@ compute_image(double posx,
                                     (img_width * img_height * 3 * sizeof(char));
 
     // create a new countdown variable
-    boost::shared_ptr<std::atomic_size_t> img_countdown = 
-              boost::make_shared<std::atomic_size_t>(num_tiles_x * num_tiles_y);
+    boost::shared_ptr<std::atomic<size_t>> img_countdown = 
+              boost::make_shared<std::atomic<size_t>>(num_tiles_x * num_tiles_y);
 
     // create a new ready event lock
     boost::shared_ptr<hpx::lcos::local::event> img_ready =
@@ -364,7 +364,7 @@ compute_image(double posx,
         images.insert(std::pair<size_t, boost::shared_ptr<std::vector<char>>>
                                                             (img_id, img_data));
         images_countdown.insert(std::pair<size_t,
-                                boost::shared_ptr<std::atomic_size_t>>
+                                boost::shared_ptr<std::atomic<size_t>>>
                                 (img_id, img_countdown));
         images_ready.insert(std::pair<size_t,
                             boost::shared_ptr<hpx::lcos::local::event>>
