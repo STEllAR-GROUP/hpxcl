@@ -11,6 +11,7 @@
 #include <hpx/include/async.hpp>
 
 #include "../server/kernel.hpp"
+#include "kernel.hpp"
 
 namespace hpx
 {

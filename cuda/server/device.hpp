@@ -17,6 +17,7 @@
 #include <cuda_runtime.h>
 
 #include  "../fwd_declarations.hpp"
+#include  "../kernel.hpp"
 
 namespace hpx
 {
@@ -53,6 +54,7 @@ namespace hpx
                 cudaDeviceProp props;   
                 std::vector<Device_ptr> device_ptrs;           	 
                 std::vector<Host_ptr<int>> host_ptrs;
+                int num_args;
               	public:
 
         	 	device();
@@ -84,23 +86,29 @@ namespace hpx
                 template <typename T>
                 void create_host_ptr(T value, size_t const byte_count)
                 {
-                    //Host_ptr<T> temp;
-                    //temp.host_ptr = (T*)malloc(byte_count);
-                    //temp.byte_count = byte_count;
-                    //host_ptrs.push_back(temp);
+                    Host_ptr<T> temp;
+                    temp.host_ptr = (T*)malloc(byte_count);
+                    temp.byte_count = byte_count;
+                    host_ptrs.push_back(temp);
                 }
+
+                void mem_cpy_h_to_d(unsigned int variable_id);
+
+                void mem_cpy_d_to_h(unsigned int variable_id);
 
                 void launch_kernel(hpx::cuda::kernel cu_kernel);
 
-                HPX_DEFINE_COMPONENT_ACTION(device,calculate_pi);
-                HPX_DEFINE_COMPONENT_ACTION(device,get_cuda_info);
-                HPX_DEFINE_COMPONENT_ACTION(device,set_device);
-                HPX_DEFINE_COMPONENT_ACTION(device,get_all_devices);
-                HPX_DEFINE_COMPONENT_ACTION(device,get_device_id);
-                HPX_DEFINE_COMPONENT_ACTION(device,get_context);
-                HPX_DEFINE_COMPONENT_ACTION(device,wait);
-                HPX_DEFINE_COMPONENT_ACTION(device,create_device_ptr);
-                //HPX_DEFINE_COMPONENT_ACTION(device,launch_kernel);
+                HPX_DEFINE_COMPONENT_ACTION(device, calculate_pi);
+                HPX_DEFINE_COMPONENT_ACTION(device, get_cuda_info);
+                HPX_DEFINE_COMPONENT_ACTION(device, set_device);
+                HPX_DEFINE_COMPONENT_ACTION(device, get_all_devices);
+                HPX_DEFINE_COMPONENT_ACTION(device, get_device_id);
+                HPX_DEFINE_COMPONENT_ACTION(device, get_context);
+                HPX_DEFINE_COMPONENT_ACTION(device, wait);
+                HPX_DEFINE_COMPONENT_ACTION(device, create_device_ptr);
+                HPX_DEFINE_COMPONENT_ACTION(device, mem_cpy_h_to_d);
+                HPX_DEFINE_COMPONENT_ACTION(device, mem_cpy_d_to_h);
+                HPX_DEFINE_COMPONENT_ACTION(device, launch_kernel);
 
                 template <typename T>
                 struct create_host_ptr_action
@@ -136,12 +144,18 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::create_device_ptr_action,
     device_create_device_ptr_action);
-/*HPX_REGISTER_ACTION_DECLARATION(
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::mem_cpy_d_to_h_action, 
+    device_mem_cpy_h_to_d_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::mem_cpy_h_to_d_action, 
+    device_mem_cpy_d_to_h_action);
+HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::launch_kernel_action,
-    device_launch_kernel_action);*/
+    device_launch_kernel_action);
 HPX_REGISTER_ACTION_DECLARATION_TEMPLATE(
     (template <typename T>),
     (hpx::cuda::server::device::create_host_ptr_action<T>)
-    );
+    )
 
 #endif //cuda_device_2_HPP

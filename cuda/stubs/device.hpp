@@ -13,6 +13,7 @@
 #include <iostream>
 
 #include "../server/device.hpp"
+#include "../kernel.hpp"
 
 namespace hpx
 {
@@ -50,7 +51,7 @@ namespace hpx
                     }
                     return devices;
                 }
-                //functions to run CUDA kernels
+
                 static hpx::lcos::future<float>
                 calculate_pi_async(hpx::naming::id_type const& gid,int nthreads, int nblocks)
                 {
@@ -105,19 +106,41 @@ namespace hpx
                 template <typename T>
                 static void create_host_ptr(hpx::naming::id_type const &gid, T value, size_t const byte_count)
                 {
-                    typedef typename server::device::create_host_ptr_action<T> action_type;
+                    //typedef typename server::device::create_host_ptr_action<T> action_type;
                     std::cout << "hello from create_host_ptr stubs" <<std::endl;
-                    hpx::async<action_type>(gid, value, byte_count).get();
+                    //hpx::async<action_type>(gid, value, byte_count).get();
                 }
 
                 template <typename T>
                 static void create_host_ptr_non_blocking(hpx::naming::id_type const &gid, T value, size_t const byte_count)
                 {
-                   typedef typename server::device::create_host_ptr_action<T> action_type;
-                   hpx::apply<action_type>(gid, value, byte_count).get();  
+                   //typedef typename server::device::create_host_ptr_action<T> action_type;
+                   //hpx::apply<action_type>(gid, value, byte_count).get();  
                 }
 
-                /*static hpx::lcos::future<void> launch_kernel_async(hpx::naming::id_type const &gid, hpx::cuda::kernel cu_kernel)
+                static hpx::lcos::future<void> mem_cpy_h_to_d_async(hpx::naming::id_type const &gid, unsigned int variable_id)
+                {   
+                    typedef server::device::mem_cpy_h_to_d_action action_type;
+                    return hpx::async<action_type>(gid, variable_id);
+                }
+
+                static void mem_cpy_h_to_d(hpx::naming::id_type const &gid, unsigned int variable_id)
+                {
+                    mem_cpy_h_to_d_async(gid, variable_id).get();
+                }
+
+                static hpx::lcos::future<void> mem_cpy_d_to_h_async(hpx::naming::id_type const &gid, unsigned int variable_id)
+                {
+                    typedef server::device::mem_cpy_d_to_h_action action_type;
+                    return hpx::async<action_type>(gid, variable_id);
+                }
+
+                static void mem_cpy_d_to_h(hpx::naming::id_type const &gid, unsigned int variable_id)
+                {
+                    mem_cpy_d_to_h_async(gid, variable_id).get();
+                }
+
+                static hpx::lcos::future<void> launch_kernel_async(hpx::naming::id_type const &gid, hpx::cuda::kernel cu_kernel)
                 {
                     typedef server::device::launch_kernel_action action_type;
                     return hpx::async<action_type>(gid, cu_kernel);
@@ -126,7 +149,7 @@ namespace hpx
                 static void launch_kernel(hpx::naming::id_type const &gid, hpx::cuda::kernel cu_kernel)
                 {
                     launch_kernel_async(gid, cu_kernel).get();
-                }*/
+                }
 
             };
         }

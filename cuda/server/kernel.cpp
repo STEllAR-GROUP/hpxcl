@@ -9,7 +9,7 @@
 #include <string>
 
 #include "kernel.hpp"
-#include  "../fwd_declarations.hpp"
+//#include  "../fwd_declarations.hpp"
 
 using namespace hpx::cuda::server;
 

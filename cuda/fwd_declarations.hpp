@@ -10,7 +10,6 @@ namespace hpx
 		//class buffer;
 		class kernel;
 		//class event;
-
 		namespace server
 		{
 			class device;

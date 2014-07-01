@@ -18,6 +18,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include  "../fwd_declarations.hpp"
 
 #include "../cuda/kernel.cuh"
 #include "../kernel.hpp"
@@ -26,7 +27,6 @@
 
 using namespace hpx::cuda::server;
         
-         
 device::device()
 {
    	cuInit(0); 
@@ -155,9 +155,22 @@ void device::get_cuda_info()
     void device::create_device_ptr(size_t const byte_count)
     {
         Device_ptr temp;
+        Host_ptr<int> temp2;
         cuMemAlloc(&temp.device_ptr, byte_count);
+        temp2.host_ptr = (int*)malloc(byte_count);
         temp.byte_count = byte_count;
         device_ptrs.push_back(temp);
+        host_ptrs.push_back(temp2);
+    }
+
+    void device::mem_cpy_h_to_d(unsigned int variable_id)
+    {
+        cuMemcpyHtoD(device_ptrs[variable_id].device_ptr, host_ptrs[variable_id].host_ptr, device_ptrs[variable_id].byte_count);
+    }
+
+    void device::mem_cpy_d_to_h(unsigned int variable_id)
+    {
+        cuMemcpyDtoH(host_ptrs[variable_id].host_ptr, device_ptrs[variable_id].device_ptr, device_ptrs[variable_id].byte_count);
     }
 
     void device::launch_kernel(hpx::cuda::kernel cu_kernel)
@@ -165,13 +178,15 @@ void device::get_cuda_info()
         hpx::cuda::server::kernel::Dim3 block = cu_kernel.get_block();
         hpx::cuda::server::kernel::Dim3 grid = cu_kernel.get_grid();
 
-        void *args[] = {};
+        void *args[1] = {&(device_ptrs[0].device_ptr)};
 
         CUfunction cu_function;
         CUmodule cu_module;
                     
         cuModuleLoad(&cu_module, cu_kernel.get_module().c_str());
         cuModuleGetFunction(&cu_function, cu_module, cu_kernel.get_function().c_str());
-		cuLaunchKernel(cu_function, grid.x, grid.y, grid.z, block.x, block.y, block.z, 0, 0, args, NULL);
+		CUresult error = cuLaunchKernel(cu_function, grid.x, grid.y, grid.z, block.x, block.y, block.z, 0, 0, args, 0);
+        if (error != CUDA_SUCCESS)
+            std::cout << "error launching kernel" << std::endl;
     }
         

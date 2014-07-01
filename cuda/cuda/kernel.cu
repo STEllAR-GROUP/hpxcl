@@ -16,9 +16,9 @@ __global__ void calculate_pi_kernel(float *sum, int nbin, float step, int nthrea
 	sum[idx] += 4.0f/(1.0f+x*x);
     }
 }
-__global__ void kernel1()
+extern "C" __global__ void kernel1(int *a)
 {
-    //this kernel does nothing
+   a++;
 }
 
 //CUDA kernel wrapper functions

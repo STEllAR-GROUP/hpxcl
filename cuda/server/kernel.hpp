@@ -75,7 +75,6 @@ namespace hpx
 
                 private:
                 CUstream cu_stream;
-                CUmodule cu_module;
                 Dim3 grid,block;
                 std::string kernel_name;
                 std::string module_name;

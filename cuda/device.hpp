@@ -8,6 +8,7 @@
 
 #include <hpx/include/components.hpp>
 #include "stubs/device.hpp"
+#include "kernel.hpp"
 
 namespace hpx
 {
@@ -115,7 +116,31 @@ namespace hpx
                 this->base_type::create_host_ptr_non_blocking(this->get_gid(), value, byte_count);
             }
 
-            /*hpx::lcos::future<void> launch_kernel_async(hpx::cuda::kernel cu_kernel)
+            hpx::lcos::future<void> mem_cpy_h_to_d_async(unsigned int variable_id)
+            {
+                HPX_ASSERT(this->get_gid());
+                return this->base_type::mem_cpy_h_to_d_async(this->get_gid(), variable_id);
+            }
+
+            void mem_cpy_h_to_d(unsigned int variable_id)
+            {
+                HPX_ASSERT(this->get_gid());
+                this->base_type::mem_cpy_h_to_d(this->get_gid(), variable_id);
+            }
+
+            hpx::lcos::future<void> mem_cpy_d_to_h_async(unsigned int variable_id)
+            {
+                HPX_ASSERT(this->get_gid());
+                return this->base_type::mem_cpy_d_to_h_async(this->get_gid(), variable_id);
+            }
+
+            void mem_cpy_d_to_h(unsigned int variable_id)
+            {
+                HPX_ASSERT(this->get_gid());
+                this->base_type::mem_cpy_d_to_h(this->get_gid(), variable_id);
+            }
+
+            hpx::lcos::future<void> launch_kernel_async(hpx::cuda::kernel cu_kernel)
             {
                 BOOST_ASSERT(this->get_gid());
                 return this->base_type::launch_kernel_async(this->get_gid(), cu_kernel);
@@ -125,7 +150,7 @@ namespace hpx
             {
                 BOOST_ASSERT(this->get_gid());
                 this->base_type::launch_kernel(this->get_gid(), cu_kernel);
-            }*/
+            }
         };
 	}
 }
