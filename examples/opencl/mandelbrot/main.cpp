@@ -48,7 +48,7 @@ int hpx_main(boost::program_options::variables_map & vm)
         }
         else
         {
-            hpx::cout << devices.size() << " OpenCL devices found!" << hpx::endl;
+            hpx::cerr << devices.size() << " OpenCL devices found!" << hpx::endl;
         }
 
 
@@ -102,11 +102,16 @@ int hpx_main(boost::program_options::variables_map & vm)
         
         } else {
 
+            size_t num_iterations = 10;
+
             std::cerr << "Starting in benchmark mode." << std::endl;
             size_t chunksize = 8;
 
             // create image generator without gpus
             image_generator img_gen(img_x, chunksize, num_kernels, verbose);
+
+            // save the time for single-gpu
+            double single_gpu_time = 1.0f;
 
             for(size_t num_gpus = 1; num_gpus <= devices.size(); num_gpus++)
             {
@@ -118,7 +123,7 @@ int hpx_main(boost::program_options::variables_map & vm)
                      hpx::cerr << "adding worker ..."
                                << hpx::endl;
                 }
-                img_gen.add_worker(devices[num_gpus - 1], 3); 
+                img_gen.add_worker(devices[devices.size() - num_gpus], 4); 
 
                 // Wait for the worker to initialize
                 if(verbose){
@@ -128,26 +133,37 @@ int hpx_main(boost::program_options::variables_map & vm)
                 img_gen.wait_for_startup_finished();
 
                 // Start timing
-                timer_start();
 
                 // Add image
-                for(size_t i = 0; i < 10; i++)
+                for(size_t i = 0; i < num_iterations + 1; i++)
                 {
-                img_gen.compute_image(posx,
-                                      posy,
-                                      zoom,
-                                      0.0,
-                                      img_x,
-                                      img_y,
-                                      true,
-                                      img_x,
-                                      chunksize).get();
+                    if(i == 1) timer_start();
+                    img_gen.compute_image(posx,
+                                          posy,
+                                          zoom,
+                                          0.0,
+                                          img_x,
+                                          img_y,
+                                          true,
+                                          img_x,
+                                          chunksize).get();
                 }
 
                 // stop timer
                 double time = timer_stop();
+                time = time / (double)num_iterations - 1;
+
+                // save time if we only have one gpu
+                if(num_gpus == 1)
+                    single_gpu_time = time;
+
+                
                 std::cerr << "Time: " << time << " ms" << hpx::endl;
-                hpx::cout << num_gpus << "\t" << time << hpx::endl;
+                std::cout << num_gpus 
+                          << "\t" << time 
+                          << "\t" << (single_gpu_time / time) 
+                          << "\t" << ((single_gpu_time / time) / (double)num_gpus)
+                          << hpx::endl;
 
             }
 
