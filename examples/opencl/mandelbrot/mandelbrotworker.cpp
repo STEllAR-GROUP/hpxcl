@@ -248,7 +248,7 @@ mandelbrotworker::worker_starter(
                                      device.get_device_info(CL_DEVICE_VERSION));
 
         // print device name
-        hpx::cout << "#" << id << ": "
+        hpx::cerr << "#" << id << ": "
                   << device_vendor << ": "
                   << device_name << " ("
                   << device_version << ")"

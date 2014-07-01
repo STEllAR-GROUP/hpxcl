@@ -131,6 +131,8 @@ int hpx_main(boost::program_options::variables_map & vm)
                 timer_start();
 
                 // Add image
+                for(size_t i = 0; i < 10; i++)
+                {
                 img_gen.compute_image(posx,
                                       posy,
                                       zoom,
@@ -140,7 +142,8 @@ int hpx_main(boost::program_options::variables_map & vm)
                                       true,
                                       img_x,
                                       chunksize).get();
-                
+                }
+
                 // stop timer
                 double time = timer_stop();
                 std::cerr << "Time: " << time << " ms" << hpx::endl;
