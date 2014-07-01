@@ -47,9 +47,6 @@ if(HPXCL_WITH_OPENCL)
     find_package(HPX_OpenCL REQUIRED)
     include_directories(${OPENCL_INCLUDE_DIRS})
     link_directories(${OPENCL_LIBRARIES})
-#  OPENCL_INCLUDE_DIRS  - the OpenCL include directory
-#  OPENCL_LIBRARIES    - link these to use OpenCL
-
 endif()
 
 if(HPXCL_WITH_CUDA)
