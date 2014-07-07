@@ -359,8 +359,8 @@ get_new_image()
     // signal waiting threads
     new_request_available.notify_all();
     
-    std::cout << "Started working on " << current_request->zoom
-              << " - (" << posx << ", " << posy << ")" << std::endl;
+    hpx::cout << "Started working on " << current_request->zoom
+              << " - (" << posx << ", " << posy << ")" << hpx::endl;
 
 
     return true;

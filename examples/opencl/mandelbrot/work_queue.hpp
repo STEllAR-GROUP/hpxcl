@@ -84,6 +84,8 @@ private:
     
     // saves how much work is left
     std::atomic<size_t> num_work;
+    std::atomic<size_t> num_requested;
+    std::atomic<size_t> num_delivered;
 
     // is true as the end-of-work-signal arrives
     std::atomic_bool finished;
@@ -96,6 +98,8 @@ work_queue<T>::work_queue()
 {
 
     num_work = 0;
+    num_requested = 0;
+    num_delivered = 0;
     finished = false;
 }
 
@@ -140,6 +144,7 @@ bool work_queue<T>::request(T* undone_workload)
         return false;
     }
 
+    num_requested++;
     // successfully aquired new work packet.
     return true;
 
@@ -148,7 +153,7 @@ bool work_queue<T>::request(T* undone_workload)
 template<typename T>
 void work_queue<T>::deliver(const T &done_workload)
 {
-    
+    num_delivered++;
     // add to finished queue
     finished_work.push(done_workload);
 

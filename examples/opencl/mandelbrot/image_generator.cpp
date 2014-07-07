@@ -151,12 +151,6 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
     while(parent->workqueue->retrieve_finished_work(&done_workload))
     {
 
-        if(verbose) hpx::cout << "retrieved workload "
-                              << done_workload->pos_in_img_x
-                              << ":" 
-                              << done_workload->pos_in_img_y
-                              << hpx::endl;
-
         // retrieve id of associated image
         size_t img_id = done_workload->img_id;
 
@@ -217,6 +211,12 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
 
         // decrease the number of work packets left
         size_t current_img_countdown = --(*img_countdown);
+        if(verbose) hpx::cout << "retrieved workload " << current_img_countdown << ": "
+                              << done_workload->pos_in_img_x
+                              << ":" 
+                              << done_workload->pos_in_img_y
+                              << hpx::endl;
+
 
         // if no work packet left (img finished), then:
         if(current_img_countdown == 0)

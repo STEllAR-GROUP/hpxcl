@@ -30,7 +30,7 @@ void grainsize_bench(std::vector<hpx::opencl::device> devices,
             double posy = 0.131825904205330;
             double zoom = 6.2426215349789484160e10;
 
-            std::cerr << "Starting in benchmark mode." << std::endl;
+            hpx::cerr << "Starting in benchmark mode." << hpx::endl;
 
             // create image generator without gpus
             image_generator img_gen(1, 1, num_kernels, verbose, devices);
@@ -40,8 +40,8 @@ void grainsize_bench(std::vector<hpx::opencl::device> devices,
             // iterate through all configurations
             for(size_t grainsize = 512; grainsize <= img_x*img_y; grainsize *= 2)
             {
-                std::cerr << "Starting test with grainsize " << grainsize << " ..."
-                          << std::endl;
+                hpx::cerr << "Starting test with grainsize " << grainsize << " ..."
+                          << hpx::endl;
                
                 // calculate tile size
                 size_t tilesize_x, tilesize_y;
@@ -56,22 +56,28 @@ void grainsize_bench(std::vector<hpx::opencl::device> devices,
                     tilesize_y = grainsize/img_x;
                 }
                
-                std::cerr << "Using tilesizes: " << tilesize_x << "x"
-                          << tilesize_y << std::endl;
+                hpx::cerr << "Using tilesizes: " << tilesize_x << "x"
+                          << tilesize_y << hpx::endl;
+
+                // initialize timer
+                double total_time = 0.0;
 
                 // main benchmark loop
                 for(size_t i = 0; i < num_iterations + 1; i++)
                 {
                     if(i == 0)
                     {
-                        std::cerr << "Warmup iteration ..." << std::endl;
+                        hpx::cerr << "Warmup iteration ..." << hpx::endl;
                     }
-                    if(i == 1)
+                    if(i >= 1)
                     {
-                        std::cerr << "Starting benchmark ..." << std::endl;
-                        // start timer after first iteration (warmup iteration)
-                        if(i == 1) timer_start();
+                        hpx::cerr << "Starting benchmark iteration " << i << "/"
+                                  << num_iterations << " ..." << hpx::endl;
+
+                        // start time measurement
+                        timer_start();
                     }
+
                     img_gen.compute_image(posx,
                                           posy,
                                           zoom,
@@ -81,20 +87,27 @@ void grainsize_bench(std::vector<hpx::opencl::device> devices,
                                           true,
                                           tilesize_x,
                                           tilesize_y).get();
+
+                    if(i >= 1)
+                    {
+
+                        // measure time
+                        total_time += timer_stop();
+
+                    }
                 }
 
-                // stop timer
-                double time = timer_stop();
-                time = time / (double)num_iterations - 1;
+                // calculate average time
+                double time = total_time / (double)num_iterations;
                 
-                std::cerr << "Time: " << time << " ms" << hpx::endl;
-                std::cout << grainsize
+                hpx::cerr << "Time: " << time << " ms" << hpx::endl;
+                hpx::cout << grainsize
                           << "\t" << time 
                           << hpx::endl;
 
             }
 
-            std::cerr << "Done." << hpx::endl;
+            hpx::cerr << "Done." << hpx::endl;
             img_gen.shutdown();
 
    
@@ -112,7 +125,7 @@ void speedup_bench(std::vector<hpx::opencl::device> devices,
             double posy = 0.131825904205330;
             double zoom = 6.2426215349789484160e10;
 
-            std::cerr << "Starting in benchmark mode." << std::endl;
+            hpx::cerr << "Starting in benchmark mode." << hpx::endl;
 
             // create image generator without gpus
             image_generator img_gen(tilesize_x, tilesize_y, num_kernels, verbose);
@@ -122,8 +135,8 @@ void speedup_bench(std::vector<hpx::opencl::device> devices,
 
             for(size_t num_gpus = 1; num_gpus <= devices.size(); num_gpus++)
             {
-                std::cerr << "Starting test with " << num_gpus << " gpus ..."
-                          << std::endl;
+                hpx::cerr << "Starting test with " << num_gpus << " gpus ..."
+                          << hpx::endl;
                
                 // Add another worker
                 if(verbose){
@@ -163,8 +176,8 @@ void speedup_bench(std::vector<hpx::opencl::device> devices,
                 if(num_gpus == 1)
                     single_gpu_time = time;
                 
-                std::cerr << "Time: " << time << " ms" << hpx::endl;
-                std::cout << num_gpus 
+                hpx::cerr << "Time: " << time << " ms" << hpx::endl;
+                hpx::cout << num_gpus 
                           << "\t" << time 
                           << "\t" << (single_gpu_time / time) 
                           << "\t" << ((single_gpu_time / time) / (double)num_gpus)
@@ -172,7 +185,7 @@ void speedup_bench(std::vector<hpx::opencl::device> devices,
 
             }
 
-            std::cerr << "Done." << hpx::endl;
+            hpx::cerr << "Done." << hpx::endl;
             img_gen.shutdown();
 
    
@@ -273,7 +286,7 @@ int hpx_main(boost::program_options::variables_map & vm)
                           verbose);
 */
             grainsize_bench(devices,
-                            4096, 2048,
+                            2048, 1024,
                             10,
                             4,
                             verbose);

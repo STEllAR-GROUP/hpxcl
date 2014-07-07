@@ -37,7 +37,7 @@ requesthandler::submit_request(boost::shared_ptr<request> request)
     request->lines_per_gpu = lines_per_gpu;
     request->img_countdown = tilesize_y/lines_per_gpu;
 
-    std::cout << "Request submitted: " << request->zoom << std::endl;
+    hpx::cout << "Request submitted: " << request->zoom << hpx::endl;
       
     // hand the request to an hpx thread    
     new_requests.push(request);

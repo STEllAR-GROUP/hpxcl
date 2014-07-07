@@ -34,7 +34,7 @@ static device create_cl_device()
 
 static void print(int id, const char* msg)
 {
-    std::cout << "[" << id << "] " << msg << std::endl;
+    hpx::cout << "[" << id << "] " << msg << hpx::endl;
 }
 
 // Counts down from 5, then triggers the event

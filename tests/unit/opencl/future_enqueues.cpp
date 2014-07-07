@@ -161,7 +161,7 @@ static void cl_test(hpx::opencl::device cldevice)
 
     for(size_t i = 0; i < 5; i++)
     {
-        std::cout << data[i] << std::endl;
+        hpx::cout << data[i] << hpx::endl;
     }
 
     
