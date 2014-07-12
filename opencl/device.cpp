@@ -38,8 +38,8 @@ device::create_buffer(cl_mem_flags flags, size_t size, const void* data) const
 
     // Create new Buffer Server
     hpx::lcos::future<hpx::naming::id_type>
-    buffer_server = hpx::components::new_<hpx::opencl::server::buffer>
-                    (get_colocation_id_sync(get_gid()), get_gid(), flags, size,
+    buffer_server = hpx::components::new_colocated<hpx::opencl::server::buffer>
+                    (get_gid(), get_gid(), flags, size,
                      serializable_data);
     
     // Return Buffer Client wrapped around Buffer Server
@@ -55,8 +55,8 @@ device::create_buffer(cl_mem_flags flags, size_t size) const
     
     // Create new Buffer Server
     hpx::lcos::future<hpx::naming::id_type>
-    buffer_server = hpx::components::new_<hpx::opencl::server::buffer>
-                    (get_colocation_id_sync(get_gid()), get_gid(), flags, size);
+    buffer_server = hpx::components::new_colocated<hpx::opencl::server::buffer>
+                    (get_gid(), get_gid(), flags, size);
 
     // Return Buffer Client wrapped around Buffer Server
     return buffer(std::move(buffer_server));
@@ -71,8 +71,8 @@ device::create_program_with_source(std::string source) const
 
     // Create new program object server
     hpx::lcos::future<hpx::naming::id_type>
-    program_server = hpx::components::new_<hpx::opencl::server::program>
-                     (get_colocation_id_sync(get_gid()), get_gid(), source);
+    program_server = hpx::components::new_colocated<hpx::opencl::server::program>
+                     (get_gid(), get_gid(), source);
 
     // Return program object client
     return program(std::move(program_server));
@@ -92,9 +92,8 @@ device::create_program_with_binary(size_t binary_size, const char* binary) const
 
     // Create new program object server
     hpx::lcos::future<hpx::naming::id_type>
-    program_server = hpx::components::new_<hpx::opencl::server::program>
-                     (get_colocation_id_sync(get_gid()), get_gid(),
-                                                           serializable_binary);
+    program_server = hpx::components::new_colocated<hpx::opencl::server::program>
+                     (get_gid(), get_gid(), serializable_binary);
 
     // Return program object client
     return program(std::move(program_server));

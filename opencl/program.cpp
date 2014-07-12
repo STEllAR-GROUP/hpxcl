@@ -66,8 +66,8 @@ program::create_kernel(std::string kernel_name) const
 
     // Create new kernel object server
     hpx::lcos::future<hpx::naming::id_type>
-    kernel_server = hpx::components::new_<hpx::opencl::server::kernel>
-                    (get_colocation_id_sync(get_gid()), get_gid(), kernel_name);
+    kernel_server = hpx::components::new_colocated<hpx::opencl::server::kernel>
+                    (get_gid(), get_gid(), kernel_name);
 
     return hpx::opencl::kernel(std::move(kernel_server));
 
