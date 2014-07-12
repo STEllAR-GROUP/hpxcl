@@ -7,7 +7,8 @@
 #ifndef HPX_OPENCL_SERVER_PROGRAM_HPP_
 #define HPX_OPENCL_SERVER_PROGRAM_HPP_
 
-#include <hpx/hpx_main.hpp>
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 #include <hpx/include/components.hpp>
 #include <hpx/util/serialize_buffer.hpp>
 

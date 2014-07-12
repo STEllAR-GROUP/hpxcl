@@ -10,7 +10,8 @@
 #include <CL/cl.h>
 
 #include <vector>
-#include <hpx/hpx_main.hpp>
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 #include <hpx/include/actions.hpp>
 
 #include <boost/serialization/vector.hpp>
