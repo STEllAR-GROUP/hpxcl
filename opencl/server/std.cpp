@@ -172,10 +172,38 @@ ensure_device_components_initialization()
                                   devices_on_platform.data(), NULL);
         cl_ensure(err, "clGetDeviceIDs()");
 
+
         // Add devices_on_platform to devices
         BOOST_FOREACH( const std::vector<cl_device_id>::value_type& device,
                        devices_on_platform )
         {
+
+        #ifndef HPXCL_ALLOW_OPENCL_1_0_DEVICES
+
+            // Get OpenCL Version string length
+            size_t version_string_length;
+            err = clGetDeviceInfo(device, CL_DEVICE_VERSION, 0, NULL,
+                                                       &version_string_length);
+
+            // Get OpenCL Version string
+            std::vector<char> version_string_arr(version_string_length);
+            err = clGetDeviceInfo(device, CL_DEVICE_VERSION, 
+                                    version_string_length,
+                                    version_string_arr.data(),
+                                    NULL);
+
+            // Convert to std::string
+            std::string version_string(version_string_arr.begin(),
+                                       version_string_arr.end());
+
+            // Parse
+            std::vector<int> version = parse_version_string(version_string);
+
+            // only allow machines with version 1.1 or higher
+            if(version[0] < 1) continue;
+            if(version[0] == 1 && version[1] < 1) continue;
+
+        #endif //HPXCL_ALLOW_OPENCL_1_0_DEVICES
 
             // Create a new device client 
             hpx::opencl::device device_client(
