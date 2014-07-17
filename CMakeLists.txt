@@ -7,6 +7,10 @@ project(hpxcl CXX)
 
 # This adds the HPX cmake configuration directory to the search path.
 
+if(NOT DEFINED HPX_ROOT)
+	set (HPX_ROOT $ENV{HPX_ROOT})
+endif()
+
 message(STATUS
 ${HPX_ROOT}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules)
 set(CMAKE_MODULE_PATH
