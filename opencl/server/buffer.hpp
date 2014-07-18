@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "../fwd_declarations.hpp"
+#include "../event.hpp"
 
 namespace hpx { namespace opencl{ namespace server{
 

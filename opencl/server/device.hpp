@@ -22,7 +22,7 @@
 #include <CL/cl.h>
 
 #include "../fwd_declarations.hpp"
-
+#include "../event.hpp"
 
 // ! This component header may NOT include other component headers !
 // (To avoid recurcive includes)

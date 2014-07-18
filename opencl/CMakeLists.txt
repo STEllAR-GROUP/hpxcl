@@ -53,6 +53,6 @@ add_hpx_component(opencl
             server/kernel.hpp
             server/hpx_cl_interop.hpp
    COMPONENT_DEPENDENCIES iostreams 
-   DEPENDENCIES ${OpenCL_LIBRARY}
+   DEPENDENCIES ${OPENCL_LIBRARIES}
    )
 
