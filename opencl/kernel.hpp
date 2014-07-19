@@ -7,8 +7,12 @@
 #ifndef HPX_OPENCL_KERNEL_HPP_
 #define HPX_OPENCL_KERNEL_HPP_
 
+#include "export_definitions.hpp"
+
 #include "server/kernel.hpp"
 
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 #include <hpx/include/components.hpp>
 #include <hpx/lcos/when_all.hpp>
 #include <boost/serialization/vector.hpp>
@@ -72,7 +76,7 @@ namespace opencl {
     /// This represents one specific OpenCL task that can be directly executed
     /// on an OpenCL device.
     ///
-    class kernel
+    class HPX_OPENCL_EXPORT kernel
       : public hpx::components::client_base<
           kernel, hpx::components::stub_base<server::kernel>
         >

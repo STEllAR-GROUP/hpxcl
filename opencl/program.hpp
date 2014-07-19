@@ -7,8 +7,12 @@
 #ifndef HPX_OPENCL_PROGRAM_HPP_
 #define HPX_OPENCL_PROGRAM_HPP_
 
+#include "export_definitions.hpp"
+
 #include "server/program.hpp"
 
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 #include <hpx/include/components.hpp>
 
 #include "fwd_declarations.hpp"
@@ -22,7 +26,7 @@ namespace opencl {
     /// One program represents one or multiple kernels.
     /// It can be created from one (TODO multiple) source files.
     ///
-    class program
+    class HPX_OPENCL_EXPORT program
       : public hpx::components::client_base<
           program, hpx::components::stub_base<server::program>
         >

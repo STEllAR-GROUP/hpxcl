@@ -5,34 +5,33 @@ cmake_minimum_required(VERSION 2.8.4 FATAL_ERROR)
 #This project is C++ based.
 project(hpxcl CXX)
 
-# This adds the HPX cmake configuration directory to the search path.
-
-if(NOT DEFINED HPX_ROOT)
-	set (HPX_ROOT $ENV{HPX_ROOT})
+# Find and include HPX settings
+if(NOT HPX_ROOT)
+  message("HPX_ROOT not set, checking environment variables...")
+  set(HPX_ROOT $ENV{HPX_ROOT})
+  if(NOT DEFINED HPX_ROOT)
+    message(FATAL_ERROR "HPX_ROOT not set, unable to find HPX!")
+  endif()
 endif()
 
-message(STATUS
-${HPX_ROOT}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules)
+# This adds the HPX cmake configuration directory to the search path.
 set(CMAKE_MODULE_PATH
-${HPX_ROOT}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules)
+${HPX_ROOT}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
+	${CMAKE_MODULE_PATH})
 
 # add our cmake path
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH} )
 
 ###########################
-# Include boost and hpx
+# Include hpx
 #
-find_package(HPX_Boost)
-
-hpx_include_sys_directories("${BOOST_INCLUDE_DIR}")
-hpx_link_sys_directories("${BOOST_LIBRARY_DIR}")
-
 
 #Instruct cmake to find the HPX settings
 find_package(HPX REQUIRED)
 set(HPX_RPATH "${CMAKE_BINARY_DIR}/lib/hpx:${HPX_RPATH}:${CMAKE_INSTALL_PREFIX}/lib/hpx")
 include_directories(${HPX_INCLUDE_DIR})
 link_directories(${HPX_LIBRARY_DIR})
+
 
 ########################################################################
 # configurations
@@ -56,6 +55,13 @@ endif()
 
 if(HPXCL_WITH_CUDA)
     find_package(CUDA REQUIRED)
+endif()
+
+if(HPX_BUILD_EXAMPLES)
+    find_package(PNG)
+    if(PNG_FOUND)
+        include_directories(${PNG_INCLUDE_DIRS})
+    endif()
 endif()
 
 

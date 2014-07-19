@@ -8,8 +8,12 @@
 #ifndef HPX_OPENCL_EVENT_HPP_
 #define HPX_OPENCL_EVENT_HPP_
 
+#include "export_definitions.hpp"
+
 #include "server/event.hpp"
 
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 #include <hpx/include/components.hpp>
 #include <hpx/lcos/future.hpp>
 
@@ -22,7 +26,7 @@ namespace opencl {
     ///
     /// This is the main synchronization mechanism of this OpenCL framework.
     ///
-    class event
+    class HPX_OPENCL_EXPORT event
       : public hpx::components::client_base<
           event, hpx::components::stub_base<server::event>
         >

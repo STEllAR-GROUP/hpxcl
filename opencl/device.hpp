@@ -7,8 +7,12 @@
 #ifndef HPX_OPENCL_DEVICE_HPP_
 #define HPX_OPENCL_DEVICE_HPP_
 
+#include "export_definitions.hpp"
+
 #include "server/device.hpp"
 
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 #include <hpx/include/components.hpp>
 #include <hpx/lcos/future.hpp>
 
@@ -22,7 +26,7 @@ namespace opencl {
     /////////////////////////////////////////
     /// @brief An accelerator device.
     ///
-    class device
+    class HPX_OPENCL_EXPORT device
       : public hpx::components::client_base<
           device, hpx::components::stub_base<server::device>
         >

@@ -3,21 +3,11 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#add_hpx_library(opencl_tools
-#   ESSENTIAL
-#   SOURCES tools.cpp
-#   HEADERS tools.hpp
-#   DEPENDENCIES ${OpenCL_LIBRARY}
-#   )
+# set library exports
+add_definitions(-DHPX_OPENCL_MODULE_EXPORTS)
 
-#add_hpx_library(opencl_std
-#   ESSENTIAL
-#   SOURCES std.cpp server/std.cpp
-#   HEADERS std.hpp server/std.hpp name_definitions.hpp
-#   COMPONENT_DEPENDENCIES iostreams
-#   DEPENDENCIES ${OpenCL_LIBRARY} opencl_tools_lib
-#   )
-
+# allow old opencl 1.1 calls
+add_definitions(-DCL_USE_DEPRECATED_OPENCL_1_1_APIS)
 
 add_hpx_component(opencl
    ESSENTIAL
@@ -37,6 +27,7 @@ add_hpx_component(opencl
             server/hpx_cl_interop.cpp
             component_definitions.cpp
    HEADERS  fwd_declarations.hpp
+            export_definitions.hpp
             std.hpp
             tools.hpp
             device.hpp

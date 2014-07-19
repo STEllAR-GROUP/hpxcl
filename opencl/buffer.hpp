@@ -7,8 +7,12 @@
 #ifndef HPX_OPENCL_BUFFER_HPP_
 #define HPX_OPENCL_BUFFER_HPP_
 
+#include "export_definitions.hpp"
+
 #include "server/buffer.hpp"
 
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 #include <hpx/include/components.hpp>
 #include <hpx/lcos/future.hpp>
 
@@ -23,7 +27,7 @@ namespace opencl {
     ///
     /// Every buffer belongs to one \ref device.
     ///
-    class buffer
+    class HPX_OPENCL_EXPORT buffer
       : public hpx::components::client_base<
           buffer, hpx::components::stub_base<server::buffer>
         >
@@ -204,7 +208,7 @@ namespace opencl {
             enqueue_write(size_t offset, size_t size, const void* data,
                std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
             //@}
-
+#undef CL_VERSION_1_2            
 #ifdef CL_VERSION_1_2
             // Fill Buffer
             /**

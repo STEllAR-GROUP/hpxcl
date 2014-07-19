@@ -7,8 +7,12 @@
 #ifndef HPX_OPENCL_STD_HPP_
 #define HPX_OPENCL_STD_HPP_
 
+#include "export_definitions.hpp"
+
 #include "server/std.hpp"
 
+#include <hpx/config.hpp>
+#include <hpx/hpx.hpp>
 #include <hpx/include/iostreams.hpp>
 #include <hpx/lcos/future.hpp>
 
@@ -42,8 +46,9 @@ namespace hpx { namespace opencl{
      *                            Recommended value is "OpenCL 1.1".
      * @return A list of suitable OpenCL devices on target node
      */
+    HPX_OPENCL_EXPORT
     hpx::lcos::future<std::vector<device>>
-    get_devices( hpx::naming::id_type node_id, cl_device_type device_type,
+    get_devices(hpx::naming::id_type node_id, cl_device_type device_type,
                  std::string required_cl_version );
 
     /**
@@ -67,6 +72,7 @@ namespace hpx { namespace opencl{
      *                            Recommended value is "OpenCL 1.1".
      * @return A list of suitable OpenCL devices
      */
+    HPX_OPENCL_EXPORT
     hpx::lcos::future<std::vector<device>>
     get_all_devices( cl_device_type device_type,
                      std::string required_cl_version );

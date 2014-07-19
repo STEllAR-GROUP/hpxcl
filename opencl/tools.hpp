@@ -9,6 +9,9 @@
 
 #include <CL/cl.h>
 #include <sstream>
+
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 #include <hpx/include/iostreams.hpp>
 
 #ifndef CL_VERSION_1_1

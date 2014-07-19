@@ -7,9 +7,10 @@
 # OpenCL_LIBPATH    - Library path (e.h. OpenCL_LIBPATH=/usr/lib64/nvidia)
 #
 # Once done this will define
-#  OPENCL_FOUND        - system has OpenCL
-#  OPENCL_INCLUDE_DIRS  - the OpenCL include directory
-#  OPENCL_LIBRARIES    - link these to use OpenCL
+#  OPENCL_FOUND            - system has OpenCL
+#  OPENCL_INCLUDE_DIRS     - the OpenCL include directory
+#  OPENCL_LIBRARIES        - link these to use OpenCL
+#  OPENCL_HAS_CPP_BINDINGS - TRUE if cl.hpp was found
 #
 # WIN32 should work, but is untested
 FIND_PACKAGE(PackageHandleStandardArgs)
@@ -58,6 +59,7 @@ IF(_OPENCL_CPP_INCLUDE_DIRS)
   # This is often the same, so clean up
   LIST( REMOVE_DUPLICATES OPENCL_INCLUDE_DIRS )
 ENDIF(_OPENCL_CPP_INCLUDE_DIRS)
+
 MARK_AS_ADVANCED(
-  OPENCL_INCLUDE_DIRS
+  OPENCL_LIBRARIES OPENCL_INCLUDE_DIRS _OPENCL_CPP_INCLUDE_DIRS
 )

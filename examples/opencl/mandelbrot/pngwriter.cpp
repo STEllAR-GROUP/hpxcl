@@ -80,8 +80,8 @@ static mem_encode save_png_to_mem(boost::shared_ptr< std::vector<char> > data, s
     /* Set image attributes. */
     png_set_IHDR(png_ptr,
                  info_ptr,
-                 width,
-                 height,
+                 (png_uint_32)width,
+                 (png_uint_32)height,
                  8,
                  PNG_COLOR_TYPE_RGB,
                  PNG_INTERLACE_NONE,
@@ -89,7 +89,7 @@ static mem_encode save_png_to_mem(boost::shared_ptr< std::vector<char> > data, s
                  PNG_FILTER_TYPE_DEFAULT);
 
     /* Initialize the rows of png */
-    bytes_per_row = width * sizeof(char) * 3;
+    bytes_per_row = (png_uint_32) (width * sizeof(char) * 3);
     row_pointers = (png_byte **)png_malloc(png_ptr, height * sizeof(png_byte *));
     for (y = 0; y < height; ++y) {
         row_pointers[y] = (png_byte *)(data->data() + 3*y*width);

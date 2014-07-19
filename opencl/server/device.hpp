@@ -9,6 +9,8 @@
 
 #include <cstdint>
 
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 #include <hpx/include/iostreams.hpp>
 #include <hpx/util/serialize_buffer.hpp>
 #include <hpx/lcos/local/mutex.hpp>

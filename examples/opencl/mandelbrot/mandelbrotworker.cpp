@@ -8,11 +8,11 @@
 #include "mandelbrotworker_buffermanager.hpp"
 
 #include <cmath>
-#include <atomic>
+#include <boost/atomic/atomic.hpp>
 
 #define MAX_IMG_WIDTH 30000
 
-static std::atomic_uint id_counter(0);
+static boost::atomic<unsigned int> id_counter((unsigned int)0);
 
 mandelbrotworker::mandelbrotworker(
                          hpx::opencl::device device_,

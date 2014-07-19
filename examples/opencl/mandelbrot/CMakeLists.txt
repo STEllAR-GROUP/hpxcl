@@ -3,8 +3,9 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+if(PNG_FOUND)
 
-set(sources_lib
+set(sources_common
     pngwriter.cpp
     workload.cpp
     mandelbrotworker.cpp
@@ -30,36 +31,16 @@ set(sources_maps
 
 
 
-source_group("Source Files" FILES ${sources_lib} ${sources_main} ${sources_maps})
+source_group("Source Files" FILES ${sources_common} ${sources_main} ${sources_maps})
 
-# add mandelbrot component
-add_hpx_component(mandelbrot_lib
-                   SOURCES ${sources_lib}
-                   DEPENDENCIES opencl_component
-                   COMPONENT_DEPENDENCIES iostreams
-                   FOLDER "Examples/OpenCL/mandelbrot")
 
-# add a custom target for this example
-add_hpx_pseudo_target(examples.opencl.mandelbrot_lib)
-
-# make pseudo-targets depend on master pseudo-target
-add_hpx_pseudo_dependencies(examples.opencl
-                            examples.opencl.mandelbrot_lib)
-
-# add dependencies to pseudo-target
-add_hpx_pseudo_dependencies(examples.opencl.mandelbrot_lib
-                            mandelbrot_lib_component)
-
-set_target_properties(mandelbrot_lib_component
-    PROPERTIES
-    LINK_FLAGS "-lpng")
 
 
 
 # add example executable
 add_hpx_executable(mandelbrot
-                   SOURCES ${sources_main}
-                   DEPENDENCIES opencl_component mandelbrot_lib_component
+                   SOURCES ${sources_main} ${sources_common}
+                   DEPENDENCIES opencl_component
                    COMPONENT_DEPENDENCIES iostreams
                    FOLDER "Examples/OpenCL/mandelbrot")
 
@@ -77,8 +58,8 @@ add_hpx_pseudo_dependencies(examples.opencl.mandelbrot
 
 # add example executable
 add_hpx_executable(mandelbrot_maps
-                   SOURCES ${sources_maps}
-                   DEPENDENCIES opencl_component mandelbrot_lib_component
+                   SOURCES ${sources_maps} ${sources_common}
+                   DEPENDENCIES opencl_component
                    COMPONENT_DEPENDENCIES iostreams
                    FOLDER "Examples/OpenCL/mandelbrot")
 
@@ -92,4 +73,10 @@ add_hpx_pseudo_dependencies(examples.opencl
 # add dependencies to pseudo-target
 add_hpx_pseudo_dependencies(examples.opencl.mandelbrot_maps
                             mandelbrot_maps_exe)
+							
+							
+target_link_libraries(mandelbrot_exe ${PNG_LIBRARIES})
+target_link_libraries(mandelbrot_maps_exe ${PNG_LIBRARIES})
 
+
+endif()
