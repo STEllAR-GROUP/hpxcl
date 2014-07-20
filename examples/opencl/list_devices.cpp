@@ -27,7 +27,7 @@ device_uint_to_string(hpx::future<std::vector<char>> data_future)
 
     std::vector<char> data_raw = data_future.get();
 
-    cl_uint res = *((int*)data_raw.data());
+    cl_uint res = *((cl_uint*)data_raw.data());
     
     std::stringstream ss;
 
@@ -97,16 +97,14 @@ int hpx_main(int argc, char* argv[])
         hpx::cout << hpx::endl << "Devices:" << hpx::endl << hpx::endl;
 
         // print a lot of information about every device
-        for(size_t i = 1; i < devices.size()+1; i++)
+        size_t i = 1;
+        BOOST_FOREACH(device & cldevice, devices)
         {
    
             size_t j = 1;
 
             // generate string
             std::string str;
-
-            // get device handle
-            device cldevice = devices[i-1];
              
             // print name
             str = cldevice.device_info_to_string(
@@ -150,15 +148,16 @@ int hpx_main(int argc, char* argv[])
             str = cldevice.device_info_to_string(
                         cldevice.get_device_info(CL_DEVICE_OPENCL_C_VERSION));
             printinfo(i, j++, "Compiler Version", str);
-
-
             
-
             /*** TO BE CONTINUED ***/
+
+
+
 
             // add newline before starting a new device
             hpx::cout << hpx::endl;
 
+            i++;
         }
     
         

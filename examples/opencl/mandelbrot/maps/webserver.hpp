@@ -58,16 +58,13 @@ private:
                         size_t lines_read,
                         std::string requested_filename);
 
-    // callback, closes the socket and returns
-    void close_socket(boost::shared_ptr<boost::asio::ip::tcp::socket> socket);
-
     // callback, closes the socket and returns.
     // keeps data alive until the write finishes
     void close_socket(boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
-                      boost::shared_ptr<std::vector<char>> data);
+                      boost::any keepalive_data);
 
     // keeps data alive until the write finishes
-    void dont_close_socket(boost::shared_ptr<std::vector<char>> data);
+    void dont_close_socket(boost::any keepalive_data);
 
     // sends '500 Server Error' and closes the socket
     void send_server_error_and_close(

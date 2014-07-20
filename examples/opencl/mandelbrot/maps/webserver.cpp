@@ -57,7 +57,7 @@ struct registration_wrapper
 }; 
 
 void
-webserver::dont_close_socket(boost::shared_ptr<std::vector<char>> keepalive_data)
+webserver::dont_close_socket(boost::any keepalive_data)
 {
     std::cout << "Packets: " << num_answers << "/" << num_aborted
               << "/" << num_requests << " - "
@@ -66,16 +66,8 @@ webserver::dont_close_socket(boost::shared_ptr<std::vector<char>> keepalive_data
 }
 
 void
-webserver::close_socket(boost::shared_ptr<tcp::socket> socket)
-{
-
-    socket->close();
-
-}
-
-void
 webserver::close_socket(boost::shared_ptr<tcp::socket> socket,
-                        boost::shared_ptr<std::vector<char>> keepalive_data)
+                        boost::any keepalive_data)
 {
 
     socket->close();
@@ -89,16 +81,17 @@ webserver::send_server_error_and_close(boost::shared_ptr<tcp::socket> socket)
     //std::cout << "aborted" << std::endl;
     num_aborted ++;
 
-    std::string response(
+    boost::shared_ptr<std::string> response = boost::make_shared<std::string>(
         "HTTP/1.0 500 Server Error\r\n"
         "Connection: Close\r\n"
         "\r\n");
 
     boost::asio::async_write(*socket,
-                             boost::asio::buffer(response),
+                             boost::asio::buffer(*response),
                              strand.wrap(boost::bind(&webserver::close_socket,
                                                      this,
-                                                     socket)));
+                                                     socket,
+                                                     response)));
 
 }
 
@@ -106,16 +99,17 @@ void
 webserver::send_not_found_and_close(boost::shared_ptr<tcp::socket> socket)
 {
 
-    std::string response(
+    boost::shared_ptr<std::string> response = boost::make_shared<std::string>(
         "HTTP/1.0 404 Not Found\r\n"
         "Connection: Close\r\n"
         "\r\n");
 
     boost::asio::async_write(*socket,
-                             boost::asio::buffer(response),
+                             boost::asio::buffer(*response),
                              strand.wrap(boost::bind(&webserver::close_socket,
                                                      this,
-                                                     socket)));
+                                                     socket,
+                                                     response)));
 
 }
 
@@ -123,16 +117,17 @@ void
 webserver::send_bad_request_and_close(boost::shared_ptr<tcp::socket> socket)
 {
 
-    std::string response(
+    boost::shared_ptr<std::string> response = boost::make_shared<std::string>(
         "HTTP/1.0 400 Bad Request\r\n"
         "Connection: Close\r\n"
         "\r\n");
 
     boost::asio::async_write(*socket,
-                             boost::asio::buffer(response),
+                             boost::asio::buffer(*response),
                              strand.wrap(boost::bind(&webserver::close_socket,
                                                      this,
-                                                     socket)));
+                                                     socket,
+                                                     response)));
 
 }
 
@@ -179,6 +174,14 @@ webserver::read_filename_from_request(std::string line)
         return filename;
 }
 
+static struct send_data_data
+{
+    std::string header = "";
+    std::string footer = "";
+    boost::shared_ptr<std::vector<char>> data;
+    std::vector<boost::asio::const_buffer> buffers;
+};
+
 void
 webserver::send_data(boost::shared_ptr<tcp::socket> socket,
                      const char* content_type,
@@ -186,6 +189,15 @@ webserver::send_data(boost::shared_ptr<tcp::socket> socket,
 {
     
     num_answers ++;
+
+    // store all the data that we need to keep alive
+    boost::shared_ptr<send_data_data> keep_alive_data = boost::make_shared<send_data_data>();
+    
+    // keep data ptr alive
+    keep_alive_data->data = data;
+
+    // vector to keep data alive
+    boost::shared_ptr<std::vector<boost::any>> keep_= boost::make_shared<std::vector<boost::any>>();
 
     // generate header
     std::stringstream ss;
@@ -195,35 +207,23 @@ webserver::send_data(boost::shared_ptr<tcp::socket> socket,
        << "Connection: Keep-Alive\r\n" 
        //<< "Connection: Close\r\n" 
        << "\r\n";
-    std::string header = ss.str();
+    keep_alive_data->header = ss.str();
     
     // generate footer
-    std::string footer("\r\n\r\n");
-
-    // generate 100 continue string
-    std::string continue_msg("HTTP/1.0 100 Continue\r\n\r\n");
+    keep_alive_data->footer = "\r\n\r\n";
 
     // put everything in buffers
-    std::vector<boost::asio::const_buffer> buffers;
-    buffers.push_back( boost::asio::buffer(header) );
-    buffers.push_back( boost::asio::buffer(data->data(), data->size()) );
-    buffers.push_back( boost::asio::buffer(footer) );
-//    buffers.push_back( boost::asio::buffer(continue_msg) );
+    keep_alive_data->buffers.push_back(boost::asio::buffer(keep_alive_data->header));
+    keep_alive_data->buffers.push_back(boost::asio::buffer(keep_alive_data->data->data(), keep_alive_data->data->size()));
+    keep_alive_data->buffers.push_back(boost::asio::buffer(keep_alive_data->footer));
 
     boost::asio::async_write( *socket,
-                              buffers,
+                              keep_alive_data->buffers,
                               strand.wrap(boost::bind(
                                             &webserver::dont_close_socket,
                                             this,
-                                            data)));
+                                            keep_alive_data)));
 
-}
-
-// dummy callback for async call
-static void
-do_nothing()
-{
-    
 }
 
 void
@@ -232,7 +232,10 @@ webserver::send_data(boost::shared_ptr<tcp::socket> socket,
                      const char* data,
                      size_t data_size)
 {
-    
+   
+    // store all the data that we need to keep alive
+    boost::shared_ptr<send_data_data> keep_alive_data = boost::make_shared<send_data_data>();
+
     // generate header
     std::stringstream ss;
     ss << "HTTP/1.0 200 OK\r\n"                                        
@@ -241,23 +244,22 @@ webserver::send_data(boost::shared_ptr<tcp::socket> socket,
        << "Connection: Keep-Alive\r\n" 
 //       << "Connection: Close\r\n" 
        << "\r\n";
-    std::string header = ss.str();
+    keep_alive_data->header = ss.str();
     
     // generate footer
-    std::string footer("\r\n\r\n");
-
-    // generate 100 continue string
-    std::string continue_msg("HTTP/1.0 100 Continue\r\n\r\n");
-
+    keep_alive_data->footer = "\r\n\r\n";
+    
     // put everything in buffers
-    std::vector<boost::asio::const_buffer> buffers;
-    buffers.push_back( boost::asio::buffer(header) );
-    buffers.push_back( boost::asio::buffer(data, data_size) );
-    buffers.push_back( boost::asio::buffer(footer) );
+    keep_alive_data->buffers.push_back(boost::asio::buffer(keep_alive_data->header));
+    keep_alive_data->buffers.push_back(boost::asio::buffer(data, data_size));
+    keep_alive_data->buffers.push_back(boost::asio::buffer(keep_alive_data->footer));
 
     boost::asio::async_write( *socket,
-                              buffers,
-                              boost::bind(&do_nothing));
+                              keep_alive_data->buffers,
+                              strand.wrap(boost::bind(
+                                            &webserver::dont_close_socket,
+                                            this,
+                                            keep_alive_data)));
 
 }
 
