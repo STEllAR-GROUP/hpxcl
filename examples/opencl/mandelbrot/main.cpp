@@ -38,7 +38,7 @@ void grainsize_bench(std::vector<hpx::opencl::device> devices,
             img_gen.wait_for_startup_finished();
 
             // iterate through all configurations
-            for(size_t grainsize = 512; grainsize <= img_x*img_y; grainsize *= 2)
+            for(size_t grainsize = 256; grainsize <= img_x*img_y; grainsize *= 2)
             {
                 hpx::cerr << "Starting test with grainsize " << grainsize << " ..."
                           << hpx::endl;

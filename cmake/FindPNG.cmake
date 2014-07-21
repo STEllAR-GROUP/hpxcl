@@ -61,7 +61,6 @@ if(ZLIB_FOUND)
       )
 
   #foreach(search ${PNG_SEARCH_DIRS})
-	 message("searching " ${PNG_SEARCH_DIRS})
      find_path(PNG_PNG_INCLUDE_DIR NAMES png.h ${PNG_SEARCH_DIRS} PATH_SUFFIXES include)
   #endforeach()
 

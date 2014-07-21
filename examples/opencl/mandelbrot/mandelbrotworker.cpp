@@ -8,7 +8,7 @@
 #include "mandelbrotworker_buffermanager.hpp"
 
 #include <cmath>
-#include <boost/atomic/atomic.hpp>
+#include <boost/atomic.hpp>
 
 #define MAX_IMG_WIDTH 30000
 

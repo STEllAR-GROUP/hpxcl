@@ -74,7 +74,6 @@ set(ZLIB_NAMES z zlib zdll zlib1 zlibd zlibd1)
 
 # Try each search configuration.
 foreach(search ${_ZLIB_SEARCHES})
-message("zlib searching " ${${search}})
   find_path(ZLIB_INCLUDE_DIR NAMES zlib.h        ${${search}} PATH_SUFFIXES include)
   find_library(ZLIB_LIBRARY  NAMES ${ZLIB_NAMES} ${${search}} PATH_SUFFIXES lib)
 endforeach()
