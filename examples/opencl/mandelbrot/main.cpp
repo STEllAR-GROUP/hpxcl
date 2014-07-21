@@ -214,7 +214,7 @@ int hpx_main(boost::program_options::variables_map & vm)
 
         // get all devices
         std::vector<hpx::opencl::device> devices = 
-           hpx::opencl::get_all_devices(CL_DEVICE_TYPE_GPU, "OpenCL 1.1").get();
+           hpx::opencl::get_all_devices(CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_ACCELERATOR, "OpenCL 1.1").get();
 
         // Check whether there are any devices
         if(devices.size() < 1)
