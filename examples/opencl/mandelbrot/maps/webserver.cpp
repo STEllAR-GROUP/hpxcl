@@ -174,7 +174,7 @@ webserver::read_filename_from_request(std::string line)
         return filename;
 }
 
-static struct send_data_data
+struct send_data_data
 {
     std::string header = "";
     std::string footer = "";
