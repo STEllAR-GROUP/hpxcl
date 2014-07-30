@@ -5,6 +5,7 @@
 
 if(PNG_FOUND)
 
+
 set(sources_common
     pngwriter.cpp
     workload.cpp
@@ -23,10 +24,20 @@ set(sources_maps
     maps/requesthandler.cpp
     maps/maps_image_generator.cpp
 )
-    
+
+set(resources_maps
+    maps/resources/mandelbrot.ico
+    maps/resources/mandelbrot.html
+)
+
+set(resources
+    mandelbrotkernel.cl
+)    
 
 
 
+embed_resources(SOURCES ${resources_maps} OUTPUT resources_maps_precompiled)
+embed_resources(SOURCES ${resources} OUTPUT resources_precompiled)
 
 source_group("Source Files" FILES ${sources_common} ${sources_main} ${sources_maps})
 
@@ -37,6 +48,7 @@ source_group("Source Files" FILES ${sources_common} ${sources_main} ${sources_ma
 # add example executable
 add_hpx_executable(mandelbrot
                    SOURCES ${sources_main} ${sources_common}
+                           ${resources_precompiled}
                    DEPENDENCIES opencl_component
                    COMPONENT_DEPENDENCIES iostreams
                    FOLDER "Examples/OpenCL/mandelbrot")
@@ -56,6 +68,8 @@ add_hpx_pseudo_dependencies(examples.opencl.mandelbrot
 # add example executable
 add_hpx_executable(mandelbrot_maps
                    SOURCES ${sources_maps} ${sources_common}
+                           ${resources_precompiled}
+                           ${resources_maps_precompiled}
                    DEPENDENCIES opencl_component
                    COMPONENT_DEPENDENCIES iostreams
                    FOLDER "Examples/OpenCL/mandelbrot")

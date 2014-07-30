@@ -22,7 +22,7 @@ ${HPX_ROOT}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
 # add our cmake path
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH} )
 
-###########################
+########################################################################
 # Include hpx
 #
 
@@ -32,6 +32,11 @@ set(HPX_RPATH "${CMAKE_BINARY_DIR}/lib/hpx:${HPX_RPATH}:${CMAKE_INSTALL_PREFIX}/
 include_directories(${HPX_INCLUDE_DIR})
 link_directories(${HPX_LIBRARY_DIR})
 
+
+########################################################################
+# enable resource precompiler
+#
+include(EmbedResources)
 
 ########################################################################
 # configurations

@@ -256,7 +256,7 @@ mandelbrotworker::worker_starter(
     
         // build opencl program
         hpx::opencl::program mandelbrot_program =
-                     device.create_program_with_source(mandelbrot_kernels);
+                     device.create_program_with_source(mandelbrotkernel_cl);
         if(verbose)
             hpx::cout << "#" << id << ": " << "compiling" << hpx::endl;
         mandelbrot_program.build();
