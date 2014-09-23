@@ -6,13 +6,15 @@ cmake_minimum_required(VERSION 2.8.4 FATAL_ERROR)
 project(hpxcl CXX)
 
 # Find and include HPX settings
-if(NOT HPX_DIR)
+if(NOT HPX_ROOT)
     #  message("HPX_DIR not set, checking environment variables...")
     #  set(HPX_DIR $ENV{HPX_ROOT}/lib/cmake/hpx)
     #  if(NOT DEFINED HPX_DIR)
-    message(FATAL_ERROR "HPX_DIR not set, unable to find HPX!")
+    message(FATAL_ERROR "HPX_ROOT not set, unable to find HPX!")
     #  endif()
 endif()
+
+set(HPX_DIR "${HPX_ROOT}/lib/cmake/hpx")
 
 # add our cmake path
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH} )
