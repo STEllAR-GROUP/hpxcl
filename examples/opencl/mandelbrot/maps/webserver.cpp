@@ -175,8 +175,8 @@ webserver::read_filename_from_request(std::string line)
 
 struct send_data_data
 {
-    std::string header = "";
-    std::string footer = "";
+    std::string header;
+    std::string footer;
     boost::shared_ptr<std::vector<char>> data;
     std::vector<boost::asio::const_buffer> buffers;
 };
