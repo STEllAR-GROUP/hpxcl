@@ -9,7 +9,7 @@
 #include <string>
 
 #include "kernel.hpp"
-//#include  "../fwd_declarations.hpp"
+#include "../buffer.cpp"
 
 using namespace hpx::cuda::server;
 
@@ -41,12 +41,12 @@ void kernel::set_block_dim(unsigned int block_x, unsigned int block_y, unsigned 
     this->block.z = block_z;
 }
 
-void kernel::load_module(const std::string file_name)
+void kernel::load_module(std::string file_name)
 {
     this->module_name = file_name;
 }
 
-void kernel::load_kernel(const std::string kernal_name)
+void kernel::load_kernel(std::string kernal_name)
 {
     this->kernel_name = kernel_name;
 }
@@ -69,4 +69,9 @@ kernel::Dim3 kernel::get_grid()
 kernel::Dim3 kernel::get_block()
 {
     return this->block;
+}
+
+void kernel::set_arg(size_t size, hpx::cuda::buffer cu_buffer)
+{
+    
 }

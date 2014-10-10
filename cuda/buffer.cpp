@@ -24,9 +24,9 @@ HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(cuda_buffer_type,buffer);
 HPX_REGISTER_ACTION(
     cuda_buffer_type::wrapped_type::size_action,
 	cuda_buffer_size_action);
+/*HPX_REGISTER_ACTION(
+	cuda_buffer_type::wrapped_type::enqueue_read_action,
+	cuda_buffer_enqueue_read_action);
 HPX_REGISTER_ACTION(
-	cuda_buffer_type::wrapped_type::push_back_action,
-	cuda_buffer_push_back_action);
-HPX_REGISTER_ACTION(
-	cuda_buffer_type::wrapped_type::load_args_action,
-	cuda_buffer_load_args_action);
+	cuda_buffer_type::wrapped_type::enqueue_write_action,
+	cuda_buffer_enqueue_write_action);*/

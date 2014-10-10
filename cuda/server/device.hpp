@@ -18,6 +18,8 @@
 
 #include  "../fwd_declarations.hpp"
 #include  "../kernel.hpp"
+#include  "../buffer.hpp"
+#include  "../program.hpp"
 
 namespace hpx
 {
@@ -62,6 +64,8 @@ namespace hpx
         	 	device(int device_id);
  
   				~device();
+
+                void free();
 	     			 
                 int get_device_count();
 
@@ -86,10 +90,11 @@ namespace hpx
                 template <typename T>
                 void create_host_ptr(T value, size_t const byte_count)
                 {
-                    Host_ptr<T> temp;
-                    temp.host_ptr = (T*)malloc(byte_count);
-                    temp.byte_count = byte_count;
-                    host_ptrs.push_back(temp);
+                    //Host_ptr<T> temp;
+                    //temp.host_ptr = (T*)malloc(byte_count);
+                    //*(temp.host_ptr) = value;
+                    //temp.byte_count = byte_count;
+                    //host_ptrs.push_back(temp);
                 }
 
                 void mem_cpy_h_to_d(unsigned int variable_id);
@@ -97,6 +102,10 @@ namespace hpx
                 void mem_cpy_d_to_h(unsigned int variable_id);
 
                 void launch_kernel(hpx::cuda::kernel cu_kernel);
+
+                hpx::cuda::program create_program_with_source(std::string source);
+
+                hpx::cuda::buffer create_buffer(size_t size);
 
                 HPX_DEFINE_COMPONENT_ACTION(device, calculate_pi);
                 HPX_DEFINE_COMPONENT_ACTION(device, get_cuda_info);
@@ -109,6 +118,9 @@ namespace hpx
                 HPX_DEFINE_COMPONENT_ACTION(device, mem_cpy_h_to_d);
                 HPX_DEFINE_COMPONENT_ACTION(device, mem_cpy_d_to_h);
                 HPX_DEFINE_COMPONENT_ACTION(device, launch_kernel);
+                HPX_DEFINE_COMPONENT_ACTION(device, free);
+                HPX_DEFINE_COMPONENT_ACTION(device, create_program_with_source);
+                HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
 
                 template <typename T>
                 struct create_host_ptr_action
@@ -153,6 +165,15 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::launch_kernel_action,
     device_launch_kernel_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::free_action,
+    dvice_free_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::create_program_with_source_action,
+    device_create_program_with_source_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::create_buffer_action,
+    device_create_buffer_action);
 HPX_REGISTER_ACTION_DECLARATION_TEMPLATE(
     (template <typename T>),
     (hpx::cuda::server::device::create_host_ptr_action<T>)

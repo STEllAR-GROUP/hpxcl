@@ -13,7 +13,8 @@
 
 #include <cuda.h>
 
-#include  "../fwd_declarations.hpp"
+#include "../buffer.hpp"
+//#include  "../fwd_declarations.hpp"
 
 namespace hpx
 {
@@ -26,6 +27,7 @@ namespace hpx
                     hpx::components::managed_component_base<kernel>
                 >
             {  
+
                 public:
                 struct Dim3
                 {
@@ -51,9 +53,9 @@ namespace hpx
 
                 void set_block_dim(unsigned int block_x, unsigned int block_y, unsigned int block_z);
 
-                void load_module(const std::string file_name);
+                void load_module(std::string file_name);
 
-                void load_kernel(const std::string kernal_name);
+                void load_kernel(std::string kernal_name);
 
                 std::string get_function();
 
@@ -62,6 +64,8 @@ namespace hpx
                 Dim3 get_grid();
 
                 Dim3 get_block();
+
+                void set_arg(size_t size, hpx::cuda::buffer cu_buffer);
 
                 HPX_DEFINE_COMPONENT_ACTION(kernel, set_stream);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, load_module);
@@ -72,6 +76,7 @@ namespace hpx
                 HPX_DEFINE_COMPONENT_ACTION(kernel, get_module);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, get_grid);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, get_block);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, set_arg);
 
                 private:
                 CUstream cu_stream;
@@ -111,5 +116,8 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::get_grid_action,
     cuda_kernel_get_grid_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::kernel::set_arg_action, 
+    cuda_kernel_set_arg_action);
 
 #endif

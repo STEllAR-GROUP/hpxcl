@@ -51,3 +51,6 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
     cuda_device_type::wrapped_type::launch_kernel_action, 
     cuda_device_launch_kernel_action);
+HPX_REGISTER_ACTION(
+    cuda_device_type::wrapped_type::free_action,
+    cuda_device_free_action);

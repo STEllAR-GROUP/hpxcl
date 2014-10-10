@@ -7,7 +7,7 @@
 #define BUFFER_1_HPP
 
 #include <hpx/include/components.hpp>
-#include "stubs/kernel.hpp"
+#include "stubs/buffer.hpp"
 
 namespace hpx
 {
@@ -25,27 +25,33 @@ namespace hpx
                 buffer()
                 {}
 
-                buffer(hpx::future<hpx::naming::id_type> const& gid)
-                : base_type(gid)
+                buffer(hpx::future<hpx::naming::id_type> && gid)
+                : base_type(std::move(gid))
                 {}
 
-                size_t size()
+                hpx::lcos::future<size_t> size()
                 {
                     BOOST_ASSERT(this->get_gid());
                     return this->base_type::size(this->get_gid());
                 }
 
-                void push_back(void *arg)
+                size_t size_sync()
                 {
                     BOOST_ASSERT(this->get_gid());
-                    this->base_type::push_back(this->get_gid(),arg);
+                    return this->base_type::size_sync(this->get_gid());
                 }
 
-                void load_args()
+                /*void enqueue_read(size_t offset, size_t size) const
                 {
                     BOOST_ASSERT(this->get_gid());
-                    this->base_type::load_config(this->get_gid());
+                    this->base_type::enqueue_read(this->get_gid());
                 }
+
+                void enqueue_write(size_t offset, size_t size, const void* data) const
+                {
+                    BOOST_ASSERT(this->get_gid());
+                    this->base_type::enqueue_read(this->get_gid());
+                }*/
         };
     }
 }

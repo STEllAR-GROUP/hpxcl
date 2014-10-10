@@ -9,6 +9,8 @@
 #include <hpx/include/components.hpp>
 #include "stubs/device.hpp"
 #include "kernel.hpp"
+#include "buffer.hpp"
+#include "program.hpp"
 
 namespace hpx
 {
@@ -47,10 +49,10 @@ namespace hpx
                 this->base_type::set_device(this->get_gid(),dev);
             }
 
-            hpx::lcos::future<float> calculate_pi_async(int nthreads,int nblocks)
+            hpx::lcos::future<float> calculate_pi(int nthreads,int nblocks)
             {
                 HPX_ASSERT(this->get_gid());
-                return this->base_type::calculate_pi_async(this->get_gid(),nthreads,nblocks);
+                return this->base_type::calculate_pi(this->get_gid(),nthreads,nblocks);
             }
 
             float calculate_pi_sync(int nthreads,int nblocks)
@@ -60,25 +62,25 @@ namespace hpx
             }
 
             hpx::lcos::future<int>
-            get_device_id_async()
+            get_device_id()
             {
                 HPX_ASSERT(this->get_gid());
-                return this->base_type::get_device_id_async(this->get_gid());
+                return this->base_type::get_device_id(this->get_gid());
             }
 
-            int get_device_id()
+            int get_device_id_sync()
             {
                 HPX_ASSERT(this->get_gid());
                 return this->base_type::get_device_id_sync(this->get_gid());
             }
 
-            hpx::lcos::future<int> get_context_async()
+            hpx::lcos::future<int> get_context()
             {
                 HPX_ASSERT(this->get_gid());
-                return this->base_type::get_context_async(this->get_gid());
+                return this->base_type::get_context(this->get_gid());
             }
 
-            int get_context()
+            int get_context_sync()
             {
                 HPX_ASSERT(this->get_gid());
                 return this->base_type::get_context_sync(this->get_gid());
@@ -90,16 +92,16 @@ namespace hpx
                 return this->base_type::wait(this->get_gid());
             }
 
-            hpx::lcos::future<void> create_device_ptr_async(size_t const byte_count)
+            hpx::lcos::future<void> create_device_ptr(size_t const byte_count)
             {
                 HPX_ASSERT(this->get_gid());
-                return this->base_type::create_device_ptr_async(this->get_gid(), byte_count);
+                return this->base_type::create_device_ptr(this->get_gid(), byte_count);
             }
 
-            void create_device_ptr(size_t const byte_count)
+            void create_device_ptr_sync(size_t const byte_count)
             {
                 HPX_ASSERT(this->get_gid());
-                this->base_type::create_device_ptr(this->get_gid(), byte_count);
+                this->base_type::create_device_ptr_sync(this->get_gid(), byte_count);
             }
 
             template <typename T>
@@ -116,40 +118,76 @@ namespace hpx
                 this->base_type::create_host_ptr_non_blocking(this->get_gid(), value, byte_count);
             }
 
-            hpx::lcos::future<void> mem_cpy_h_to_d_async(unsigned int variable_id)
+            hpx::lcos::future<void> mem_cpy_h_to_d(unsigned int variable_id)
             {
                 HPX_ASSERT(this->get_gid());
-                return this->base_type::mem_cpy_h_to_d_async(this->get_gid(), variable_id);
+                return this->base_type::mem_cpy_h_to_d(this->get_gid(), variable_id);
             }
 
-            void mem_cpy_h_to_d(unsigned int variable_id)
+            void mem_cpy_h_to_d_sync(unsigned int variable_id)
             {
                 HPX_ASSERT(this->get_gid());
-                this->base_type::mem_cpy_h_to_d(this->get_gid(), variable_id);
+                this->base_type::mem_cpy_h_to_d_sync(this->get_gid(), variable_id);
             }
 
-            hpx::lcos::future<void> mem_cpy_d_to_h_async(unsigned int variable_id)
+            hpx::lcos::future<void> mem_cpy_d_to_h(unsigned int variable_id)
             {
                 HPX_ASSERT(this->get_gid());
-                return this->base_type::mem_cpy_d_to_h_async(this->get_gid(), variable_id);
+                return this->base_type::mem_cpy_d_to_h(this->get_gid(), variable_id);
             }
 
-            void mem_cpy_d_to_h(unsigned int variable_id)
+            void mem_cpy_d_to_h_sync(unsigned int variable_id)
             {
                 HPX_ASSERT(this->get_gid());
-                this->base_type::mem_cpy_d_to_h(this->get_gid(), variable_id);
+                this->base_type::mem_cpy_d_to_h_sync(this->get_gid(), variable_id);
             }
 
-            hpx::lcos::future<void> launch_kernel_async(hpx::cuda::kernel cu_kernel)
+            hpx::lcos::future<void> launch_kernel(hpx::cuda::kernel cu_kernel)
             {
                 BOOST_ASSERT(this->get_gid());
-                return this->base_type::launch_kernel_async(this->get_gid(), cu_kernel);
+                return this->base_type::launch_kernel(this->get_gid(), cu_kernel);
             }
 
-            void launch_kernel(hpx::cuda::kernel cu_kernel)
+            void launch_kernel_sync(hpx::cuda::kernel cu_kernel)
             {
                 BOOST_ASSERT(this->get_gid());
-                this->base_type::launch_kernel(this->get_gid(), cu_kernel);
+                this->base_type::launch_kernel_sync(this->get_gid(), cu_kernel);
+            }
+
+            /*hpx::lcos::future<void> free()
+            {
+                BOOST_ASSERT(this->get_gid());
+                //return this->base_type::free(this->get_gid());
+            }*/
+
+            void free_sync()
+            {
+                BOOST_ASSERT(this->get_gid());
+                this->base_type::free_sync(this->get_gid());
+            }
+
+            hpx::cuda::program create_program_with_source_sync(std::string source)
+            {
+                BOOST_ASSERT(this->get_gid());
+                return this->base_type::create_program_with_source_sync(this->get_gid(), source);
+            }
+
+            hpx::lcos::future<hpx::cuda::program> create_program_with_source(std::string source)
+            {
+                BOOST_ASSERT(this->get_gid());
+                return this->base_type::create_program_with_source(this->get_gid(), source);
+            }
+
+            hpx::lcos::future<hpx::cuda::buffer> create_buffer(size_t size)
+            {
+                BOOST_ASSERT(this->get_gid());
+                return this->base_type::create_buffer(this->get_gid(), size);
+            }
+
+            hpx::cuda::buffer create_buffer_sync(size_t size)
+            {
+                BOOST_ASSERT(this->get_gid());
+                return this->base_type::create_buffer_sync(this->get_gid(), size);
             }
         };
 	}

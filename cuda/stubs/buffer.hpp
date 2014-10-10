@@ -10,7 +10,7 @@
 #include <hpx/runtime/applier/apply.hpp>
 #include <hpx/include/async.hpp>
 
-#include "../sever/kernel.hpp"
+#include "../server/buffer.hpp"
 
 namespace hpx
 {
@@ -21,30 +21,27 @@ namespace hpx
             struct buffer
                 : hpx::components::stub_base<server::kernel>
             {
-            	static size_t size(hpx::naming::id_type const& gid)
+            	static hpx::lcos::future<size_t> size(hpx::naming::id_type const& gid)
                 {
                     typedef server::buffer::size_action action_type;
-                    hpx::apply<action_type>(gid);
+                    return hpx::async<action_type>(gid);
                 }
 
-                //figure out how to overload these two functions
-                static void push_back(hpx::naming::id_type const& gid)
+                static size_t size_sync(hpx::naming::id_type const& gid)
                 {
-                    typedef server::buffer::push_back action_type;
-                    hpx::apply<action_type>(gid);
+                    return size(gid).get();
+                }
+                /*static hpx::lcos::future<void> enqueue_read(hpx::naming::id_type const& gid, size_t offset, size_t size) const
+                {
+                    typedef server::buffer::enqueue_read_action action_type;
+                    return hpx::apply<action_type>(gid, offset, size);
                 }
 
-                static void push_back(hpx::naming::id_type const& gid)
+                static hpx::lcos::future<void> enqueue_write(hpx::naming::id_type const& gid, size_t offset, size_t size, const void* data) const
                 {
-                    typedef server::buffer::push_back action_type;
-                    hpx::apply<action_type>(gid);
-                }
-    
-                static void load_args(hpx::naming::id_type const& gid)
-                {
-                    typedef server::buffer::load_args action_type;
-                    //return hpx::apply<action_type>(gid);
-                }
+                    typedef server::buffer::enqueue_write_action action_type;
+                    return hpx::apply<action_type>(gid, offset, size, data);
+                }*/
             };
         }
     }
