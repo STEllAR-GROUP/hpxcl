@@ -20,6 +20,10 @@ using namespace hpx::cuda::server;
 
 program::program(){}
 
+program::program(hpx::naming::id_type device_id, std::string code){}
+
+program::program(hpx::naming::id_type device_id, hpx::util::serialize_buffer<char> binary){}
+
 program::~program(){}
 
 //function used to build a gpu architecture specific cuda kernel

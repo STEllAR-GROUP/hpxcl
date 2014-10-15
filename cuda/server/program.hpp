@@ -29,14 +29,23 @@
  					>
  			{
  			 	private:
+
+ 			 	boost::shared_ptr<device> parent_device;
+ 			 	hpx::naming::id_type parent_device_id;
+
  			 	public:
- 			 	program();  			
+ 			 	program();
+
+ 			 	program(hpx::naming::id_type device_id, std::string code);
+
+ 			 	program(hpx::naming::id_type device_id, hpx::util::serialize_buffer<char> binary);  			
  			
  			 	~program();
 
  			 	void build();
  				
  				HPX_DEFINE_COMPONENT_ACTION(program, build);
+
  			};
  		}
  	}
