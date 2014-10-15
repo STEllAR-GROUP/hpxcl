@@ -9,7 +9,7 @@
 
     #include "cuda/device.hpp"
     //#include "cuda/event.hpp"
-    //#include "cuda/buffer.hpp"
+    #include "cuda/buffer.hpp"
     #include "cuda/kernel.hpp"
-
+	#include "cuda/program.hpp"
 #endif
