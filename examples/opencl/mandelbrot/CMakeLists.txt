@@ -28,6 +28,7 @@ set(sources_maps
 set(resources_maps
     maps/resources/mandelbrot.ico
     maps/resources/mandelbrot.html
+    maps/resources/canvasjs.min.js
 )
 
 set(resources

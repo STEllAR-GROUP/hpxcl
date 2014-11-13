@@ -97,6 +97,13 @@ private:
     void send_data(
                          boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
                          const char* content_type,
+                         boost::shared_ptr<std::vector<char>> data,
+                         bool is_not_an_answer = true);
+
+    // sends answer data to the client and sends '100 Continue'
+    void send_answer_data(
+                         boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
+                         const char* content_type,
                          boost::shared_ptr<std::vector<char>> data);
 
     // checks wether a socket is connected or not

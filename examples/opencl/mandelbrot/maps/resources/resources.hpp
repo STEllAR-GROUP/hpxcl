@@ -10,5 +10,7 @@
     extern const unsigned long mandelbrot_html_len;
     extern const char mandelbrot_ico[];
     extern const unsigned long mandelbrot_ico_len;
+    extern const char canvasjs_min_js[];
+    extern const unsigned long canvasjs_min_js_len;
 
 #endif

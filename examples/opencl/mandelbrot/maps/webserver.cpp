@@ -182,12 +182,22 @@ struct send_data_data
 };
 
 void
-webserver::send_data(boost::shared_ptr<tcp::socket> socket,
+webserver::send_answer_data(boost::shared_ptr<tcp::socket> socket,
                      const char* content_type,
                      boost::shared_ptr<std::vector<char>> data)
 {
-    
-    num_answers ++;
+    send_data(socket, content_type, data, false);
+
+}
+
+void
+webserver::send_data(boost::shared_ptr<tcp::socket> socket,
+                     const char* content_type,
+                     boost::shared_ptr<std::vector<char>> data,
+                     bool is_not_an_answer)
+{
+    if(!is_not_an_answer)
+        num_answers ++;
 
     // store all the data that we need to keep alive
     boost::shared_ptr<send_data_data> keep_alive_data = boost::make_shared<send_data_data>();
@@ -342,6 +352,40 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
         return;
     }
 
+    // send canvasjs.min.js
+    if(filename == "/canvasjs.min.js")
+    {
+        send_data(socket, "application/javascript",
+                  canvasjs_min_js, canvasjs_min_js_len);
+        return;
+    }
+
+    // send gpu infos
+    if(filename == "/gpu_infos.xml")
+    {
+        // TODO
+        char xml_file [] = "<data><num_gpus>2</num_gpus><gpu_0>test</gpu_0><gpu_1>test2</gpu_1></data>";
+        send_data(socket, "text/xml", xml_file, strlen(xml_file));
+        return;
+    }
+
+    // send perf_data.xml
+    if(filename == "/perf_data.xml")
+    {
+        // TODO
+        std::string str;
+        str += "<perf_data>";
+        str += std::string("<gpu_0>") + std::to_string(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) + std::string("</gpu_0>");
+        str += std::string("<gpu_1>") + std::to_string(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) + std::string("</gpu_1>");
+        str += "</perf_data>";
+        
+        boost::shared_ptr<std::vector<char>> data =
+                  boost::make_shared<std::vector<char>>(str.begin(), str.end());
+
+        send_data(socket, "text/xml", data, true);
+        return;
+    }
+
     // if filename is empty, send "bad request"
     if(filename == "")
     {
@@ -384,7 +428,7 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
 
     // set done callback
     img_request->done = strand.wrap(boost::bind(
-                                        &webserver::send_data,
+                                        &webserver::send_answer_data,
                                         this,
                                         socket,
                                         "image/png",
