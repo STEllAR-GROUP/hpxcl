@@ -155,6 +155,11 @@
             var yVal_old = new Array(num_gpus);
             var yVal = new Array(num_gpus);
             
+            var yTime_old_old = 0;
+            var yTime_old = 0;
+            var yTime = 0;
+            var yTimeDiff;
+
             for(i = 0; i < num_gpus; i++)
             {
                 yVal[i] = 0;
@@ -169,13 +174,18 @@
     		var updateChart = function () {
                 perfdata=loadXMLDoc("perf_data.xml");
     			
+                yTime_old_old = yTime_old;
+                yTime_old = yTime;
+                yTime = parseInt(perfdata.getElementsByTagName("timestamp")[0].childNodes[0].nodeValue);
+                yTimeDiff = yTime - yTime_old_old;
+
                 for(i = 0; i < num_gpus; i++){
 
                     yVal_old_old[i] = yVal_old[i];
                     yVal_old[i] = yVal[i];
                     yVal[i] = parseFloat(perfdata.getElementsByTagName("gpu_" + i.toString())[0].childNodes[0].nodeValue);
                     
-                    yVal_deriv = (yVal[i] - yVal_old_old[i]) / (2.0 * updateInterval / 1000.0);
+                    yVal_deriv = (yVal[i] - yVal_old_old[i]) / (yTimeDiff / 1000.0);
                     datapoints[i].push({
                          x: xVal,
                          y: yVal_deriv

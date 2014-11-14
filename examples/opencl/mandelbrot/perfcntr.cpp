@@ -14,6 +14,8 @@ perfcntr_t::init(std::vector<std::string> gpu_names_)
     {
         num_pixels_calculated[i].store(0);
     }
+
+    start_time = boost::posix_time::microsec_clock::universal_time();
 }
 
 void
@@ -44,6 +46,18 @@ perfcntr_t::set_gpu_name(size_t gpuid, std::string gpu_name)
 {
     gpu_names[gpuid] = gpu_name;
 }
+
+long
+perfcntr_t::get_current_time()
+{
+    boost::posix_time::ptime now =
+        boost::posix_time::microsec_clock::universal_time();
+
+    boost::posix_time::time_duration diff = now - start_time;
+
+    return (long)diff.total_milliseconds();
+}
+
 
 perfcntr_t perfcntr;
 

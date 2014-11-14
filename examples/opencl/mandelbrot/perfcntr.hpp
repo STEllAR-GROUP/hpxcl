@@ -10,7 +10,7 @@
 
 #include <atomic>
 #include <string>
-
+#include <boost/date_time/local_time/local_time.hpp>
 
 namespace hpx { namespace opencl { namespace examples { namespace mandelbrot {
 
@@ -20,6 +20,7 @@ class perfcntr_t
         size_t num_gpus;
         std::vector<std::string> gpu_names;
         std::vector<std::atomic<unsigned long>> num_pixels_calculated;
+        boost::posix_time::ptime start_time;
 
     public:
         perfcntr_t(){
@@ -35,6 +36,8 @@ class perfcntr_t
         std::vector<unsigned long> get_counters();
 
         std::vector<std::string> get_gpu_names();
+
+        long get_current_time();
 };
 
 extern perfcntr_t perfcntr;

@@ -7,7 +7,6 @@
 
 #include <hpx/include/runtime.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <sstream>
 
@@ -394,6 +393,9 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
         std::string str;
         std::vector<unsigned long> perf_data = perfcntr.get_counters();
         str += "<perf_data>";
+        str += "<timestamp>";
+        str += std::to_string(perfcntr.get_current_time());
+        str += "</timestamp>";
         for(int i = 0; i < perf_data.size(); i++)
         {
             str += "<gpu_" + std::to_string(i) + ">";
