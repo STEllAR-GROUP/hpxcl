@@ -13,6 +13,8 @@
 
 #include "resources/resources.hpp"
 
+#include "../perfcntr.hpp"
+
 using namespace hpx::opencl::examples::mandelbrot;
 using boost::asio::ip::tcp;
 
@@ -364,8 +366,24 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
     if(filename == "/gpu_infos.xml")
     {
         // TODO
-        char xml_file [] = "<data><num_gpus>2</num_gpus><gpu_0>test</gpu_0><gpu_1>test2</gpu_1></data>";
-        send_data(socket, "text/xml", xml_file, strlen(xml_file));
+        std::vector<std::string> gpu_names = perfcntr.get_gpu_names();
+        
+        std::string gpu_infos = "";
+        gpu_infos += "<data><num_gpus>";
+        gpu_infos += std::to_string(gpu_names.size());
+        gpu_infos += "</num_gpus>";
+        for(size_t i = 0; i < gpu_names.size(); i++)
+        {
+            gpu_infos += "<gpu_" + std::to_string(i) + ">";
+            gpu_infos += gpu_names[i];
+            gpu_infos += "</gpu_" + std::to_string(i) + ">";
+        }
+        gpu_infos += "</data>";
+//        char xml_file [] = "<data><num_gpus>2</num_gpus><gpu_0>test</gpu_0><gpu_1>test2</gpu_1></data>";
+        std::cout << gpu_infos << std::endl; 
+        boost::shared_ptr<std::vector<char>> data =
+                  boost::make_shared<std::vector<char>>(gpu_infos.begin(), gpu_infos.end());
+        send_data(socket, "text/xml", data, true);
         return;
     }
 
@@ -374,9 +392,14 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
     {
         // TODO
         std::string str;
+        std::vector<unsigned long> perf_data = perfcntr.get_counters();
         str += "<perf_data>";
-        str += std::string("<gpu_0>") + std::to_string(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) + std::string("</gpu_0>");
-        str += std::string("<gpu_1>") + std::to_string(static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) + std::string("</gpu_1>");
+        for(int i = 0; i < perf_data.size(); i++)
+        {
+            str += "<gpu_" + std::to_string(i) + ">";
+            str += std::to_string(perf_data[i]);
+            str += "</gpu_" + std::to_string(i) + ">";
+        }
         str += "</perf_data>";
         
         boost::shared_ptr<std::vector<char>> data =

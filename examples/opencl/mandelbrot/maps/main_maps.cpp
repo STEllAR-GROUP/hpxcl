@@ -17,9 +17,12 @@
 #include "webserver.hpp"
 //#include "../maps_webserver.hpp"
 
+#include "../perfcntr.hpp"
 
 #include <string>
 #include <boost/shared_ptr.hpp>
+
+using hpx::opencl::examples::mandelbrot::perfcntr;
 
 int hpx_main(boost::program_options::variables_map & vm)
 {
@@ -51,6 +54,12 @@ int hpx_main(boost::program_options::variables_map & vm)
             hpx::cout << devices.size() << " OpenCL devices found!" << hpx::endl;
         }
 
+        std::vector<std::string> names(devices.size());
+        for(int i = 0; i < devices.size(); i++)
+        {
+            names[i] = "X";
+        }
+        perfcntr.init(names);
 
         size_t tilesize_x = 256;
         size_t tilesize_y = 256;

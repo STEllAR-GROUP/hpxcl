@@ -150,7 +150,19 @@
             };
 
     		var xVal = 0;
-    		var yVal = 100;	
+
+            var yVal_old_old = new Array(num_gpus);
+            var yVal_old = new Array(num_gpus);
+            var yVal = new Array(num_gpus);
+            
+            for(i = 0; i < num_gpus; i++)
+            {
+                yVal[i] = 0;
+                yVal_old[i] = 0;
+                yVal_old_old[i] = 0;
+            }
+
+
     		var updateInterval = 1000;
     		var dataLength = 50; // number of dataPoints visible at any point
 
@@ -158,11 +170,16 @@
                 perfdata=loadXMLDoc("perf_data.xml");
     			
                 for(i = 0; i < num_gpus; i++){
-                    yVal = parseFloat(perfdata.getElementsByTagName("gpu_" + i.toString())[0].childNodes[0].nodeValue);
- 				    datapoints[i].push({
+
+                    yVal_old_old[i] = yVal_old[i];
+                    yVal_old[i] = yVal[i];
+                    yVal[i] = parseFloat(perfdata.getElementsByTagName("gpu_" + i.toString())[0].childNodes[0].nodeValue);
+                    
+                    yVal_deriv = (yVal[i] - yVal_old_old[i]) / (2.0 * updateInterval / 1000.0);
+                    datapoints[i].push({
                          x: xVal,
- 				    	 y: yVal
- 				    });
+                         y: yVal_deriv
+                    });
 
     			    if (datapoints[i].length > dataLength)
     			    {
@@ -181,7 +198,7 @@
     
     	}
 	</script>
-	<script type="text/javascript" src="/canvasjs.min.js"></script>
+	<script type="text/javascript" src="canvasjs.min.js"></script>
   </head>
   <body>
     <table class="blind">

@@ -10,9 +10,13 @@
 #include <cmath>
 #include <boost/atomic.hpp>
 
+#include "perfcntr.hpp"
+
 #define MAX_IMG_WIDTH 30000
 
 static boost::atomic<unsigned int> id_counter((unsigned int)0);
+
+using hpx::opencl::examples::mandelbrot::perfcntr;
 
 mandelbrotworker::mandelbrotworker(
                          hpx::opencl::device device_,
@@ -38,6 +42,8 @@ mandelbrotworker::mandelbrotworker(
                                  num_workers,
                                  workpacket_size_hint_x,
                                  workpacket_size_hint_y); 
+
+    perfcntr.set_gpu_name(id, device.device_info_to_string(device.get_device_info(CL_DEVICE_NAME))); 
 
 }
 
@@ -217,6 +223,9 @@ mandelbrotworker::worker_main(
     
             // copy calculation result to output buffer
             next_workload->pixeldata = readdata;
+
+            // add to performance counter
+            perfcntr.submit(id, next_workload->num_pixels_x * next_workload->num_pixels_y);
             
             // return calculated workload to work manager workload
             deliver_done_work(next_workload);

@@ -12,6 +12,7 @@ set(sources_common
     mandelbrotworker.cpp
     mandelbrotworker_buffermanager.cpp
     image_generator.cpp
+    perfcntr.cpp
 )
 
 set(sources_main
