@@ -6,11 +6,14 @@
 #ifndef HPXCL_MANDELBROT_PERFCNTR_HPP_
 #define HPXCL_MANDELBROT_PERFCNTR_HPP_
 
+#include <hpx/config.hpp>
+
 #include <vector>
 
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <string>
 #include <boost/date_time/local_time/local_time.hpp>
+
 
 namespace hpx { namespace opencl { namespace examples { namespace mandelbrot {
 
@@ -19,7 +22,7 @@ class perfcntr_t
     private:
         size_t num_gpus;
         std::vector<std::string> gpu_names;
-        std::vector<std::atomic<unsigned long>> num_pixels_calculated;
+        boost::atomic<unsigned long> num_pixels_calculated[100];
         boost::posix_time::ptime start_time;
 
     public:

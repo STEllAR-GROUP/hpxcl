@@ -369,13 +369,13 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
         
         std::string gpu_infos = "";
         gpu_infos += "<data><num_gpus>";
-        gpu_infos += std::to_string(gpu_names.size());
+        gpu_infos += std::to_string((long long)gpu_names.size());
         gpu_infos += "</num_gpus>";
         for(size_t i = 0; i < gpu_names.size(); i++)
         {
-            gpu_infos += "<gpu_" + std::to_string(i) + ">";
+            gpu_infos += "<gpu_" + std::to_string((long long)i) + ">";
             gpu_infos += gpu_names[i];
-            gpu_infos += "</gpu_" + std::to_string(i) + ">";
+            gpu_infos += "</gpu_" + std::to_string((long long)i) + ">";
         }
         gpu_infos += "</data>";
 //        char xml_file [] = "<data><num_gpus>2</num_gpus><gpu_0>test</gpu_0><gpu_1>test2</gpu_1></data>";
@@ -394,13 +394,13 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
         std::vector<unsigned long> perf_data = perfcntr.get_counters();
         str += "<perf_data>";
         str += "<timestamp>";
-        str += std::to_string(perfcntr.get_current_time());
+        str += std::to_string((long long)perfcntr.get_current_time());
         str += "</timestamp>";
         for(int i = 0; i < perf_data.size(); i++)
         {
-            str += "<gpu_" + std::to_string(i) + ">";
-            str += std::to_string(perf_data[i]);
-            str += "</gpu_" + std::to_string(i) + ">";
+            str += "<gpu_" + std::to_string((long long)i) + ">";
+            str += std::to_string((long long)perf_data[i]);
+            str += "</gpu_" + std::to_string((long long)i) + ">";
         }
         str += "</perf_data>";
         

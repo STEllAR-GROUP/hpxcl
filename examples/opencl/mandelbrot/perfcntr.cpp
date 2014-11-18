@@ -9,7 +9,6 @@ perfcntr_t::init(std::vector<std::string> gpu_names_)
     gpu_names = gpu_names_;
     num_gpus = gpu_names_.size();
     
-    num_pixels_calculated = std::vector<std::atomic<unsigned long>>(num_gpus);
     for(int i = 0; i<num_gpus; i++)
     {
         num_pixels_calculated[i].store(0);
