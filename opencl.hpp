@@ -8,7 +8,6 @@
 #define HPX_OPENCL_HPP_
 
     #include "opencl/device.hpp"
-    #include "opencl/event.hpp"
     #include "opencl/buffer.hpp"
     #include "opencl/program.hpp"
     #include "opencl/kernel.hpp"

@@ -7,11 +7,11 @@
 
 set(tests
     initialization
-    buffer_read_write
-    events_and_futures
-    kernel
-    future_enqueues
-    program_from_binary
+#    buffer_read_write
+#    events_and_futures
+#    kernel
+#    future_enqueues
+#    program_from_binary
    )
 
 
