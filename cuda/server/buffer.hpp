@@ -1,4 +1,3 @@
-
 // Copyright (c)		2013 Damond Howard
 // 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -43,14 +42,13 @@
  			 
  			 	~buffer();
  			 	
- 			 	/*void enqueue_read(size_t offset, size_t size) const;
-
+ 			 	void enqueue_read(size_t offset, size_t size) const;
+				
  			 	void enqueue_write(size_t offset, size_t size, const void* data) const;
- 			 	*/
- 			 	//HPX action definitions
+ 			 	
  			 	HPX_DEFINE_COMPONENT_ACTION(buffer, size);
- 			 	//HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read);
- 			 	//HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write);
+ 			 	HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read);
+ 			 	HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write);
  			};
  		}
  	}
@@ -59,12 +57,11 @@
  HPX_REGISTER_ACTION_DECLARATION(
  	hpx::cuda::server::buffer::size_action,
  	buffer_size_action);
- /*HPX_REGISTER_ACTION_DECLARATION(
+ HPX_REGISTER_ACTION_DECLARATION(
  	hpx::cuda::server::buffer::enqueue_read_action, 
  	buffer_enqueue_read_action);
  HPX_REGISTER_ACTION_DECLARATION(
  	hpx::cuda::server::buffer::enqueue_write_action,
  	buffer_enqueue_write_action);
-*/
- //HPX action declarations
+
  #endif //BUFFER_2_HPP

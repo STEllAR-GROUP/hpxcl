@@ -38,95 +38,31 @@ namespace hpx
                 CUstream cu_stream;
             	public:
        
-                event()
-                {
-                   cuEventCreate(&cu_event, CU_EVENT_DEFAULT);
-                   cuStreamCreate(&cu_stream, CU_STREAM_DEFAULT);  
-                } 
+                event(); 
 
-            	event(int event_id, unsigned int stream_id,unsigned int event_flag, unsigned int stream_flag)
-            	{
-                    this->event_id = event_id;
-                    this->stream_id = stream_id;
-                    cuEventCreate(&cu_event,event_flag);
-                    //Valid flags are 
-                    //CU_EVENT_DEFAULT
-                    //CU_EVENT_BLOCKING_SYNC
-                    //CU_EVENT_DISABLE_TIMING
-                    cuStreamCreate(&cu_stream, stream_flag);
-                    //valid flags are 
-                    //CU_STREAM_DEFAULT
-                    //CU_STREAM_NON_BLOCKING
-                }
+            	event(int event_id, unsigned int stream_id,unsigned int event_flag, unsigned int stream_flag);
                 //Create a CUDA Event object with flags
-                event(unsigned int event_id,unsigned int stream_id)
-                {      
-                    this->stream_id = stream_id;
-                    this->event_id = event_id;
-                    cuEventCreate(&cu_event, CU_EVENT_DEFAULT);
-                    cuStreamCreate(&cu_stream, CU_STREAM_DEFAULT);
-                }
+                event(unsigned int event_id,unsigned int stream_id);
                 //Destroy the CUDA Event
-                ~event()
-                {
-                    cuEventDestroy(cu_event);
-                }
+                ~event();
 
-                CUevent cuda_event()
-                {
-                    return this->cu_event;
-                }
+                CUevent cuda_event();
 
                 //Wrapper for the cudaEventSynchronize
                 //this function will be called by an io-threadpool thread to prevent the 
                 //blocking of an hpx thread 
                 static void 
                 hpx_cudaEventSynchronize(CUevent cu_event,
-                    boost::shared_ptr<hpx::lcos::local::promise<int> > p)
-                {
-                    //wait for the given event to complete
-                    cuEventSynchronize(cu_event);
-
-                    //return the error code via future
-                    p->set_value(0);
-                }
+                    boost::shared_ptr<hpx::lcos::local::promise<int> > p);
 
                 //waits for an event to happen
-                void await() const
-                {
-                    //create a promise
-                    boost::shared_ptr<hpx::lcos::local::promise<int> > p =
-                        boost::make_shared<hpx::lcos::local::promise<int> >();
-
-                    //get a reference to one of the IO specific HPX io_service objects ...
-                    hpx::util::io_service_pool* pool =
-                        hpx::get_runtime().get_thread_pool("io_pool");
-
-                    //...and schedule the handler to run the cudaEventSynchronize on one 
-                    //of the OS-threads.
-                    pool->get_io_service().post(
-                        hpx::util::bind(&hpx_cudaEventSynchronize,this->cu_event,p));
-
-                    //wait for event to finish
-                    p->get_future();
-                }
+                void await() const;
 
                 //Retruns true if the event is already finished
-                bool finished() const
-                {
-                    CUresult error = cuEventQuery(cu_event);
-                    if(error == CUDA_ERROR_NOT_READY)
-                        return false;
-                    else
-                        return true;
-                }
+                bool finished() const;
 
                 //Triggers the event
-                void trigger()
-                {
-                    //trigger the event on the parent device
-                    cuEventRecord(cu_event,cu_stream);
-                } 
+                void trigger();
 
                 //define event class actions
                 HPX_DEFINE_COMPONENT_ACTION(event,await);

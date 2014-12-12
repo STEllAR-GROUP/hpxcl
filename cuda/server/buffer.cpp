@@ -32,14 +32,16 @@ size_t buffer::size()
     return this->arg_buffer_size;
 }
 
-/*void buffer::enqueue_read(size_t offset, size_t size) const
+void buffer::enqueue_read(size_t offset, size_t size) const
 {
-	//read a buffer 
+	//read a buffer  
 }
 
 void buffer::enqueue_write(size_t offset, size_t size, const void* data) const
 {
-	//write to the buffer
-}*/
+	//either create pinned memory use cuda 6 memory or just do device copies manually
+	//buffer memory is on the device
+	
+}
 
 

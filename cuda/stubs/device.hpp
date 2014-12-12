@@ -54,18 +54,6 @@ namespace hpx
                     return devices;
                 }
 
-                static hpx::lcos::future<float>
-                calculate_pi(hpx::naming::id_type const& gid,int nthreads, int nblocks)
-                {
-                    typedef server::device::calculate_pi_action action_type;
-                    return hpx::async<action_type>(gid,nthreads,nblocks);
-                }
-
-                static float calculate_pi_sync(hpx::naming::id_type const& gid,int nthreads, int nblocks)
-                {
-                    return calculate_pi(gid,nthreads,nblocks).get();
-                }
-
                 static hpx::lcos::future<int>
                 get_device_id(hpx::naming::id_type const& gid)
                 {

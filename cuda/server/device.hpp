@@ -39,8 +39,7 @@ namespace hpx
             size_t byte_count;
          };
 
-         /////////////////////////////////////////////////
-         /// This class represents a cuda device /////////
+        //// This class represents a cuda device /////////
         class device
             :  public hpx::components::locking_hook<
                     hpx::components::managed_component_base<device> 
@@ -83,18 +82,16 @@ namespace hpx
 
                 static hpx::lcos::future<int> wait();   
 
-                float calculate_pi(int nthreads,int nblocks);
-
                 void create_device_ptr(size_t const byte_count);
 
                 template <typename T>
                 void create_host_ptr(T value, size_t const byte_count)
                 {
-                    //Host_ptr<T> temp;
-                    //temp.host_ptr = (T*)malloc(byte_count);
-                    //*(temp.host_ptr) = value;
-                    //temp.byte_count = byte_count;
-                    //host_ptrs.push_back(temp);
+                    Host_ptr<T> temp;
+                    temp.host_ptr = (T*)malloc(byte_count);
+                    (temp.host_ptr) = value;
+                    temp.byte_count = byte_count;
+                    host_ptrs.push_back(temp);
                 }
 
                 void mem_cpy_h_to_d(unsigned int variable_id);
@@ -107,7 +104,6 @@ namespace hpx
 
                 hpx::cuda::buffer create_buffer(size_t size);
 
-                HPX_DEFINE_COMPONENT_ACTION(device, calculate_pi);
                 HPX_DEFINE_COMPONENT_ACTION(device, get_cuda_info);
                 HPX_DEFINE_COMPONENT_ACTION(device, set_device);
                 HPX_DEFINE_COMPONENT_ACTION(device, get_all_devices);
@@ -132,9 +128,6 @@ namespace hpx
     }
 }
 
-HPX_REGISTER_ACTION_DECLARATION(
-	hpx::cuda::server::device::calculate_pi_action,
-	device_calculate_pi_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::get_cuda_info_action,
     device_get_cuda_info_action);

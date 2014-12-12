@@ -29,16 +29,34 @@ namespace hpx
                 : base_type(std::move(gid))
                 {}
 
-                hpx::lcos::future<void> build()
+                hpx::lcos::future<void> build(std::string NVCC_FLAGS)
                 {
                     HPX_ASSERT(this->get_gid());
-                    return base_type::build(this->get_gid());
+                    return base_type::build(this->get_gid(), NVCC_FLAGS);
                 }
 
-                void build_sync()
+                void build_sync(std::string NVCC_FLAGS)
                 {
                     HPX_ASSERT(this->get_gid());
-                    base_type::build_sync(this->get_gid());
+                    base_type::build_sync(this->get_gid(), NVCC_FLAGS);
+                }
+
+                hpx::lcos::future<void> create_kernel(std::string kernel_name)
+                {
+                    HPX_ASSERT(this->get_gid());
+                    return base_type::create_kernel(this->get_gid(), kernel_name);
+                }
+
+                void create_kernel_sync(std::string kernel_name)
+                {
+                    HPX_ASSERT(this->get_gid());
+                    base_type::create_kernel_sync(this->get_gid(), kernel_name);
+                }
+
+                void set_source(std::string source)
+                {
+                    HPX_ASSERT(this->get_gid());
+                    base_type::set_source_sync(this->get_gid(), source);
                 }
         };
     }

@@ -13,9 +13,11 @@
 #include <hpx/runtime/get_ptr.hpp>
 #include <hpx/include/util.hpp>
 
+#include <iostream>
 #include <cuda.h>
 
-#include  "../fwd_declarations.hpp"
+#include "../fwd_declarations.hpp"
+#include "../kernel.hpp"
 
  namespace hpx
  {
@@ -32,6 +34,8 @@
 
  			 	boost::shared_ptr<device> parent_device;
  			 	hpx::naming::id_type parent_device_id;
+ 			 	std::string kernel_source;
+ 			 	std::string kernel_name;
 
  			 	public:
  			 	program();
@@ -42,9 +46,15 @@
  			
  			 	~program();
 
- 			 	void build();
- 				
+ 			 	hpx::cuda::kernel create_kernel(std::string kernel_name);
+
+ 			 	void build(std::string NVCC_FLAGS);
+
+ 			 	void set_source(std::string source);
+
  				HPX_DEFINE_COMPONENT_ACTION(program, build);
+ 				HPX_DEFINE_COMPONENT_ACTION(program, create_kernel);
+ 				HPX_DEFINE_COMPONENT_ACTION(program, set_source);
 
  			};
  		}
@@ -54,5 +64,11 @@
 HPX_REGISTER_ACTION_DECLARATION(
 	hpx::cuda::server::program::build_action,
 	cuda_program_build_action);
+HPX_REGISTER_ACTION_DECLARATION(
+	hpx::cuda::server::program::create_kernel_action,
+	cuda_program_create_kernel_action);
+HPX_REGISTER_ACTION_DECLARATION(
+	hpx::cuda::server::program::set_source_action,
+	cuda_program_set_source_action);
 
  #endif //PROGRAM_2_HPP

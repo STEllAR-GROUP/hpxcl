@@ -11,10 +11,14 @@
 #include <hpx/hpx_init.hpp>
 #include <hpx/include/runtime.hpp>
 
+#include <sstream>
+#include <cstring>
 #include <cuda.h>
 #include <cuda_runtime.h>
 
 #include "program.hpp"
+#include "kernel.hpp"
+#include "../kernel.hpp"
 
 using namespace hpx::cuda::server;
 
@@ -26,8 +30,33 @@ program::program(hpx::naming::id_type device_id, hpx::util::serialize_buffer<cha
 
 program::~program(){}
 
-//function used to build a gpu architecture specific cuda kernel
-void program::build()
+void program::set_source(std::string source)
 {
-	
+	//this->kernel_source = source;
+}
+
+hpx::cuda::kernel program::create_kernel(std::string kernel_name)
+{
+	typedef hpx::cuda::server::kernel kernel_type;
+
+	hpx::cuda::kernel cu_kernel(
+		hpx::components::new_<kernel_type>(hpx::find_here()));
+	return cu_kernel;
+}
+
+//function used to build a gpu architecture specific cuda kernel
+void program::build(std::string NVCC_FLAGS)
+{
+	std::string NVCC = " ";
+	std::string kernel_name = " ";
+    int nvcc_exit_status = system(
+		(std::string(NVCC) + " -ptx " + NVCC_FLAGS + " " + kernel_name
+			+ " -o " + kernel_name).c_str()
+			);
+
+	if (nvcc_exit_status)
+	{
+		std::cerr << "ERROR: nvcc exits with status code: " << nvcc_exit_status	<< std::endl;
+		exit(1);
+	}
 }

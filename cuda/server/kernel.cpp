@@ -8,8 +8,10 @@
 
 #include <string>
 
+#include  "../fwd_declarations.hpp"
+
 #include "kernel.hpp"
-#include "../buffer.cpp"
+#include "../buffer.hpp"
 
 using namespace hpx::cuda::server;
 
@@ -73,5 +75,5 @@ kernel::Dim3 kernel::get_block()
 
 void kernel::set_arg(size_t size, hpx::cuda::buffer cu_buffer)
 {
-    
+    ///sets the argument for a kernel using a buffer
 }

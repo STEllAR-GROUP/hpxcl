@@ -12,4 +12,5 @@
     #include "cuda/buffer.hpp"
     #include "cuda/kernel.hpp"
 	#include "cuda/program.hpp"
+    #include "cuda/std.hpp"
 #endif

@@ -49,18 +49,6 @@ namespace hpx
                 this->base_type::set_device(this->get_gid(),dev);
             }
 
-            hpx::lcos::future<float> calculate_pi(int nthreads,int nblocks)
-            {
-                HPX_ASSERT(this->get_gid());
-                return this->base_type::calculate_pi(this->get_gid(),nthreads,nblocks);
-            }
-
-            float calculate_pi_sync(int nthreads,int nblocks)
-            {
-                HPX_ASSERT(this->get_gid());
-                return this->base_type::calculate_pi_sync(this->get_gid(),nthreads,nblocks);
-            }
-
             hpx::lcos::future<int>
             get_device_id()
             {
@@ -154,11 +142,13 @@ namespace hpx
                 this->base_type::launch_kernel_sync(this->get_gid(), cu_kernel);
             }
 
-            /*hpx::lcos::future<void> free()
+            /*
+            hpx::lcos::future<void> free()
             {
                 BOOST_ASSERT(this->get_gid());
-                //return this->base_type::free(this->get_gid());
-            }*/
+                return this->base_type::free(this->get_gid());
+            }
+            */
 
             void free_sync()
             {

@@ -22,9 +22,6 @@ typedef hpx::components::managed_component<
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(cuda_device_type,device);
 
 HPX_REGISTER_ACTION(
-    cuda_device_type::wrapped_type::calculate_pi_action,
-    cuda_device_calculate_pi_action);
-HPX_REGISTER_ACTION(
     cuda_device_type::wrapped_type::get_cuda_info_action,
     cuda_device_get_cuda_info_action);
 HPX_REGISTER_ACTION(

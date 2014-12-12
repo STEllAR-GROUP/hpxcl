@@ -16,13 +16,16 @@
 #include <thrust/version.h>
 #include <boost/make_shared.hpp>
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <vector>
 
-#include  "../fwd_declarations.hpp"
 #include "../cuda/kernel.cuh"
+
 #include "device.hpp"
-#include "../server/kernel.hpp"
+#include "kernel.hpp"
+#include "buffer.hpp"
+#include "program.hpp"
 
 #include "../kernel.hpp"
 #include "../buffer.hpp"
@@ -135,8 +138,6 @@ void device::get_cuda_info()
     void device::do_wait(boost::shared_ptr<hpx::lcos::local::promise<int> > p)
     {
         p->set_value(0);   
-       	float x = pi(10,10);
-        std::cout << x << std::endl;
     }
 
    	hpx::lcos::future<int> device::wait()
@@ -152,11 +153,6 @@ void device::get_cuda_info()
         return p->get_future();
     }   
 
-    float device::calculate_pi(int nthreads,int nblocks)
-    {
-        return pi(nthreads,nblocks);
-    }
-
     void device::create_device_ptr(size_t const byte_count)
     {
         Device_ptr temp;
@@ -165,7 +161,6 @@ void device::get_cuda_info()
         device_ptrs.push_back(temp);
         Host_ptr<int> temp2;
         temp2.host_ptr = (int*)malloc(byte_count);
-        //*(temp.host_ptr) = value;
         host_ptrs.push_back(temp2);
     }
 
@@ -189,35 +184,34 @@ void device::get_cuda_info()
         CUfunction cu_function;
         CUmodule cu_module;
         CUresult cu_error;
-
-        char *cu_kernel_name = new char[cu_kernel.get_function_sync().size()+1];
-        cu_kernel_name[cu_kernel.get_function_sync().size()] = 0;
-        memcpy(cu_kernel_name, cu_kernel.get_function_sync().c_str(), cu_kernel.get_function_sync().size());
         
+        std::cout << "function name is " << cu_kernel.get_function_sync().c_str() << std::endl;
         cu_error = cuModuleLoad(&cu_module, (char*)cu_kernel.get_module_sync().c_str());
         std::cout << "loading module returns " << (unsigned int)cu_error << std::endl;
 
-        std::cout << "kernel name =" << cu_kernel_name << std::endl;
         cu_error = cuModuleGetFunction(&cu_function, cu_module, /*(char*)cu_kernel_name*/"kernel1");
         std::cout << "loading function returns " << (unsigned int)cu_error << std::endl;
 
         cu_error = cuLaunchKernel(cu_function, grid.x, grid.y, grid.z, block.x, block.y, block.z, 0, 0, args, 0);
         std::cout << "launching kernel returns " << (unsigned int)cu_error << std::endl;
-        
-        delete[] cu_kernel_name;
-
     }
 
-    //cuda jit compilation
     hpx::cuda::program device::create_program_with_source(std::string source)
     {
+        //typedef hpx::cuda::server::program program_type;
+
+        /*hpx::cuda::program cu_program(
+            hpx::components::new_<program_type>(hpx::find_here()));*/
         hpx::cuda::program cu_program;
         return cu_program;
     }
 
-    //returns buffer object
     hpx::cuda::buffer device::create_buffer(size_t size)
     {
+        //typedef hpx::cuda::server::buffer buffer_type;
+        
+        /*hpx::cuda::buffer cu_buffer(
+            hpx::components::new_<buffer_type>(hpx::find_here()));*/
         hpx::cuda::buffer cu_buffer;
         return cu_buffer;
     }

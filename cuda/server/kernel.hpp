@@ -14,7 +14,7 @@
 #include <cuda.h>
 
 #include "../buffer.hpp"
-//#include  "../fwd_declarations.hpp"
+#include  "../fwd_declarations.hpp"
 
 namespace hpx
 {
