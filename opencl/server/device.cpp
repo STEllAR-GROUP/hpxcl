@@ -19,11 +19,12 @@ using namespace hpx::opencl::server;
 device::device()
 {}
 
+// External destructor action.
+// This is needed because OpenCL calls only run properly on large stack size.
 namespace hpx { namespace opencl { namespace server {
     static void device_cleanup(uintptr_t command_queue_ptr,
                                uintptr_t context_ptr)
     {
-    
         cl_int err;
 
         cl_command_queue command_queue = (cl_command_queue) command_queue_ptr;
@@ -72,10 +73,12 @@ device::~device()
 void
 device::init(cl_device_id _device_id, bool enable_profiling)
 {
+    /*
     // TODO remove
     hpx::cout << std::string("Threadsize: ")
               << std::hex << hpx::threads::get_ctx_ptr()->get_stacksize()
               << std::string("\n") << hpx::flush;
+    */
 
     this->device_id = _device_id;
 

@@ -22,10 +22,10 @@ static void printinfo(size_t i, size_t j, std::string info_type,
 }
 
 static std::string
-device_uint_to_string(hpx::future<std::vector<char>> data_future)
+device_uint_to_string(hpx::future<hpx::util::serialize_buffer<char>> data_future)
 {
 
-    std::vector<char> data_raw = data_future.get();
+    hpx::util::serialize_buffer<char> data_raw = data_future.get();
 
     cl_uint res = *((cl_uint*)data_raw.data());
     
@@ -37,10 +37,10 @@ device_uint_to_string(hpx::future<std::vector<char>> data_future)
 
 }
 static std::string
-device_type_to_string(hpx::future<std::vector<char>> type_future)
+device_type_to_string(hpx::future<hpx::util::serialize_buffer<char>> type_future)
 {
 
-    std::vector<char> type_raw = type_future.get();
+    hpx::util::serialize_buffer<char> type_raw = type_future.get();
     cl_device_type type = *((cl_device_type*) type_raw.data());
 
     std::vector<std::string> typelist;

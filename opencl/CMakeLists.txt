@@ -15,8 +15,8 @@ add_hpx_component(opencl
             device.cpp
             get_devices.cpp
             tools.cpp
-            server/get_devices.cpp
             server/device.cpp
+            server/get_devices.cpp
    HEADERS  device.hpp
             get_devices.hpp
             export_definitions.hpp
