@@ -52,19 +52,31 @@ namespace hpx { namespace opencl{ namespace server{
 
     private:
         ///////////////////////////////////////////////
+        // Private Member Functions
+        //
+        
+        // Error Callback
+        static void CL_CALLBACK error_callback(const char*, const void*,
+                                               size_t, void*);
+
+    private:
+        ///////////////////////////////////////////////
         // Private Member Variables
         //
         cl_device_id        device_id;
         cl_platform_id      platform_id;
-
+        cl_context          context;
+        cl_command_queue    command_queue;
 
     };
 }}}
 
 //[opencl_management_registration_declarations
+HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::device::get_device_info_action);
 HPX_REGISTER_ACTION_DECLARATION(
         hpx::opencl::server::device::get_device_info_action,
         opencl_device_get_device_info_action);
+HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::device::get_platform_info_action);
 HPX_REGISTER_ACTION_DECLARATION(
         hpx::opencl::server::device::get_platform_info_action,
         opencl_device_get_platform_info_action);

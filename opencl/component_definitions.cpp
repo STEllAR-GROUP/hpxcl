@@ -20,21 +20,11 @@ typedef hpx::components::managed_component<
                         hpx::opencl::server::device> device_type;
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(device_type, device);
 
-/*
-typedef  hpx::components::server::create_component_action2 <
-                hpx::opencl::server::device,
-                hpx::opencl::server::clx_device_id,
-                bool
-         > device_constructor;
-HPX_ACTION_USES_LARGE_STACK(device_constructor);
-*/
 
 HPX_REGISTER_ACTION(device_type::wrapped_type::get_device_info_action,
                     device_get_device_info_action);
-//HPX_ACTION_USES_LARGE_STACK(device_get_device_info_action);
 
 HPX_REGISTER_ACTION(device_type::wrapped_type::get_platform_info_action,
                     device_get_platform_info_action);
-//HPX_ACTION_USES_LARGE_STACK(device_get_platform_info_action);
 
 
