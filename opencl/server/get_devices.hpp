@@ -4,14 +4,14 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
-#ifndef HPX_OPENCL_SERVER_STD_HPP_
-#define HPX_OPENCL_SERVER_STD_HPP_
+#ifndef HPX_OPENCL_SERVER_GET_DEVICES_HPP_
+#define HPX_OPENCL_SERVER_GET_DEVICES_HPP_
+
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 
 #include <CL/cl.h>
 
-#include <vector>
-#include <hpx/config.hpp>
-#include <hpx/hpx.hpp>
 #include <hpx/include/actions.hpp>
 
 #include <boost/serialization/vector.hpp>
@@ -36,8 +36,9 @@ namespace hpx { namespace opencl{ namespace server{
 
 }}}
 
-
+HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::get_devices_action);
 HPX_REGISTER_PLAIN_ACTION_DECLARATION(hpx::opencl::server::get_devices_action);
 
 
 #endif
+

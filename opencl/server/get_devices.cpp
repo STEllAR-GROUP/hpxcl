@@ -4,7 +4,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 
-#include "std.hpp"
+#include "get_devices.hpp"
 #include "../tools.hpp"
 #include "../device.hpp"
 
@@ -208,9 +208,13 @@ ensure_device_components_initialization()
             // Create a new device client 
             hpx::opencl::device device_client(
                 hpx::components::new_<hpx::opencl::server::device>(
-                            hpx::find_here(),
-                            (hpx::opencl::server::clx_device_id)device
-                                                    ));
+                            hpx::find_here()));
+            
+            // Initialize device server locally
+            boost::shared_ptr<hpx::opencl::server::device> device_server =
+                                 hpx::get_ptr<hpx::opencl::server::device>
+                                                (device_client.get_gid()).get();
+            device_server->init(device);
 
             // Add device to list of valid devices
             devices.get().push_back(device_client);
@@ -245,14 +249,11 @@ hpx::opencl::server::get_devices(cl_device_type type,
     BOOST_FOREACH( const std::vector<hpx::opencl::device>::value_type& device,
                    devices.get())
     {
-        // Get device OpenCL version
-        std::vector<char> cl_version_string_vec =
-                                device.get_device_info(CL_DEVICE_VERSION).get();
-
-        // Make String out of char array
-        std::string cl_version_string (cl_version_string_vec.begin(),
-                                       cl_version_string_vec.end());
-    
+        //
+        // Get device OpenCL version string
+        std::string cl_version_string = device.device_info_to_string(
+                                     device.get_device_info(CL_DEVICE_VERSION));
+                            
         // Parse OpenCL version
         std::vector<int> device_cl_version = 
                                         parse_version_string(cl_version_string);
@@ -265,7 +266,7 @@ hpx::opencl::server::get_devices(cl_device_type type,
         }
 
         // Check for requested device type
-        std::vector<char> device_type_string = 
+        hpx::util::serialize_buffer<char> device_type_string = 
                                    device.get_device_info(CL_DEVICE_TYPE).get();
         cl_device_type device_type = *((cl_device_type*)
                                                    (device_type_string.data()));
@@ -279,6 +280,7 @@ hpx::opencl::server::get_devices(cl_device_type type,
     return suitable_devices;
 
 }
+
 
 
 

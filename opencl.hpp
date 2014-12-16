@@ -8,9 +8,9 @@
 #define HPX_OPENCL_HPP_
 
     #include "opencl/device.hpp"
-    #include "opencl/buffer.hpp"
-    #include "opencl/program.hpp"
-    #include "opencl/kernel.hpp"
-    #include "opencl/std.hpp"
+    #include "opencl/get_devices.hpp"
+//    #include "opencl/buffer.hpp"
+//    #include "opencl/program.hpp"
+//    #include "opencl/kernel.hpp"
 
 #endif

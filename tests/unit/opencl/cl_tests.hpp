@@ -7,7 +7,8 @@
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
 #include <hpx/util/lightweight_test.hpp>
-#include <hpx/util/static.hpp>
+//#include <hpx/util/static.hpp>
+#include <hpx/include/iostreams.hpp>
 
 #include "../../../opencl.hpp"
 
@@ -18,13 +19,14 @@ using boost::program_options::value;
 // the main test function
 static void cl_test(hpx::opencl::device);
 
+/*
 #define TEST_CL_BUFFER(buffer, value)                                          \
 {                                                                              \
     boost::shared_ptr<std::vector<char>> out1 =                                \
                        buffer.enqueue_read(0, DATASIZE).get().get_data().get();\
     HPX_TEST_EQ(std::string((const char*)(value)), std::string(out1->data()));  \
 }                                                           
-
+*/
 
 static std::string get_cl_info(hpx::opencl::device cldevice,
                                cl_device_info info_type)
