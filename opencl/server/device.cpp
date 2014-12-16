@@ -135,7 +135,7 @@ device::get_device_info(cl_device_info info_type)
     cl_int err;
 
     // Query for size
-    size_t param_size;
+    std::size_t param_size;
     err = clGetDeviceInfo(device_id, info_type, 0, NULL, &param_size);
     cl_ensure(err, "clGetDeviceInfo()");
 
@@ -160,7 +160,7 @@ device::get_platform_info(cl_platform_info info_type)
     cl_int err;
 
     // Query for size
-    size_t param_size;
+    std::size_t param_size;
     err = clGetPlatformInfo(platform_id, info_type, 0, NULL, &param_size);
     cl_ensure(err, "clGetPlatformInfo()");
 
@@ -178,7 +178,7 @@ device::get_platform_info(cl_platform_info info_type)
 
 
 void CL_CALLBACK
-device::error_callback(const char* errinfo, const void* info, size_t info_size,
+device::error_callback(const char* errinfo, const void* info, std::size_t info_size,
                                                 void* _thisp)
 {
     device* thisp = (device*) _thisp;

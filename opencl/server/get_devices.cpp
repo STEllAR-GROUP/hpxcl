@@ -181,7 +181,7 @@ ensure_device_components_initialization()
         #ifndef HPXCL_ALLOW_OPENCL_1_0_DEVICES
 
             // Get OpenCL Version string length
-            size_t version_string_length;
+            std::size_t version_string_length;
             err = clGetDeviceInfo(device, CL_DEVICE_VERSION, 0, NULL,
                                                        &version_string_length);
 
@@ -193,8 +193,14 @@ ensure_device_components_initialization()
                                     NULL);
 
             // Convert to std::string
+            std::size_t length = 0;
+            while(length < version_string_arr.size())
+            {
+                if(version_string_arr[length] == '\0') break;
+                length++;
+            }
             std::string version_string(version_string_arr.begin(),
-                                       version_string_arr.end());
+                                       version_string_arr.begin() + length);
 
             // Parse
             std::vector<int> version = parse_version_string(version_string);

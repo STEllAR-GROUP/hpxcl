@@ -45,7 +45,7 @@ device::device_info_to_string(hpx::future<hpx::util::serialize_buffer<char>> inf
     // Calculate length of string. Cut short if it has a 0-Termination
     // (Some queries like CL_DEVICE_NAME always return a size of 64, but 
     // contain a 0-terminated string)
-    size_t length = 0;
+    std::size_t length = 0;
     while(length < char_array.size())
     {
         if(char_array[length] == '\0') break;

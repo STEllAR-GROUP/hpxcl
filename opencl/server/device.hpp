@@ -57,7 +57,7 @@ namespace hpx { namespace opencl{ namespace server{
         
         // Error Callback
         static void CL_CALLBACK error_callback(const char*, const void*,
-                                               size_t, void*);
+                                               std::size_t, void*);
 
     private:
         ///////////////////////////////////////////////
