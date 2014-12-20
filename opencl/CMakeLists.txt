@@ -15,14 +15,18 @@ add_hpx_component(opencl
             device.cpp
             get_devices.cpp
             tools.cpp
+            buffer.cpp
             server/device.cpp
+            server/buffer.cpp
             server/get_devices.cpp
    HEADERS  device.hpp
             get_devices.hpp
             export_definitions.hpp
             fwd_declarations.hpp
             tools.hpp
+            buffer.hpp
             server/device.hpp
+            server/buffer.hpp
             server/get_devices.hpp
    COMPONENT_DEPENDENCIES iostreams 
    DEPENDENCIES ${OPENCL_LIBRARIES}

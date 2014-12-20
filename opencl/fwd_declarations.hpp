@@ -19,11 +19,13 @@ namespace hpx {
 namespace opencl {
 
     class device;
+    class buffer;
 
     // The OpenCL server namespace
     namespace server {
         
         class device;
+        class buffer;
 
     }
 

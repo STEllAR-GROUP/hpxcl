@@ -3,12 +3,18 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+// Default includes
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
+// The server class
 #include "server/device.hpp"
 
+// The class header file
 #include "device.hpp"
+
+// Dependencies
+#include "buffer.hpp"
 
 using hpx::opencl::device;
 hpx::future<hpx::util::serialize_buffer<char>>
@@ -53,5 +59,20 @@ device::device_info_to_string(hpx::future<hpx::util::serialize_buffer<char>> inf
     }
 
     return std::string(char_array.data(), char_array.data() + length);
+
+}
+
+hpx::opencl::buffer
+device::create_buffer(cl_mem_flags flags, std::size_t size) const
+{
+
+    BOOST_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::device::create_buffer_action func;
+    
+    hpx::future<hpx::id_type> buffer_server =
+                                 hpx::async<func>(this->get_gid(), flags, size);
+
+    return buffer(std::move(buffer_server));
 
 }

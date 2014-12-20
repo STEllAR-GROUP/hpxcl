@@ -11,8 +11,27 @@
 #include <CL/cl.h>
 #include <sstream>
 
-namespace hpx { namespace opencl { 
+namespace hpx { namespace opencl { namespace tools {
 
+bool runs_on_large_stack()
+{
+    
+    // Get current stack size
+    std::size_t current_stack_size = hpx::threads::get_ctx_ptr()->get_stacksize();
+
+    // Get large stack size
+    std::size_t large_stack_size =
+                            hpx::get_runtime().get_config().get_stack_size(
+                                          hpx::threads::thread_stacksize_large);
+
+    /*
+    hpx::cout << "Stack: " << std::hex << current_stack_size << " / "
+                           << std::hex << large_stack_size << hpx::endl;
+    */
+
+    return current_stack_size == large_stack_size;
+
+}
 
 const char* cl_err_to_str(cl_int errCode)
 {
@@ -82,5 +101,5 @@ const char* cl_err_to_str(cl_int errCode)
 }
 
 
-}}
+}}}
 

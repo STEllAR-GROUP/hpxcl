@@ -34,6 +34,8 @@ namespace hpx { namespace opencl{ namespace server{
         ///
         void init(cl_device_id device_id, bool enable_profiling=false);
 
+        cl_context get_context();
+
 
         //////////////////////////////////////////////////
         /// Exposed functionality of this component
@@ -47,8 +49,13 @@ namespace hpx { namespace opencl{ namespace server{
         hpx::util::serialize_buffer<char>
         get_platform_info(cl_platform_info info_type);
 
+        // creates a new buffer
+        hpx::id_type
+        create_buffer(cl_mem_flags flags, std::size_t size);
+
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_info);
     HPX_DEFINE_COMPONENT_ACTION(device, get_platform_info);
+    HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
 
     private:
         ///////////////////////////////////////////////
@@ -80,6 +87,10 @@ HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::device::get_platform_info_actio
 HPX_REGISTER_ACTION_DECLARATION(
         hpx::opencl::server::device::get_platform_info_action,
         opencl_device_get_platform_info_action);
+HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::device::create_buffer_action);
+HPX_REGISTER_ACTION_DECLARATION(
+        hpx::opencl::server::device::create_buffer_action,
+        opencl_device_create_buffer_action);
 //]
 
 #endif

@@ -7,16 +7,21 @@
 #ifndef HPX_OPENCL_DEVICE_HPP_
 #define HPX_OPENCL_DEVICE_HPP_
 
-
+// Default includes
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
+// Export definitions
 #include "export_definitions.hpp"
+
+// The server class
 #include "server/device.hpp"
 
+// HPX Dependencies
 #include <hpx/include/components.hpp>
 #include <hpx/lcos/future.hpp>
 
+// Forward Declarations
 #include "fwd_declarations.hpp"
 
 namespace hpx {
@@ -100,6 +105,31 @@ namespace opencl {
             static std::string
             device_info_to_string(hpx::lcos::future<
                                        hpx::util::serialize_buffer<char>> info);
+
+            /**
+             *  @brief Creates an OpenCL buffer.
+             *
+             *  @param flags    Sets properties of the buffer.<BR>
+             *                  Possible values are
+             *                      - CL_MEM_READ_WRITE
+             *                      - CL_MEM_WRITE_ONLY
+             *                      - CL_MEM_READ_ONLY
+             *                      - CL_MEM_HOST_WRITE_ONLY
+             *                      - CL_MEM_HOST_READ_ONLY
+             *                      - CL_MEM_HOST_NO_ACCESS
+             *                      .
+             *                  and combinations of them.<BR>
+             *                  For further information, read the official
+             *                  <A HREF="http://www.khronos.org/registry/cl/sdk/
+             * 1.2/docs/man/xhtml/clCreateBuffer.html">
+             *                  OpenCL Reference</A>.
+             *  @param size     The size of the buffer, in bytes.
+             *  @return         A new \ref buffer object.
+             *  @see            buffer
+             */
+            // Creates an OpenCL buffer
+            hpx::opencl::buffer
+            create_buffer(cl_mem_flags flags, std::size_t size) const;
 
     };
 

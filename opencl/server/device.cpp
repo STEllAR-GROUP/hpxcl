@@ -3,14 +3,24 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+// Default includes
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
+// The Header of this class
 #include "device.hpp"
 
+// HPXCL tools
 #include "../tools.hpp"
 
+// HPX dependencies
+#include <hpx/include/thread_executors.hpp>
+
+// OpenCL
 #include <CL/cl.h>
+
+// other hpxcl dependencies
+#include "buffer.hpp"
 
 using namespace hpx::opencl::server;
 
@@ -19,52 +29,50 @@ using namespace hpx::opencl::server;
 device::device()
 {}
 
-// External destructor action.
+// External destructor.
 // This is needed because OpenCL calls only run properly on large stack size.
-namespace hpx { namespace opencl { namespace server {
-    static void device_cleanup(uintptr_t command_queue_ptr,
-                               uintptr_t context_ptr)
+static void device_cleanup(uintptr_t command_queue_ptr,
+                           uintptr_t context_ptr)
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    cl_int err;
+
+    cl_command_queue command_queue = reinterpret_cast<cl_command_queue>(command_queue_ptr);
+    cl_context context = reinterpret_cast<cl_context>(context_ptr);
+
+    // Release command queue
+    if(command_queue)
     {
-        cl_int err;
-
-        cl_command_queue command_queue = (cl_command_queue) command_queue_ptr;
-        cl_context context = (cl_context) context_ptr;
-    
-        // Release command queue
-        if(command_queue)
-        {
-            err = clFinish(command_queue);
-            cl_ensure_nothrow(err, "clFinish()");
-            err = clReleaseCommandQueue(command_queue);
-            cl_ensure_nothrow(err, "clReleaseCommandQueue()");
-            command_queue = NULL; 
-        }
-        
-        // Release context
-        if(context)
-        {
-            err = clReleaseContext(context);
-            cl_ensure_nothrow(err, "clReleaseContext()");
-            context = NULL;
-        }
-    
+        err = clFinish(command_queue);
+        cl_ensure_nothrow(err, "clFinish()");
+        err = clReleaseCommandQueue(command_queue);
+        cl_ensure_nothrow(err, "clReleaseCommandQueue()");
+        command_queue = NULL; 
     }
-    HPX_DEFINE_PLAIN_ACTION(device_cleanup, device_cleanup_action);
-}}}
+    
+    // Release context
+    if(context)
+    {
+        err = clReleaseContext(context);
+        cl_ensure_nothrow(err, "clReleaseContext()");
+        context = NULL;
+    }
 
-HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::device_cleanup_action);
-HPX_REGISTER_PLAIN_ACTION_DECLARATION(hpx::opencl::server::device_cleanup_action);
-HPX_REGISTER_PLAIN_ACTION(hpx::opencl::server::device_cleanup_action,
-                          hpx_opencl_server_device_cleanup_action);
+}
 
 // Destructor
 device::~device()
 {
 
+    hpx::threads::executors::default_executor exec(
+                                          hpx::threads::thread_priority_normal,
+                                          hpx::threads::thread_stacksize_large);
+
     // run dectructor in a thread, as we need it to run on a large stack size
-    typedef hpx::opencl::server::device_cleanup_action func;
-    hpx::async<func>(hpx::find_here(),
-                     (uintptr_t)command_queue, (uintptr_t)context).wait();
+    hpx::async( exec, &device_cleanup, (uintptr_t)command_queue,
+                                       (uintptr_t)context).wait();
 
 }
 
@@ -73,12 +81,8 @@ device::~device()
 void
 device::init(cl_device_id _device_id, bool enable_profiling)
 {
-    /*
-    // TODO remove
-    hpx::cout << std::string("Threadsize: ")
-              << std::hex << hpx::threads::get_ctx_ptr()->get_stacksize()
-              << std::string("\n") << hpx::flush;
-    */
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
 
     this->device_id = _device_id;
 
@@ -106,7 +110,8 @@ device::init(cl_device_id _device_id, bool enable_profiling)
     hpx::util::serialize_buffer<char> supported_queue_properties_data = 
                                     get_device_info(CL_DEVICE_QUEUE_PROPERTIES);
     cl_command_queue_properties supported_queue_properties =
-     *((cl_command_queue_properties *)(supported_queue_properties_data.data()));
+                *( reinterpret_cast<cl_command_queue_properties *>(
+                                       supported_queue_properties_data.data()));
 
     // Initialize command queue properties
     cl_command_queue_properties command_queue_properties = 0;
@@ -131,6 +136,8 @@ hpx::util::serialize_buffer<char>
 device::get_device_info(cl_device_info info_type)
 {
     
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
     // Declairing the cl error code variable
     cl_int err;
 
@@ -156,6 +163,8 @@ hpx::util::serialize_buffer<char>
 device::get_platform_info(cl_platform_info info_type)
 {
     
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
     // Declairing the cl error code variable
     cl_int err;
 
@@ -186,4 +195,27 @@ device::error_callback(const char* errinfo, const void* info, std::size_t info_s
              << errinfo << hpx::endl;
 }
 
+cl_context
+device::get_context()
+{
+    return context;
+}
 
+hpx::id_type
+device::create_buffer( cl_mem_flags flags, std::size_t size )
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    // Create new buffer
+    hpx::id_type buf = hpx::components::new_<hpx::opencl::server::buffer>
+                                                     ( hpx::find_here() ).get();
+
+    // Initialzie buffer locally
+    boost::shared_ptr<hpx::opencl::server::buffer> buffer_server = 
+                        hpx::get_ptr<hpx::opencl::server::buffer>( buf ).get();
+
+    buffer_server->init(get_gid(), flags, size);
+
+    return buf;           
+}

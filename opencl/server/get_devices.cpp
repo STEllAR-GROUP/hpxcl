@@ -120,6 +120,8 @@ void
 ensure_device_components_initialization()
 {
 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
     // Lock the list
     static_device_list_lock_type device_lock;
     boost::lock_guard<spinlock> lock(device_lock.get());
@@ -237,6 +239,8 @@ hpx::opencl::server::get_devices(cl_device_type type,
                                  std::string min_cl_version)
 {
 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
     // Parse required OpenCL version
     std::vector<int> required_version = parse_version_string(min_cl_version);
 
@@ -274,7 +278,7 @@ hpx::opencl::server::get_devices(cl_device_type type,
         // Check for requested device type
         hpx::util::serialize_buffer<char> device_type_string = 
                                    device.get_device_info(CL_DEVICE_TYPE).get();
-        cl_device_type device_type = *((cl_device_type*)
+        cl_device_type device_type = *(reinterpret_cast<cl_device_type*>
                                                    (device_type_string.data()));
         if(!(device_type & type)) continue;
 
