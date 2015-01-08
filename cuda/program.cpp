@@ -23,5 +23,7 @@ HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(cuda_program_type,program);
 
 HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::build_action,
 	cuda_program_build_action);
+HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::set_source_action, 
+	cuda_program_set_source_action);
 HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::create_kernel_action,
 	cuda_program_create_kernel_action);

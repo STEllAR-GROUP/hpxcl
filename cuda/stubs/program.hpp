@@ -34,15 +34,15 @@ namespace hpx
                     build(gid, NVCC_FLAGS).get();
                 }
 
-                static hpx::lcos::future<void> create_kernel(hpx::naming::id_type const &gid, std::string kernel_name)
+                static hpx::lcos::future<void> create_kernel(hpx::naming::id_type const &gid, std::string module_name, std::string kernel_name)
                 {
                     typedef server::program::create_kernel_action action_type;
-                    return hpx::async<action_type>(gid, kernel_name);
+                    return hpx::async<action_type>(gid, module_name, kernel_name);
                 }
 
-                static void create_kernel_sync(hpx::naming::id_type const &gid, std::string kernel_name)
+                static void create_kernel_sync(hpx::naming::id_type const &gid, std::string module_name, std::string kernel_name)
                 {
-                    create_kernel(gid, kernel_name).get();
+                    create_kernel(gid, module_name, kernel_name).get();
                 }
 
                 static void set_source_sync(hpx::naming::id_type const &gid, std::string source)

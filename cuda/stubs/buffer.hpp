@@ -31,17 +31,29 @@ namespace hpx
                 {
                     return size(gid).get();
                 }
-                /*static hpx::lcos::future<void> enqueue_read(hpx::naming::id_type const& gid, size_t offset, size_t size) const
+
+                static hpx::lcos::future<void> set_size(hpx::naming::id_type const& gid, size_t size)
                 {
-                    typedef server::buffer::enqueue_read_action action_type;
-                    return hpx::apply<action_type>(gid, offset, size);
+                    typedef server::buffer::set_size_action action_type;
+                    return hpx::async<action_type>(gid, size);
                 }
 
-                static hpx::lcos::future<void> enqueue_write(hpx::naming::id_type const& gid, size_t offset, size_t size, const void* data) const
+                static void set_size_sync(hpx::naming::id_type const& gid, size_t size)
+                {
+                    set_size(gid, size).get();
+                }
+
+                static hpx::lcos::future<void> enqueue_read(hpx::naming::id_type const& gid, size_t offset, size_t size)
+                {
+                    typedef server::buffer::enqueue_read_action action_type;
+                    return hpx::async<action_type>(gid, offset, size);
+                }
+
+                static hpx::lcos::future<void> enqueue_write(hpx::naming::id_type const& gid, size_t offset, hpx::util::serialize_buffer<char> data)
                 {
                     typedef server::buffer::enqueue_write_action action_type;
-                    return hpx::apply<action_type>(gid, offset, size, data);
-                }*/
+                    return hpx::async<action_type>(gid, offset, data);
+                }
             };
         }
     }

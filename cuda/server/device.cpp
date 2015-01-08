@@ -107,7 +107,7 @@ void device::get_cuda_info()
        	}
 
         std::cout<<i<<": "<< props.name<<": "<<props.major<<"."<<props.minor<<std::endl;
-        std::cout<< "   Global memory:   "<<props.totalGlobalMem / mb<<"mb"<<std::endl;
+        std::cout<<"   Global memory:   "<<props.totalGlobalMem / mb<<"mb"<<std::endl;
         std::cout<<"   Shared memory:   " <<props.sharedMemPerBlock / kb<<"kb"<<std::endl;
         std::cout<<"   Constant memory: " <<props.totalConstMem / kb<<"kb"<<std::endl;
         std::cout<<"   Block registers: " <<props.regsPerBlock<<std::endl<<std::endl;
@@ -185,11 +185,10 @@ void device::get_cuda_info()
         CUmodule cu_module;
         CUresult cu_error;
         
-        std::cout << "function name is " << cu_kernel.get_function_sync().c_str() << std::endl;
         cu_error = cuModuleLoad(&cu_module, (char*)cu_kernel.get_module_sync().c_str());
         std::cout << "loading module returns " << (unsigned int)cu_error << std::endl;
 
-        cu_error = cuModuleGetFunction(&cu_function, cu_module, /*(char*)cu_kernel_name*/"kernel1");
+        cu_error = cuModuleGetFunction(&cu_function, cu_module, (char*)cu_kernel.get_function_sync().c_str());
         std::cout << "loading function returns " << (unsigned int)cu_error << std::endl;
 
         cu_error = cuLaunchKernel(cu_function, grid.x, grid.y, grid.z, block.x, block.y, block.z, 0, 0, args, 0);
@@ -198,21 +197,23 @@ void device::get_cuda_info()
 
     hpx::cuda::program device::create_program_with_source(std::string source)
     {
-        //typedef hpx::cuda::server::program program_type;
+        typedef hpx::cuda::server::program program_type;
 
-        /*hpx::cuda::program cu_program(
-            hpx::components::new_<program_type>(hpx::find_here()));*/
-        hpx::cuda::program cu_program;
+        hpx::cuda::program cu_program(
+            hpx::components::new_<program_type>(hpx::find_here()));
+        cu_program.set_source_sync(source);
         return cu_program;
     }
 
     hpx::cuda::buffer device::create_buffer(size_t size)
     {
-        //typedef hpx::cuda::server::buffer buffer_type;
+        typedef hpx::cuda::server::buffer buffer_type;
         
-        /*hpx::cuda::buffer cu_buffer(
-            hpx::components::new_<buffer_type>(hpx::find_here()));*/
-        hpx::cuda::buffer cu_buffer;
+        hpx::cuda::buffer cu_buffer(
+            hpx::components::new_<buffer_type>(hpx::find_here()));
+
+        cu_buffer.set_size_sync(size);
+
         return cu_buffer;
     }
         

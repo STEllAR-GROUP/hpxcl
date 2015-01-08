@@ -41,19 +41,19 @@ namespace hpx
                     base_type::build_sync(this->get_gid(), NVCC_FLAGS);
                 }
 
-                hpx::lcos::future<void> create_kernel(std::string kernel_name)
+                hpx::lcos::future<void> create_kernel(std::string module_name, std::string kernel_name)
                 {
                     HPX_ASSERT(this->get_gid());
-                    return base_type::create_kernel(this->get_gid(), kernel_name);
+                    return base_type::create_kernel(this->get_gid(), module_name, kernel_name);
                 }
 
-                void create_kernel_sync(std::string kernel_name)
+                void create_kernel_sync(std::string module_name, std::string kernel_name)
                 {
                     HPX_ASSERT(this->get_gid());
-                    base_type::create_kernel_sync(this->get_gid(), kernel_name);
+                    base_type::create_kernel_sync(this->get_gid(), module_name, kernel_name);
                 }
 
-                void set_source(std::string source)
+                void set_source_sync(std::string source)
                 {
                     HPX_ASSERT(this->get_gid());
                     base_type::set_source_sync(this->get_gid(), source);

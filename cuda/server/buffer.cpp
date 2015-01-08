@@ -32,16 +32,21 @@ size_t buffer::size()
     return this->arg_buffer_size;
 }
 
+void buffer::set_size(size_t size)
+{
+	this->arg_buffer_size = size;
+}
+
 void buffer::enqueue_read(size_t offset, size_t size) const
 {
 	//read a buffer  
 }
 
-void buffer::enqueue_write(size_t offset, size_t size, const void* data) const
+void buffer::enqueue_write(size_t offset, hpx::util::serialize_buffer<char> data)
 {
 	//either create pinned memory use cuda 6 memory or just do device copies manually
 	//buffer memory is on the device
-	
+	//create a device pointer a host pointer and copy it to the device
 }
 
 

@@ -11,7 +11,7 @@
 #include <hpx/runtime/components/server/locking_hook.hpp>
 #include <hpx/runtime/actions/component_action.hpp>
 #include <hpx/runtime/get_ptr.hpp>
-#include <hpx/include/util.hpp>
+#include <hpx/util/serialize_buffer.hpp>
 
 #include <cuda.h>
 
@@ -33,20 +33,24 @@
  			{
  			 	private:
  			 	size_t arg_buffer_size; 
+                int parent_device_num;
  			 	public:
  			 	buffer(); 
 
  			 	buffer(size_t size);
  			
  			 	size_t size();
+
+ 			 	void set_size(size_t size);
  			 
  			 	~buffer();
  			 	
  			 	void enqueue_read(size_t offset, size_t size) const;
 				
- 			 	void enqueue_write(size_t offset, size_t size, const void* data) const;
+ 			 	void enqueue_write(size_t offset, hpx::util::serialize_buffer<char> data);
  			 	
  			 	HPX_DEFINE_COMPONENT_ACTION(buffer, size);
+ 			 	HPX_DEFINE_COMPONENT_ACTION(buffer, set_size);
  			 	HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read);
  			 	HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write);
  			};
@@ -57,6 +61,9 @@
  HPX_REGISTER_ACTION_DECLARATION(
  	hpx::cuda::server::buffer::size_action,
  	buffer_size_action);
+ HPX_REGISTER_ACTION_DECLARATION(
+ 	hpx::cuda::server::buffer::set_size_action,
+ 	buffer_set_size_action);
  HPX_REGISTER_ACTION_DECLARATION(
  	hpx::cuda::server::buffer::enqueue_read_action, 
  	buffer_enqueue_read_action);

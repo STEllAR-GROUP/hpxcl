@@ -55,7 +55,7 @@ namespace hpx
 
                 void load_module(std::string file_name);
 
-                void load_kernel(std::string kernal_name);
+                void load_kernel(std::string kernel_name);
 
                 std::string get_function();
 

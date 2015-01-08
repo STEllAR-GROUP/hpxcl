@@ -46,7 +46,9 @@
  			
  			 	~program();
 
- 			 	hpx::cuda::kernel create_kernel(std::string kernel_name);
+				hpx::cuda::kernel create_kernel(std::string module_name, std::string kernel_name);
+ 			 	
+ 			 	//hpx::cuda::kernel create_kernel(std::string kernel_name);
 
  			 	void build(std::string NVCC_FLAGS);
 

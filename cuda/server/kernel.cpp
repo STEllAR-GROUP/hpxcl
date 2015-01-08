@@ -48,7 +48,7 @@ void kernel::load_module(std::string file_name)
     this->module_name = file_name;
 }
 
-void kernel::load_kernel(std::string kernal_name)
+void kernel::load_kernel(std::string kernel_name)
 {
     this->kernel_name = kernel_name;
 }

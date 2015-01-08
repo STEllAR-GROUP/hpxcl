@@ -32,17 +32,29 @@ program::~program(){}
 
 void program::set_source(std::string source)
 {
-	//this->kernel_source = source;
+	this->kernel_source = source;
 }
-
-hpx::cuda::kernel program::create_kernel(std::string kernel_name)
+hpx::cuda::kernel program::create_kernel(std::string module_name, std::string kernel_name)
 {
 	typedef hpx::cuda::server::kernel kernel_type;
 
 	hpx::cuda::kernel cu_kernel(
 		hpx::components::new_<kernel_type>(hpx::find_here()));
+	cu_kernel.load_module_sync(module_name);
+	cu_kernel.load_kernel_sync(kernel_name);
 	return cu_kernel;
 }
+/*hpx::cuda::kernel program::create_kernel(std::string kernel_name)
+{
+	typedef hpx::cuda::server::kernel kernel_type;
+
+	hpx::cuda::kernel cu_kernel(
+		hpx::components::new_<kernel_type>(hpx::find_here()));
+	//if kernel and module name are the same
+	cu_kernel.load_module_sync(kernel_name);
+	cu_kernel.load_kernel_sync(kernel_name);
+	return cu_kernel;
+}*/
 
 //function used to build a gpu architecture specific cuda kernel
 void program::build(std::string NVCC_FLAGS)
