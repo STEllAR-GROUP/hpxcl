@@ -75,5 +75,5 @@ kernel::Dim3 kernel::get_block()
 
 void kernel::set_arg(size_t size, hpx::cuda::buffer cu_buffer)
 {
-    ///sets the argument for a kernel using a buffer
+    ///sets a buffer component as the argument to a kernel
 }

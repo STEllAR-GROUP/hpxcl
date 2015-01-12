@@ -36,6 +36,7 @@
  			 	hpx::naming::id_type parent_device_id;
  			 	std::string kernel_source;
  			 	std::string kernel_name;
+ 			 	CUlinkState cu_link_state;
 
  			 	public:
  			 	program();
@@ -48,8 +49,6 @@
 
 				hpx::cuda::kernel create_kernel(std::string module_name, std::string kernel_name);
  			 	
- 			 	//hpx::cuda::kernel create_kernel(std::string kernel_name);
-
  			 	void build(std::string NVCC_FLAGS);
 
  			 	void set_source(std::string source);
