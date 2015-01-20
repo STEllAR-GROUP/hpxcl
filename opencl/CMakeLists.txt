@@ -28,6 +28,7 @@ add_hpx_component(opencl
             server/device.hpp
             server/buffer.hpp
             server/get_devices.hpp
+            lcos/event.hpp
    COMPONENT_DEPENDENCIES iostreams 
    DEPENDENCIES ${OPENCL_LIBRARIES}
    )
