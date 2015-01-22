@@ -8,6 +8,7 @@
 set(tests
     initialization
     buffer_read_write
+    event
 #    events_and_futures
 #    kernel
 #    future_enqueues
