@@ -17,7 +17,7 @@ hpx::future<std::size_t>
 buffer::size() const
 {
     
-    BOOST_ASSERT(this->get_gid());
+    HPX_ASSERT(this->get_gid());
     typedef hpx::opencl::server::buffer::size_action func;
 
     return hpx::async<func>(this->get_gid());

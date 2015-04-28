@@ -17,11 +17,11 @@
 #include "buffer.hpp"
 
 using hpx::opencl::device;
-hpx::future<hpx::util::serialize_buffer<char>>
+hpx::future<hpx::serialization::serialize_buffer<char>>
 device::get_device_info(cl_device_info info_type) const
 {
 
-    BOOST_ASSERT(this->get_gid());
+    HPX_ASSERT(this->get_gid());
 
     typedef hpx::opencl::server::device::get_device_info_action func;
 
@@ -30,11 +30,11 @@ device::get_device_info(cl_device_info info_type) const
 }
 
 
-hpx::future<hpx::util::serialize_buffer<char>>
+hpx::future<hpx::serialization::serialize_buffer<char>>
 device::get_platform_info(cl_platform_info info_type) const
 {
 
-    BOOST_ASSERT(this->get_gid());
+    HPX_ASSERT(this->get_gid());
 
     typedef hpx::opencl::server::device::get_platform_info_action func;
 
@@ -43,10 +43,11 @@ device::get_platform_info(cl_platform_info info_type) const
 }
 
 std::string
-device::device_info_to_string(hpx::future<hpx::util::serialize_buffer<char>> info)
+device::device_info_to_string(
+    hpx::future<hpx::serialization::serialize_buffer<char>> info)
 {
 
-    hpx::util::serialize_buffer<char> char_array = info.get();
+    hpx::serialization::serialize_buffer<char> char_array = info.get();
 
     // Calculate length of string. Cut short if it has a 0-Termination
     // (Some queries like CL_DEVICE_NAME always return a size of 64, but 
@@ -66,7 +67,7 @@ hpx::opencl::buffer
 device::create_buffer(cl_mem_flags flags, std::size_t size) const
 {
 
-    BOOST_ASSERT(this->get_gid());
+    HPX_ASSERT(this->get_gid());
 
     typedef hpx::opencl::server::device::create_buffer_action func;
     

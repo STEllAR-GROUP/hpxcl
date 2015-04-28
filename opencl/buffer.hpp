@@ -25,14 +25,10 @@ namespace opencl {
     /// Every buffer belongs to one \ref device.
     ///
     class HPX_OPENCL_EXPORT buffer
-      : public hpx::components::client_base<
-          buffer, hpx::components::stub_base<server::buffer>
-        >
+      : public hpx::components::client_base<buffer, server::buffer>
     {
     
-        typedef hpx::components::client_base<
-            buffer, hpx::components::stub_base<server::buffer>
-            > base_type;
+        typedef hpx::components::client_base<buffer, server::buffer> base_type;
 
         public:
             // Empty constructor, necessary for hpx purposes

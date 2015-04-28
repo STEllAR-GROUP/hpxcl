@@ -31,15 +31,10 @@ namespace opencl {
     /// @brief An accelerator device.
     ///
     class HPX_OPENCL_EXPORT device
-      : public hpx::components::client_base<
-          device, hpx::components::stub_base<server::device>
-        >
-    
+      : public hpx::components::client_base<device, server::device>
     {
     
-        typedef hpx::components::client_base<
-            device, hpx::components::stub_base<server::device>
-            > base_type;
+        typedef hpx::components::client_base<device, server::device> base_type;
 
         public:
             device(){}
@@ -68,7 +63,7 @@ namespace opencl {
              *          \endcode
              *          or converted to a string via \ref device_info_to_string.
              */
-            hpx::future<hpx::util::serialize_buffer<char>>
+            hpx::future<hpx::serialization::serialize_buffer<char> >
             get_device_info(cl_device_info info_type) const;
 
              /**
@@ -87,7 +82,7 @@ namespace opencl {
              *          \endcode
              *          or converted to a string via \ref device_info_to_string.
              */
-            hpx::future<hpx::util::serialize_buffer<char>>
+            hpx::future<hpx::serialization::serialize_buffer<char>>
             get_platform_info(cl_platform_info info_type) const;
 
             /** 
@@ -104,7 +99,7 @@ namespace opencl {
              */
             static std::string
             device_info_to_string(hpx::lcos::future<
-                                       hpx::util::serialize_buffer<char>> info);
+                             hpx::serialization::serialize_buffer<char>> info);
 
             /**
              *  @brief Creates an OpenCL buffer.

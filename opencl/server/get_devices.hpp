@@ -12,10 +12,6 @@
 
 #include <CL/cl.h>
 
-#include <hpx/include/actions.hpp>
-
-#include <boost/serialization/vector.hpp>
-
 #include "../fwd_declarations.hpp"
 
 ////////////////////////////////////////////////////////////////
@@ -37,8 +33,8 @@ namespace hpx { namespace opencl{ namespace server{
 }}}
 
 HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::get_devices_action);
-HPX_REGISTER_PLAIN_ACTION_DECLARATION(hpx::opencl::server::get_devices_action);
-
+HPX_REGISTER_ACTION_DECLARATION(hpx::opencl::server::get_devices_action,
+                                hpx_opencl_server_get_devices_action)
 
 #endif
 

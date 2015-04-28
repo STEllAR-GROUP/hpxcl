@@ -107,7 +107,7 @@ device::init(cl_device_id _device_id, bool enable_profiling)
     cl_ensure(err, "clCreateContext()");
 
     // Get supported device queue properties
-    hpx::util::serialize_buffer<char> supported_queue_properties_data = 
+    hpx::serialization::serialize_buffer<char> supported_queue_properties_data = 
                                     get_device_info(CL_DEVICE_QUEUE_PROPERTIES);
     cl_command_queue_properties supported_queue_properties =
                 *( reinterpret_cast<cl_command_queue_properties *>(
@@ -132,7 +132,7 @@ device::init(cl_device_id _device_id, bool enable_profiling)
 }
 
 
-hpx::util::serialize_buffer<char>
+hpx::serialization::serialize_buffer<char>
 device::get_device_info(cl_device_info info_type)
 {
     
@@ -147,9 +147,9 @@ device::get_device_info(cl_device_info info_type)
     cl_ensure(err, "clGetDeviceInfo()");
 
     // Retrieve
-    hpx::util::serialize_buffer<char> info( new char[param_size],
+    hpx::serialization::serialize_buffer<char> info( new char[param_size],
                                             param_size,
-                                            hpx::util::serialize_buffer<char>::take);
+                                            hpx::serialization::serialize_buffer<char>::take);
     err = clGetDeviceInfo(device_id, info_type, param_size, info.data(), 0);
     cl_ensure(err, "clGetDeviceInfo()");
 
@@ -159,7 +159,7 @@ device::get_device_info(cl_device_info info_type)
 }
 
 
-hpx::util::serialize_buffer<char>
+hpx::serialization::serialize_buffer<char>
 device::get_platform_info(cl_platform_info info_type)
 {
     
@@ -174,9 +174,9 @@ device::get_platform_info(cl_platform_info info_type)
     cl_ensure(err, "clGetPlatformInfo()");
 
     // Retrieve
-    hpx::util::serialize_buffer<char> info( new char[param_size],
+    hpx::serialization::serialize_buffer<char> info( new char[param_size],
                                             param_size,
-                                            hpx::util::serialize_buffer<char>::take);
+                                            hpx::serialization::serialize_buffer<char>::take);
     err = clGetPlatformInfo(platform_id, info_type, param_size, info.data(), 0);
     cl_ensure(err, "clGetPlatformInfo()");
 

@@ -12,7 +12,6 @@
 
 #include <CL/cl.h>
 
-#include <hpx/runtime/components/server/managed_component_base.hpp>
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
@@ -42,11 +41,11 @@ namespace hpx { namespace opencl{ namespace server{
         ///
 
         // returns device specific information
-        hpx::util::serialize_buffer<char>
+        hpx::serialization::serialize_buffer<char>
         get_device_info(cl_device_info info_type);
         
         // returns platform specific information
-        hpx::util::serialize_buffer<char>
+        hpx::serialization::serialize_buffer<char>
         get_platform_info(cl_platform_info info_type);
 
         // creates a new buffer
@@ -82,7 +81,7 @@ namespace hpx { namespace opencl{ namespace server{
 HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::device::get_device_info_action);
 HPX_REGISTER_ACTION_DECLARATION(
         hpx::opencl::server::device::get_device_info_action,
-        opencl_device_get_device_info_action);
+        hpx_opencl_device_get_device_info_action);
 HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::device::get_platform_info_action);
 HPX_REGISTER_ACTION_DECLARATION(
         hpx::opencl::server::device::get_platform_info_action,

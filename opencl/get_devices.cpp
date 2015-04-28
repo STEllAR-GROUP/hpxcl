@@ -9,6 +9,7 @@
 
 #include <hpx/lcos/when_all.hpp>
 
+
 hpx::lcos::future<std::vector<hpx::opencl::device>>
 hpx::opencl::get_devices( hpx::naming::id_type node_id,
                           cl_device_type device_type,
@@ -32,7 +33,7 @@ hpx::opencl::get_all_devices( cl_device_type device_type,
     // query all devices
     std::vector<hpx::lcos::future<std::vector<hpx::opencl::device>>>
     locality_device_futures;
-    BOOST_FOREACH(hpx::naming::id_type & locality, localities)
+    for(auto &locality : localities)
     {
 
         // get all devices on locality
@@ -73,10 +74,7 @@ hpx::opencl::get_all_devices( cl_device_type device_type,
                 > > locality_device_futures = parent_future.get();
 
                 // for each future, take devices out and join in one list
-                BOOST_FOREACH(
-                    hpx::lcos::future<std::vector<hpx::opencl::device>> &
-                    locality_device_future,
-                    locality_device_futures)
+                for(auto &locality_device_future : locality_device_futures)
                 {
             
                     // wait for device query to finish

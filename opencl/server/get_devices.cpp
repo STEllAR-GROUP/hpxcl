@@ -59,12 +59,6 @@ static void clear_device_list()
 
 
 ///////////////////////////////////////////////////
-/// HPX Registration Stuff
-///
-HPX_REGISTER_PLAIN_ACTION(hpx::opencl::server::get_devices_action,
-                          opencl_get_devices_action);
-
-///////////////////////////////////////////////////
 /// Local functions
 ///
 static std::vector<int> 
@@ -74,7 +68,7 @@ parse_version_string(std::string version_str)
     try{
        
         // Make sure the version string starts with "OpenCL "
-        BOOST_ASSERT(version_str.compare(0, 7, "OpenCL ") == 0);
+        HPX_ASSERT(version_str.compare(0, 7, "OpenCL ") == 0);
 
         // Cut away the "OpenCL " in front of the version string
         version_str = version_str.substr(7);
@@ -157,8 +151,7 @@ ensure_device_components_initialization()
     cl_ensure(err, "clGetPlatformIDs()");
 
     // Search on every platform
-    BOOST_FOREACH(
-        const std::vector<cl_platform_id>::value_type& platform, platforms)
+    for(const auto &platform : platforms)
     {
         // Query for number of available devices
         cl_uint num_devices_on_platform;
@@ -176,8 +169,7 @@ ensure_device_components_initialization()
 
 
         // Add devices_on_platform to devices
-        BOOST_FOREACH( const std::vector<cl_device_id>::value_type& device,
-                       devices_on_platform )
+        for(const auto & device : devices_on_platform)
         {
 
         #ifndef HPXCL_ALLOW_OPENCL_1_0_DEVICES
@@ -256,8 +248,7 @@ hpx::opencl::server::get_devices(cl_device_type type,
 
     // Generate a list of suitable devices
     std::vector<hpx::opencl::device> suitable_devices;
-    BOOST_FOREACH( const std::vector<hpx::opencl::device>::value_type& device,
-                   devices.get())
+    for(const auto & device : devices.get())
     {
         //
         // Get device OpenCL version string
@@ -276,7 +267,7 @@ hpx::opencl::server::get_devices(cl_device_type type,
         }
 
         // Check for requested device type
-        hpx::util::serialize_buffer<char> device_type_string = 
+        hpx::serialization::serialize_buffer<char> device_type_string = 
                                    device.get_device_info(CL_DEVICE_TYPE).get();
         cl_device_type device_type = *(reinterpret_cast<cl_device_type*>
                                                    (device_type_string.data()));
