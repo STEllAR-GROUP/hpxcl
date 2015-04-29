@@ -8,6 +8,8 @@
 #include "../tools.hpp"
 #include "../device.hpp"
 
+#include "device.hpp"
+
 #include <hpx/lcos/local/spinlock.hpp>
 #include <hpx/util/static.hpp>
 #include <hpx/runtime.hpp>

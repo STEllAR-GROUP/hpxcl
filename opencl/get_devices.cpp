@@ -3,10 +3,14 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+// Header File
 #include "get_devices.hpp"
 
+// Internal Dependencies
 #include "device.hpp"
+#include "server/get_devices.hpp"
 
+// HPX dependencies
 #include <hpx/lcos/when_all.hpp>
 
 

@@ -7,13 +7,15 @@
 #ifndef HPX_OPENCL_BUFFER_HPP_
 #define HPX_OPENCL_BUFFER_HPP_
 
+// Default includes
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
+// Export definitions
 #include "export_definitions.hpp"
 
-#include "server/buffer.hpp"
-
+// Forward Declarations
+#include "fwd_declarations.hpp"
 
 namespace hpx {
 namespace opencl { 

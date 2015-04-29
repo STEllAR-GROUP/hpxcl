@@ -3,15 +3,11 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-// Default includes
-#include <hpx/hpx.hpp>
-#include <hpx/config.hpp>
+// The class header file
+#include "device.hpp"
 
 // The server class
 #include "server/device.hpp"
-
-// The class header file
-#include "device.hpp"
 
 // Dependencies
 #include "buffer.hpp"

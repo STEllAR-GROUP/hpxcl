@@ -12,8 +12,6 @@
 
 #include "export_definitions.hpp"
 
-#include "server/get_devices.hpp"
-
 #include <CL/cl.h>
 
 #include "fwd_declarations.hpp"

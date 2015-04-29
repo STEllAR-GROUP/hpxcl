@@ -12,7 +12,6 @@
 
 #include <CL/cl.h>
 
-
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
     

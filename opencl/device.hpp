@@ -14,12 +14,8 @@
 // Export definitions
 #include "export_definitions.hpp"
 
-// The server class
-#include "server/device.hpp"
-
-// HPX Dependencies
-#include <hpx/include/components.hpp>
-#include <hpx/lcos/future.hpp>
+// OpenCL
+#include <CL/cl.h>
 
 // Forward Declarations
 #include "fwd_declarations.hpp"

@@ -10,7 +10,6 @@
 #include "server/device.hpp"
 #include "server/buffer.hpp"
 
-
 HPX_REGISTER_COMPONENT_MODULE();
 
 
