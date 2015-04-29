@@ -3,17 +3,17 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-
+// The Header
 #include "get_devices.hpp"
-#include "../tools.hpp"
-#include "../device.hpp"
 
+// HPXCL tools
+#include "../tools.hpp"
+
+// HPX dependencies
+#include "../device.hpp"
 #include "device.hpp"
 
-#include <hpx/lcos/local/spinlock.hpp>
-#include <hpx/util/static.hpp>
-#include <hpx/runtime.hpp>
-
+// Other dependencies
 #include <vector>
 #include <string>
 
