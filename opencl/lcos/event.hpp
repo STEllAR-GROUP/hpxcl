@@ -12,7 +12,6 @@
 
 #include <hpx/lcos/promise.hpp>
 
-
 ///////////////////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl { namespace lcos { namespace detail
 {
@@ -25,24 +24,34 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
 
         template <typename>
         friend struct components::detail_adl_barrier::init;
-        
+
         void set_back_ptr(components::managed_component<event>* bp)
         {
             HPX_ASSERT(bp);
             HPX_ASSERT(this->gid_ == naming::invalid_gid);
             this->gid_ = bp->get_base_gid();
         }
-
     };
-}}}};
+}}}}
+
+namespace hpx { namespace components { namespace detail
+{
+    // use the promise heap factory for constructing events
+    template <typename Result, typename RemoteResult>
+    struct heap_factory<
+            opencl::lcos::detail::event<Result, RemoteResult>,
+            managed_component<opencl::lcos::detail::event<Result, RemoteResult> > >
+        : promise_heap_factory<opencl::lcos::detail::event<Result, RemoteResult> >
+    {};
+}}}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace hpx { namespace opencl { namespace lcos 
+namespace hpx { namespace opencl { namespace lcos
 {
-    template <typename Result,                                               
-        typename RemoteResult =                                              
-            typename traits::promise_remote_result<Result>::type>            
-    class event;                                                           
+    template <typename Result,
+        typename RemoteResult =
+            typename traits::promise_remote_result<Result>::type>
+    class event;
 
     ///////////////////////////////////////////////////////////////////////////
     template <typename Result, typename RemoteResult>
@@ -155,7 +164,6 @@ namespace hpx { namespace opencl { namespace lcos
         bool future_obtained_;
     };
 
-
     ///////////////////////////////////////////////////////////////////////////
     template <>
     class event<void, util::unused_type>
@@ -262,15 +270,16 @@ namespace hpx { namespace traits
     }
 
     template <typename Result, typename RemoteResult>
-    struct component_type_database<hpx::opencl::lcos::detail::event
-                                        <Result, RemoteResult> >
+    struct component_type_database<
+        hpx::opencl::lcos::detail::event<Result, RemoteResult> >
     {
         static components::component_type value;
 
         static components::component_type get()
         {
-            // Promises are never created remotely, their factories are not
-            // registered with AGAS, so we can assign the component types locally.
+            // Events are never created remotely, their factories are not
+            // registered with AGAS, so we can assign the component types
+            // locally.
             if (value == components::component_invalid)
             {
                 value = derived_component_type(++detail::unique_type,
@@ -289,6 +298,6 @@ namespace hpx { namespace traits
     components::component_type component_type_database<
         hpx::opencl::lcos::detail::event<Result, RemoteResult>
     >::value = components::component_invalid;
-
 }}
+
 #endif

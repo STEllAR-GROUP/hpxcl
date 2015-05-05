@@ -9,7 +9,29 @@ add_definitions(-DHPX_OPENCL_MODULE_EXPORTS)
 # allow old opencl 1.1 calls
 add_definitions(-DCL_USE_DEPRECATED_OPENCL_1_1_APIS)
 
-add_hpx_component(opencl
+if(MSVC)
+  hpx_add_compile_flag(-Ox CONFIGURATIONS Release LANGUAGES CXX C)
+  hpx_add_compile_flag(-RTC1 CONFIGURATIONS Debug LANGUAGES CXX C)
+
+  # VS2012 and above has a special flag for improving the debug experience by
+  # adding more symbol information to the build (-d2Zi)
+  hpx_add_compile_flag(-d2Zi+ CONFIGURATIONS RelWithDebInfo)
+
+  # VS2013 and above know how to do link time constant data segment folding
+  # VS2013 update 2 and above know how to remove debug information for
+  #     non-referenced functions and data (-Zc:inline)
+  if(MSVC12 OR MSVC13)
+    hpx_add_compile_flag(-Zc:inline)
+    hpx_add_compile_flag(-Gw CONFIGURATIONS Release RelWithDebInfo MinSizeRelease)
+    hpx_add_compile_flag(-Zo CONFIGURATIONS RelWithDebInfo)
+  endif()
+  hpx_add_compile_flag(-EHsc)       # Exceptions
+  hpx_add_compile_flag(-GR)         # Runtime type information
+  hpx_add_compile_flag(-MP)         # Multiprocessor build
+  hpx_add_compile_flag(-bigobj)     # Increase the maximum size of object file sections
+endif()
+
+add_hpx_component(hpxopencl
    ESSENTIAL
    SOURCES  component_definitions.cpp
             device.cpp
@@ -29,7 +51,7 @@ add_hpx_component(opencl
             server/buffer.hpp
             server/get_devices.hpp
             lcos/event.hpp
-   COMPONENT_DEPENDENCIES iostreams 
+   COMPONENT_DEPENDENCIES iostreams
    DEPENDENCIES ${OPENCL_LIBRARIES}
    )
 

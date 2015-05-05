@@ -25,7 +25,7 @@
 using hpx::lcos::local::spinlock;
 using hpx::lcos::local::condition_variable;
 
-// serves as a unique tag to get the device 
+// serves as a unique tag to get the device
 struct global_device_list_tag {};
 struct global_device_list_lock_tag {};
 struct global_device_list_condvar_tag {};
@@ -69,27 +69,27 @@ static void clear_device_list()
 ///////////////////////////////////////////////////
 /// Local functions
 ///
-static std::vector<int> 
+static std::vector<int>
 parse_version_string(std::string version_str)
 {
 
     try{
-       
+
         // Make sure the version string starts with "OpenCL "
         HPX_ASSERT(version_str.compare(0, 7, "OpenCL ") == 0);
 
         // Cut away the "OpenCL " in front of the version string
         version_str = version_str.substr(7);
-    
+
         // Cut away everything behind the version number
         version_str = version_str.substr(0, version_str.find(" "));
-        
+
         // Get major version string
-        std::string version_str_major = 
+        std::string version_str_major =
                            version_str.substr(0, version_str.find("."));
 
         // Get minor version string
-        std::string version_str_minor = 
+        std::string version_str_minor =
                            version_str.substr(version_str_major.size() + 1);
 
         // create output vector
@@ -122,19 +122,19 @@ void
 ensure_device_components_initialization()
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     // Check if list needs to be initialized
     static_device_list_lock_type device_lock;
     static_device_list_condvar_type device_condvar;
     {
-        boost::lock_guard<spinlock> lock(device_lock.get());
+        spinlock::scoped_lock lock(device_lock.get());
 
-        // Don't initialize if someone else is already initializeing
+        // Don't initialize if someone else is already initializing
         if(device_list_initializing != false){
             // Wait until list is initialized
             while(device_list_ready != true){
-                device_condvar.get().wait(device_lock.get());
+                device_condvar.get().wait(lock);
             }
             return;
         }
@@ -144,7 +144,7 @@ ensure_device_components_initialization()
 
         // Release lock. HPX does not allow thread suspension with held locks
     }
-        
+
 
 
 
@@ -198,7 +198,7 @@ ensure_device_components_initialization()
 
             // Get OpenCL Version string
             std::vector<char> version_string_arr(version_string_length);
-            err = clGetDeviceInfo(device, CL_DEVICE_VERSION, 
+            err = clGetDeviceInfo(device, CL_DEVICE_VERSION,
                                     version_string_length,
                                     version_string_arr.data(),
                                     NULL);
@@ -222,11 +222,11 @@ ensure_device_components_initialization()
 
         #endif //HPXCL_ALLOW_OPENCL_1_0_DEVICES
 
-            // Create a new device client 
+            // Create a new device client
             hpx::opencl::device device_client(
                 hpx::components::new_<hpx::opencl::server::device>(
                             hpx::find_here()));
-            
+
             // Initialize device server locally
             boost::shared_ptr<hpx::opencl::server::device> device_server =
                                  hpx::get_ptr<hpx::opencl::server::device>
@@ -248,20 +248,20 @@ ensure_device_components_initialization()
 
         // Set status to ready
         device_list_ready = true;
-                
+
         // Notify waiting threads
         device_condvar.get().notify_all();
     }
 
 }
-    
+
 
 std::vector<hpx::opencl::device>
 hpx::opencl::server::get_devices(cl_device_type type,
                                  std::string min_cl_version)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     // Parse required OpenCL version
     std::vector<int> required_version = parse_version_string(min_cl_version);
@@ -292,9 +292,9 @@ hpx::opencl::server::get_devices(cl_device_type type,
         // Get device OpenCL version string
         std::string cl_version_string = device.device_info_to_string(
                                      device.get_device_info(CL_DEVICE_VERSION));
-                            
+
         // Parse OpenCL version
-        std::vector<int> device_cl_version = 
+        std::vector<int> device_cl_version =
                                         parse_version_string(cl_version_string);
 
         // Check if device supports required version
@@ -305,7 +305,7 @@ hpx::opencl::server::get_devices(cl_device_type type,
         }
 
         // Check for requested device type
-        hpx::serialization::serialize_buffer<char> device_type_string = 
+        hpx::serialization::serialize_buffer<char> device_type_string =
                                    device.get_device_info(CL_DEVICE_TYPE).get();
         cl_device_type device_type = *(reinterpret_cast<cl_device_type*>
                                                    (device_type_string.data()));
