@@ -9,9 +9,10 @@
 // HPXCL tools
 #include "../tools.hpp"
 
-// HPX dependencies
+// HPXCL dependencies
 #include "../device.hpp"
 #include "device.hpp"
+
 
 // Other dependencies
 #include <vector>
@@ -22,14 +23,16 @@
 ///
 
 using hpx::lcos::local::spinlock;
+using hpx::lcos::local::condition_variable;
 
 // serves as a unique tag to get the device 
 struct global_device_list_tag {};
+struct global_device_list_lock_tag {};
+struct global_device_list_condvar_tag {};
 
 // Will be set to true once the device list got initialized.
-static bool device_list_initialized = false;
-// Will be set to true once the device shutdown hook is set.
-static bool device_shutdown_hook_initialized = false;
+static bool device_list_initializing = false;
+static bool device_list_ready = false;
 
 // This defines a static device list type.
 // Generating instances of this type will always give the same list.
@@ -41,7 +44,10 @@ hpx::util::static_<std::vector<hpx::opencl::device>,
 // Generating instances of this type will always give the same lock.
 typedef
 hpx::util::static_<spinlock,
-                   global_device_list_tag>  static_device_list_lock_type;
+                   global_device_list_lock_tag>  static_device_list_lock_type;
+typedef
+hpx::util::static_<condition_variable,
+                   global_device_list_condvar_tag>  static_device_list_condvar_type;
 
 // The shutdown hook for clearing the device list on hpx::finalize()
 static void clear_device_list()
@@ -118,23 +124,32 @@ ensure_device_components_initialization()
 
     HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
 
-    // Lock the list
+    // Check if list needs to be initialized
     static_device_list_lock_type device_lock;
-    boost::lock_guard<spinlock> lock(device_lock.get());
+    static_device_list_condvar_type device_condvar;
+    {
+        boost::lock_guard<spinlock> lock(device_lock.get());
+
+        // Don't initialize if someone else is already initializeing
+        if(device_list_initializing != false){
+            // Wait until list is initialized
+            while(device_list_ready != true){
+                device_condvar.get().wait(device_lock.get());
+            }
+            return;
+        }
+
+        // If necessary, initialize the list
+        device_list_initializing = true;
+
+        // Release lock. HPX does not allow thread suspension with held locks
+    }
+        
+
+
 
     // get static device list
     static_device_list_type devices;
-
-    // Register the shutdown hook to empty the device list before shutdown
-    if(device_shutdown_hook_initialized == false)
-    {
-        hpx::get_runtime_ptr()->add_pre_shutdown_function(&clear_device_list);
-        device_shutdown_hook_initialized = true;
-    }
-
-    // Don't initialize if already initialized
-    if(device_list_initialized != false)
-        return;
 
     // Reset the device list
     devices.get().clear();
@@ -223,7 +238,20 @@ ensure_device_components_initialization()
         }
     }
 
-    device_list_initialized = true;
+    // Register the shutdown hook to empty the device list before shutdown
+    hpx::get_runtime_ptr()->add_pre_shutdown_function(&clear_device_list);
+
+    // Set the device list status to ready and notify waiting threads
+    {
+        // Lock
+        boost::lock_guard<spinlock> lock(device_lock.get());
+
+        // Set status to ready
+        device_list_ready = true;
+                
+        // Notify waiting threads
+        device_condvar.get().notify_all();
+    }
 
 }
     
@@ -241,18 +269,26 @@ hpx::opencl::server::get_devices(cl_device_type type,
     // Create the list of device clients
     ensure_device_components_initialization();
 
-    // Lock the list
-    static_device_list_lock_type device_lock;
-    boost::lock_guard<spinlock> lock(device_lock.get());
+    // Initialise the list of devices
+    std::vector<hpx::opencl::device> devices;
 
-    // get static device list
-    static_device_list_type devices;
+    // Retrieve the available devices
+    {
+        // Lock the list
+        static_device_list_lock_type device_lock;
+        boost::lock_guard<spinlock> lock(device_lock.get());
+
+        // get static device list
+        static_device_list_type device_list;
+
+        // Copy device list
+        devices = std::vector<hpx::opencl::device>(device_list.get());
+    }
 
     // Generate a list of suitable devices
     std::vector<hpx::opencl::device> suitable_devices;
-    for(const auto & device : devices.get())
+    for(const auto & device : devices)
     {
-        //
         // Get device OpenCL version string
         std::string cl_version_string = device.device_info_to_string(
                                      device.get_device_info(CL_DEVICE_VERSION));
