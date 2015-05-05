@@ -25,7 +25,7 @@ foreach(test ${tests})
   set(sources
       ${test}.cpp)
 
-  set(${test}_FLAGS ${${test}_FLAGS} DEPENDENCIES opencl_component)
+  set(${test}_FLAGS ${${test}_FLAGS} DEPENDENCIES hpxopencl_component)
 
   source_group("Source Files" FILES ${sources})
 
