@@ -10,13 +10,9 @@
 
 static void cl_test(hpx::opencl::device cldevice)
 {
-
     hpx::opencl::lcos::event<void> event;
 
     hpx::future<void> fut = event.get_future();
-
-    
-
 }
 
 
