@@ -34,6 +34,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     };
 }}}}
 
+///////////////////////////////////////////////////////////////////////////////
 namespace hpx { namespace components { namespace detail
 {
     // use the promise heap factory for constructing events
@@ -44,6 +45,16 @@ namespace hpx { namespace components { namespace detail
         : promise_heap_factory<opencl::lcos::detail::event<Result, RemoteResult> >
     {};
 }}}
+
+namespace hpx { namespace traits
+{
+    template <typename Result, typename RemoteResult>
+    struct managed_component_dtor_policy<
+        opencl::lcos::detail::event<Result, RemoteResult> >
+    {
+        typedef managed_object_is_lifetime_controlled type;
+    };
+}}
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl { namespace lcos
