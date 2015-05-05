@@ -1,4 +1,3 @@
-
 // Copyright (c)    2013 Martin Stumpf
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -21,19 +20,12 @@ namespace opencl {
 
     class device;
     class buffer;
-    class kernel;
-    class event;
-    class program;
 
     // The OpenCL server namespace
     namespace server {
         
-        typedef intptr_t clx_device_id;
         class device;
         class buffer;
-        class kernel;
-        class event;
-        class program;
 
     }
 
@@ -46,4 +38,5 @@ namespace opencl {
 
 
 #endif
+
 

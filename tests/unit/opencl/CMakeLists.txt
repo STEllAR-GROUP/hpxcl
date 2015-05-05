@@ -8,10 +8,11 @@
 set(tests
     initialization
     buffer_read_write
-    events_and_futures
-    kernel
-    future_enqueues
-    program_from_binary
+    event
+#    events_and_futures
+#    kernel
+#    future_enqueues
+#    program_from_binary
    )
 
 
@@ -24,7 +25,7 @@ foreach(test ${tests})
   set(sources
       ${test}.cpp)
 
-  set(${test}_FLAGS ${${test}_FLAGS} DEPENDENCIES opencl_component)
+  set(${test}_FLAGS ${${test}_FLAGS} DEPENDENCIES hpxopencl_component)
 
   source_group("Source Files" FILES ${sources})
 

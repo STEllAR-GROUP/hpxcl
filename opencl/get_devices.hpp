@@ -4,21 +4,15 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
-#ifndef HPX_OPENCL_STD_HPP_
-#define HPX_OPENCL_STD_HPP_
+#ifndef HPX_OPENCL_GET_DEVICES_HPP_
+#define HPX_OPENCL_GET_DEVICES_HPP_
+
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 
 #include "export_definitions.hpp"
 
-#include "server/std.hpp"
-
-#include <hpx/config.hpp>
-#include <hpx/hpx.hpp>
-#include <hpx/include/iostreams.hpp>
-#include <hpx/lcos/future.hpp>
-
 #include <CL/cl.h>
-
-#include <vector>
 
 #include "fwd_declarations.hpp"
 
@@ -48,7 +42,7 @@ namespace hpx { namespace opencl{
      */
     HPX_OPENCL_EXPORT
     hpx::lcos::future<std::vector<device>>
-    get_devices(hpx::naming::id_type node_id, cl_device_type device_type,
+    get_devices( hpx::naming::id_type node_id, cl_device_type device_type,
                  std::string required_cl_version );
 
     /**
@@ -82,3 +76,4 @@ namespace hpx { namespace opencl{
 
 
 #endif
+
