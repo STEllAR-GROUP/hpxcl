@@ -31,7 +31,7 @@ if(MSVC)
   hpx_add_compile_flag(-bigobj)     # Increase the maximum size of object file sections
 endif()
 
-add_hpx_component(hpxopencl
+add_hpx_component(opencl
    ESSENTIAL
    SOURCES  component_definitions.cpp
             device.cpp
