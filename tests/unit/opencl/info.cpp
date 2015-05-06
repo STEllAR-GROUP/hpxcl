@@ -15,19 +15,10 @@ static void cl_test(hpx::opencl::device cldevice)
     // identical results
     //
 
-    hpx::opencl::info name_info = cldevice.get_device_info(CL_DEVICE_NAME);
-
-    std::string name_str = static_cast<std::string>(name_info);
-    std::vector<char> name_arr = static_cast<std::vector<char>>(name_info);
+    std::string device_version =
+        cldevice.get_device_info<CL_DEVICE_VERSION>().get();
     
-    // count valid characters in array
-    std::size_t name_arr_size = 0;
-    for(char &c : name_arr){
-        if(c == '\0') break;
-        name_arr_size++;
-    }
-    
-    HPX_TEST_EQ(name_str.size(), name_arr_size);
+    HPX_TEST(device_version.find("OpenCL ") == 0);
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -35,11 +26,11 @@ static void cl_test(hpx::opencl::device cldevice)
     // specified by OpenCL
     //
 
-    cl_uint work_dims = static_cast<cl_uint>(cldevice.get_device_info(
-                                        CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS));
+    cl_uint work_dims =
+        cldevice.get_device_info<CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS>().get();
 
-    std::vector<std::size_t> work_items = static_cast<std::vector<std::size_t> >(
-        cldevice.get_device_info(CL_DEVICE_MAX_WORK_ITEM_SIZES));
+    std::vector<std::size_t> work_items = 
+        cldevice.get_device_info<CL_DEVICE_MAX_WORK_ITEM_SIZES>().get();
 
     HPX_TEST_EQ(work_items.size(), work_dims);
 

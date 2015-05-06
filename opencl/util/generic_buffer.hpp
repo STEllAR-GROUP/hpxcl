@@ -24,7 +24,7 @@ namespace util {
     class HPX_OPENCL_EXPORT generic_buffer
     {
         
-        typedef hpx::shared_future<hpx::serialization::serialize_buffer<char> >
+        typedef hpx::future<hpx::serialization::serialize_buffer<char> >
             data_type;
     
         public:
@@ -35,36 +35,42 @@ namespace util {
              *
              *  @return The string
              */
-            explicit operator std::string();
+            explicit operator hpx::future<std::string>();
 
             /**
              *  @brief Converts the info to an std::vector of generic items
              *
              *  @return The vector
              */
-            template <typename T> explicit operator std::vector<T>()
+            template <typename T> explicit operator hpx::future<std::vector<T>>()
             {
-                hpx::serialization::serialize_buffer<char> raw_data = data.get();
+                return data.then(
+                    [] (data_type && data)
+                    {
 
-                // Compute number of elements
-                std::size_t num_elements = raw_data.size() / sizeof(T);
+                        hpx::serialization::serialize_buffer<char> raw_data =
+                            data.get();
+                    
+                        // Compute number of elements
+                        std::size_t num_elements = raw_data.size() / sizeof(T);
 
-                // Initialize result vector
-                std::vector<T> result;
-                result.reserve(num_elements);
+                        // Initialize result vector
+                        std::vector<T> result;
+                        result.reserve(num_elements);
 
-                // Fill result vector
-                for(std::size_t i = 0; i + sizeof(T) <= raw_data.size();
-                        i+=sizeof(T))
-                {
-                    result.push_back( 
-                        *reinterpret_cast<T*>(&raw_data.data()[i]) );
-                }
+                        // Fill result vector
+                        for(std::size_t i = 0; i + sizeof(T) <= raw_data.size();
+                            i+=sizeof(T))
+                        {
+                            result.push_back( 
+                                *reinterpret_cast<T*>(&raw_data.data()[i]) );
+                        }
 
-                /* Compare lengths */
-                HPX_ASSERT(result.size() == num_elements);
+                        /* Compare lengths */
+                        HPX_ASSERT(result.size() == num_elements);
 
-                return result;
+                        return result;
+                    });
             }
 
             /**
@@ -72,14 +78,19 @@ namespace util {
              *
              * @return The converted result
              */
-            template <typename T> explicit operator T()
+            template <typename T> explicit operator hpx::future<T>()
             {
-                hpx::serialization::serialize_buffer<char> raw_data = data.get();
+                return data.then(
+                    [] (data_type && data)
+                    {
+                        hpx::serialization::serialize_buffer<char> raw_data =
+                            data.get();
 
-                // Compare lengths
-                HPX_ASSERT(sizeof(T) == raw_data.size());
+                        // Compare lengths
+                        HPX_ASSERT(sizeof(T) == raw_data.size());
 
-                return * reinterpret_cast<T*>(raw_data.data());
+                        return * reinterpret_cast<T*>(raw_data.data());
+                    });
             };
 
             /**

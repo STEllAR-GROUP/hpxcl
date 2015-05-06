@@ -82,13 +82,14 @@ namespace opencl {
              *  @return The requested information.
              */
             template<cl_device_info Name>
-            typename detail::device_info<Name>::type
+            hpx::future<typename detail::device_info<Name>::type>
             get_device_info() const {
 
                 hpx::opencl::util::generic_buffer data = 
-                                                    get_device_info_raw(Name);
+                    get_device_info_raw(Name);
 
-                return static_cast<typename detail::device_info<Name>::type>(data);
+                return static_cast<hpx::future<
+                    typename detail::device_info<Name>::type> >(data);
 
             }
 
@@ -103,13 +104,14 @@ namespace opencl {
              *  @return The requested information.
              */
             template<cl_platform_info Name>
-            typename detail::platform_info<Name>::type
+            hpx::future<typename detail::platform_info<Name>::type>
             get_platform_info() const {
 
                 hpx::opencl::util::generic_buffer data = 
-                                                    get_platform_info_raw(Name);
+                    get_platform_info_raw(Name);
 
-                return static_cast<typename detail::platform_info<Name>::type>(data);
+                return static_cast<hpx::future<
+                    typename detail::platform_info<Name>::type> >(data);
 
             }
 

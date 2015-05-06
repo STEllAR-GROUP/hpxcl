@@ -96,39 +96,39 @@ int hpx_main(int argc, char* argv[])
             std::string str;
              
             // print name
-            str = cldevice.get_device_info<CL_DEVICE_NAME>();
+            str = cldevice.get_device_info<CL_DEVICE_NAME>().get();
             hpx::cout << i << ". " << str << hpx::endl;
 
             // print platform name
-            str = cldevice.get_platform_info<CL_PLATFORM_NAME>();
+            str = cldevice.get_platform_info<CL_PLATFORM_NAME>().get();
             printinfo(i, j++, "Platform", str);
 
             // print supported opencl version
-            str = cldevice.get_device_info<CL_DEVICE_VERSION>();
+            str = cldevice.get_device_info<CL_DEVICE_VERSION>().get();
             printinfo(i, j++, "OpenCL Version", str);
 
             // print device type
             str = device_type_to_string(
-                        cldevice.get_device_info<CL_DEVICE_TYPE>());
+                        cldevice.get_device_info<CL_DEVICE_TYPE>().get());
             printinfo(i, j++, "Type", str);
 
             // print driver version
-            str = cldevice.get_device_info<CL_DRIVER_VERSION>();
+            str = cldevice.get_device_info<CL_DRIVER_VERSION>().get();
             printinfo(i, j++, "Driver Version", str);
 
             // print vendor
             str = device_uint_to_string(
-                    cldevice.get_device_info<CL_DEVICE_VENDOR_ID>());
+                    cldevice.get_device_info<CL_DEVICE_VENDOR_ID>().get());
             str += " - ";
-            str += cldevice.get_device_info<CL_DEVICE_VENDOR>();
+            str += cldevice.get_device_info<CL_DEVICE_VENDOR>().get();
             printinfo(i, j++, "Vendor", str);
 
             // print profile
-            str = cldevice.get_device_info<CL_DEVICE_PROFILE>();
+            str = cldevice.get_device_info<CL_DEVICE_PROFILE>().get();
             printinfo(i, j++, "Profile", str);
 
             // print compiler c version
-            str = cldevice.get_device_info<CL_DEVICE_OPENCL_C_VERSION>();
+            str = cldevice.get_device_info<CL_DEVICE_OPENCL_C_VERSION>().get();
             printinfo(i, j++, "Compiler Version", str);
             
             /*** TO BE CONTINUED ***/

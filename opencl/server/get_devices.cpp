@@ -290,7 +290,7 @@ hpx::opencl::server::get_devices(cl_device_type type,
     {
         // Get device OpenCL version string
         std::string cl_version_string =
-                device.get_device_info<CL_DEVICE_VERSION>();
+                device.get_device_info<CL_DEVICE_VERSION>().get();
 
         // Parse OpenCL version
         std::vector<int> device_cl_version =
@@ -304,7 +304,7 @@ hpx::opencl::server::get_devices(cl_device_type type,
         }
 
         // Check for requested device type
-        cl_device_type device_type = device.get_device_info<CL_DEVICE_TYPE>();
+        cl_device_type device_type = device.get_device_info<CL_DEVICE_TYPE>().get();
         if(!(device_type & type)) continue;
 
         // TODO filter devices

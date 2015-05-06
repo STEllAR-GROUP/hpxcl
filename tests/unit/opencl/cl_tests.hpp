@@ -46,7 +46,7 @@ static hpx::opencl::device init(variables_map & vm)
     hpx::opencl::device cldevice = devices[device_id];
 
     // Test whether get_device_info works
-    std::string version = cldevice.get_device_info<CL_DEVICE_VERSION>();
+    std::string version = cldevice.get_device_info<CL_DEVICE_VERSION>().get();
 
     // Test whether version is a valid OpenCL version string
     std::string versionstring = std::string("OpenCL ");
@@ -56,11 +56,11 @@ static hpx::opencl::device init(variables_map & vm)
     hpx::cout << "Device ID:  " << device_id << " / " << devices.size()
                                 << hpx::endl;
     hpx::cout << "Version:    " << version << hpx::endl;
-    hpx::cout << "Name:       " << cldevice.get_device_info<CL_DEVICE_NAME>()
+    hpx::cout << "Name:       " << cldevice.get_device_info<CL_DEVICE_NAME>().get()
                                 << hpx::endl;
-    hpx::cout << "Vendor:     " << cldevice.get_device_info<CL_DEVICE_VENDOR>()
+    hpx::cout << "Vendor:     " << cldevice.get_device_info<CL_DEVICE_VENDOR>().get()
                                 << hpx::endl;
-    hpx::cout << "Profile:    " << cldevice.get_device_info<CL_DEVICE_PROFILE>()
+    hpx::cout << "Profile:    " << cldevice.get_device_info<CL_DEVICE_PROFILE>().get()
                                 << hpx::endl;
 
     // Test for valid device client
