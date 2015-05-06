@@ -49,6 +49,7 @@ add_hpx_component(opencl
             tools.hpp
             buffer.hpp
             info.hpp
+            cl_headers.hpp
             server/device.hpp
             server/buffer.hpp
             server/get_devices.hpp

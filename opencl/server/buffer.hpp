@@ -11,7 +11,7 @@
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
-#include <CL/cl.h>
+#include "../cl_headers.hpp"
 
 #include "../fwd_declarations.hpp"
 

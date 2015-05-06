@@ -12,7 +12,7 @@
 
 #include "export_definitions.hpp"
 
-#include <CL/cl.h>
+#include "cl_headers.hpp"
 
 #include "fwd_declarations.hpp"
 

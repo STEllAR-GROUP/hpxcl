@@ -15,7 +15,7 @@
 #include "export_definitions.hpp"
 
 // OpenCL
-#include <CL/cl.h>
+#include "cl_headers.hpp"
 
 // Forward Declarations
 #include "fwd_declarations.hpp"

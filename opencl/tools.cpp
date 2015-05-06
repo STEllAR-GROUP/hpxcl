@@ -7,7 +7,6 @@
 #include "tools.hpp"
 
 // Dependencies
-#include <CL/cl.h>
 #include <sstream>
 
 namespace hpx { namespace opencl { namespace tools {

@@ -15,9 +15,6 @@
 // HPX dependencies
 #include <hpx/include/thread_executors.hpp>
 
-// OpenCL
-#include <CL/cl.h>
-
 using namespace hpx::opencl::server;
 
 
