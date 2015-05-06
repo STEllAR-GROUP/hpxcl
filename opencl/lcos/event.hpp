@@ -7,8 +7,8 @@
 #ifndef HPX_OPENCL_LCOS_EVENT_HPP_
 #define HPX_OPENCL_LCOS_EVENT_HPP_
 
-#include <hpx/config.hpp>
 #include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 
 #include <hpx/lcos/promise.hpp>
 
@@ -177,10 +177,10 @@ namespace hpx { namespace opencl { namespace lcos
 
     ///////////////////////////////////////////////////////////////////////////
     template <>
-    class event<void, util::unused_type>
+    class event<void, hpx::util::unused_type>
     {
     public:
-        typedef detail::event<void, util::unused_type> wrapped_type;
+        typedef detail::event<void, hpx::util::unused_type> wrapped_type;
         typedef components::managed_component<wrapped_type> wrapping_type;
 
         /// Construct a new \a event instance. The supplied
@@ -236,7 +236,7 @@ namespace hpx { namespace opencl { namespace lcos
             return (*impl_)->is_ready();
         }
 
-        typedef util::unused_type result_type;
+        typedef hpx::util::unused_type result_type;
 
         ~event()
         {}
@@ -258,7 +258,7 @@ namespace hpx { namespace opencl { namespace lcos
 
         void set_value()
         {
-            (*impl_)->set_data(util::unused);
+            (*impl_)->set_data(hpx::util::unused);
         }
 
         void set_exception(boost::exception_ptr const& e)
