@@ -20,28 +20,23 @@ static void printinfo(size_t i, size_t j, std::string info_type,
               << info_type << ": " << info << hpx::endl;
 
 }
-
+            
 static std::string
-device_uint_to_string(hpx::future<hpx::util::serialize_buffer<char>> data_future)
+device_uint_to_string(hpx::opencl::info && info_data)
 {
 
-    hpx::util::serialize_buffer<char> data_raw = data_future.get();
-
-    cl_uint res = *((cl_uint*)data_raw.data());
+    cl_uint res = static_cast<cl_uint>(info_data);
     
     std::stringstream ss;
-
     ss << res;
-
     return ss.str();
 
 }
 static std::string
-device_type_to_string(hpx::future<hpx::util::serialize_buffer<char>> type_future)
+device_type_to_string(hpx::opencl::info && info_data)
 {
 
-    hpx::util::serialize_buffer<char> type_raw = type_future.get();
-    cl_device_type type = *((cl_device_type*) type_raw.data());
+    cl_device_type type = static_cast<cl_device_type>(info_data);
 
     std::vector<std::string> typelist;
 
@@ -98,7 +93,7 @@ int hpx_main(int argc, char* argv[])
 
         // print a lot of information about every device
         size_t i = 1;
-        BOOST_FOREACH(device & cldevice, devices)
+        for(auto &cldevice : devices)
         {
    
             size_t j = 1;
@@ -107,17 +102,17 @@ int hpx_main(int argc, char* argv[])
             std::string str;
              
             // print name
-            str = cldevice.device_info_to_string(
+            str = static_cast<std::string>(
                         cldevice.get_device_info(CL_DEVICE_NAME));
             hpx::cout << i << ". " << str << hpx::endl;
 
             // print platform name
-            str = cldevice.device_info_to_string(
+            str = static_cast<std::string>(
                         cldevice.get_platform_info(CL_PLATFORM_NAME));
             printinfo(i, j++, "Platform", str);
 
             // print supported opencl version
-            str = cldevice.device_info_to_string(
+            str = static_cast<std::string>(
                         cldevice.get_device_info(CL_DEVICE_VERSION));
             printinfo(i, j++, "OpenCL Version", str);
 
@@ -127,7 +122,7 @@ int hpx_main(int argc, char* argv[])
             printinfo(i, j++, "Type", str);
 
             // print driver version
-            str = cldevice.device_info_to_string(
+            str = static_cast<std::string>(
                         cldevice.get_device_info(CL_DRIVER_VERSION));
             printinfo(i, j++, "Driver Version", str);
 
@@ -135,23 +130,21 @@ int hpx_main(int argc, char* argv[])
             str = device_uint_to_string(
                         cldevice.get_device_info(CL_DEVICE_VENDOR_ID));
             str += " - ";
-            str += cldevice.device_info_to_string(
+            str += static_cast<std::string>(
                         cldevice.get_device_info(CL_DEVICE_VENDOR));
             printinfo(i, j++, "Vendor", str);
 
             // print profile
-            str = cldevice.device_info_to_string(
+            str = static_cast<std::string>(
                         cldevice.get_device_info(CL_DEVICE_PROFILE));
             printinfo(i, j++, "Profile", str);
 
             // print compiler c version
-            str = cldevice.device_info_to_string(
+            str = static_cast<std::string>(
                         cldevice.get_device_info(CL_DEVICE_OPENCL_C_VERSION));
             printinfo(i, j++, "Compiler Version", str);
             
             /*** TO BE CONTINUED ***/
-
-
 
 
             // add newline before starting a new device

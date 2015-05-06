@@ -11,9 +11,10 @@
 
 // Dependencies
 #include "buffer.hpp"
+#include "info.hpp"
 
 using hpx::opencl::device;
-hpx::future<hpx::serialization::serialize_buffer<char>>
+hpx::opencl::info
 device::get_device_info(cl_device_info info_type) const
 {
 
@@ -21,12 +22,12 @@ device::get_device_info(cl_device_info info_type) const
 
     typedef hpx::opencl::server::device::get_device_info_action func;
 
-    return hpx::async<func>(this->get_gid(), info_type);
+    return hpx::opencl::info(hpx::async<func>(this->get_gid(), info_type));
 
 }
 
 
-hpx::future<hpx::serialization::serialize_buffer<char>>
+hpx::opencl::info
 device::get_platform_info(cl_platform_info info_type) const
 {
 
@@ -34,30 +35,10 @@ device::get_platform_info(cl_platform_info info_type) const
 
     typedef hpx::opencl::server::device::get_platform_info_action func;
 
-    return hpx::async<func>(this->get_gid(), info_type);
+    return hpx::opencl::info(hpx::async<func>(this->get_gid(), info_type));
 
 }
 
-std::string
-device::device_info_to_string(
-    hpx::future<hpx::serialization::serialize_buffer<char>> info)
-{
-
-    hpx::serialization::serialize_buffer<char> char_array = info.get();
-
-    // Calculate length of string. Cut short if it has a 0-Termination
-    // (Some queries like CL_DEVICE_NAME always return a size of 64, but 
-    // contain a 0-terminated string)
-    std::size_t length = 0;
-    while(length < char_array.size())
-    {
-        if(char_array[length] == '\0') break;
-        length++;
-    }
-
-    return std::string(char_array.data(), char_array.data() + length);
-
-}
 
 hpx::opencl::buffer
 device::create_buffer(cl_mem_flags flags, std::size_t size) const

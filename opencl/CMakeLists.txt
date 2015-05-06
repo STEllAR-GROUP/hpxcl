@@ -38,6 +38,7 @@ add_hpx_component(opencl
             get_devices.cpp
             tools.cpp
             buffer.cpp
+            info.cpp
             server/device.cpp
             server/buffer.cpp
             server/get_devices.cpp
@@ -47,6 +48,7 @@ add_hpx_component(opencl
             fwd_declarations.hpp
             tools.hpp
             buffer.hpp
+            info.hpp
             server/device.hpp
             server/buffer.hpp
             server/get_devices.hpp

@@ -32,8 +32,7 @@ static std::string get_cl_info(hpx::opencl::device cldevice,
                                cl_device_info info_type)
 {
 
-    return hpx::opencl::device::device_info_to_string(
-                                cldevice.get_device_info(info_type));
+    return static_cast<std::string>(cldevice.get_device_info(info_type));
 
 }
 

@@ -12,6 +12,7 @@
 // HPXCL dependencies
 #include "../device.hpp"
 #include "device.hpp"
+#include "../info.hpp"
 
 
 // Other dependencies
@@ -290,7 +291,7 @@ hpx::opencl::server::get_devices(cl_device_type type,
     for(const auto & device : devices)
     {
         // Get device OpenCL version string
-        std::string cl_version_string = device.device_info_to_string(
+        std::string cl_version_string = static_cast<std::string>(
                                      device.get_device_info(CL_DEVICE_VERSION));
 
         // Parse OpenCL version
@@ -305,10 +306,8 @@ hpx::opencl::server::get_devices(cl_device_type type,
         }
 
         // Check for requested device type
-        hpx::serialization::serialize_buffer<char> device_type_string =
-                                   device.get_device_info(CL_DEVICE_TYPE).get();
-        cl_device_type device_type = *(reinterpret_cast<cl_device_type*>
-                                                   (device_type_string.data()));
+        cl_device_type device_type = static_cast<cl_device_type> (
+                                       device.get_device_info(CL_DEVICE_TYPE));
         if(!(device_type & type)) continue;
 
         // TODO filter devices

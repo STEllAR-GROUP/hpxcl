@@ -51,15 +51,10 @@ namespace opencl {
              *                      <A HREF="http://www.khronos.org/registry/cl/
              * sdk/1.2/docs/man/xhtml/clGetDeviceInfo.html">
              *                      OpenCL Reference</A>.
-             *  @return The info data as char array.<BR>
-             *          This will typically be cast to some other type via
-             *          (for example):
-             *          \code{.cpp}
-             *          cl_uint *return_uint = (cl_uint*)return_charvector.data();
-             *          \endcode
-             *          or converted to a string via \ref device_info_to_string.
+             *  @return The info data as \ref hpx::opencl::info.<BR>
+             *          It can be cast to several datatypes.
              */
-            hpx::future<hpx::serialization::serialize_buffer<char> >
+            hpx::opencl::info
             get_device_info(cl_device_info info_type) const;
 
              /**
@@ -70,32 +65,11 @@ namespace opencl {
              *                      <A HREF="http://www.khronos.org/registry/cl/
              * sdk/1.2/docs/man/xhtml/clGetPlatformInfo.html">
              *                      OpenCL Reference</A>.
-             *  @return The info data as char array.<BR>
-             *          This will typically be cast to some other type via
-             *          (for example):
-             *          \code{.cpp}
-             *          cl_uint *return_uint = (cl_uint*)return_charvector.data();
-             *          \endcode
-             *          or converted to a string via \ref device_info_to_string.
+             *  @return The info data as \ref hpx::opencl::info.<BR>
+             *          It can be cast to several datatypes.
              */
-            hpx::future<hpx::serialization::serialize_buffer<char>>
+            hpx::opencl::info
             get_platform_info(cl_platform_info info_type) const;
-
-            /** 
-             *  @brief Converts device info data to a string
-             *
-             *  This method is for convenience.<BR>
-             *  It should only be used on String return types of
-             *  \ref get_device_info.
-             *
-             *  @param info     Output data of \ref get_device_info. <BR>
-             *                  Only use this function if the data type is
-             *                  a string.
-             *  @return         The data, converted to a string.
-             */
-            static std::string
-            device_info_to_string(hpx::lcos::future<
-                             hpx::serialization::serialize_buffer<char>> info);
 
             /**
              *  @brief Creates an OpenCL buffer.
