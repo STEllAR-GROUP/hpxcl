@@ -11,31 +11,33 @@
 
 // Dependencies
 #include "buffer.hpp"
-#include "info.hpp"
+#include "util/generic_buffer.hpp"
 
 using hpx::opencl::device;
-hpx::opencl::info
-device::get_device_info(cl_device_info info_type) const
+hpx::opencl::util::generic_buffer
+device::get_device_info_raw(cl_device_info info_type) const
 {
 
     HPX_ASSERT(this->get_gid());
 
     typedef hpx::opencl::server::device::get_device_info_action func;
 
-    return hpx::opencl::info(hpx::async<func>(this->get_gid(), info_type));
+    return hpx::opencl::util::generic_buffer(
+                                hpx::async<func>(this->get_gid(), info_type));
 
 }
 
 
-hpx::opencl::info
-device::get_platform_info(cl_platform_info info_type) const
+hpx::opencl::util::generic_buffer
+device::get_platform_info_raw(cl_platform_info info_type) const
 {
 
     HPX_ASSERT(this->get_gid());
 
     typedef hpx::opencl::server::device::get_platform_info_action func;
 
-    return hpx::opencl::info(hpx::async<func>(this->get_gid(), info_type));
+    return hpx::opencl::util::generic_buffer(
+                                hpx::async<func>(this->get_gid(), info_type));
 
 }
 

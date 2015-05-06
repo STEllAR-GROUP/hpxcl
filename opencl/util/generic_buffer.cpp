@@ -4,18 +4,18 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 // The class header file
-#include "info.hpp"
+#include "generic_buffer.hpp"
 
-using hpx::opencl::info;
+using hpx::opencl::util::generic_buffer;
 
 hpx::serialization::serialize_buffer<char>
-info::raw()
+generic_buffer::raw()
 {
     return data.get();
 }
 
 
-info::operator std::string()
+generic_buffer::operator std::string()
 {
    
     hpx::serialization::serialize_buffer<char> char_array = data.get();

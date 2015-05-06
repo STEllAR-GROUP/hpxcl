@@ -4,36 +4,31 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
-#ifndef HPX_OPENCL_INFO_HPP_
-#define HPX_OPENCL_INFO_HPP_
+#ifndef HPX_OPENCL_UTIL_GENERIC_BUFFER_HPP_
+#define HPX_OPENCL_UTIL_GENERIC_BUFFER_HPP_
 
 // Default includes
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
 // Export definitions
-#include "export_definitions.hpp"
-
-// OpenCL
-#include "cl_headers.hpp"
-
-// Forward Declarations
-#include "fwd_declarations.hpp"
+#include "../export_definitions.hpp"
 
 namespace hpx {
 namespace opencl {
+namespace util {
 
     /////////////////////////////////////////
     /// @brief An accelerator device.
     ///
-    class HPX_OPENCL_EXPORT info
+    class HPX_OPENCL_EXPORT generic_buffer
     {
         
         typedef hpx::shared_future<hpx::serialization::serialize_buffer<char> >
             data_type;
     
         public:
-            info(data_type && data_) : data(std::move(data_)){}
+            generic_buffer(data_type && data_) : data(std::move(data_)){}
 
             /**
              *  @brief Converts the info to std::string
@@ -99,9 +94,9 @@ namespace opencl {
 
     };
 
-}}
+}}}
 
 
-#endif// HPX_OPENCL_INFO_HPP_
+#endif// HPX_OPENCL_UTIL_GENERIC_BUFFER_HPP_
 
             

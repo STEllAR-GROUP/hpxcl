@@ -38,22 +38,23 @@ add_hpx_component(opencl
             get_devices.cpp
             tools.cpp
             buffer.cpp
-            info.cpp
             server/device.cpp
             server/buffer.cpp
             server/get_devices.cpp
+            util/generic_buffer.cpp
    HEADERS  device.hpp
             get_devices.hpp
             export_definitions.hpp
             fwd_declarations.hpp
             tools.hpp
             buffer.hpp
-            info.hpp
             cl_headers.hpp
             server/device.hpp
             server/buffer.hpp
             server/get_devices.hpp
             lcos/event.hpp
+            util/generic_buffer.hpp
+            detail/info_type.hpp
    COMPONENT_DEPENDENCIES iostreams
    DEPENDENCIES ${OPENCL_LIBRARIES}
    )
