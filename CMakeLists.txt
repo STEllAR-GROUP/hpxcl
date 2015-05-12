@@ -97,6 +97,9 @@ endif()
 ###############################################################################
 
 if(HPX_BUILD_TESTS)
+
+  file(COPY ${HPX_ROOT}/bin/hpxrun.py DESTINATION ${CMAKE_BINARY_DIR}/bin)
+
   hpx_option(HPX_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
   hpx_option(HPX_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
   hpx_option(HPX_BUILD_TESTS_UNIT BOOL "Build HPX unit tests (default: ON)" ON ADVANCED)
