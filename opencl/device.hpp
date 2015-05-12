@@ -88,8 +88,7 @@ namespace opencl {
                 hpx::opencl::util::generic_buffer data = 
                     get_device_info_raw(Name);
 
-                return static_cast<hpx::future<
-                    typename detail::device_info<Name>::type> >(data);
+                return data.get<typename detail::device_info<Name>::type>();
 
             }
 
@@ -110,8 +109,7 @@ namespace opencl {
                 hpx::opencl::util::generic_buffer data = 
                     get_platform_info_raw(Name);
 
-                return static_cast<hpx::future<
-                    typename detail::platform_info<Name>::type> >(data);
+                return data.get<typename detail::platform_info<Name>::type>();
 
             }
 

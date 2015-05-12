@@ -7,15 +7,11 @@
 #include "generic_buffer.hpp"
 
 using hpx::opencl::util::generic_buffer;
-
-hpx::serialization::serialize_buffer<char>
-generic_buffer::raw()
-{
-    return data.get();
-}
+using hpx::opencl::util::detail::generic_buffer_impl;
 
 
-generic_buffer::operator hpx::future<std::string>()
+hpx::future<std::string>
+generic_buffer_impl<std::string>::get(data_type && data)
 {
     return data.then(
         [] (data_type && data)
