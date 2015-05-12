@@ -10,6 +10,7 @@ set(tests
     buffer_read_write
     event
     info
+    event_map
 #    events_and_futures
 #    kernel
 #    future_enqueues

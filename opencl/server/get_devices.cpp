@@ -54,7 +54,7 @@ static void clear_device_list()
 
     // Lock the list
     static_device_list_lock_type device_lock;
-    boost::lock_guard<spinlock> lock(device_lock.get());
+    spinlock::scoped_lock lock(device_lock.get());
 
     // get static device list
     static_device_list_type devices;
@@ -243,7 +243,7 @@ ensure_device_components_initialization()
     // Set the device list status to ready and notify waiting threads
     {
         // Lock
-        boost::lock_guard<spinlock> lock(device_lock.get());
+        spinlock::scoped_lock lock(device_lock.get());
 
         // Set status to ready
         device_list_ready = true;
@@ -275,7 +275,7 @@ hpx::opencl::server::get_devices(cl_device_type type,
     {
         // Lock the list
         static_device_list_lock_type device_lock;
-        boost::lock_guard<spinlock> lock(device_lock.get());
+        spinlock::scoped_lock lock(device_lock.get());
 
         // get static device list
         static_device_list_type device_list;
