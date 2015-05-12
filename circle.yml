@@ -27,4 +27,3 @@ test:
     override:
         - docker run -v $PWD:/hpx -w /hpx/build ${IMAGE_NAME} ../tools/run_tests.sh
 
-
