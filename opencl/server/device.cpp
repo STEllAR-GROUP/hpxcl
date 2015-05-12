@@ -119,9 +119,18 @@ device::init(cl_device_id _device_id, bool enable_profiling)
         command_queue_properties |= CL_QUEUE_PROFILING_ENABLE;
 
     // Create Command Queue
-    command_queue = clCreateCommandQueue(context, device_id,
-                                         command_queue_properties, &err);
-    cl_ensure(err, "clCreateCommandQueue()");
+    #ifdef CL_VERSION_2_0
+        cl_queue_properties queue_properties[] = {CL_QUEUE_PROPERTIES,
+                              (cl_queue_properties) command_queue_properties,
+                              (cl_queue_properties) 0};
+        command_queue = clCreateCommandQueueWithProperties(context, device_id,
+                                                        queue_properties, &err);
+        cl_ensure(err, "clCreateCommandQueueWithProperties()");
+    #else
+        command_queue = clCreateCommandQueue(context, device_id,
+                                             command_queue_properties, &err);
+        cl_ensure(err, "clCreateCommandQueue()");
+    #endif
 }
 
 
