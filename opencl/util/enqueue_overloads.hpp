@@ -60,10 +60,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace dependencies{
         return result;
     }
 
-    // This class is there to split the arguments from the dependencies.
-    // It will then create the solution id_type vector via recursive
-    // templates and call the function name_impl(args, deps).
-    template<typename return_value, typename ...Args>
+/*    template<typename return_value, typename ...Args>
     class caller{
         public:
         
@@ -74,24 +71,40 @@ namespace hpx{ namespace opencl{ namespace util{ namespace dependencies{
             return f( std::forward<Args>(args)...,
                       resolver(std::forward<Deps>(deps)...) );
         }
-    };
+    };*/
 
 }}}}
 
 #define HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(return_value, name, args...)      \
                                                                                 \
-    static hpx::future<return_value>                                                   \
+    hpx::future<return_value>                                                   \
     name##_impl(args, std::vector<hpx::naming::id_type>);                       \
                                                                                 \
-    class name##_type{                                                          \
+    /*                                                                          \
+     * This class is there to split the arguments from the dependencies.        \
+     * It will then create the solution id_type vector via recursive            \
+     * templates and call the function name_impl(args, deps).                   \
+     */                                                                         \
+    template<typename ...Nondeps>                                               \
+    class name##_caller{                                                        \
         public:                                                                 \
-            template<typename ...Params>                                        \
-            hpx::future<return_value> operator()(Params &&... params){          \
-                using hpx::opencl::util::dependencies::caller;                  \
-                return caller<return_value, args>()(name##_impl,                \
-                            std::forward<Params>(params)...);                   \
-            }                                                                   \
-    } name
+        template<typename C, typename ...Deps>                                  \
+        hpx::future<return_value> operator()(C && c, Nondeps &&... nondeps,     \
+                                                     Deps &&... deps)           \
+        {                                                                       \
+            using hpx::opencl::util::dependencies::resolver;                    \
+            return c->name##_impl ( std::forward<Nondeps>(nondeps)...,          \
+                      resolver(std::forward<Deps>(deps)...) );                  \
+        }                                                                       \
+    };                                                                          \
+                                                                                \
+    template<typename ...Params>                                                \
+    hpx::future<return_value>                                                   \
+    name (Params &&... params)                                                  \
+    {                                                                           \
+        return name##_caller<args>()(this, std::forward<Params>(params)...);    \
+    }
+
 
 
 
