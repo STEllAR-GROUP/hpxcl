@@ -21,6 +21,7 @@ HPX_REGISTER_COMPONENT(device_component_type, hpx_opencl_device);
 HPX_REGISTER_ACTION(device_type::get_device_info_action);
 HPX_REGISTER_ACTION(device_type::get_platform_info_action);
 HPX_REGISTER_ACTION(device_type::create_buffer_action);
+HPX_REGISTER_ACTION(device_type::release_event_action);
 
 
 // BUFFER

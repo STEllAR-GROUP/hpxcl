@@ -20,7 +20,10 @@ using namespace hpx::opencl::server;
 
 // Constructor
 device::device()
-{}
+{
+    // Register the event deletion callback function at the event map
+    event_map.register_deletion_callback(delete_event);
+}
 
 // External destructor.
 // This is needed because OpenCL calls only run properly on large stack size.
@@ -220,4 +223,29 @@ device::create_buffer( cl_mem_flags flags, std::size_t size )
     buffer_server->init(get_gid(), flags, size);
 
     return buf;           
+}
+
+void
+device::release_event( hpx::naming::id_type && gid )
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    // delete event from map
+    event_map.remove(gid);
+
+}
+
+
+void
+device::delete_event( cl_event event )
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    // delete the actual cl_event object
+    cl_int err;
+    err = clReleaseEvent(event);
+    cl_ensure(err, "clReleaseEvent()");
+
 }

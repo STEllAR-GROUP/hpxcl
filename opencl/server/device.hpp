@@ -12,6 +12,11 @@
 
 #include "../cl_headers.hpp"
 
+#include "util/event_map.hpp"
+
+// REGISTER_ACTION_DECLARATION templates
+#include "util/server_definitions.hpp"
+
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
     
@@ -51,9 +56,19 @@ namespace hpx { namespace opencl{ namespace server{
         hpx::id_type
         create_buffer(cl_mem_flags flags, std::size_t size);
 
+        /////////////////////////////////////////////////
+        /// Behind-the-scenes functionality of this component
+        /// 
+
+        // releases an event registered to a GID
+        void
+        release_event(hpx::naming::id_type && gid);
+    
+
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_info);
     HPX_DEFINE_COMPONENT_ACTION(device, get_platform_info);
     HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
+    HPX_DEFINE_COMPONENT_ACTION(device, release_event);
 
     private:
         ///////////////////////////////////////////////
@@ -64,6 +79,9 @@ namespace hpx { namespace opencl{ namespace server{
         static void CL_CALLBACK error_callback(const char*, const void*,
                                                std::size_t, void*);
 
+        // cl_event Deletion Callback
+        static void delete_event(cl_event);
+
     private:
         ///////////////////////////////////////////////
         // Private Member Variables
@@ -73,22 +91,15 @@ namespace hpx { namespace opencl{ namespace server{
         cl_context          context;
         cl_command_queue    command_queue;
 
+        util::event_map     event_map;
     };
 }}}
 
 //[opencl_management_registration_declarations
-HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::device::get_device_info_action);
-HPX_REGISTER_ACTION_DECLARATION(
-        hpx::opencl::server::device::get_device_info_action,
-        hpx_opencl_device_get_device_info_action);
-HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::device::get_platform_info_action);
-HPX_REGISTER_ACTION_DECLARATION(
-        hpx::opencl::server::device::get_platform_info_action,
-        opencl_device_get_platform_info_action);
-HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::device::create_buffer_action);
-HPX_REGISTER_ACTION_DECLARATION(
-        hpx::opencl::server::device::create_buffer_action,
-        opencl_device_create_buffer_action);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, get_device_info);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, get_platform_info);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, create_buffer);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, release_event);
 //]
 
 #endif

@@ -15,6 +15,8 @@
 
 #include "../fwd_declarations.hpp"
 
+// REGISTER_ACTION_DECLARATION templates
+#include "util/server_definitions.hpp"
 
 namespace hpx { namespace opencl{ namespace server{
 
@@ -57,10 +59,7 @@ namespace hpx { namespace opencl{ namespace server{
 }}}
 
 //[opencl_management_registration_declarations
-HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::buffer::size_action);
-HPX_REGISTER_ACTION_DECLARATION(
-        hpx::opencl::server::buffer::size_action,
-        opencl_buffer_size_action);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, size);
 //]
 
 #endif
