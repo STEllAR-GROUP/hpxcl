@@ -226,10 +226,8 @@ device::create_buffer( cl_mem_flags flags, std::size_t size )
 }
 
 void
-device::release_event( hpx::naming::id_type && gid )
+device::release_event( hpx::naming::id_type gid )
 {
-
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
 
     // delete event from map
     event_map.remove(gid);
@@ -249,3 +247,23 @@ device::delete_event( cl_event event )
     cl_ensure(err, "clReleaseEvent()");
 
 }
+
+void
+device::register_event( const hpx::naming::id_type & gid, cl_event event )
+{
+
+    // Add pair to event_map
+    event_map.add(gid, event); 
+
+}
+
+cl_event
+device::retrieve_event( const hpx::naming::id_type & gid )
+{
+
+    // Get event from event_map
+    return event_map.get(gid);
+
+}
+
+

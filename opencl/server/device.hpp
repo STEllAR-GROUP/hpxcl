@@ -62,13 +62,24 @@ namespace hpx { namespace opencl{ namespace server{
 
         // releases an event registered to a GID
         void
-        release_event(hpx::naming::id_type && gid);
+        release_event(hpx::naming::id_type gid);
     
-
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_info);
     HPX_DEFINE_COMPONENT_ACTION(device, get_platform_info);
     HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
     HPX_DEFINE_COMPONENT_ACTION(device, release_event);
+
+    public:
+        /////////////////////////////////////////////////
+        // Public Member Functions
+
+        // registers an event-GID pair
+        void
+        register_event(const hpx::naming::id_type & gid, cl_event);
+
+        // retrieves an event from a GID
+        cl_event
+        retrieve_event(const hpx::naming::id_type & gid);
 
     private:
         ///////////////////////////////////////////////
