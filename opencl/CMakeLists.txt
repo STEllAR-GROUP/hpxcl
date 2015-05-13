@@ -39,6 +39,7 @@ add_hpx_component(opencl
             tools.cpp
             buffer.cpp
             util/generic_buffer.cpp
+            util/enqueue_overloads.cpp
             server/device.cpp
             server/buffer.cpp
             server/get_devices.cpp
@@ -51,6 +52,7 @@ add_hpx_component(opencl
             buffer.hpp
             cl_headers.hpp
             util/generic_buffer.hpp
+            util/enqueue_overloads.hpp
             lcos/event.hpp
             detail/info_type.hpp
             server/device.hpp

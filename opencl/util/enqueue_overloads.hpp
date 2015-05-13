@@ -10,59 +10,99 @@
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
+#include <hpx/include/iostreams.hpp>
+
 namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 
     // This is the function that actually extrudes the GID from the futures.
     template<typename future_type>
     hpx::naming::id_type
     extrude_id(future_type && fut){
+        // TODO
         return hpx::naming::id_type();
     }
+
+
+
+
+
+    namespace detail
+    {
+        BOOST_MPL_HAS_XXX_TRAIT_DEF(value_type)
+        BOOST_MPL_HAS_XXX_TRAIT_DEF(iterator)
+        BOOST_MPL_HAS_XXX_TRAIT_DEF(size_type)
+        BOOST_MPL_HAS_XXX_TRAIT_DEF(reference)
+
+        template <typename T>
+        struct is_container
+          : boost::mpl::bool_<
+                has_value_type<T>::value && has_iterator<T>::value &&
+                has_size_type<T>::value && has_reference<T>::value>
+        {};
+
+        template <typename T>
+        struct is_container<T&>
+          : is_container<T>
+        {};
+    }
+
+    // This function object switches its implementation depending on wether
+    // the given value is a container or not
+    template<bool is_vector>
+    struct extrude_all_ids
+    {
+    };
+
+    template<>
+    struct extrude_all_ids<false>
+    {
+        template<typename T>
+        std::vector<hpx::naming::id_type>
+        operator()(T && t){
+            return std::vector<hpx::naming::id_type>({extrude_id(t)});
+        }
+    };
+
+    template<>
+    struct extrude_all_ids<true>
+    {
+        template<typename T>
+        std::vector<hpx::naming::id_type>
+        operator()(const std::vector<T> & t_vec){
+            std::vector<hpx::naming::id_type> res;
+            res.reserve(t_vec.size());
+            for(const T & t : t_vec){
+                res.push_back(extrude_id(t));
+            }
+            return res;
+        }
+    };
+
 
     // The resolver recursive template functions are here to convert
     // an arbitrary number of future and std::vector<future> to
     // one single std::vector<id_type>.
-    template<typename Dep>
     std::vector<hpx::naming::id_type>
-    resolver(Dep&& dep){
-        std::vector<hpx::naming::id_type> result;
-        result.push_back(extrude_id(std::forward<Dep>(dep)));
-        return result;
-    }
+    resolver();
 
     template<typename Dep>
     std::vector<hpx::naming::id_type>
-    resolver(std::vector<Dep> & dep_vec){
-        std::vector<hpx::naming::id_type> result;
-        for(const Dep & dep : dep_vec){
-            result.push_back(extrude_id(dep));
-        }
-        return result;
+    resolver(Dep&& dep){
+        return extrude_all_ids<detail::is_container<Dep>::value>()(dep);
     }
 
     template<typename Dep, typename ...Deps>
     std::vector<hpx::naming::id_type>
     resolver(Dep&& dep, Deps&&... deps){
+
+        // recursive call
         std::vector<hpx::naming::id_type> result
             = resolver(std::forward<Deps>(deps)...);
-        result.push_back(extrude_id(dep));
-        return result;
-    }
 
-    template<typename Dep, typename ...Deps>
-    std::vector<hpx::naming::id_type>
-    resolver(std::vector<Dep> & dep_vec, Deps&&... deps){
-        std::vector<hpx::naming::id_type> result
-            = resolver(std::forward<Deps>(deps)...);
-        for(const Dep & dep : dep_vec){
-            result.push_back(extrude_id(dep));
-        }
-        return result;
-    }
+        std::vector<hpx::naming::id_type> ids
+            = extrude_all_ids<detail::is_container<Dep>::value>()(dep);
 
-    std::vector<hpx::naming::id_type>
-    resolver(){
-        std::vector<hpx::naming::id_type> result;
+        result.insert(result.end(), ids.begin(), ids.end());
         return result;
     }
 
