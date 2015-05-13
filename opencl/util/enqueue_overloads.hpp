@@ -10,7 +10,7 @@
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
-namespace hpx{ namespace opencl{ namespace util{ namespace dependencies{
+namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 
     // This is the function that actually extrudes the GID from the futures.
     template<typename future_type>
@@ -60,18 +60,12 @@ namespace hpx{ namespace opencl{ namespace util{ namespace dependencies{
         return result;
     }
 
-/*    template<typename return_value, typename ...Args>
-    class caller{
-        public:
-        
-        template<typename F, typename ...Deps>
-        hpx::future<return_value> operator()(F && f, Args &&... args,
-                                                     Deps &&... deps)
-        {
-            return f( std::forward<Args>(args)...,
-                      resolver(std::forward<Deps>(deps)...) );
-        }
-    };*/
+    std::vector<hpx::naming::id_type>
+    resolver(){
+        std::vector<hpx::naming::id_type> result;
+        return result;
+    }
+
 
 }}}}
 
@@ -81,7 +75,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace dependencies{
     name##_impl(args, std::vector<hpx::naming::id_type>);                       \
                                                                                 \
     /*                                                                          \
-     * This class is there to split the arguments from the dependencies.        \
+     * This class  splits the arguments from the dependencies.                  \
      * It will then create the solution id_type vector via recursive            \
      * templates and call the function name_impl(args, deps).                   \
      */                                                                         \
@@ -92,7 +86,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace dependencies{
         hpx::future<return_value> operator()(C && c, Nondeps &&... nondeps,     \
                                                      Deps &&... deps)           \
         {                                                                       \
-            using hpx::opencl::util::dependencies::resolver;                    \
+            using hpx::opencl::util::enqueue_overloads::resolver;               \
             return c->name##_impl ( std::forward<Nondeps>(nondeps)...,          \
                       resolver(std::forward<Deps>(deps)...) );                  \
         }                                                                       \
