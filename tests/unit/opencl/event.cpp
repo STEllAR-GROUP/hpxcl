@@ -7,37 +7,49 @@
 #include <hpx/config.hpp>
 #include <hpx/hpx_main.hpp>
 
-#include <hpx/include/iostreams.hpp>
+#include <hpx/util/lightweight_test.hpp>
 
-#include <iomanip>
+#include <hpx/include/iostreams.hpp>
 
 void dummy(){}
 
 
-int main()
+int hpx_main()
 {
-    typedef hpx::lcos::promise<void> promise_type;
-    typedef typename promise_type::wrapped_type shared_state_type;
+
+    {
+        typedef hpx::lcos::promise<void> promise_type;
+        typedef typename promise_type::wrapped_type shared_state_type;
 
 
-    promise_type promise;
-    auto gid = promise.get_gid();
+        promise_type promise;
 
 
-    auto future = promise.get_future();
-    auto future_data = hpx::lcos::detail::get_shared_state(future);
-    auto shared_state = boost::static_pointer_cast<shared_state_type>(future_data);
+        auto future = promise.get_future();
+        auto future_data = hpx::lcos::detail::get_shared_state(future);
+        auto shared_state = boost::static_pointer_cast<shared_state_type>(future_data);
 
 
-    auto gid2 = shared_state->get_gid();
+        auto gid2 = shared_state->get_gid();
 
-    hpx::cout << gid << hpx::endl;
-    hpx::cout << gid2 << hpx::endl;
-    hpx::cout << std::hex << (gid.get_msb() & 0x0000000000FFFFFF) << hpx::endl;
-    hpx::cout << std::hex << (gid2.get_msb() & 0x0000000000FFFFFF) << hpx::endl;
+        auto gid = promise.get_base_gid();
+        
+        auto msb1 = gid.get_msb() & 0x0000000000FFFFFF;
+        auto msb2 = gid2.get_msb() & 0x0000000000FFFFFF;
 
+        HPX_TEST_EQ(msb1, msb2);
+        HPX_TEST_EQ(gid.get_lsb(), gid2.get_lsb());
 
-    return 0;
+        hpx::cout << gid << hpx::endl;
+        hpx::cout << gid2 << hpx::endl;
+    }
+
+    hpx::finalize();
+    return hpx::util::report_errors();
 }
 
-
+///////////////////////////////////////////////////////////////////////////////
+int main(int argc, char* argv[])
+{
+    return hpx::init(argc, argv);
+}
