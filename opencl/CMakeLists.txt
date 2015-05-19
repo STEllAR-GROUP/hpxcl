@@ -44,6 +44,7 @@ add_hpx_component(opencl
             server/buffer.cpp
             server/get_devices.cpp
             server/util/event_map.cpp
+            server/util/event_dependencies.cpp
    HEADERS  device.hpp
             get_devices.hpp
             export_definitions.hpp
@@ -59,6 +60,7 @@ add_hpx_component(opencl
             server/buffer.hpp
             server/get_devices.hpp
             server/util/event_map.hpp
+            server/util/event_dependencies.hpp
    COMPONENT_DEPENDENCIES iostreams
    DEPENDENCIES ${OPENCL_LIBRARIES}
    )

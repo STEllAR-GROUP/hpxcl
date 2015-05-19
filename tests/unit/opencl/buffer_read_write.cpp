@@ -31,6 +31,10 @@ static void cl_test(hpx::opencl::device cldevice)
     // test if buffer initialization worked
     size_t buffer_size = buffer.size().get();
     HPX_TEST_EQ(buffer_size, DATASIZE);
+
+    // test if buffer can be written to
+    auto data_write_future = buffer.enqueue_write(0, DATASIZE, initdata);
+
 /*
     // read and compare
     TEST_CL_BUFFER(buffer, initdata);

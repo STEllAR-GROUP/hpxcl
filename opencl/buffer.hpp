@@ -17,6 +17,9 @@
 // Forward Declarations
 #include "fwd_declarations.hpp"
 
+// Crazy function overloading
+#include "util/enqueue_overloads.hpp"
+
 namespace hpx {
 namespace opencl { 
 
@@ -47,11 +50,26 @@ namespace opencl {
  
             /**
              *  @brief Get the size of the buffer
+             *
              *  @return The size of the buffer
              */
             hpx::future<std::size_t>
             size() const;
             
+            /**
+            * @brief Writes data to the buffer
+            *
+            * @param offset The start position of the area to write to.
+            * @param size The size of the data to write.
+            * @param data The data to be written.
+            * @return An future that can be used for synchronization or
+            *         dependency for other calls.
+            */
+            HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(
+                hpx::future<void>, enqueue_write, std::size_t /*offset*/,
+                                                  std::size_t /*size*/,
+                                                  const void* /*data*/);
+
     };
 
 }}

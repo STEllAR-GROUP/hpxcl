@@ -20,8 +20,24 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     class event
       : public hpx::lcos::detail::promise<Result, RemoteResult>
     {
+
+    public:
+        
+        virtual
+        ~event()
+        {
+            hpx::cout << "event destroyed!" << hpx::endl;
+
+        }
+
+
+        //////////////////////////////////////////////////////////
+        // HPX Stuff
+        //
+    public:
         enum { value = components::component_promise };
 
+    private:
         template <typename>
         friend struct components::detail_adl_barrier::init;
 

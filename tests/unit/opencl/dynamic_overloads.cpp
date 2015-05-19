@@ -10,7 +10,7 @@
 
 class test_client{
     public:
-    HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(int, func, int, int);
+    HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(hpx::future<int>, func, int, int);
 };
 
 
@@ -24,11 +24,11 @@ test_client::func_impl(int a, int b, std::vector<hpx::naming::id_type> ids){
 
 static void cl_test(hpx::opencl::device cldevice){
 
-    hpx::opencl::lcos::event<void> event;
+    hpx::opencl::lcos::event<int> event;
 
-    hpx::shared_future<void> sfut = event.get_future();
-    std::vector<hpx::shared_future<void>> vsfut1 = {sfut};
-    std::vector<hpx::shared_future<void>> vsfut2 = {sfut, sfut};
+    hpx::shared_future<int> sfut = event.get_future();
+    std::vector<hpx::shared_future<int>> vsfut1 = {sfut};
+    std::vector<hpx::shared_future<int>> vsfut2 = {sfut, sfut};
 
     test_client t;
 
