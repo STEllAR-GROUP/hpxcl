@@ -26,11 +26,9 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
             event_type;
         
         auto shared_state = hpx::lcos::detail::get_shared_state(fut);
-        const event_type* ev
-            = dynamic_cast<const event_type*>(shared_state.get());
+        auto ev = boost::static_pointer_cast<event_type>(shared_state);
 
         hpx::cout << typeid(shared_state).name() << hpx::endl;
-        hpx::cout << ev << hpx::endl;
         hpx::cout << ev->get_gid() << hpx::endl;
         
         return hpx::naming::id_type();

@@ -10,12 +10,12 @@
 using hpx::opencl::server::util::event_map;
 
 event_map::gid_entry::gid_entry(boost::uint64_t msb_, boost::uint64_t lsb_){
-    msb = msb_;
+    msb = msb_ & 0x0000000000FFFFFF;
     lsb = lsb_;
 }
 
 event_map::gid_entry::gid_entry(const hpx::naming::id_type & gid){
-    msb = gid.get_msb();
+    msb = gid.get_msb() & 0x0000000000FFFFFF;
     lsb = gid.get_lsb();
 }
 

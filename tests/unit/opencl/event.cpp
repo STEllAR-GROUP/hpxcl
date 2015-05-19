@@ -3,35 +3,41 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
+#include <hpx/hpx_main.hpp>
 
-#include "cl_tests.hpp"
+#include <hpx/include/iostreams.hpp>
 
-#include "../../../opencl/lcos/event.hpp"
+#include <iomanip>
 
 void dummy(){}
 
 
-static void cl_test(hpx::opencl::device cldevice)
+int main()
 {
-    typedef hpx::lcos::promise<void> event_type;
-    //typedef hpx::opencl::lcos::event<void> event_type;
-    typedef typename event_type::wrapped_type event_state_type;
+    typedef hpx::lcos::promise<void> promise_type;
+    typedef typename promise_type::wrapped_type shared_state_type;
 
 
-
-    event_type event;
-    hpx::future<void> fut = hpx::async(dummy);//event.get_future();
-    hpx::naming::id_type gid = event.get_gid();
+    promise_type promise;
+    auto gid = promise.get_gid();
 
 
-    const event_state_type* event2 = static_cast<const event_state_type*>(
-                                hpx::lcos::detail::get_shared_state(fut).get());
+    auto future = promise.get_future();
+    auto future_data = hpx::lcos::detail::get_shared_state(future);
+    auto shared_state = boost::static_pointer_cast<shared_state_type>(future_data);
 
 
-    hpx::naming::id_type gid2 = event2->get_gid();
+    auto gid2 = shared_state->get_gid();
 
     hpx::cout << gid << hpx::endl;
     hpx::cout << gid2 << hpx::endl;
+    hpx::cout << std::hex << (gid.get_msb() & 0x0000000000FFFFFF) << hpx::endl;
+    hpx::cout << std::hex << (gid2.get_msb() & 0x0000000000FFFFFF) << hpx::endl;
+
+
+    return 0;
 }
 
 
