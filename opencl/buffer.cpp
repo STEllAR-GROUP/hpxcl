@@ -39,7 +39,7 @@ buffer::enqueue_write_impl( std::size_t offset,
                                   buffer_type::init_mode::reference);
 
     // create local event
-    event<void> ev(this->get_gid());
+    event<void> ev( device_gid );
 
     // send command to server class
     typedef hpx::opencl::server::buffer::enqueue_write_action func;

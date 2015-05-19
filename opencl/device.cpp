@@ -53,6 +53,6 @@ device::create_buffer(cl_mem_flags flags, std::size_t size) const
     hpx::future<hpx::id_type> buffer_server =
                                  hpx::async<func>(this->get_gid(), flags, size);
 
-    return buffer(std::move(buffer_server));
+    return buffer(std::move(buffer_server), this->get_gid());
 
 }

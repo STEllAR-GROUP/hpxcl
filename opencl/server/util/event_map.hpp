@@ -53,7 +53,7 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         // !! This function is the only one of this class with a consistency
         // guarantee. remove() will ALWAYS be called AFTER all other calls
         // involving the given GID are finished. (i.e. add() and get())
-        void remove(const hpx::naming::id_type&);
+        void remove(boost::uint64_t gid_msb, boost::uint64_t gid_lsb);
 
     private:
         ///////////////////////////////////////////////
@@ -62,6 +62,7 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         struct gid_entry{
             public:
                 gid_entry(const hpx::naming::id_type &);
+                gid_entry(boost::uint64_t msb, boost::uint64_t lsb);
                 boost::uint64_t msb;
                 boost::uint64_t lsb;
         };

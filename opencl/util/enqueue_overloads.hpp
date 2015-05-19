@@ -12,13 +12,27 @@
 
 #include <hpx/include/iostreams.hpp>
 
+#include "../lcos/event.hpp"
+
 namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 
     // This is the function that actually extrudes the GID from the futures.
-    template<typename future_type>
+    template<typename Future>
     hpx::naming::id_type
-    extrude_id(future_type && fut){
-        // TODO
+    extrude_id(Future && fut){
+        typedef typename std::remove_reference<Future>::type::result_type
+            result_type;
+        typedef typename hpx::opencl::lcos::event<result_type>::wrapped_type
+            event_type;
+        
+        auto shared_state = hpx::lcos::detail::get_shared_state(fut);
+        const event_type* ev
+            = dynamic_cast<const event_type*>(shared_state.get());
+
+        hpx::cout << typeid(shared_state).name() << hpx::endl;
+        hpx::cout << ev << hpx::endl;
+        hpx::cout << ev->get_gid() << hpx::endl;
+        
         return hpx::naming::id_type();
     }
 
@@ -109,10 +123,13 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 
 }}}}
 
+
+//TODO avoid id_type copies, move everything (especially inside of resolver)
+
 #define HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(return_value, name, args...)      \
                                                                                 \
-    hpx::future<return_value>                                                   \
-    name##_impl(args, std::vector<hpx::naming::id_type>);                       \
+    return_value                                                                \
+    name##_impl(args, std::vector<hpx::naming::id_type> &&);                       \
                                                                                 \
     /*                                                                          \
      * This class  splits the arguments from the dependencies.                  \
@@ -123,17 +140,17 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     class name##_caller{                                                        \
         public:                                                                 \
         template<typename C, typename ...Deps>                                  \
-        hpx::future<return_value> operator()(C && c, Nondeps &&... nondeps,     \
+        return_value operator()(C && c, Nondeps &&... nondeps,                  \
                                                      Deps &&... deps)           \
         {                                                                       \
             using hpx::opencl::util::enqueue_overloads::resolver;               \
             return c->name##_impl ( std::forward<Nondeps>(nondeps)...,          \
-                      resolver(std::forward<Deps>(deps)...) );                  \
+                    std::move(resolver(std::forward<Deps>(deps)...)) );         \
         }                                                                       \
     };                                                                          \
                                                                                 \
     template<typename ...Params>                                                \
-    hpx::future<return_value>                                                   \
+    return_value                                                                \
     name (Params &&... params)                                                  \
     {                                                                           \
         return name##_caller<args>()(this, std::forward<Params>(params)...);    \

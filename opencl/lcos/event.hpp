@@ -12,9 +12,18 @@
 
 #include <hpx/lcos/promise.hpp>
 
+
+
 ///////////////////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl { namespace lcos { namespace detail
 {
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    void unregister_event( hpx::naming::id_type device_id,
+                           boost::uint64_t event_gid_msb,
+                           boost::uint64_t event_gid_lsb );
+
     ///////////////////////////////////////////////////////////////////////////
     template <typename Result, typename RemoteResult>
     class event
@@ -31,11 +40,11 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         virtual
         ~event()
         {
-            hpx::cout << "event destroyed!" << hpx::endl;
+            std::cout << "event destroyed!" << std::endl;
             
-            typedef hpx::opencl::server::device::remove_event_action func;
-            hpx::apply<func>( device_id, get_gid() );
-
+            unregister_event( device_id, 
+                              this->get_base_gid().get_msb(),
+                              this->get_base_gid().get_lsb() );
         }
 
     private:

@@ -40,10 +40,14 @@ namespace opencl {
             buffer(){}
 
             // Constructor
-            buffer(hpx::shared_future<hpx::naming::id_type> const& gid)
-              : base_type(gid)
+            buffer(hpx::shared_future<hpx::naming::id_type> const& gid,
+                   hpx::naming::id_type device_gid_)
+              : base_type(gid), device_gid(std::move(device_gid_))
             {}
             
+            // initialization
+            
+
             // ///////////////////////////////////////////////
             // Exposed Component functionality
             // 
@@ -69,6 +73,9 @@ namespace opencl {
                 hpx::future<void>, enqueue_write, std::size_t /*offset*/,
                                                   std::size_t /*size*/,
                                                   const void* /*data*/);
+        
+        private:
+            hpx::naming::id_type device_gid;
 
     };
 
