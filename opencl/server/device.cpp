@@ -179,9 +179,9 @@ device::get_platform_info(cl_platform_info info_type)
     cl_ensure(err, "clGetPlatformInfo()");
 
     // Retrieve
-    hpx::serialization::serialize_buffer<char> info( new char[param_size],
-                                            param_size,
-                                            hpx::serialization::serialize_buffer<char>::take);
+    hpx::serialization::serialize_buffer<char>
+    info( new char[param_size], param_size,
+          hpx::serialization::serialize_buffer<char>::take);
     err = clGetPlatformInfo(platform_id, info_type, param_size, info.data(), 0);
     cl_ensure(err, "clGetPlatformInfo()");
 
@@ -267,3 +267,29 @@ device::retrieve_event( const hpx::naming::id_type & gid )
 }
 
 
+cl_command_queue
+device::get_read_command_queue()
+{
+    return command_queue;
+}
+
+cl_command_queue
+device::get_write_command_queue()
+{
+    return command_queue;
+}
+
+cl_command_queue
+device::get_kernel_command_queue()
+{
+    return command_queue;
+}
+        
+void
+device::put_event_data(cl_event, hpx::serialization::serialize_buffer<char>)
+{
+
+    // TODO implement
+    hpx::cout << "ERROR" << hpx::endl;
+
+}

@@ -81,6 +81,16 @@ namespace hpx { namespace opencl{ namespace server{
         cl_event
         retrieve_event(const hpx::naming::id_type & gid);
 
+        // command queue retrievals
+        cl_command_queue get_read_command_queue();
+        cl_command_queue get_write_command_queue();
+        cl_command_queue get_kernel_command_queue();
+
+        // event data handling. needed to keep clEnqueue* data alive 
+        // (like clEnqueueWriteBuffer)
+        void
+        put_event_data(cl_event, hpx::serialization::serialize_buffer<char>);
+
     private:
         ///////////////////////////////////////////////
         // Private Member Functions

@@ -15,7 +15,7 @@ class test_client{
 
 
 hpx::future<int>
-test_client::func_impl(int a, int b, std::vector<hpx::naming::id_type> ids){
+test_client::func_impl(int a, int b, std::vector<hpx::naming::id_type> && ids){
     return hpx::make_ready_future<int>(ids.size() + 1000 * a + 100 * b);
 };
 
@@ -24,7 +24,7 @@ test_client::func_impl(int a, int b, std::vector<hpx::naming::id_type> ids){
 
 static void cl_test(hpx::opencl::device cldevice){
 
-    hpx::opencl::lcos::event<int> event;
+    hpx::opencl::lcos::event<int> event(cldevice.get_gid());
 
     hpx::shared_future<int> sfut = event.get_future();
     std::vector<hpx::shared_future<int>> vsfut1 = {sfut};

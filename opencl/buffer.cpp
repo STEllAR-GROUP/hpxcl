@@ -32,15 +32,14 @@ buffer::enqueue_write_impl( std::size_t offset,
                             std::vector<hpx::naming::id_type> && dependencies)
 {
     using hpx::opencl::lcos::event;
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
     // wrap the data in a serialize_buffer object
-    hpx::util::serialize_buffer<char>
-    serializable_data(static_cast<const char*>(data), size,
-        hpx::util::serialize_buffer<char>::init_mode::reference);
-
+    buffer_type serializable_data(static_cast<const char*>(data), size,
+                                  buffer_type::init_mode::reference);
 
     // create local event
-    event ev(this->get_gid());
+    event<void> ev(this->get_gid());
 
     // send command to server class
     typedef hpx::opencl::server::buffer::enqueue_write_action func;

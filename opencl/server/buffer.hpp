@@ -45,7 +45,15 @@ namespace hpx { namespace opencl{ namespace server{
         // Returns the size of the buffer
         std::size_t size();
 
+        // Writes to the buffer
+        void enqueue_write( hpx::naming::id_type && event_gid,
+                            std::size_t offset,
+                            std::size_t size,
+                            hpx::serialization::serialize_buffer<char> data,
+                            std::vector<hpx::naming::id_type> && dependencies );
+
     HPX_DEFINE_COMPONENT_ACTION(buffer, size);
+    HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write);
  
     private:
         //////////////////////////////////////////////////
@@ -60,6 +68,7 @@ namespace hpx { namespace opencl{ namespace server{
 
 //[opencl_management_registration_declarations
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, size);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_write);
 //]
 
 #endif

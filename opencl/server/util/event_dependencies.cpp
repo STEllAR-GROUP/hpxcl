@@ -5,11 +5,13 @@
 
 #include "event_dependencies.hpp"
 
+#include "../device.hpp"
+
 using hpx::opencl::server::util::event_dependencies;
 
 event_dependencies::
-event_dependencies(std::vector<hpx::naming::id_type> event_ids_)
-    : event_ids(std::move(event_ids_)
+event_dependencies(const std::vector<hpx::naming::id_type> & event_ids,
+                   hpx::opencl::server::device* parent_device)
 {
     if(event_ids.size() != 0){
     
@@ -33,7 +35,7 @@ event_dependencies::
 size()
 {
 
-    return event_ids.size();
+    return events.size();
 
 }
 
@@ -42,7 +44,7 @@ event_dependencies::
 get_cl_events()
 {
 
-    if(event_ids.size() == 0)
+    if(events.size() == 0)
         return NULL;
         
     return events.data();

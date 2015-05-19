@@ -22,13 +22,25 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     {
 
     public:
-        
+       
+        event(hpx::naming::id_type && device_id_)
+            : device_id(std::move(device_id_))
+        {
+        }
+
         virtual
         ~event()
         {
             hpx::cout << "event destroyed!" << hpx::endl;
+            
+            typedef hpx::opencl::server::device::remove_event_action func;
+            hpx::apply<func>( device_id, get_gid() );
 
         }
+
+    private:
+
+        hpx::naming::id_type device_id;
 
 
         //////////////////////////////////////////////////////////
@@ -101,8 +113,8 @@ namespace hpx { namespace opencl { namespace lcos
         ///               target for either of these actions has to be this
         ///               future instance (as it has to be sent along
         ///               with the action as the continuation parameter).
-        event()
-          : impl_(new wrapping_type(new wrapped_type())),
+        event(hpx::naming::id_type device_id)
+          : impl_(new wrapping_type(new wrapped_type(std::move(device_id)))),
             future_obtained_(false)
         {
             LLCO_(info) << "event::event(" << impl_->get_gid() << ")";
@@ -211,8 +223,8 @@ namespace hpx { namespace opencl { namespace lcos
         ///               target for either of these actions has to be this
         ///               future instance (as it has to be sent along
         ///               with the action as the continuation parameter).
-        event()
-          : impl_(new wrapping_type(new wrapped_type())),
+        event(hpx::naming::id_type device_id)
+          : impl_(new wrapping_type(new wrapped_type(std::move(device_id)))),
             future_obtained_(false)
         {
             LLCO_(info) << "event<void>::event(" << impl_->get_gid() << ")";

@@ -30,6 +30,7 @@ typedef hpx::components::managed_component<buffer_type> buffer_component_type;
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(buffer_component_type, hpx_opencl_buffer);
 
 HPX_REGISTER_ACTION(buffer_type::size_action);
+HPX_REGISTER_ACTION(buffer_type::enqueue_write_action);
 
 // GLOBAL ACTIONS
 HPX_REGISTER_ACTION(hpx::opencl::server::get_devices_action,

@@ -11,19 +11,20 @@
 #include <hpx/config.hpp>
 
 #include "../../cl_headers.hpp"
+#include "../../fwd_declarations.hpp"
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{ namespace util{
     
 
     ////////////////////////////////////////////////////////
-    // This class is used to keep the cl_events alive.
+    // This class is used to convert event ids to cl_events
     //
     class event_dependencies
     {
     public:
         // Constructor
-        event_dependencies(std::vector<hpx::naming::id_type> event_ids,
+        event_dependencies(const std::vector<hpx::naming::id_type> & event_ids,
                            hpx::opencl::server::device* parent_device);
         ~event_dependencies();
 
@@ -41,7 +42,6 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         std::size_t size();
 
     private:
-        std::vector<hpx::naming::id_type> event_ids;
         std::vector<cl_event> events;
 
     };
