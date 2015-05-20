@@ -29,9 +29,7 @@ static void cl_test(hpx::opencl::device cldevice){
     hpx::opencl::lcos::event<int> event(cldevice.get_gid());
 
 
-    hpx::shared_future<int> sfut_hpx = event.get_future();
-    hpx::opencl::shared_future<int> sfut( std::move(sfut_hpx),
-                                          std::move(event.get_gid()) );
+    hpx::opencl::shared_future<int> sfut = event.get_future();
 
     register_event(cldevice, sfut);
 

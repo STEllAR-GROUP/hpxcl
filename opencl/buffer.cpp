@@ -55,6 +55,5 @@ buffer::enqueue_write_impl( std::size_t offset,
                      
 
     // return future connected to event
-    return hpx::opencl::future<void>( std::move(ev.get_future()),
-                                      std::move(ev_gid) );
+    return ev.get_future();
 }

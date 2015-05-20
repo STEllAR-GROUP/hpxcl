@@ -33,7 +33,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         public:
             future_base( Future && future_, 
                          hpx::naming::id_type && event_id_ )
-                : future    (std::move( future_   )),
+                : fut       (std::move( future_   )),
                   event_id  (std::move( event_id_ ))
             {
             }
@@ -44,7 +44,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             }
     
         protected:
-            Future future;
+            Future fut;
             hpx::naming::id_type event_id;
 
     };
@@ -53,22 +53,13 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
 }}}}
 
 
+
 ///////////////////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl { namespace lcos
 {
 
     ///////////////////////////////////////////////////////////////////////////
-    template <typename Result>
-    class future : public detail::future_base<hpx::future<Result> >
-    {
-        public:
-            future( hpx::future<Result> && future_,
-                    hpx::naming::id_type && event_id_ )
-                : detail::future_base<hpx::future<Result> >
-                    ( std::move(future_), std::move(event_id_) )
-            {
-            }
-    };
+
 
     template <typename Result>
     class shared_future : public detail::future_base<hpx::shared_future<Result> >
@@ -82,9 +73,30 @@ namespace hpx { namespace opencl { namespace lcos
             }
     };
 
+    template <typename Result>
+    class future : public detail::future_base<hpx::future<Result> >
+    {
+        public:
+            future( hpx::future<Result> && future_,
+                    hpx::naming::id_type && event_id_ )
+                : detail::future_base<hpx::future<Result> >
+                    ( std::move(future_), std::move(event_id_) )
+            {
+            }
 
+            template<typename T>
+            operator hpx::opencl::lcos::shared_future<T>()
+            {
+                hpx::shared_future<Result> sfut = this->fut.share();
+
+                return hpx::opencl::lcos::shared_future<Result>
+                    ( std::move(sfut), std::move(this->event_id) );
+            }
+    };
 }}};
 
+
+///////////////////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl { 
 
     template<typename T>
@@ -94,5 +106,6 @@ namespace hpx { namespace opencl {
     using shared_future = lcos::shared_future<T>;
 
 }};
+
 
 #endif

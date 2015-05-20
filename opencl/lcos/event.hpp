@@ -12,6 +12,7 @@
 
 #include <hpx/lcos/promise.hpp>
 
+#include "future.hpp"
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -177,16 +178,19 @@ namespace hpx { namespace opencl { namespace lcos
         hpx::lcos::future<Result> get_future(error_code& ec = throws)
         {
             if (future_obtained_) {
-                HPX_THROWS_IF(ec, future_already_retrieved,
+                HPX_THROW_EXCEPTION(future_already_retrieved,
                     "event<Result>::get_future",
                     "future already has been retrieved from this packaged_action");
-                return hpx::lcos::future<Result>();
+                //return hpx::lcos::future<Result>();
             }
 
             future_obtained_ = true;
 
             using traits::future_access;
-            return future_access<future<Result> >::create(impl_->get());
+            hpx::lcos::future<Result> fut = 
+                future_access<hpx::lcos::future<Result> >::create(impl_->get());
+
+            return fut;
         }
 
         ///
@@ -278,19 +282,23 @@ namespace hpx { namespace opencl { namespace lcos
         ~event()
         {}
 
-        hpx::lcos::future<void> get_future(error_code& ec = throws)
+        hpx::opencl::future<void> get_future(error_code& ec = throws)
         {
             if (future_obtained_) {
-                HPX_THROWS_IF(ec, future_already_retrieved,
+                HPX_THROW_EXCEPTION(future_already_retrieved,
                     "event<void>::get_future",
                     "future already has been retrieved from this packaged_action");
-                return hpx::lcos::future<void>();
+                //return hpx::lcos::future<void>();
             }
 
             future_obtained_ = true;
 
             using traits::future_access;
-            return future_access<future<void> >::create(impl_->get());
+            hpx::lcos::future<void> fut = 
+                future_access<hpx::lcos::future<void> >::create(impl_->get());
+
+            return hpx::opencl::future<void> ( std::move(fut),
+                                               std::move(this->get_gid()) );
         }
 
         void set_value()
