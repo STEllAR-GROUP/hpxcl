@@ -19,7 +19,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     // This is the function that actually extrudes the GID from the futures.
     template<typename Future>
     hpx::naming::id_type
-    extrude_id(Future && fut){
+    extrude_id(const Future & fut){
         typedef typename std::remove_reference<Future>::type::result_type
             result_type;
         typedef typename hpx::opencl::lcos::event<result_type>::wrapped_type
@@ -31,7 +31,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
         hpx::cout << typeid(shared_state).name() << hpx::endl;
         hpx::cout << ev->get_gid() << hpx::endl;
         
-        return hpx::naming::id_type();
+        return ev->get_gid();
     }
 
 
@@ -70,8 +70,10 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     {
         template<typename T>
         std::vector<hpx::naming::id_type>
-        operator()(T && t){
-            return std::vector<hpx::naming::id_type>({extrude_id(t)});
+        operator()(const T & t){
+            std::vector<hpx::naming::id_type> res;
+            res.push_back(std::move(extrude_id(t)));
+            return res;
         }
     };
 
@@ -84,7 +86,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
             std::vector<hpx::naming::id_type> res;
             res.reserve(t_vec.size());
             for(const T & t : t_vec){
-                res.push_back(extrude_id(t));
+                res.push_back(std::move(extrude_id(t)));
             }
             return res;
         }
@@ -114,15 +116,14 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
         std::vector<hpx::naming::id_type> ids
             = extrude_all_ids<detail::is_container<Dep>::value>()(dep);
 
-        result.insert(result.end(), ids.begin(), ids.end());
+        result.reserve(result.size() + ids.size());
+        std::move(ids.begin(), ids.end(), std::back_inserter(result));
         return result;
     }
 
 
 }}}}
 
-
-//TODO avoid id_type copies, move everything (especially inside of resolver)
 
 #define HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(return_value, name, args...)      \
                                                                                 \

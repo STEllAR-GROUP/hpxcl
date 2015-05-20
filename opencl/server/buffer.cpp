@@ -125,6 +125,7 @@ buffer::enqueue_write( hpx::naming::id_type && event_gid,
                                 data.size(), data.data(),
                                 static_cast<cl_uint>(events.size()),
                                 events.get_cl_events(), &return_event );
+    cl_ensure(err, "clEnqueueWriteBuffer()");
 
     // register the data to prevent deallocation
     parent_device->put_event_data(return_event, data);
