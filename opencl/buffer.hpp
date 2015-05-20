@@ -20,6 +20,8 @@
 // Crazy function overloading
 #include "util/enqueue_overloads.hpp"
 
+#include "lcos/future.hpp"
+
 namespace hpx {
 namespace opencl { 
 
@@ -70,9 +72,10 @@ namespace opencl {
             *         dependency for other calls.
             */
             HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(
-                hpx::future<void>, enqueue_write, std::size_t /*offset*/,
-                                                  std::size_t /*size*/,
-                                                  const void* /*data*/);
+                hpx::opencl::future<void>, enqueue_write,
+                                std::size_t /*offset*/,
+                                std::size_t /*size*/,
+                                const void* /*data*/ );
         
         private:
             hpx::naming::id_type device_gid;

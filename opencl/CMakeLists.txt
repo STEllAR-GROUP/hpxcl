@@ -56,6 +56,7 @@ add_hpx_component(opencl
             util/generic_buffer.hpp
             util/enqueue_overloads.hpp
             lcos/event.hpp
+            lcos/future.hpp
             detail/info_type.hpp
             server/device.hpp
             server/buffer.hpp

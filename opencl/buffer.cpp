@@ -25,7 +25,7 @@ buffer::size() const
 
 }
 
-hpx::future<void>
+hpx::opencl::future<void>
 buffer::enqueue_write_impl( std::size_t offset,
                             std::size_t size,
                             const void* data,
@@ -41,10 +41,13 @@ buffer::enqueue_write_impl( std::size_t offset,
     // create local event
     event<void> ev( device_gid );
 
+    // get gid of event
+    hpx::naming::id_type ev_gid = ev.get_gid();
+
     // send command to server class
     typedef hpx::opencl::server::buffer::enqueue_write_action func;
     hpx::apply<func>( this->get_gid(),
-                      ev.get_gid(),
+                      ev_gid,
                       offset,
                       size,
                       serializable_data,
@@ -52,5 +55,6 @@ buffer::enqueue_write_impl( std::size_t offset,
                      
 
     // return future connected to event
-    return ev.get_future();
+    return hpx::opencl::future<void>( std::move(ev.get_future()),
+                                      std::move(ev_gid) );
 }

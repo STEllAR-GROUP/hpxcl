@@ -14,27 +14,22 @@
 
 #include "../lcos/event.hpp"
 
+#include "../lcos/future.hpp"
+
 namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 
     // This is the function that actually extrudes the GID from the futures.
-    template<typename Future>
+    template<typename Result>
     hpx::naming::id_type
-    extrude_id(Future && fut){
-        typedef typename std::remove_reference<Future>::type::result_type
-            result_type;
-        typedef typename hpx::opencl::lcos::event<result_type>::wrapped_type
-            event_type;
-        
-        auto shared_state = hpx::lcos::detail::get_shared_state(fut);
-        auto ev = boost::static_pointer_cast<event_type>(shared_state);
+    extrude_id(const hpx::opencl::lcos::detail::future_base<Result> & fut){
 
-        hpx::cout << typeid(shared_state).name() << hpx::endl;
-        hpx::cout << ev->get_gid() << hpx::endl;
+        hpx::naming::id_type event_id = fut.get_event_id();
+
+        hpx::cout << typeid(fut).name() << hpx::endl;
+        hpx::cout << event_id << hpx::endl;
         
-        return hpx::naming::id_type();
+        return event_id;
     }
-
-
 
 
 
@@ -71,7 +66,9 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
         template<typename T>
         std::vector<hpx::naming::id_type>
         operator()(T && t){
-            return std::vector<hpx::naming::id_type>({extrude_id(t)});
+            std::vector<hpx::naming::id_type> res;
+            res.push_back(std::move(extrude_id(t)));
+            return res;
         }
     };
 
@@ -84,7 +81,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
             std::vector<hpx::naming::id_type> res;
             res.reserve(t_vec.size());
             for(const T & t : t_vec){
-                res.push_back(extrude_id(t));
+                res.push_back(std::move(extrude_id(t)));
             }
             return res;
         }
@@ -114,7 +111,8 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
         std::vector<hpx::naming::id_type> ids
             = extrude_all_ids<detail::is_container<Dep>::value>()(dep);
 
-        result.insert(result.end(), ids.begin(), ids.end());
+        result.reserve(result.size() + ids.size());
+        std::move(ids.begin(), ids.end(), std::back_inserter(result));
         return result;
     }
 
