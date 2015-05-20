@@ -32,7 +32,7 @@ int hpx_main()
 
         auto gid2 = shared_state->get_gid();
 
-        auto gid = promise.get_base_gid();
+        auto gid = promise.get_gid();
         
         auto msb1 = gid.get_msb() & 0x0000000000FFFFFF;
         auto msb2 = gid2.get_msb() & 0x0000000000FFFFFF;
