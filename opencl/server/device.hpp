@@ -27,6 +27,8 @@ namespace hpx { namespace opencl{ namespace server{
     class device
       : public hpx::components::managed_component_base<device>
     {
+        typedef hpx::lcos::local::spinlock lock_type;
+
     public:
         // Constructor
         device();
@@ -103,6 +105,13 @@ namespace hpx { namespace opencl{ namespace server{
         // cl_event Deletion Callback
         static void delete_event(cl_event);
 
+        // Releases the data that was being kept alive
+        void delete_event_data(cl_event);
+
+        // Waits for an opencl event.
+        // Necessary to offload wait from hpx to os thread.
+        void wait_for_cl_event(cl_event);
+
     private:
         ///////////////////////////////////////////////
         // Private Member Variables
@@ -113,6 +122,12 @@ namespace hpx { namespace opencl{ namespace server{
         cl_command_queue    command_queue;
 
         util::event_map     event_map;
+
+        typedef std::map<cl_event, hpx::serialization::serialize_buffer<char> >
+            event_data_map_type;
+        event_data_map_type event_data_map;
+        lock_type event_data_lock;
+        
     };
 }}}
 

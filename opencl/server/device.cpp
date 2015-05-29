@@ -11,6 +11,7 @@
 
 // other hpxcl dependencies
 #include "buffer.hpp"
+#include "util/hpx_cl_interop.hpp"
 
 // HPX dependencies
 #include <hpx/include/thread_executors.hpp>
@@ -61,6 +62,8 @@ static void device_cleanup(uintptr_t command_queue_ptr,
 // Destructor
 device::~device()
 {
+
+    HPX_ASSERT(event_data_map.empty());
 
     hpx::threads::executors::default_executor exec(
                                           hpx::threads::thread_priority_normal,
@@ -228,6 +231,10 @@ device::create_buffer( cl_mem_flags flags, std::size_t size )
 void
 device::release_event(hpx::naming::gid_type gid)
 {
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    // release data registered on event
+    delete_event_data(event_map.get(gid));
 
     // delete event from map
     event_map.remove(gid);
@@ -286,10 +293,98 @@ device::get_kernel_command_queue()
 }
         
 void
-device::put_event_data(cl_event, hpx::serialization::serialize_buffer<char>)
+device::put_event_data( cl_event event,
+                        hpx::serialization::serialize_buffer<char> data )
 {
 
-    // TODO implement
-    hpx::cout << "ERROR" << hpx::endl;
+    {
+        // Lock event_data_map
+        lock_type::scoped_lock l(event_data_lock);
 
+        // Insert in event_data_map
+        event_data_map.insert(event_data_map_type::value_type(event, data));
+        HPX_ASSERT(event_data_map.at(event) == data);
+
+    }
+
+}
+
+
+struct wait_for_cl_event_args{
+    hpx::runtime* rt;
+    hpx::lcos::local::promise<cl_int>* promise;
+};
+
+static void CL_CALLBACK
+wait_for_cl_event_callback( cl_event event, cl_int exec_status, void* user_data )
+{
+    // Cast arguments
+    wait_for_cl_event_args* args =
+        static_cast<wait_for_cl_event_args*>(user_data);
+
+    // Send exec status to waiting future
+    using hpx::opencl::server::util::set_promise_from_external;
+    set_promise_from_external ( args->rt, args->promise, exec_status );
+}
+
+void
+device::wait_for_cl_event(cl_event event)
+{
+    cl_int err;
+
+    // Create a new promise
+    hpx::lcos::local::promise<cl_int> promise;
+
+    // Retrieve the future
+    hpx::future<cl_int> future = promise.get_future();
+
+    // Build arguments struct for callback
+    wait_for_cl_event_args args;
+    args.rt = hpx::get_runtime_ptr();
+    args.promise = &promise;
+
+    // Attach callback
+    err = clSetEventCallback(event, CL_COMPLETE, wait_for_cl_event_callback,
+                             &args); 
+    cl_ensure(err, "clSetEventCallback()");
+
+    // Wait for future to trigger
+    err = future.get();
+    cl_ensure(err, "OpenCL Internal Function");
+
+}
+
+void
+device::delete_event_data(cl_event event)
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    cl_int err;
+    
+    {
+        // Lock event_data_map
+        lock_type::scoped_lock l(event_data_lock);
+
+        // Try to get the data associated with the event
+        event_data_map_type::iterator it = event_data_map.find(event);
+
+        // if no data is associated, do nothing
+        if(it == event_data_map.end())
+            return;
+
+    }
+
+    // wait for event to trigger (clEnqueueX-call could still be using
+    //                            the memory)
+    wait_for_cl_event(event);
+
+    {
+        // Lock event_data_map
+        lock_type::scoped_lock l(event_data_lock);
+
+        // Delete the memory
+        event_data_map.erase(event);
+    }
+    
 }

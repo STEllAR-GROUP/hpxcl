@@ -45,8 +45,15 @@ event_map::add(const hpx::naming::id_type & gid, cl_event event){
 }
 
 cl_event
-event_map::get(const hpx::naming::id_type& gid){
-    hpx::naming::gid_type key = gid.get_gid();
+event_map::get(const hpx::naming::id_type& id)
+{
+
+    return this->get(id.get_gid());
+
+}
+
+cl_event
+event_map::get(const hpx::naming::gid_type& key){
 
     map_type::iterator it;
     {

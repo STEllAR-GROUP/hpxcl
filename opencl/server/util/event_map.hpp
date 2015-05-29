@@ -44,6 +44,7 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         // !! BLOCKS if gid is not present until gid gets added
         // with 'add()'.
         cl_event get(const hpx::naming::id_type&);
+        cl_event get(const hpx::naming::gid_type&);
 
         // Registers a function that will get called upon gid removal
         // (Used to delete associated cl_event)

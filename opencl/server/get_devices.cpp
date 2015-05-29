@@ -52,16 +52,25 @@ hpx::util::static_<condition_variable,
 static void clear_device_list()
 {
 
-    // Lock the list
-    static_device_list_lock_type device_lock;
-    spinlock::scoped_lock lock(device_lock.get());
 
-    // get static device list
-    static_device_list_type devices;
+    std::vector<hpx::opencl::device> local_devicelist;
 
-    // clear the devices list
-    devices.get().clear();
+    {
+        // Lock the list
+        static_device_list_lock_type device_lock;
+        spinlock::scoped_lock lock(device_lock.get());
 
+        // get static device list
+        static_device_list_type devices;
+
+        // take the device out of the list
+        std::move( devices.get().begin(), devices.get().end(),
+                   std::back_inserter(local_devicelist) );
+    }
+
+    // Clear locally. Clear _might_ cause a thread suspension and can
+    // not be called whilst holding a lock.
+    local_devicelist.clear();
 }
 
 
