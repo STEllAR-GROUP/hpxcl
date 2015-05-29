@@ -40,11 +40,11 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         virtual
         ~event()
         {
-            std::cout << "event destroyed!" << std::endl;
-            
+            std::cout << "destroying event ..." << std::endl;
             unregister_event( device_id, 
                               this->get_base_gid().get_msb(),
                               this->get_base_gid().get_lsb() );
+            std::cout << "event destroyed!" << std::endl;
         }
 
     private:
