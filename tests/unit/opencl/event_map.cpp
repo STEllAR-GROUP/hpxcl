@@ -57,7 +57,7 @@ static void cl_test(hpx::opencl::device cldevice)
         HPX_TEST_EQ(map->get(id), event);
 
         HPX_TEST_EQ(count_deleted(), 0);
-        map->remove(id.get_msb(), id.get_lsb());
+        map->remove(id.get_gid());
         HPX_TEST_EQ(count_deleted(), 1);
     }
         
@@ -97,8 +97,8 @@ static void cl_test(hpx::opencl::device cldevice)
         HPX_TEST_EQ(thread2_1.get(), event2);
         
         HPX_TEST_EQ(count_deleted(), 0);
-        map->remove(id.get_msb(), id.get_lsb());
-        map->remove(id2.get_msb(), id2.get_lsb());
+        map->remove(id.get_gid());
+        map->remove(id2.get_gid());
         HPX_TEST_EQ(count_deleted(), 2);
     }
     

@@ -53,37 +53,21 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         // !! This function is the only one of this class with a consistency
         // guarantee. remove() will ALWAYS be called AFTER all other calls
         // involving the given GID are finished. (i.e. add() and get())
-        void remove(boost::uint64_t gid_msb, boost::uint64_t gid_lsb);
+        void remove(const hpx::naming::gid_type&);
 
     private:
         ///////////////////////////////////////////////
         // Private Member Variables
         //
-        struct gid_entry{
-            public:
-                gid_entry(const hpx::naming::id_type &);
-                gid_entry(boost::uint64_t msb, boost::uint64_t lsb);
-                boost::uint64_t msb;
-                boost::uint64_t lsb;
-        };
-        struct gid_entry_comparator{
-            public:
-                bool operator()(gid_entry const& lhs, gid_entry const& rhs){
-                    if(lhs.msb < rhs.msb) return true;
-                    if(lhs.msb > rhs.msb) return false;
-                    if(lhs.lsb < rhs.lsb) return true;
-                    if(lhs.lsb > rhs.lsb) return false;
-                    return false;
-                }
-        };
 
         // The actual internal datastructure
-        typedef std::map<gid_entry, cl_event, gid_entry_comparator> map_type;
+        typedef std::map<hpx::naming::gid_type, cl_event>
+            map_type;
         map_type events;
 
         // Threads that called get() and are waiting for a corresponding add()
-        typedef std::map<gid_entry, std::shared_ptr<condition_type>,
-                    gid_entry_comparator> waitmap_type;
+        typedef std::map<hpx::naming::gid_type, std::shared_ptr<condition_type> >
+            waitmap_type;
         waitmap_type waits;
 
         // Lock for synchronization

@@ -9,13 +9,12 @@
 
 void
 hpx::opencl::lcos::detail::unregister_event( hpx::naming::id_type device_id,
-                                             boost::uint64_t event_gid_msb,
-                                             boost::uint64_t event_gid_lsb )
+                                             hpx::naming::gid_type event_gid )
 {
 
     // TODO change to hpx::naming::gid_type
     typedef hpx::opencl::server::device::release_event_action func;
-    hpx::apply<func>( device_id, event_gid_msb, event_gid_lsb );
+    hpx::apply<func>( device_id, event_gid );
 
 }
 

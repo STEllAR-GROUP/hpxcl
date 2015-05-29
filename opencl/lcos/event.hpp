@@ -21,8 +21,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     ///////////////////////////////////////////////////////////////////////////
 
     void unregister_event( hpx::naming::id_type device_id,
-                           boost::uint64_t event_gid_msb,
-                           boost::uint64_t event_gid_lsb );
+                           hpx::naming::gid_type event_gid );
 
     ///////////////////////////////////////////////////////////////////////////
     template <typename Result, typename RemoteResult>
@@ -42,8 +41,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         {
             std::cout << "destroying event ..." << std::endl;
             unregister_event( device_id, 
-                              this->get_base_gid().get_msb(),
-                              this->get_base_gid().get_lsb() );
+                              this->get_base_gid() );
             std::cout << "event destroyed!" << std::endl;
         }
 

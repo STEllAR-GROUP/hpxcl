@@ -9,16 +9,6 @@
 
 using hpx::opencl::server::util::event_map;
 
-event_map::gid_entry::gid_entry(boost::uint64_t msb_, boost::uint64_t lsb_){
-    msb = msb_ & 0x0000000000FFFFFF;
-    lsb = lsb_;
-}
-
-event_map::gid_entry::gid_entry(const hpx::naming::id_type & gid){
-    msb = gid.get_msb() & 0x0000000000FFFFFF;
-    lsb = gid.get_lsb();
-}
-
 event_map::event_map(){
 
 }
@@ -32,9 +22,9 @@ event_map::~event_map(){
 
 void
 event_map::add(const hpx::naming::id_type & gid, cl_event event){
-    gid_entry key(gid);
+    hpx::naming::gid_type key = gid.get_gid();
 
-    std::cout << key.msb << " - " << key.lsb << std::endl;
+    std::cout << key << std::endl;
     {
         // Lock
         lock_type::scoped_lock l(lock);
@@ -56,7 +46,7 @@ event_map::add(const hpx::naming::id_type & gid, cl_event event){
 
 cl_event
 event_map::get(const hpx::naming::id_type& gid){
-    gid_entry key(gid);
+    hpx::naming::gid_type key = gid.get_gid();
 
     map_type::iterator it;
     {
@@ -107,18 +97,15 @@ event_map::get(const hpx::naming::id_type& gid){
 }
 
 void 
-event_map::remove(boost::uint64_t gid_msb, boost::uint64_t gid_lsb)
+event_map::remove(const hpx::naming::gid_type &gid)
 {
-    gid_entry key(gid_msb, gid_lsb);
-
     cl_event event;
     {
         // Lock
         lock_type::scoped_lock l(lock);
     
         // Find Element
-        std::cout << key.msb << " - " << key.lsb << std::endl;
-        auto it = events.find(key);
+        auto it = events.find(gid);
         HPX_ASSERT(it != events.end());
 
         // Unwrap event
@@ -133,7 +120,7 @@ event_map::remove(boost::uint64_t gid_msb, boost::uint64_t gid_lsb)
         lock_type::scoped_lock l(lock);
     
         // Remove element
-        events.erase(key);
+        events.erase(gid);
     }
 }
 

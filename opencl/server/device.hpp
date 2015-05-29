@@ -62,7 +62,7 @@ namespace hpx { namespace opencl{ namespace server{
 
         // releases an event registered to a GID
         void
-        release_event(boost::uint64_t gid_msb, boost::uint64_t gid_lsb);
+        release_event(hpx::naming::gid_type);
     
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_info);
     HPX_DEFINE_COMPONENT_ACTION(device, get_platform_info);

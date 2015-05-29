@@ -226,11 +226,11 @@ device::create_buffer( cl_mem_flags flags, std::size_t size )
 }
 
 void
-device::release_event(boost::uint64_t gid_msb, boost::uint64_t gid_lsb)
+device::release_event(hpx::naming::gid_type gid)
 {
 
     // delete event from map
-    event_map.remove(gid_msb, gid_lsb);
+    event_map.remove(gid);
 
 }
 
