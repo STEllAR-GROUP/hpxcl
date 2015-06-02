@@ -60,7 +60,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
 
     public:
         // Gets called by when_all, wait_all, etc
-        virtual void execute_deferred(){
+        virtual void execute_deferred(error_code& ec = throws){
             if(!is_armed.exchange(true)){
                 this->arm(); 
             }

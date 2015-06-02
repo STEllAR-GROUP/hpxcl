@@ -27,14 +27,41 @@ static void cl_test(hpx::opencl::device cldevice)
 
     hpx::opencl::buffer buffer = cldevice.create_buffer(CL_MEM_READ_WRITE,
                                                               DATASIZE);
+    hpx::opencl::buffer buffer2 = cldevice.create_buffer(CL_MEM_READ_WRITE,
+                                                              DATASIZE);
 
     // test if buffer initialization worked
     size_t buffer_size = buffer.size().get();
     HPX_TEST_EQ(buffer_size, DATASIZE);
 
     // test if buffer can be written to
-    auto data_write_future = buffer.enqueue_write(0, DATASIZE, initdata);
-    data_write_future.wait();
+    {
+        auto data_write_future = buffer.enqueue_write(0, DATASIZE, initdata);
+        data_write_future.wait();
+    }
+
+    // test when_all
+    {
+        auto future1 = buffer.enqueue_write(0, DATASIZE, initdata);
+        auto future2 = buffer2.enqueue_write(0, DATASIZE, initdata);
+        
+        std::vector<hpx::future<void> > futures;
+        futures.push_back(std::move(future1));
+        futures.push_back(std::move(future2));
+
+        hpx::when_all(futures).get();
+    }
+
+    // test local continuation
+    {
+        auto data_write_future = buffer.enqueue_write(0, DATASIZE, initdata);
+        auto future2 = data_write_future.then(
+            [](hpx::future<void> fut){
+                return true;   
+            }
+        );
+        HPX_TEST(future2.get());
+    }
 
     // TODO local wait test, remote continuation test
 /*

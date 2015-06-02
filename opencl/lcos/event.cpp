@@ -25,6 +25,7 @@ void hpx::opencl::lcos::detail::event<void, hpx::util::unused_type>::arm(){
     typedef hpx::opencl::server::device::activate_deferred_event_action func;
     hpx::apply<func>(device_id, this->get_gid());
 
+    std::cout << "event<void>::arm " << this->get_base_gid() << std::endl;
 }
 
 template<>
