@@ -22,6 +22,7 @@ HPX_REGISTER_ACTION(device_type::get_device_info_action);
 HPX_REGISTER_ACTION(device_type::get_platform_info_action);
 HPX_REGISTER_ACTION(device_type::create_buffer_action);
 HPX_REGISTER_ACTION(device_type::release_event_action);
+HPX_REGISTER_ACTION(device_type::activate_deferred_event_action);
 
 
 // BUFFER

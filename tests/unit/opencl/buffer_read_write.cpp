@@ -34,7 +34,9 @@ static void cl_test(hpx::opencl::device cldevice)
 
     // test if buffer can be written to
     auto data_write_future = buffer.enqueue_write(0, DATASIZE, initdata);
+    data_write_future.wait();
 
+    // TODO local wait test, remote continuation test
 /*
     // read and compare
     TEST_CL_BUFFER(buffer, initdata);

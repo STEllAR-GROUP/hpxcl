@@ -17,3 +17,37 @@ hpx::opencl::lcos::detail::unregister_event( hpx::naming::id_type device_id,
 
 }
 
+template<>
+void hpx::opencl::lcos::detail::event<void, hpx::util::unused_type>::arm(){
+
+    // Tell the device server that we'd like to be informed when the cl_event
+    // is completed
+    typedef hpx::opencl::server::device::activate_deferred_event_action func;
+    hpx::apply<func>(device_id, this->get_gid());
+
+}
+
+template<>
+void hpx::opencl::lcos::detail::event
+<int, typename hpx::traits::promise_remote_result<int>::type>
+::arm(){
+
+    // this specialization is necessary for certain unit tests, but should never
+    // be called
+    HPX_ASSERT(false);
+
+}
+
+template<>
+void hpx::opencl::lcos::detail::event
+<hpx::serialization::serialize_buffer<char>,
+ hpx::traits::promise_remote_result<hpx::serialization::serialize_buffer<char> > >
+::arm(){
+
+    // event<void> are the only deferred ones. therefore, this should never be
+    // called.
+    HPX_ASSERT(false);
+
+}
+
+

@@ -65,11 +65,16 @@ namespace hpx { namespace opencl{ namespace server{
         // releases an event registered to a GID
         void
         release_event(hpx::naming::gid_type);
-    
+
+        // activates a deferred event
+        void
+        activate_deferred_event(hpx::naming::id_type);
+     
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_info);
     HPX_DEFINE_COMPONENT_ACTION(device, get_platform_info);
     HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
     HPX_DEFINE_COMPONENT_ACTION(device, release_event);
+    HPX_DEFINE_COMPONENT_ACTION(device, activate_deferred_event);
 
     public:
         /////////////////////////////////////////////////
@@ -110,7 +115,7 @@ namespace hpx { namespace opencl{ namespace server{
 
         // Waits for an opencl event.
         // Necessary to offload wait from hpx to os thread.
-        void wait_for_cl_event(cl_event);
+        hpx::future<cl_int> wait_for_cl_event(cl_event);
 
     private:
         ///////////////////////////////////////////////
@@ -136,6 +141,7 @@ HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, get_device_info);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, get_platform_info);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, create_buffer);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, release_event);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, activate_deferred_event);
 //]
 
 #endif

@@ -327,7 +327,7 @@ wait_for_cl_event_callback( cl_event event, cl_int exec_status, void* user_data 
     set_promise_from_external ( args->rt, args->promise, exec_status );
 }
 
-void
+hpx::future<cl_int>
 device::wait_for_cl_event(cl_event event)
 {
     cl_int err;
@@ -348,10 +348,7 @@ device::wait_for_cl_event(cl_event event)
                              &args); 
     cl_ensure(err, "clSetEventCallback()");
 
-    // Wait for future to trigger
-    err = future.get();
-    cl_ensure(err, "OpenCL Internal Function");
-
+    return future;
 }
 
 void
@@ -377,8 +374,11 @@ device::delete_event_data(cl_event event)
 
     // wait for event to trigger (clEnqueueX-call could still be using
     //                            the memory)
-    wait_for_cl_event(event);
+    err = wait_for_cl_event(event).get();
+    cl_ensure(err, "OpenCL Internal Function");
 
+    // do not run this as a continuation, as a continuation wouldn't keep
+    // the device alive
     {
         // Lock event_data_map
         lock_type::scoped_lock l(event_data_lock);
@@ -387,4 +387,30 @@ device::delete_event_data(cl_event event)
         event_data_map.erase(event);
     }
     
+}
+
+void
+device::activate_deferred_event(hpx::naming::id_type event_id)
+{
+    // get the cl_event
+    cl_event event = event_map.get(event_id);
+
+    // get a future that triggers upon completion
+    hpx::future<cl_int> event_future = wait_for_cl_event(event);
+
+    // attach local the hpx::opencl::event as continuation
+    event_future.then(
+        [event_id](hpx::future<cl_int> && err){
+            
+            // make sure the event did not cause an OpenCL error
+            cl_ensure(err.get(), "OpenCL Internal Function");
+
+            // trigger the client event
+            hpx::trigger_lco_event(event_id);
+        }
+    );
+
+    std::cout << "activate_deferred_event " << event_id << std::endl;
+
+
 }

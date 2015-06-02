@@ -36,10 +36,9 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
 
     public:
        
-        event(hpx::naming::id_type && device_id_)
-            : device_id(std::move(device_id_))
+        event(hpx::naming::id_type && device_id_, bool is_deferred_ = false)
+            : device_id(std::move(device_id_)), is_armed(!is_deferred_)
         {
-            is_armed = false;
         }
 
         virtual
@@ -57,9 +56,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     private:
         boost::atomic<bool> is_armed;
 
-        void arm(){
-            std::cout << "event::arm! " << this->get_base_gid() << std::endl;
-        }
+        void arm();
 
     public:
         // Gets called by when_all, wait_all, etc
@@ -118,6 +115,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             this->gid_ = bp->get_base_gid();
         }
     };
+
 }}}}
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -282,7 +280,9 @@ namespace hpx { namespace opencl { namespace lcos
         ///               future instance (as it has to be sent along
         ///               with the action as the continuation parameter).
         event(hpx::naming::id_type device_id)
-          : impl_(new wrapping_type(new wrapped_type(std::move(device_id)))),
+          : impl_(new wrapping_type( // event<void> is deferred
+                new wrapped_type(std::move(device_id), true)
+            )),
             future_obtained_(false)
         {
             LLCO_(info) << "event<void>::event(" << impl_->get_gid() << ")";
