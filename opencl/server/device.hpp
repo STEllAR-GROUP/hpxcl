@@ -115,7 +115,7 @@ namespace hpx { namespace opencl{ namespace server{
 
         // Waits for an opencl event.
         // Necessary to offload wait from hpx to os thread.
-        hpx::future<cl_int> wait_for_cl_event(cl_event);
+        void wait_for_cl_event(cl_event);
 
     private:
         ///////////////////////////////////////////////
