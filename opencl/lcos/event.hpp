@@ -29,11 +29,17 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
       : public hpx::lcos::detail::promise<Result, RemoteResult>
     {
 
+    private:
+        typedef hpx::lcos::detail::promise<Result, RemoteResult> parent_type;
+        typedef typename hpx::lcos::detail::future_data<Result>::data_type
+            data_type; 
+
     public:
        
         event(hpx::naming::id_type && device_id_)
             : device_id(std::move(device_id_))
         {
+            is_armed = false;
         }
 
         virtual
@@ -45,6 +51,51 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             std::cout << "event destroyed!" << std::endl;
         }
 
+        ///////////////////////////////////////////////////////////
+        // Overrides that enable the event to be deferred
+        //
+    private:
+        boost::atomic<bool> is_armed;
+
+        void arm(){
+            std::cout << "event::arm! " << this->get_base_gid() << std::endl;
+        }
+
+    public:
+        // Gets called by when_all, wait_all, etc
+        virtual void execute_deferred(){
+            if(!is_armed.exchange(true)){
+                this->arm(); 
+            }
+        }
+
+        // retrieving the value
+        virtual data_type& get_result(error_code& ec = throws)
+        {
+            this->execute_deferred();
+            return this->parent_type::get_result(ec);
+        }
+
+        // wait for the value
+        virtual void wait(error_code& ec = throws)
+        {
+            this->execute_deferred();
+            this->parent_type::wait(ec);
+        }
+
+        virtual BOOST_SCOPED_ENUM(hpx::lcos::future_status)
+        wait_until(boost::chrono::steady_clock::time_point const& abs_time,
+            error_code& ec = throws)
+        {
+            if (!is_armed.load())
+                return hpx::lcos::future_status::deferred; //-V110
+            else
+                return this->parent_type::wait_until(abs_time, ec);
+        };
+        
+        ///////////////////////////////////////////////////////////
+        // Internal stuff
+        //
     private:
 
         hpx::naming::id_type device_id;
