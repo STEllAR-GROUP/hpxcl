@@ -111,6 +111,8 @@ buffer::enqueue_write( hpx::naming::id_type && event_gid,
                        hpx::serialization::serialize_buffer<char> data,
                        std::vector<hpx::naming::id_type> && dependencies ){
     
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
     cl_int err;
     cl_event return_event;
 
@@ -132,6 +134,46 @@ buffer::enqueue_write( hpx::naming::id_type && event_gid,
 
     // register the cl_event to the client event
     parent_device->register_event(event_gid, return_event);
+
+}
+
+void
+buffer::enqueue_read( hpx::naming::id_type && event_gid,
+                      std::size_t offset,
+                      std::size_t size,
+                      std::vector<hpx::naming::id_type> && dependencies ){
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+
+    cl_int err;
+    cl_event return_event;
+
+    // retrieve the dependency cl_events
+    util::event_dependencies events( dependencies, parent_device.get() );
+
+    // retrieve the command queue
+    cl_command_queue command_queue = parent_device->get_read_command_queue();
+
+    // create new target buffer
+    buffer_type data( new char[size], size, buffer_type::init_mode::take );
+
+    // run the OpenCL-call
+    err = clEnqueueReadBuffer( command_queue, device_mem, CL_FALSE, offset,
+                                data.size(), data.data(),
+                                static_cast<cl_uint>(events.size()),
+                                events.get_cl_events(), &return_event );
+    cl_ensure(err, "clEnqueueWriteBuffer()");
+
+    // register the data to prevent deallocation
+    parent_device->put_event_data(return_event, data);
+
+    // register the cl_event to the client event
+    parent_device->register_event(event_gid, return_event);
+
+    // arm the future
+    parent_device->activate_deferred_event_with_data(event_gid);
 
 }
 

@@ -22,6 +22,17 @@ static const char refdata2[] = "World";
 
 static const char refdata3[] = "Hello Wolp,!";
 
+static bool test_eq( hpx::serialization::serialize_buffer<char> data,
+                     const char* ref_data )
+{
+    for(size_t i = 0; i < data.size(); i++){
+        if(data[i] != ref_data[i])
+            return false;
+    }
+    
+    return true;
+}
+
 static void cl_test(hpx::opencl::device cldevice)
 {
 
@@ -61,6 +72,20 @@ static void cl_test(hpx::opencl::device cldevice)
             }
         );
         HPX_TEST(future2.get());
+    }
+
+    // test read
+    {
+        auto data_read_future = buffer.enqueue_read(0, DATASIZE);
+        HPX_TEST(test_eq(data_read_future.get(), initdata)); 
+    }
+
+    // test remote continuation
+    {
+        auto data_write_future = buffer.enqueue_write(3, 2, modifydata);
+        auto data_read_future = buffer.enqueue_read(0, DATASIZE,
+                                                    data_write_future);
+        HPX_TEST(test_eq(data_read_future.get(), refdata1)); 
     }
 
     // TODO local wait test, remote continuation test

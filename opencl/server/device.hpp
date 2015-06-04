@@ -28,6 +28,7 @@ namespace hpx { namespace opencl{ namespace server{
       : public hpx::components::managed_component_base<device>
     {
         typedef hpx::lcos::local::spinlock lock_type;
+        typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
     public:
         // Constructor
@@ -70,6 +71,10 @@ namespace hpx { namespace opencl{ namespace server{
         void
         activate_deferred_event(hpx::naming::id_type);
      
+        // activates a deferred event<serialize_buffer<char> >
+        void
+        activate_deferred_event_with_data(hpx::naming::id_type);
+
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_info);
     HPX_DEFINE_COMPONENT_ACTION(device, get_platform_info);
     HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
@@ -96,7 +101,7 @@ namespace hpx { namespace opencl{ namespace server{
         // event data handling. needed to keep clEnqueue* data alive 
         // (like clEnqueueWriteBuffer)
         void
-        put_event_data(cl_event, hpx::serialization::serialize_buffer<char>);
+        put_event_data(cl_event, buffer_type);
 
     private:
         ///////////////////////////////////////////////
@@ -128,7 +133,7 @@ namespace hpx { namespace opencl{ namespace server{
 
         util::event_map     event_map;
 
-        typedef std::map<cl_event, hpx::serialization::serialize_buffer<char> >
+        typedef std::map<cl_event, buffer_type>
             event_data_map_type;
         event_data_map_type event_data_map;
         lock_type event_data_lock;

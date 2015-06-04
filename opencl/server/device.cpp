@@ -294,7 +294,7 @@ device::get_kernel_command_queue()
         
 void
 device::put_event_data( cl_event event,
-                        hpx::serialization::serialize_buffer<char> data )
+                        device::buffer_type data )
 {
 
     {
@@ -402,4 +402,36 @@ device::activate_deferred_event(hpx::naming::id_type event_id)
 
     // trigger the client event
     hpx::trigger_lco_event(event_id);
+}
+
+void
+device::activate_deferred_event_with_data(hpx::naming::id_type event_id)
+{
+
+    // get the cl_event
+    cl_event event = event_map.get(event_id);
+
+    buffer_type data;
+
+    // get the event data
+    {
+        // Lock event_data_map
+        lock_type::scoped_lock l(event_data_lock);
+    
+        // Find data
+        auto event_data_entry = event_data_map.find(event);
+
+        // Ensure data exists
+        HPX_ASSERT(event_data_entry != event_data_map.end());
+
+        // Get the data pointer
+        data = event_data_entry->second;
+    }
+
+    // wait for the cl_event to complete
+    wait_for_cl_event(event);
+
+    // trigger the client event
+    hpx::set_lco_value(event_id, data);
+
 }

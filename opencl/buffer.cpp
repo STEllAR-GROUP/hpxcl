@@ -29,7 +29,7 @@ hpx::future<void>
 buffer::enqueue_write_impl( std::size_t offset,
                             std::size_t size,
                             const void* data,
-                            std::vector<hpx::naming::id_type> && dependencies)
+                            std::vector<hpx::naming::id_type> && dependencies )
 {
     using hpx::opencl::lcos::event;
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
@@ -50,6 +50,29 @@ buffer::enqueue_write_impl( std::size_t offset,
                       serializable_data,
                       dependencies );
                      
+
+    // return future connected to event
+    return ev.get_future();
+}
+
+hpx::future<hpx::serialization::serialize_buffer<char> >
+buffer::enqueue_read_impl( std::size_t offset,
+                           std::size_t size,
+                           std::vector<hpx::naming::id_type> && dependencies )
+{
+    using hpx::opencl::lcos::event;
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+
+    // create local event
+    event<buffer_type> ev( device_gid );
+   
+    // send command to server class
+    typedef hpx::opencl::server::buffer::enqueue_read_action func;
+    hpx::apply<func>( this->get_gid(),
+                      ev.get_gid(),
+                      offset,
+                      size,
+                      dependencies ); 
 
     // return future connected to event
     return ev.get_future();

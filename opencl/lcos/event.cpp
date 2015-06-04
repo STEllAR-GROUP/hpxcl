@@ -42,7 +42,7 @@ void hpx::opencl::lcos::detail::event
 template<>
 void hpx::opencl::lcos::detail::event
 <hpx::serialization::serialize_buffer<char>,
- hpx::traits::promise_remote_result<hpx::serialization::serialize_buffer<char> > >
+ hpx::traits::promise_remote_result<hpx::serialization::serialize_buffer<char> >::type >
 ::arm(){
 
     // event<void> are the only deferred ones. therefore, this should never be
@@ -50,5 +50,4 @@ void hpx::opencl::lcos::detail::event
     HPX_ASSERT(false);
 
 }
-
 
