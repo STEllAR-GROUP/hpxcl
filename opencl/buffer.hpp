@@ -95,6 +95,8 @@ namespace opencl {
                                    enqueue_read, std::size_t /*offset*/,
                                                  std::size_t /*size*/);
         
+            // TODO create enqueue_read with pointer
+
         private:
             hpx::naming::id_type device_gid;
 

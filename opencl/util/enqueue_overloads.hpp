@@ -16,6 +16,8 @@
 
 namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 
+
+    // TODO implement check for correct device
     // This is the function that actually extrudes the GID from the futures.
     template<typename Future>
     hpx::naming::id_type
