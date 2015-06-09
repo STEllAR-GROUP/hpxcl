@@ -130,7 +130,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 #define HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(return_value, name, args...)      \
                                                                                 \
     return_value                                                                \
-    name##_impl(args, std::vector<hpx::naming::id_type> &&);                       \
+    name##_impl(args, std::vector<hpx::naming::id_type> &&);                    \
                                                                                 \
     /*                                                                          \
      * This class  splits the arguments from the dependencies.                  \
@@ -156,7 +156,6 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     {                                                                           \
         return name##_caller<args>()(this, std::forward<Params>(params)...);    \
     }
-
 
 
 

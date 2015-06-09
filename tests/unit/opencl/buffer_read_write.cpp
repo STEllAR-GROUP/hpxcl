@@ -12,26 +12,25 @@
  */
 
 
-static const char initdata[] = "Hello World!";
-#define DATASIZE ((size_t)13)
+typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
-static char modifydata[] = "p,";
-static const char refdata1[] = "Help, World!";
+#define DATASIZE (sizeof("Hello World!"))
 
-static const char refdata2[] = "World";
+#define CREATE_BUFFER(name, data)                                               \
+    static const buffer_type name(data, sizeof(data),                           \
+                                  buffer_type::init_mode::reference)
 
-static const char refdata3[] = "Hello Wolp,!";
+#define COMPARE_RESULT( result, correct_result )                                \
+    HPX_TEST( strcmp( result.get().data(), correct_result.data() ) == 0 )
 
-static bool test_eq( hpx::serialization::serialize_buffer<char> data,
-                     const char* ref_data )
-{
-    for(size_t i = 0; i < data.size(); i++){
-        if(data[i] != ref_data[i])
-            return false;
-    }
-    
-    return true;
-}
+CREATE_BUFFER(initdata, "Hello World!");
+CREATE_BUFFER(refdata1, "Help, World!");
+CREATE_BUFFER(refdata2, "World");
+CREATE_BUFFER(refdata3, "Hello Wolp,!");
+
+static const buffer_type modifydata("p,", 2,
+                                  buffer_type::init_mode::reference);
+
 
 static void cl_test(hpx::opencl::device cldevice)
 {
@@ -47,14 +46,14 @@ static void cl_test(hpx::opencl::device cldevice)
 
     // test if buffer can be written to
     {
-        auto data_write_future = buffer.enqueue_write(0, DATASIZE, initdata);
+        auto data_write_future = buffer.enqueue_write(0, initdata);
         data_write_future.wait();
     }
 
     // test when_all
     {
-        auto future1 = buffer.enqueue_write(0, DATASIZE, initdata);
-        auto future2 = buffer2.enqueue_write(0, DATASIZE, initdata);
+        auto future1 = buffer.enqueue_write(0, initdata);
+        auto future2 = buffer2.enqueue_write(0, initdata);
         
         std::vector<hpx::future<void> > futures;
         futures.push_back(std::move(future1));
@@ -65,7 +64,7 @@ static void cl_test(hpx::opencl::device cldevice)
 
     // test local continuation
     {
-        auto data_write_future = buffer.enqueue_write(0, DATASIZE, initdata);
+        auto data_write_future = buffer.enqueue_write(0, initdata);
         auto future2 = data_write_future.then(
             [](hpx::future<void> fut){
                 return true;   
@@ -77,16 +76,22 @@ static void cl_test(hpx::opencl::device cldevice)
     // test read
     {
         auto data_read_future = buffer.enqueue_read(0, DATASIZE);
-        HPX_TEST(test_eq(data_read_future.get(), initdata)); 
-    }
+
+        COMPARE_RESULT(data_read_future, initdata);
+     }
 
     // test remote continuation
     {
-        auto data_write_future = buffer.enqueue_write(3, 2, modifydata);
+        auto data_write_future = buffer.enqueue_write(3, modifydata);
         auto data_read_future = buffer.enqueue_read(0, DATASIZE,
                                                     data_write_future);
-        HPX_TEST(test_eq(data_read_future.get(), refdata1)); 
+
+        COMPARE_RESULT(data_read_future, refdata1);
     }
+
+
+
+
 
     // TODO local wait test, remote continuation test
 /*

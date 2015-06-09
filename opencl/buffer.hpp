@@ -20,6 +20,8 @@
 // Crazy function overloading
 #include "util/enqueue_overloads.hpp"
 
+#include "server/buffer.hpp"
+
 namespace hpx {
 namespace opencl { 
 
@@ -69,10 +71,32 @@ namespace opencl {
              *  @return         An future that can be used for synchronization or
              *                  dependency for other calls.
              */
-            HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(
-                hpx::future<void>, enqueue_write, std::size_t /*offset*/,
-                                                  std::size_t /*size*/,
-                                                  const void* /*data*/);
+            template<typename T, typename ...Deps>
+            hpx::future<void>
+            enqueue_write( std::size_t offset,
+                           const hpx::serialization::serialize_buffer<T> data,
+                           Deps &&... dependencies )
+            {
+                // combine dependency futures in one std::vector
+                using hpx::opencl::util::enqueue_overloads::resolver;
+                auto deps = resolver(std::forward<Deps>(dependencies)...);
+                
+                // create local event
+                using hpx::opencl::lcos::event;
+                event<void> ev( device_gid );
+            
+                // send command to server class
+                typedef hpx::opencl::server::buffer::enqueue_write_action<T> func;
+                hpx::apply<func>( this->get_gid(),
+                                  ev.get_gid(),
+                                  offset,
+                                  data,
+                                  deps );
+                                 
+            
+                // return future connected to event
+                return ev.get_future();
+            }
 
             /**
              *  @brief Reads data from the buffer
