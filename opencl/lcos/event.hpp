@@ -12,6 +12,23 @@
 
 #include <hpx/lcos/promise.hpp>
 
+namespace hpx { namespace opencl { namespace lcos { namespace detail
+{
+    template <typename Result, typename RemoteResult>
+    class event;
+}}}}
+ 
+///////////////////////////////////////////////////////////////////////////////
+namespace hpx { namespace components { namespace detail
+{
+    // use the promise heap factory for constructing events
+    template <typename Result, typename RemoteResult>
+    struct heap_factory<
+            opencl::lcos::detail::event<Result, RemoteResult>,
+            managed_component<opencl::lcos::detail::event<Result, RemoteResult> > >
+        : promise_heap_factory<opencl::lcos::detail::event<Result, RemoteResult> >
+    {};
+}}}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -192,17 +209,6 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
 }}}}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace hpx { namespace components { namespace detail
-{
-    // use the promise heap factory for constructing events
-    template <typename Result, typename RemoteResult>
-    struct heap_factory<
-            opencl::lcos::detail::event<Result, RemoteResult>,
-            managed_component<opencl::lcos::detail::event<Result, RemoteResult> > >
-        : promise_heap_factory<opencl::lcos::detail::event<Result, RemoteResult> >
-    {};
-}}}
-
 namespace hpx { namespace traits
 {
     template <typename Result, typename RemoteResult>
