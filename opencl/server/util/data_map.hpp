@@ -32,7 +32,7 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
 
     public:
         template <typename T>
-        data_map_entry(hpx::serialization::serialize_buffer<T> data)
+        void set_data(hpx::serialization::serialize_buffer<T> data)
         {
 
             // The data itself does not need to explicitely get kept alive,
@@ -42,7 +42,8 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
                                             hpx::util::placeholders::_1);
         }
 
-        void send_to_client(const hpx::naming::id_type& client_event);
+        // Sends the data to the client event (to trigger client future)
+        void send_data_to_client(const hpx::naming::id_type& client_event);
         
     private:
         hpx::util::function_nonser<void(const hpx::naming::id_type&)>
@@ -70,7 +71,8 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         void add(cl_event event, hpx::serialization::serialize_buffer<T> data)
         {
             // Strip the template from the buffer
-            data_map_entry entry(data);
+            data_map_entry entry;
+            entry.set_data(data);
 
             {
                 // Lock the map
@@ -78,15 +80,17 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
 
                 // Insert the data into the map
                 map.insert(std::move(
-                        map_type::value_type(event, std::move(data))
+                        map_type::value_type(event, std::move(entry))
                     ));
             }
         }
      
-        // Sends the data to the client event (to trigger client future)
-        void send_data_to_client(
-            const hpx::naming::id_type& client_event,
-            cl_event event );
+        // Returns the data entry associated with the event.
+        // Undefined behaviour if no data is available.
+        data_map_entry get(cl_event event);
+
+        // Returns bool if data is registered, and false if not
+        bool has_data(cl_event event);
 
         // Deletes the data
         void remove(cl_event event);

@@ -32,31 +32,51 @@ data_map::remove(cl_event event)
 }
 
 
-
-void 
-data_map::send_data_to_client(const hpx::naming::id_type& client_event,
-                              cl_event event)
+data_map_entry
+data_map::get(cl_event event)
 {
+    data_map_entry result;
 
     // get data from the map
-    map_type::iterator it;
     {
         // Lock
         lock_type::scoped_lock l(lock);
 
-        it = map.find(event);
+        // Retrieve the data from the map
+        map_type::iterator it = map.find(event);
+    
+        // Make sure the data actually exists
+        HPX_ASSERT(it != map.end());
+    
+        // Get the data entry
+        result = it->second; 
     }
 
-    // Make sure the data actually exists
-    HPX_ASSERT(it != map.end());
-    
-    // Send the data to the client
-    it->second.send_to_client(client_event);    
+    return result;
+}
 
+bool
+data_map::has_data(cl_event event)
+{
+
+    bool result = true;
+    {
+        // Lock
+        lock_type::scoped_lock l(lock);
+
+        // Try to find the entry
+        map_type::iterator it = map.find(event);
+
+        // Check wether or not we found the entry
+        if(it == map.end())
+            result = false;
+    }
+
+    return result;
 }
 
 void
-data_map_entry::send_to_client(const hpx::naming::id_type& client_event)
+data_map_entry::send_data_to_client(const hpx::naming::id_type& client_event)
 {
     // no synchronization necessary, should only get called once
     // (at least the client event has to make sure this only gets called once)

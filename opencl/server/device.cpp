@@ -63,8 +63,6 @@ static void device_cleanup(uintptr_t command_queue_ptr,
 device::~device()
 {
 
-    HPX_ASSERT(event_data_map.empty());
-
     hpx::threads::executors::default_executor exec(
                                           hpx::threads::thread_priority_normal,
                                           hpx::threads::thread_stacksize_large);
@@ -297,15 +295,7 @@ device::put_event_data( cl_event event,
                         device::buffer_type data )
 {
 
-    {
-        // Lock event_data_map
-        lock_type::scoped_lock l(event_data_lock);
-
-        // Insert in event_data_map
-        event_data_map.insert(event_data_map_type::value_type(event, data));
-        HPX_ASSERT(event_data_map.at(event) == data);
-
-    }
+    event_data_map.add(event, data);
 
 }
 
@@ -362,33 +352,17 @@ device::delete_event_data(cl_event event)
 
     cl_int err;
     
-    {
-        // Lock event_data_map
-        lock_type::scoped_lock l(event_data_lock);
-
-        // Try to get the data associated with the event
-        event_data_map_type::iterator it = event_data_map.find(event);
-
-        // if no data is associated, do nothing
-        if(it == event_data_map.end())
-            return;
-
-    }
+    // return if no data is registered
+    if(!event_data_map.has_data(event))
+        return;
 
     // wait for event to trigger (clEnqueueX-call could still be using
     //                            the memory)
     wait_for_cl_event(event);
 
-    // do not run this as a continuation, as a continuation wouldn't keep
-    // the device alive
-    {
-        // Lock event_data_map
-        lock_type::scoped_lock l(event_data_lock);
+    // release the data
+    event_data_map.remove(event);
 
-        // Delete the memory
-        event_data_map.erase(event);
-    }
-    
 }
 
 void
@@ -411,27 +385,13 @@ device::activate_deferred_event_with_data(hpx::naming::id_type event_id)
     // get the cl_event
     cl_event event = event_map.get(event_id);
 
-    buffer_type data;
+    // find the data associated with the event
+    auto data = event_data_map.get(event);
 
-    // get the event data
-    {
-        // Lock event_data_map
-        lock_type::scoped_lock l(event_data_lock);
-    
-        // Find data
-        auto event_data_entry = event_data_map.find(event);
-
-        // Ensure data exists
-        HPX_ASSERT(event_data_entry != event_data_map.end());
-
-        // Get the data pointer
-        data = event_data_entry->second;
-    }
-
-    // wait for the cl_event to complete
+    // wait for the event to trigger
     wait_for_cl_event(event);
 
-    // trigger the client event
-    hpx::set_lco_value(event_id, data);
+    // send the data to the client
+    data.send_data_to_client(event_id);
 
 }

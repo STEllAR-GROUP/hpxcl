@@ -11,6 +11,7 @@ set(tests
     event
     info
     event_map
+    data_map
     dynamic_overloads
 #    events_and_futures
 #    kernel

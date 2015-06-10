@@ -13,6 +13,7 @@
 #include "../cl_headers.hpp"
 
 #include "util/event_map.hpp"
+#include "util/data_map.hpp"
 
 // REGISTER_ACTION_DECLARATION templates
 #include "util/server_definitions.hpp"
@@ -132,11 +133,7 @@ namespace hpx { namespace opencl{ namespace server{
         cl_command_queue    command_queue;
 
         util::event_map     event_map;
-
-        typedef std::map<cl_event, buffer_type>
-            event_data_map_type;
-        event_data_map_type event_data_map;
-        lock_type event_data_lock;
+        util::data_map      event_data_map;
         
     };
 }}}
