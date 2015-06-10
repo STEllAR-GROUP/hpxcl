@@ -30,17 +30,6 @@ void hpx::opencl::lcos::detail::event<void, hpx::util::unused_type>::arm(){
 
 template<>
 void hpx::opencl::lcos::detail::event
-<int, typename hpx::traits::promise_remote_result<int>::type>
-::arm(){
-
-    // this specialization is necessary for certain unit tests, but should never
-    // be called
-    HPX_ASSERT(false);
-
-}
-
-template<>
-void hpx::opencl::lcos::detail::event
 <hpx::serialization::serialize_buffer<char>,
  hpx::traits::promise_remote_result<hpx::serialization::serialize_buffer<char> >::type >
 ::arm(){
