@@ -13,6 +13,7 @@
 
 
 typedef hpx::serialization::serialize_buffer<char> buffer_type;
+typedef hpx::serialization::serialize_buffer<uint32_t> intbuffer_type;
 
 #define DATASIZE (sizeof("Hello World!"))
 
@@ -20,16 +21,37 @@ typedef hpx::serialization::serialize_buffer<char> buffer_type;
     static const buffer_type name(data, sizeof(data),                           \
                                   buffer_type::init_mode::reference)
 
+std::string to_string(buffer_type buf){
+    std::size_t length = 0; 
+    while(length < buf.size())
+    {
+        if(buf[length] == '\0') break;
+        length++;
+    }
+    return std::string(buf.data(), buf.data() + length);
+}
+
 #define COMPARE_RESULT( result, correct_result )                                \
-    HPX_TEST( strcmp( result.get().data(), correct_result.data() ) == 0 )
+{                                                                               \
+    auto result_data = result.get();                                            \
+    HPX_TEST_EQ(result_data.size(), correct_result.size());                     \
+    std::string correct_string = to_string(correct_result);                     \
+    std::string result_string = to_string(result_data);                         \
+    HPX_TEST_EQ(correct_string, result_string);                                 \
+}
 
 CREATE_BUFFER(initdata, "Hello World!");
 CREATE_BUFFER(refdata1, "Help, World!");
 CREATE_BUFFER(refdata2, "World");
 CREATE_BUFFER(refdata3, "Hello Wolp,!");
+CREATE_BUFFER(refdata4, "HDEFGjihgld!");
 
-static const buffer_type modifydata("p,", 2,
-                                  buffer_type::init_mode::reference);
+
+static const buffer_type modifydata("p,", 2, buffer_type::init_mode::reference);
+
+static const uint32_t intarr[] = {0x47464544, 0x6768696a};
+static const intbuffer_type modifydata2(intarr, 2,
+                                        intbuffer_type::init_mode::reference);
 
 
 static void cl_test(hpx::opencl::device cldevice)
@@ -89,9 +111,17 @@ static void cl_test(hpx::opencl::device cldevice)
         COMPARE_RESULT(data_read_future, refdata1);
     }
 
+    // test read continuation and non-char buffer writes and offsets
+    {
+        auto data_read_future1 = buffer.enqueue_read(3, 2);
+        auto data_write_future = buffer.enqueue_write(1, modifydata2,
+                                                      data_read_future1);
+        auto data_read_future2 = buffer.enqueue_read(0, DATASIZE,
+                                                     data_write_future);
 
-
-
+        COMPARE_RESULT(data_read_future1, modifydata);
+        COMPARE_RESULT(data_read_future2, refdata4);
+    }
 
     // TODO local wait test, remote continuation test
 /*
