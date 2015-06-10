@@ -93,7 +93,13 @@ HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_read);
 namespace hpx { namespace traits
 {
     template <typename T>
-    struct action_stacksize<hpx::opencl::server::buffer::enqueue_write_action<T> >
+    struct action_stacksize<
+        hpx::opencl::server::buffer::enqueue_write_action<T>,
+        typename util::always_void<
+            typename
+            hpx::opencl::server::buffer::enqueue_write_action<T>::type
+        >::type
+    >
     {
         enum { value = hpx::threads::thread_stacksize_large };
     };

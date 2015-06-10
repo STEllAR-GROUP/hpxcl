@@ -320,6 +320,8 @@ wait_for_cl_event_callback( cl_event event, cl_int exec_status, void* user_data 
 void
 device::wait_for_cl_event(cl_event event)
 {
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
     cl_int err;
 
     // Create a new promise
