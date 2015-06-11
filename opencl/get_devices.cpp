@@ -13,27 +13,13 @@
 // HPX dependencies
 #include <hpx/lcos/when_all.hpp>
 
-
+static 
 hpx::lcos::future<std::vector<hpx::opencl::device>>
-hpx::opencl::get_devices( hpx::naming::id_type node_id,
-                          cl_device_type device_type,
-                          std::string required_cl_version)
+get_devices_on_nodes( std::vector<hpx::naming::id_type> && localities,
+                      cl_device_type device_type,
+                      std::string required_cl_version )
 {
-
-    typedef hpx::opencl::server::get_devices_action action;
-    return async<action>(node_id, device_type, required_cl_version);
-
-}
-
-hpx::lcos::future<std::vector<hpx::opencl::device>>
-hpx::opencl::get_all_devices( cl_device_type device_type,
-                              std::string required_cl_version)
-{
-
-    // get all HPX localities
-    std::vector<hpx::naming::id_type> localities = 
-                                        hpx::find_all_localities();
-
+   
     // query all devices
     std::vector<hpx::lcos::future<std::vector<hpx::opencl::device>>>
     locality_device_futures;
@@ -104,5 +90,60 @@ hpx::opencl::get_all_devices( cl_device_type device_type,
 
 }
 
+hpx::lcos::future<std::vector<hpx::opencl::device>>
+hpx::opencl::get_devices( hpx::naming::id_type node_id,
+                          cl_device_type device_type,
+                          std::string required_cl_version)
+{
+
+    typedef hpx::opencl::server::get_devices_action action;
+    return async<action>(node_id, device_type, required_cl_version);
+
+}
+
+hpx::lcos::future<std::vector<hpx::opencl::device>>
+hpx::opencl::get_local_devices( cl_device_type device_type,
+                                std::string required_cl_version)
+{
+
+    // get local locality id
+    hpx::naming::id_type locality = hpx::find_here();
+
+    // find devices on localities
+    return get_devices( locality, device_type, required_cl_version );
+
+}
+
+hpx::lcos::future<std::vector<hpx::opencl::device>>
+hpx::opencl::get_remote_devices( cl_device_type device_type,
+                                 std::string required_cl_version)
+{
+
+    // get remote HPX localities
+    std::vector<hpx::naming::id_type> localities = 
+                                        hpx::find_remote_localities();
+
+    // find devices on localities
+    return get_devices_on_nodes( std::move(localities),
+                                 device_type,
+                                 required_cl_version );
+
+}
+
+hpx::lcos::future<std::vector<hpx::opencl::device>>
+hpx::opencl::get_all_devices( cl_device_type device_type,
+                              std::string required_cl_version)
+{
+
+    // get all HPX localities
+    std::vector<hpx::naming::id_type> localities = 
+                                        hpx::find_all_localities();
+
+    // find devices on localities
+    return get_devices_on_nodes( std::move(localities),
+                                 device_type,
+                                 required_cl_version );
+
+}
 
 

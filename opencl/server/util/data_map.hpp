@@ -22,23 +22,23 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
     class data_map_entry
     {
     private:
-        template <typename T>
+        template <typename T, typename Alloc>
         static void
-        send_to_client_impl( hpx::serialization::serialize_buffer<T> data,
+        send_to_client_impl( hpx::serialization::serialize_buffer<T, Alloc> data,
                              const hpx::naming::id_type& event_id )
         {
             hpx::set_lco_value(event_id, data); 
         }
 
     public:
-        template <typename T>
-        void set_data(hpx::serialization::serialize_buffer<T> data)
+        template <typename T, typename Alloc>
+        void set_data(hpx::serialization::serialize_buffer<T, Alloc> data)
         {
 
             // The data itself does not need to explicitely get kept alive,
             // it gets kept alive inside of the bind.
             
-            send_callback = hpx::util::bind(send_to_client_impl<T>, data,
+            send_callback = hpx::util::bind(send_to_client_impl<T, Alloc>, data,
                                             hpx::util::placeholders::_1);
         }
 
@@ -67,8 +67,9 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         ///
 
         // Registers a data chunk to a cl_event
-        template <typename T>
-        void add(cl_event event, hpx::serialization::serialize_buffer<T> data)
+        template <typename T, typename Alloc>
+        void add( cl_event event,
+                  hpx::serialization::serialize_buffer<T, Alloc> data )
         {
             // Strip the template from the buffer
             data_map_entry entry;

@@ -12,6 +12,23 @@
 
 #include <hpx/lcos/promise.hpp>
 
+namespace hpx { namespace opencl { namespace lcos { namespace detail
+{
+    template <typename Result, typename RemoteResult>
+    class event;
+}}}}
+ 
+///////////////////////////////////////////////////////////////////////////////
+namespace hpx { namespace components { namespace detail
+{
+    // use the promise heap factory for constructing events
+    template <typename Result, typename RemoteResult>
+    struct heap_factory<
+            opencl::lcos::detail::event<Result, RemoteResult>,
+            managed_component<opencl::lcos::detail::event<Result, RemoteResult> > >
+        : promise_heap_factory<opencl::lcos::detail::event<Result, RemoteResult> >
+    {};
+}}}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,8 +53,9 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
 
     public:
        
-        event(hpx::naming::id_type && device_id_, bool is_deferred_ = false)
-            : device_id(std::move(device_id_)), is_armed(!is_deferred_)
+        event(hpx::naming::id_type && device_id_, Result && result_buffer_)
+            : device_id(std::move(device_id_)),
+              result_buffer(std::move(result_buffer_))
         {
         }
 
@@ -50,7 +68,74 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             std::cout << "event destroyed!" << std::endl;
         }
 
-        ///////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////
+        // Overrides that enable zero-copy
+        //
+    public:
+        // This function is here for zero-copy of read_to_userbuffer_remote
+        // Take (unmanaged) remote value for de-serialization (de-serialization
+        // of the remote object automatically sets the value in result_buffer).
+        // Then trigger set result_buffer as data of this event.
+
+        // This holds the buffer that will get returned by the future.
+        data_type result_buffer;
+
+        
+        ////////////////////////////////////////////////////////////////////////
+        // Internal stuff
+        //
+    private:
+
+        hpx::naming::id_type device_id;
+
+
+        ////////////////////////////////////////////////////////////////////////
+        // HPX Stuff
+        //
+    public:
+        enum { value = components::component_promise };
+
+    private:
+        template <typename>
+        friend struct components::detail_adl_barrier::init;
+
+        void set_back_ptr(components::managed_component<event>* bp)
+        {
+            HPX_ASSERT(bp);
+            HPX_ASSERT(this->gid_ == naming::invalid_gid);
+            this->gid_ = bp->get_base_gid();
+        }
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+    template <>
+    class event<void, hpx::util::unused_type>
+      : public hpx::lcos::detail::promise<void, hpx::util::unused_type>
+    {
+
+    private:
+        typedef hpx::lcos::detail::promise<void, hpx::util::unused_type>
+            parent_type;
+        typedef typename hpx::lcos::detail::future_data<void>::data_type
+            data_type; 
+
+    public:
+       
+        event(hpx::naming::id_type && device_id_)
+            : device_id(std::move(device_id_)), is_armed(false)
+        {
+        }
+
+        virtual
+        ~event()
+        {
+            std::cout << "destroying event ..." << std::endl;
+            unregister_event( device_id, 
+                              this->get_base_gid() );
+            std::cout << "event destroyed!" << std::endl;
+        }
+
+        ////////////////////////////////////////////////////////////////////////
         // Overrides that enable the event to be deferred
         //
     private:
@@ -90,7 +175,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
                 return this->parent_type::wait_until(abs_time, ec);
         };
         
-        ///////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////
         // Internal stuff
         //
     private:
@@ -98,7 +183,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         hpx::naming::id_type device_id;
 
 
-        //////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////
         // HPX Stuff
         //
     public:
@@ -119,17 +204,6 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
 }}}}
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace hpx { namespace components { namespace detail
-{
-    // use the promise heap factory for constructing events
-    template <typename Result, typename RemoteResult>
-    struct heap_factory<
-            opencl::lcos::detail::event<Result, RemoteResult>,
-            managed_component<opencl::lcos::detail::event<Result, RemoteResult> > >
-        : promise_heap_factory<opencl::lcos::detail::event<Result, RemoteResult> >
-    {};
-}}}
-
 namespace hpx { namespace traits
 {
     template <typename Result, typename RemoteResult>
@@ -169,8 +243,10 @@ namespace hpx { namespace opencl { namespace lcos
         ///               target for either of these actions has to be this
         ///               future instance (as it has to be sent along
         ///               with the action as the continuation parameter).
-        event(hpx::naming::id_type device_id)
-          : impl_(new wrapping_type(new wrapped_type(std::move(device_id)))),
+        event(hpx::naming::id_type device_id, Result result_buffer = Result())
+          : impl_(new wrapping_type(
+                new wrapped_type(std::move(device_id), std::move(result_buffer))
+            )),
             future_obtained_(false)
         {
             LLCO_(info) << "event::event(" << impl_->get_gid() << ")";
@@ -236,24 +312,6 @@ namespace hpx { namespace opencl { namespace lcos
             return future_access<future<Result> >::create(impl_->get());
         }
 
-        ///
-        template <typename T>
-        void set_value(T && result)
-        {
-            (*impl_)->set_data(std::forward<T>(result));
-        }
-
-        void set_exception(boost::exception_ptr const& e)
-        {
-            (*impl_)->set_exception(e);      // set the received error
-        }
-
-        template <typename T>
-        void set_local_data(T && result)
-        {
-            (*impl_)->set_local_data(std::forward<Result>(result));
-        }
-
     protected:
         boost::intrusive_ptr<wrapping_type> impl_;
         bool future_obtained_;
@@ -281,7 +339,7 @@ namespace hpx { namespace opencl { namespace lcos
         ///               with the action as the continuation parameter).
         event(hpx::naming::id_type device_id)
           : impl_(new wrapping_type( // event<void> is deferred
-                new wrapped_type(std::move(device_id), true)
+                new wrapped_type(std::move(device_id))
             )),
             future_obtained_(false)
         {
@@ -340,16 +398,6 @@ namespace hpx { namespace opencl { namespace lcos
 
             using traits::future_access;
             return future_access<future<void> >::create(impl_->get());
-        }
-
-        void set_value()
-        {
-            (*impl_)->set_data(hpx::util::unused);
-        }
-
-        void set_exception(boost::exception_ptr const& e)
-        {
-            (*impl_)->set_exception(e);
         }
 
     protected:
