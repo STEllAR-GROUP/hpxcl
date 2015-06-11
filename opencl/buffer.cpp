@@ -33,12 +33,8 @@ buffer::enqueue_read_impl( std::size_t offset,
     using hpx::opencl::lcos::event;
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
-    // create new result buffer
-    buffer_type result_buffer( new char[size], size,
-                               buffer_type::init_mode::take );
-
     // create local event
-    event<buffer_type> ev( device_gid, result_buffer );
+    event<buffer_type> ev( device_gid );
    
     // send command to server class
     typedef hpx::opencl::server::buffer::enqueue_read_action func;

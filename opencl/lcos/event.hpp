@@ -72,15 +72,10 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         // Overrides that enable zero-copy
         //
     public:
-        // Override set_value. Take (unmanaged) remote value and replace
-        // with locally cached (managed) value.
-        virtual void set_value (RemoteResult && result)
-        {
-            std::cout << "set VALUE!" << std::endl;
-            this->parent_type::set_value(std::forward<RemoteResult>(result));
-            //HPX_ASSERT(result.size() == result_buffer.size());
-            //this->parent_type::set_data(std::move(result_buffer));
-        }
+        // This function is here for zero-copy of read_to_userbuffer_remote
+        // Take (unmanaged) remote value for de-serialization (de-serialization
+        // of the remote object automatically sets the value in result_buffer).
+        // Then trigger set result_buffer as data of this event.
 
         // This holds the buffer that will get returned by the future.
         data_type result_buffer;
@@ -248,7 +243,7 @@ namespace hpx { namespace opencl { namespace lcos
         ///               target for either of these actions has to be this
         ///               future instance (as it has to be sent along
         ///               with the action as the continuation parameter).
-        event(hpx::naming::id_type device_id, Result result_buffer)
+        event(hpx::naming::id_type device_id, Result result_buffer = Result())
           : impl_(new wrapping_type(
                 new wrapped_type(std::move(device_id), std::move(result_buffer))
             )),
