@@ -36,10 +36,16 @@ static hpx::opencl::device init(variables_map & vm)
     if (vm.count("deviceid"))
         device_id = vm["deviceid"].as<std::size_t>();
 
-    // Query devices
+    // Try to get remote devices
     std::vector<hpx::opencl::device> devices
-            = hpx::opencl::get_devices( hpx::find_here(),
-                                        CL_DEVICE_TYPE_ALL, "OpenCL 1.1").get();
+            = hpx::opencl::get_remote_devices( CL_DEVICE_TYPE_ALL,
+                                               "OpenCL 1.1" ).get();
+    // If no remote devices present, get local device
+    if(devices.empty()){
+        hpx::cout << "WARNING: No remote devices found." << hpx::endl;
+        devices = hpx::opencl::get_all_devices( CL_DEVICE_TYPE_ALL,
+                                                "OpenCL 1.1" ).get();
+    }
     HPX_TEST(devices.size() >= device_id);
 
     // Choose device
