@@ -15,6 +15,8 @@
 
 #include "../fwd_declarations.hpp"
 
+#include "../lcos/zerocopy_buffer.hpp"
+#include "../lcos/event.hpp"
 
 // REGISTER_ACTION_DECLARATION templates
 #include "util/server_definitions.hpp"
@@ -60,6 +62,7 @@ namespace hpx { namespace opencl{ namespace server{
                            std::vector<hpx::naming::id_type> && dependencies );
 
         // Reads from the buffer. Needed for direct copy to user-supplied buffer
+        template <typename T>
         void enqueue_read_to_userbuffer_remote(
                             hpx::naming::id_type && event_gid,
                             std::size_t offset,
@@ -78,7 +81,6 @@ namespace hpx { namespace opencl{ namespace server{
 
     HPX_DEFINE_COMPONENT_ACTION(buffer, size);
     HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read);
-    HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read_to_userbuffer_remote);
 
     // Actions with template arguments (see enqueue_write<>() above) require
     // special type definitions. The simplest way to define such an action type
@@ -91,6 +93,17 @@ namespace hpx { namespace opencl{ namespace server{
                         hpx::serialization::serialize_buffer<T>,
                         std::vector<hpx::naming::id_type> &&),
             &buffer::template enqueue_write<T>, enqueue_write_action<T> >
+    {};
+    template <typename T>
+    struct enqueue_read_to_userbuffer_remote_action
+      : hpx::actions::make_action<void (buffer::*)(
+                        hpx::naming::id_type &&,
+                        std::size_t,
+                        std::size_t,
+                        std::uintptr_t,
+                        std::vector<hpx::naming::id_type> &&),
+            &buffer::template enqueue_read_to_userbuffer_remote<T>,
+            enqueue_read_to_userbuffer_remote_action<T> >
     {};
     template <typename T>
     struct enqueue_read_to_userbuffer_local_action
@@ -116,7 +129,6 @@ namespace hpx { namespace opencl{ namespace server{
 //[opencl_management_registration_declarations
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, size);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_read);
-HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_read_to_userbuffer_remote);
 namespace hpx { namespace traits
 {
     template <typename T>
@@ -136,6 +148,17 @@ namespace hpx { namespace traits
         typename util::always_void<
             typename
             hpx::opencl::server::buffer::enqueue_read_to_userbuffer_local_action<T>::type
+        >::type
+    >
+    {
+        enum { value = hpx::threads::thread_stacksize_large };
+    };
+    template <typename T>
+    struct action_stacksize<
+        hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote_action<T>,
+        typename util::always_void<
+            typename
+            hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote_action<T>::type
         >::type
     >
     {
@@ -229,5 +252,63 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_local(
 
 }
 
+template <typename T>
+void
+hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote(
+    hpx::naming::id_type && event_gid,
+    std::size_t offset,
+    std::size_t size,
+    std::uintptr_t remote_data_addr,
+    std::vector<hpx::naming::id_type> && dependencies ){
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+
+    cl_int err;
+    cl_event return_event;
+
+    // retrieve the dependency cl_events
+    util::event_dependencies events( dependencies, parent_device.get() );
+
+    // retrieve the command queue
+    cl_command_queue command_queue = parent_device->get_read_command_queue();
+
+    // create new target buffer
+    std::cout << "siz: " << size << std::endl;
+    buffer_type data( new char[size], size, buffer_type::init_mode::take );
+
+    // run the OpenCL-call
+    err = clEnqueueReadBuffer( command_queue, device_mem, CL_FALSE, offset,
+                                data.size(), data.data(),
+                                static_cast<cl_uint>(events.size()),
+                                events.get_cl_events(), &return_event );
+    cl_ensure(err, "clEnqueueReadBuffer()");
+
+    // put_event_data not necessary as we locally keep the buffer alive until
+    // the event triggered
+
+    // also important: the cl_event does not get destroyed inside of
+    // the event map of parent_device, because we keep the lcos::event
+    // alive as we have an event_id
+
+    // register the cl_event to the client event
+    parent_device->register_event(event_gid, return_event);
+
+    // prepare a zero-copy buffer
+    hpx::opencl::lcos::zerocopy_buffer zerocopy_buffer( remote_data_addr,
+                                                        size,
+                                                        data );
+
+    // wait for the event to finish
+    parent_device->wait_for_cl_event(return_event);
+
+    // TODO run the zero-copy buffer thingy
+    // send the zerocopy_buffer to the lcos::event
+    typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
+        set_data_func;
+    hpx::apply_colocated<set_data_func>( event_gid, event_gid, zerocopy_buffer);
+
+}
 
 #endif

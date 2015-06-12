@@ -162,7 +162,7 @@ namespace opencl {
                 typedef hpx::opencl::server::buffer
                     ::enqueue_read_to_userbuffer_local_action<T> func_local;
                 typedef hpx::opencl::server::buffer
-                    ::enqueue_read_to_userbuffer_remote_action func_remote;
+                    ::enqueue_read_to_userbuffer_remote_action<T> func_remote;
                 if(is_remote_call){
                     // is remote call
 
