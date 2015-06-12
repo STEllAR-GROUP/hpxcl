@@ -101,8 +101,16 @@ namespace hpx { namespace opencl{ namespace server{
 
         // event data handling. needed to keep clEnqueue* data alive 
         // (like clEnqueueWriteBuffer)
-        void
-        put_event_data(cl_event, buffer_type);
+        template<typename T>
+        void put_event_data( cl_event event,
+                             hpx::serialization::serialize_buffer<T> data )
+        {
+            event_data_map.add(event, data);
+        }
+
+        // Waits for an opencl event.
+        // Necessary to offload wait from hpx to os thread.
+        void wait_for_cl_event(cl_event);
 
     private:
         ///////////////////////////////////////////////
@@ -118,10 +126,6 @@ namespace hpx { namespace opencl{ namespace server{
 
         // Releases the data that was being kept alive
         void delete_event_data(cl_event);
-
-        // Waits for an opencl event.
-        // Necessary to offload wait from hpx to os thread.
-        void wait_for_cl_event(cl_event);
 
     private:
         ///////////////////////////////////////////////

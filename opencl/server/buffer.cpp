@@ -12,6 +12,7 @@
 // other hpxcl dependencies
 #include "device.hpp"
 #include "util/event_dependencies.hpp"
+#include "../lcos/zerocopy_buffer.hpp"
 
 // HPX dependencies
 #include <hpx/include/thread_executors.hpp>
@@ -131,7 +132,7 @@ buffer::enqueue_read( hpx::naming::id_type && event_gid,
                                 data.size(), data.data(),
                                 static_cast<cl_uint>(events.size()),
                                 events.get_cl_events(), &return_event );
-    cl_ensure(err, "clEnqueueWriteBuffer()");
+    cl_ensure(err, "clEnqueueReadBuffer()");
 
     // register the data to prevent deallocation
     parent_device->put_event_data(return_event, data);
@@ -139,9 +140,64 @@ buffer::enqueue_read( hpx::naming::id_type && event_gid,
     // register the cl_event to the client event
     parent_device->register_event(event_gid, return_event);
 
-    // arm the future
+    // arm the future. ! this blocks.
     parent_device->activate_deferred_event_with_data(event_gid);
 
 }
 
+void
+buffer::enqueue_read_to_userbuffer_remote(
+    hpx::naming::id_type && event_gid,
+    std::size_t offset,
+    std::size_t size,
+    std::uintptr_t remote_data_addr,
+    std::vector<hpx::naming::id_type> && dependencies ){
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+
+    cl_int err;
+    cl_event return_event;
+
+    // retrieve the dependency cl_events
+    util::event_dependencies events( dependencies, parent_device.get() );
+
+    // retrieve the command queue
+    cl_command_queue command_queue = parent_device->get_read_command_queue();
+
+    // create new target buffer
+    std::cout << "siz: " << size << std::endl;
+    buffer_type data( new char[size], size, buffer_type::init_mode::take );
+
+    // run the OpenCL-call
+    err = clEnqueueReadBuffer( command_queue, device_mem, CL_FALSE, offset,
+                                data.size(), data.data(),
+                                static_cast<cl_uint>(events.size()),
+                                events.get_cl_events(), &return_event );
+    cl_ensure(err, "clEnqueueReadBuffer()");
+
+    // put_event_data not necessary as we locally keep the buffer alive until
+    // the event triggered
+
+    // also important: the cl_event does not get destroyed inside of
+    // the event map of parent_device, because we keep the lcos::event
+    // alive as we have an event_id
+
+    // register the cl_event to the client event
+    parent_device->register_event(event_gid, return_event);
+
+    // prepare a zero-copy buffer
+    hpx::opencl::lcos::zerocopy_buffer( remote_data_addr,
+                                        size,
+                                        data );
+
+    // wait for the event to finish
+    parent_device->wait_for_cl_event(return_event);
+
+    // TODO run the zero-copy buffer thingy
+    // send the zerocopy_buffer to the lcos::event
+    HPX_ASSERT(false);
+
+}
 

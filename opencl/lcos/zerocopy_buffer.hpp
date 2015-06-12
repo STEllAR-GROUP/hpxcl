@@ -10,7 +10,7 @@
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
-namespace hpx { namespace opencl { namespace util
+namespace hpx { namespace opencl { namespace lcos
 {
 
     //----------------------------------------------------------------------------
@@ -21,13 +21,6 @@ namespace hpx { namespace opencl { namespace util
     //
     class zerocopy_buffer
     {
-    private:
-        template <typename T>
-        static char*
-        get_data(hpx::serialization::serialize_buffer<T> buffer){
-            return static_cast<char*>(buffer.data());
-        }
-
     public:
         zerocopy_buffer() BOOST_NOEXCEPT
           : pointer_(0), size_(0)
@@ -35,18 +28,14 @@ namespace hpx { namespace opencl { namespace util
             std::cout << "zerocopy_buffer(0-0)" << std::endl;
         }
     
-        // explanation: keep buffer alive by binding it to get_data().
-        // this also strips away the template parameter.
-        template<typename T>
         zerocopy_buffer(std::uintptr_t p, std::size_t size,
-                        hpx::serialization::serialize_buffer<T> buffer)
-          : pointer_(reinterpret_cast<T*>(p)), size_(size),
-            data_(hpx::bind(get_data<T>, buffer));
+                        hpx::serialization::serialize_buffer<char> buffer)
+          : pointer_(p), size_(size), buffer_(buffer)
         {
 
             std::cout << "zerocopy_buffer(" << size_ << ")" << std::endl;
-            HPX_ASSERT(buffer_.size() * sizeof(T) == size_);
-            HPX_ASSERT(data() == static_cast<char*>(buffer.data()));
+            HPX_ASSERT(buffer.size() == size_);
+            //HPX_ASSERT(data_() == static_cast<char*>(buffer.data()));
 
         }
     
@@ -70,7 +59,8 @@ namespace hpx { namespace opencl { namespace util
         {
             std::cout << "zerocopy_buffer_save(" << size_ << ")" << std::endl;
             // send size, adress and data
-            ar << size_ << pointer_ << make_array(data_(), size_);
+            ar << size_ << pointer_
+               << hpx::serialization::make_array(buffer_.data(), size_);
         }
     
         HPX_SERIALIZATION_SPLIT_MEMBER()
@@ -78,7 +68,7 @@ namespace hpx { namespace opencl { namespace util
     private:
         std::uintptr_t pointer_;
         std::size_t size_;
-        hpx::util::function<char*(void)> data_;
+        hpx::serialization::serialize_buffer<char> buffer_;
     };
 
 }}}

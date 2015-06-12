@@ -289,15 +289,7 @@ device::get_kernel_command_queue()
 {
     return command_queue;
 }
-        
-void
-device::put_event_data( cl_event event,
-                        device::buffer_type data )
-{
-
-    event_data_map.add(event, data);
-
-}
+    
 
 
 struct wait_for_cl_event_args{

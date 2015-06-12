@@ -31,13 +31,25 @@ std::string to_string(buffer_type buf){
     return std::string(buf.data(), buf.data() + length);
 }
 
-#define COMPARE_RESULT( result, correct_result )                                \
+#define COMPARE_RESULT( result_data, correct_result )                           \
 {                                                                               \
-    auto result_data = result.get();                                            \
-    HPX_TEST_EQ(result_data.size(), correct_result.size());                     \
-    std::string correct_string = to_string(correct_result);                     \
-    std::string result_string = to_string(result_data);                         \
+    auto lhs = result_data;                                                     \
+    auto rhs = correct_result;                                                  \
+    HPX_TEST_EQ(lhs.size(), rhs.size());                                        \
+    std::string correct_string = to_string(rhs);                                \
+    std::string result_string = to_string(lhs);                                 \
     HPX_TEST_EQ(correct_string, result_string);                                 \
+}
+
+#define COMPARE_RESULT_INT( result_data, correct_result )                       \
+{                                                                               \
+    auto lhs = result_data;                                                     \
+    auto rhs = correct_result;                                                  \
+    HPX_TEST_EQ(lhs.size(), rhs.size());                                        \
+    for(std::size_t i = 0; i < lhs.size(); i++){                                \
+        std::cout << std::hex << lhs[i] << "-" << rhs[i] << std::endl;          \
+        HPX_TEST_EQ(lhs[i], rhs[i]);                                            \
+    }                                                                           \
 }
 
 CREATE_BUFFER(initdata, "Hello World!");
@@ -99,8 +111,8 @@ static void cl_test(hpx::opencl::device cldevice)
     {
         auto data_read_future = buffer.enqueue_read(0, DATASIZE);
 
-        COMPARE_RESULT(data_read_future, initdata);
-     }
+        COMPARE_RESULT(data_read_future.get(), initdata);
+    }
 
     // test remote continuation
     {
@@ -108,7 +120,7 @@ static void cl_test(hpx::opencl::device cldevice)
         auto data_read_future = buffer.enqueue_read(0, DATASIZE,
                                                     data_write_future);
 
-        COMPARE_RESULT(data_read_future, refdata1);
+        COMPARE_RESULT(data_read_future.get(), refdata1);
     }
 
     // test read continuation and non-char buffer writes and offsets
@@ -119,9 +131,25 @@ static void cl_test(hpx::opencl::device cldevice)
         auto data_read_future2 = buffer.enqueue_read(0, DATASIZE,
                                                      data_write_future);
 
-        COMPARE_RESULT(data_read_future1, modifydata);
-        COMPARE_RESULT(data_read_future2, refdata4);
+        COMPARE_RESULT(data_read_future1.get(), modifydata);
+        COMPARE_RESULT(data_read_future2.get(), refdata4);
     }
+
+    // test read to buffer
+    {
+        intbuffer_type readbuffer( new uint32_t[2], 2,
+                               intbuffer_type::init_mode::take );
+
+        auto data_read_future = buffer.enqueue_read(1, readbuffer);
+
+        auto result_buffer = data_read_future.get();
+
+        HPX_TEST(readbuffer.data() == result_buffer.data());
+        HPX_TEST(readbuffer.size() == result_buffer.size());
+
+        COMPARE_RESULT_INT(result_buffer, modifydata2);
+    }
+
 
     // TODO local wait test, remote continuation test
 /*

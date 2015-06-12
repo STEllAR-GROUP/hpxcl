@@ -26,9 +26,10 @@ buffer::size() const
 }
 
 hpx::future<hpx::serialization::serialize_buffer<char> >
-buffer::enqueue_read_impl( std::size_t offset,
-                           std::size_t size,
-                           std::vector<hpx::naming::id_type> && dependencies )
+buffer::enqueue_read_alloc_impl(
+                        std::size_t offset,
+                        std::size_t size,
+                        std::vector<hpx::naming::id_type> && dependencies )
 {
     using hpx::opencl::lcos::event;
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
