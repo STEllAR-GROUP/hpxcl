@@ -12,6 +12,16 @@
 
 #include <hpx/lcos/promise.hpp>
 
+#include "zerocopy_buffer.hpp"
+
+namespace hpx { namespace opencl { namespace lcos
+{
+    template <typename Result,
+        typename RemoteResult =
+            typename traits::promise_remote_result<Result>::type>
+    class event;
+}}}
+
 namespace hpx { namespace opencl { namespace lcos { namespace detail
 {
     template <typename Result, typename RemoteResult>
@@ -40,6 +50,55 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     void unregister_event( hpx::naming::id_type device_id,
                            hpx::naming::gid_type event_gid );
 
+    //////////////////////////////////////////////////////////////////////////
+    // Zerocopy-Data Function
+    //
+
+    // This function is here for zero-copy of read_to_userbuffer_remote
+    // Receive a zerocopy_buffer as result of the event.
+    // De-serialization of the zerocopy_buffer automatically writes
+    // the data to result_buffer (zerocopy_buffer knows the address of the
+    // result_buffer's data() member)
+    // Then set result_buffer as data of this event.
+    template<typename T>
+    void set_zerocopy_data( hpx::naming::id_type event_id,
+                            hpx::opencl::lcos::zerocopy_buffer buf ){
+
+        typedef hpx::serialization::serialize_buffer<T> buffer_type;
+        typedef hpx::lcos::base_lco_with_value<buffer_type> lco_type;
+        typedef typename hpx::opencl::lcos::event<buffer_type>::wrapped_type*
+            event_ptr;
+
+        // Resolve address of lco
+        hpx::naming::address lco_addr = agas::resolve(event_id).get();
+
+        // Ensure everything is correct
+        HPX_ASSERT(hpx::get_locality() == lco_addr.locality_);
+        HPX_ASSERT(traits::component_type_is_compatible<lco_type>::call(
+                        lco_addr));
+
+        // Get ptr to lco
+        auto lco_ptr = hpx::get_lva<lco_type>::call(lco_addr.address_);
+
+        // Get ptr to event
+        event_ptr event = static_cast<event_ptr>(lco_ptr);
+
+        // Make sure sizes match
+        HPX_ASSERT( buf.size() == event->result_buffer.size() * sizeof(T) );
+
+        // Trigger the event
+        event->set_value(std::move(event->result_buffer));
+    }
+
+    // Action delcaration
+    template <typename T>
+    struct set_zerocopy_data_action
+      : hpx::actions::make_action<void (*)( hpx::naming::id_type,
+                                            hpx::opencl::lcos::zerocopy_buffer ),
+            &set_zerocopy_data<T>,
+            set_zerocopy_data_action<T> >
+    {};
+ 
     ///////////////////////////////////////////////////////////////////////////
     template <typename Result, typename RemoteResult>
     class event
@@ -69,16 +128,12 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         }
 
         ////////////////////////////////////////////////////////////////////////
-        // Overrides that enable zero-copy
+        // Stuff that enable zero-copy
         //
     public:
-        // This function is here for zero-copy of read_to_userbuffer_remote
-        // Take (unmanaged) remote value for de-serialization (de-serialization
-        // of the remote object automatically sets the value in result_buffer).
-        // Then trigger set result_buffer as data of this event.
 
         // This holds the buffer that will get returned by the future.
-        data_type result_buffer;
+        Result result_buffer;
 
         
         ////////////////////////////////////////////////////////////////////////
@@ -217,11 +272,6 @@ namespace hpx { namespace traits
 ///////////////////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl { namespace lcos
 {
-    template <typename Result,
-        typename RemoteResult =
-            typename traits::promise_remote_result<Result>::type>
-    class event;
-
     ///////////////////////////////////////////////////////////////////////////
     template <typename Result, typename RemoteResult>
     class event

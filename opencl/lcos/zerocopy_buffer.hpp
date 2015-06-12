@@ -38,6 +38,10 @@ namespace hpx { namespace opencl { namespace lcos
             //HPX_ASSERT(data_() == static_cast<char*>(buffer.data()));
 
         }
+        
+        std::size_t size(){
+            return size_;
+        }
     
     private:
         // serialization support
@@ -62,7 +66,7 @@ namespace hpx { namespace opencl { namespace lcos
             ar << size_ << pointer_
                << hpx::serialization::make_array(buffer_.data(), size_);
         }
-    
+
         HPX_SERIALIZATION_SPLIT_MEMBER()
     
     private:

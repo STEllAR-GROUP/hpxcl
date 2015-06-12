@@ -13,6 +13,7 @@
 #include "device.hpp"
 #include "util/event_dependencies.hpp"
 #include "../lcos/zerocopy_buffer.hpp"
+#include "../lcos/event.hpp"
 
 // HPX dependencies
 #include <hpx/include/thread_executors.hpp>
@@ -188,16 +189,18 @@ buffer::enqueue_read_to_userbuffer_remote(
     parent_device->register_event(event_gid, return_event);
 
     // prepare a zero-copy buffer
-    hpx::opencl::lcos::zerocopy_buffer( remote_data_addr,
-                                        size,
-                                        data );
+    hpx::opencl::lcos::zerocopy_buffer zerocopy_buffer( remote_data_addr,
+                                                        size,
+                                                        data );
 
     // wait for the event to finish
     parent_device->wait_for_cl_event(return_event);
 
     // TODO run the zero-copy buffer thingy
     // send the zerocopy_buffer to the lcos::event
-    HPX_ASSERT(false);
+    typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<uint32_t>
+        set_data_func;
+    hpx::apply_colocated<set_data_func>( event_gid, event_gid, zerocopy_buffer);
 
 }
 
