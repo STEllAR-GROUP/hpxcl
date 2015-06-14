@@ -103,6 +103,16 @@ namespace hpx { namespace opencl{ namespace server{
                     std::size_t size,
                     std::vector<hpx::naming::id_type> && src_dependencies,
                     std::vector<hpx::naming::id_type> && dst_dependencies );
+        void send_direct(
+                    hpx::naming::id_type && dst,
+                    boost::shared_ptr<hpx::opencl::server::buffer> && dst_buffer,
+                    hpx::naming::id_type && src_event,
+                    hpx::naming::id_type && dst_event,
+                    std::size_t src_offset,
+                    std::size_t dst_offset,
+                    std::size_t size,
+                    std::vector<hpx::naming::id_type> && src_dependencies,
+                    std::vector<hpx::naming::id_type> && dst_dependencies );
 
 
     HPX_DEFINE_COMPONENT_ACTION(buffer, size);

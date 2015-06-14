@@ -201,6 +201,59 @@ buffer::send_bruteforce( hpx::naming::id_type && dst,
 }
 
 void
+buffer::send_direct( hpx::naming::id_type && dst,
+                     boost::shared_ptr<hpx::opencl::server::buffer> && dst_buffer,
+                     hpx::naming::id_type && src_event_gid,
+                     hpx::naming::id_type && dst_event_gid,
+                     std::size_t src_offset,
+                     std::size_t dst_offset,
+                     std::size_t size,
+                     std::vector<hpx::naming::id_type> && src_dependencies,
+                     std::vector<hpx::naming::id_type> && dst_dependencies)
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    
+    cl_int err;
+    cl_event return_event;
+
+    // gather all dependencies from both devices
+    std::vector<cl_event> events;
+    events.reserve(src_dependencies.size() + dst_dependencies.size());
+    for(const auto& id : src_dependencies){
+        events.push_back( parent_device->retrieve_event(id) );
+    }
+    for(const auto& id : dst_dependencies){
+        events.push_back( dst_buffer->parent_device->retrieve_event(id) );
+    }
+
+    // Create a pointer that is either a pointer to the data or NULL
+    cl_event* events_ptr = NULL;
+    if(!events.empty()){
+        events_ptr = events.data();
+    }
+
+    // retrieve the command queue
+    cl_command_queue command_queue = parent_device->get_write_command_queue();
+
+    // run the OpenCL-call
+    err = clEnqueueCopyBuffer( command_queue, device_mem, dst_buffer->device_mem,
+                               src_offset, dst_offset, size,
+                               static_cast<cl_uint>(events.size()),
+                               events_ptr, &return_event );
+    cl_ensure(err, "clEnqueueCopyBuffer()");
+
+    // retain event to enable double-registration
+    err = clRetainEvent( return_event );
+    cl_ensure(err, "clRetainEvent()");
+
+    // register the cl_event to both client events
+    this->parent_device->register_event(src_event_gid, return_event);
+    dst_buffer->parent_device->register_event(dst_event_gid, return_event);
+
+}
+
+void
 buffer::enqueue_send( hpx::naming::id_type && dst,
                       hpx::naming::id_type && src_event,
                       hpx::naming::id_type && dst_event,
@@ -232,9 +285,31 @@ buffer::enqueue_send( hpx::naming::id_type && dst,
 
     // get the location of the destination
     hpx::naming::id_type dst_location = dst_location_future.get();
+    hpx::naming::id_type src_location = hpx::find_here();
 
     // choose which function to run
-    // TODO
+    // optimization for context internal copies
+    if(dst_location == src_location){
+        auto dst_buffer = hpx::get_ptr<hpx::opencl::server::buffer>(dst).get();
+
+        cl_context src_context = this->parent_device->get_context();
+        cl_context dst_context = dst_buffer->parent_device->get_context();
+
+        if(src_context == dst_context){
+            send_direct( std::move(dst),
+                         std::move(dst_buffer),
+                         std::move(src_event),
+                         std::move(dst_event),
+                         src_offset,
+                         dst_offset,
+                         size,
+                         std::move(src_dependencies),
+                         std::move(dst_dependencies) );
+            return;
+        }
+    }
+
+    // Always works: the bruteforce method
     send_bruteforce( std::move(dst),
                      std::move(src_event),
                      std::move(dst_event),
