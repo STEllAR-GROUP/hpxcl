@@ -145,3 +145,105 @@ buffer::enqueue_read( hpx::naming::id_type && event_gid,
 }
 
 
+void
+buffer::send_bruteforce( hpx::naming::id_type && dst,
+                         hpx::naming::id_type && src_event_gid,
+                         hpx::naming::id_type && dst_event_gid,
+                         std::size_t src_offset,
+                         std::size_t dst_offset,
+                         std::size_t size,
+                         std::vector<hpx::naming::id_type> && src_dependencies,
+                         std::vector<hpx::naming::id_type> && dst_dependencies)
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    
+    ////////////////////////////////////////////////////////////////////////////
+    // Read
+    //
+
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+
+    cl_int err;
+    cl_event src_event;
+
+    // retrieve the dependency cl_events
+    util::event_dependencies events( src_dependencies, parent_device.get() );
+
+    // retrieve the command queue
+    cl_command_queue command_queue = parent_device->get_read_command_queue();
+
+    // create new target buffer
+    buffer_type data( new char[size], size, buffer_type::init_mode::take );
+
+    // run the OpenCL-call
+    err = clEnqueueReadBuffer( command_queue, device_mem, CL_FALSE, src_offset,
+                                data.size(), data.data(),
+                                static_cast<cl_uint>(events.size()),
+                                events.get_cl_events(), &src_event );
+    cl_ensure(err, "clEnqueueReadBuffer()");
+
+    // register the cl_event to the client event
+    parent_device->register_event(src_event_gid, src_event);
+
+    // wait for clEnqueueReadBuffer to finish
+    parent_device->wait_for_cl_event(src_event);
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Write
+    //
+    typedef hpx::opencl::server::buffer::enqueue_write_action<char> func;
+    hpx::apply<func>( std::move(dst),
+                      std::move(dst_event_gid),
+                      dst_offset,
+                      data,
+                      std::move(dst_dependencies) );
+}
+
+void
+buffer::enqueue_send( hpx::naming::id_type && dst,
+                      hpx::naming::id_type && src_event,
+                      hpx::naming::id_type && dst_event,
+                      std::size_t src_offset,
+                      std::size_t dst_offset,
+                      std::size_t size,
+                      std::vector<hpx::naming::id_type> && dependencies,
+                      std::vector<hpx::naming::gid_type> && dependency_devices )
+{
+
+    HPX_ASSERT(dependencies.size() == dependency_devices.size());
+
+    // query the location of the destination
+    auto dst_location_future = hpx::get_colocation_id(dst);
+
+    // split between src_dependencies and dst_dependencies
+    std::vector<hpx::naming::id_type> src_dependencies;
+    std::vector<hpx::naming::id_type> dst_dependencies;
+    hpx::naming::gid_type src_device = parent_device_id.get_gid();
+    std::vector<hpx::naming::id_type>::iterator it = dependencies.begin();
+    for(const auto& device : dependency_devices){
+        if(device == src_device){
+            std::move(it, it+1, std::back_inserter(src_dependencies));
+        } else {
+            std::move(it, it+1, std::back_inserter(dst_dependencies));
+        }
+        it++;
+    }
+
+    // get the location of the destination
+    hpx::naming::id_type dst_location = dst_location_future.get();
+
+    // choose which function to run
+    // TODO
+    send_bruteforce( std::move(dst),
+                     std::move(src_event),
+                     std::move(dst_event),
+                     src_offset,
+                     dst_offset,
+                     size,
+                     std::move(src_dependencies),
+                     std::move(dst_dependencies) );
+
+}
+
+

@@ -25,6 +25,40 @@ buffer::size() const
 
 }
 
+buffer::send_result
+buffer::enqueue_send_impl(
+    const hpx::opencl::buffer &dst,
+    std::size_t src_offset,
+    std::size_t dst_offset,
+    std::size_t size,
+    hpx::opencl::util::resolved_events && dependencies )
+{
+    using hpx::opencl::lcos::event;
+    HPX_ASSERT(this->get_gid()); 
+    HPX_ASSERT(dependencies.are_from_devices(device_gid, dst.device_gid));
+
+    // create events
+    event<void> src_event( device_gid );
+    event<void> dst_event( dst.device_gid );
+    
+    // send command to server class
+    typedef hpx::opencl::server::buffer::enqueue_send_action func;
+    hpx::apply<func>( this->get_gid(),
+                      dst.get_gid(),
+                      src_event.get_gid(),
+                      dst_event.get_gid(),
+                      src_offset,
+                      dst_offset,
+                      size,
+                      dependencies.event_ids,
+                      dependencies.device_ids ); 
+
+    // return futures
+    return send_result( std::move(src_event.get_future()),
+                        std::move(dst_event.get_future()) );
+}
+
+
 hpx::future<hpx::serialization::serialize_buffer<char> >
 buffer::enqueue_read_alloc_impl(
     std::size_t offset,

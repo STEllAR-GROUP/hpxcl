@@ -36,7 +36,8 @@ hpx::future<cl_event> get_async(id_type id){
             });
 }
 
-static void cl_test(hpx::opencl::device cldevice)
+static void cl_test( hpx::opencl::device local_device,
+                     hpx::opencl::device cldevice )
 {
 
     // Usually: do not use new, use make_shared<>. But in this case,

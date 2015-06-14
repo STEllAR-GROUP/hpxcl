@@ -48,6 +48,9 @@ namespace hpx { namespace opencl{ namespace server{
         // Returns the size of the buffer
         std::size_t size();
 
+        // Returns the parent device
+        hpx::naming::id_type get_parent_device_id();
+
         // Writes to the buffer
         template <typename T>
         void enqueue_write( hpx::naming::id_type && event_gid,
@@ -78,9 +81,34 @@ namespace hpx { namespace opencl{ namespace server{
                             hpx::serialization::serialize_buffer<T> data,
                             std::vector<hpx::naming::id_type> && dependencies );
 
+        // Copies data from this buffer to a remote buffer
+        void enqueue_send( hpx::naming::id_type && dst,
+                           hpx::naming::id_type && src_event,
+                           hpx::naming::id_type && dst_event,
+                           std::size_t src_offset,
+                           std::size_t dst_offset,
+                           std::size_t size,
+                           std::vector<hpx::naming::id_type> && dependencies,
+                           std::vector<hpx::naming::gid_type> &&
+                                dependency_devices );
+
+        // Different versions of enqueue_send, optimized for different
+        // runtime scenarios
+        void send_bruteforce(
+                    hpx::naming::id_type && dst,
+                    hpx::naming::id_type && src_event,
+                    hpx::naming::id_type && dst_event,
+                    std::size_t src_offset,
+                    std::size_t dst_offset,
+                    std::size_t size,
+                    std::vector<hpx::naming::id_type> && src_dependencies,
+                    std::vector<hpx::naming::id_type> && dst_dependencies );
+
 
     HPX_DEFINE_COMPONENT_ACTION(buffer, size);
+    HPX_DEFINE_COMPONENT_ACTION(buffer, get_parent_device_id);
     HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read);
+    HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_send);
 
     // Actions with template arguments (see enqueue_write<>() above) require
     // special type definitions. The simplest way to define such an action type
@@ -127,8 +155,12 @@ namespace hpx { namespace opencl{ namespace server{
 }}}
 
 //[opencl_management_registration_declarations
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::opencl::server::buffer::get_parent_device_id_action,
+    hpx_opencl_buffer_get_parent_device_id_action);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, size);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_read);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_send);
 namespace hpx { namespace traits
 {
     template <typename T>

@@ -24,7 +24,8 @@ test_client::func_impl( int a, int b, hpx::opencl::util::resolved_events && ids)
 
 
 
-static void cl_test(hpx::opencl::device cldevice){
+static void cl_test( hpx::opencl::device local_device, 
+                     hpx::opencl::device cldevice ){
 
     hpx::opencl::lcos::event<void> event(cldevice.get_gid());
     register_event(cldevice, event.get_gid());

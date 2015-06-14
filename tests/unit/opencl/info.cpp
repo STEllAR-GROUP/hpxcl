@@ -7,7 +7,8 @@
 #include "cl_tests.hpp"
 
 
-static void cl_test(hpx::opencl::device cldevice)
+static void cl_test( hpx::opencl::device local_device,
+                     hpx::opencl::device cldevice )
 {
 
     ////////////////////////////////////////////////////////////////////////////

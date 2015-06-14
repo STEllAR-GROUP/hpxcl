@@ -9,9 +9,9 @@
 
 #define HPX_OPENCL_REGISTER_ACTION_DECLARATION(component_name, action_name)     \
     HPX_ACTION_USES_LARGE_STACK(                                                \
-        hpx::opencl::server::component_name::action_name##_action);               \
+        hpx::opencl::server::component_name::action_name##_action);             \
     HPX_REGISTER_ACTION_DECLARATION(                                            \
-        hpx::opencl::server::component_name::action_name##_action,                \
+        hpx::opencl::server::component_name::action_name##_action,              \
         hpx_opencl_##component_name##_##action_name##_action)
 
 #endif

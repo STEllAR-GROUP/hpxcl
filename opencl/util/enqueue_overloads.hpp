@@ -28,6 +28,16 @@ namespace hpx{ namespace opencl{ namespace util{
                 }
                 return true;
             }
+            bool are_from_devices( const hpx::naming::id_type& device1,
+                                   const hpx::naming::id_type& device2 ){
+                hpx::naming::gid_type device_gid1 = device1.get_gid();
+                hpx::naming::gid_type device_gid2 = device2.get_gid();
+                for(const auto& id : device_ids){
+                    if((device_gid1 != id) && (device_gid2 != id))
+                        return false;
+                }
+                return true;
+            }
     };
 
     

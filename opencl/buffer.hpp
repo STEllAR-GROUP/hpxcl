@@ -61,7 +61,7 @@ namespace opencl {
              */
             hpx::future<std::size_t>
             size() const;
-            
+
             /**
              *  @brief Writes data to the buffer
              *
@@ -212,10 +212,18 @@ namespace opencl {
                 return ev.get_future();
             }
 
+            // the result struct for enqueue_send
             struct send_result{
-                hpx::shared_future< void > src_future;
-                hpx::shared_future< void > dst_future;
+                public:
+                    send_result( hpx::future<void>&& fut1,
+                                 hpx::future<void>&& fut2 )
+                        : src_future(std::move(fut1)),
+                          dst_future(std::move(fut2)){};
+
+                    hpx::future< void > src_future;
+                    hpx::future< void > dst_future;
             };
+
             /*
              *  @name Copies data to another buffer.
              *
@@ -233,11 +241,10 @@ namespace opencl {
              */ 
             HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(
                 send_result, enqueue_send,
-                                        hpx::opencl::buffer /*dst*/,
+                                        const hpx::opencl::buffer& /*dst*/,
                                         std::size_t         /*src_offset*/,
                                         std::size_t         /*dst_offset*/,
                                         std::size_t         /*size*/ );
-
         private:
             hpx::naming::id_type device_gid;
 

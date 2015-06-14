@@ -17,7 +17,7 @@ using boost::program_options::options_description;
 using boost::program_options::value;
 
 // the main test function
-static void cl_test(hpx::opencl::device);
+static void cl_test(hpx::opencl::device, hpx::opencl::device);
 
 /*
 #define TEST_CL_BUFFER(buffer, value)                                          \
@@ -28,28 +28,9 @@ static void cl_test(hpx::opencl::device);
 }                                                           
 */
 
-static hpx::opencl::device init(variables_map & vm)
-{
-
-    std::size_t device_id = 0;
-
-    if (vm.count("deviceid"))
-        device_id = vm["deviceid"].as<std::size_t>();
-
-    // Try to get remote devices
-    std::vector<hpx::opencl::device> devices
-            = hpx::opencl::get_remote_devices( CL_DEVICE_TYPE_ALL,
-                                               "OpenCL 1.1" ).get();
-    // If no remote devices present, get local device
-    if(devices.empty()){
-        hpx::cout << "WARNING: No remote devices found." << hpx::endl;
-        devices = hpx::opencl::get_all_devices( CL_DEVICE_TYPE_ALL,
-                                                "OpenCL 1.1" ).get();
-    }
-    HPX_TEST(devices.size() >= device_id);
-
-    // Choose device
-    hpx::opencl::device cldevice = devices[device_id];
+static void print_testdevice_info(hpx::opencl::device & cldevice,
+                                  std::size_t device_id,
+                                  std::size_t num_devices){
 
     // Test whether get_device_info works
     std::string version = cldevice.get_device_info<CL_DEVICE_VERSION>().get();
@@ -59,8 +40,9 @@ static hpx::opencl::device init(variables_map & vm)
     HPX_TEST(0 == version.compare(0, versionstring.length(), versionstring));
 
     // Write Info Code
-    hpx::cout << "Device ID:  " << device_id << " / " << devices.size()
+    hpx::cout << "Device ID:  " << device_id << " / " << num_devices
                                 << hpx::endl;
+    hpx::cout << "Device GID: " << cldevice.get_gid() << hpx::endl;
     hpx::cout << "Version:    " << version << hpx::endl;
     hpx::cout << "Name:       " << cldevice.get_device_info<CL_DEVICE_NAME>().get()
                                 << hpx::endl;
@@ -72,16 +54,57 @@ static hpx::opencl::device init(variables_map & vm)
     // Test for valid device client
     HPX_TEST(cldevice.get_gid());
 
-    // return the device
-    return cldevice;
+
+}
+
+static std::vector<hpx::opencl::device> init(variables_map & vm)
+{
+
+    std::size_t device_id = 0;
+
+    if (vm.count("deviceid"))
+        device_id = vm["deviceid"].as<std::size_t>();
+
+    // Try to get remote devices
+    std::vector<hpx::opencl::device> remote_devices
+            = hpx::opencl::get_remote_devices( CL_DEVICE_TYPE_ALL,
+                                               "OpenCL 1.1" ).get();
+    std::vector<hpx::opencl::device> local_devices
+            = hpx::opencl::get_local_devices( CL_DEVICE_TYPE_ALL,
+                                              "OpenCL 1.1" ).get();
+    // If no remote devices present, get local device
+    if(remote_devices.empty()){
+        hpx::cout << "WARNING: No remote devices found." << hpx::endl;
+        remote_devices = local_devices;
+    }
+    HPX_ASSERT(!remote_devices.empty());
+    HPX_ASSERT(!local_devices.empty());
+    HPX_TEST(local_devices.size() >= device_id);
+    HPX_TEST(remote_devices.size() >= device_id);
+
+    // Choose device
+    hpx::opencl::device local_device  = local_devices[device_id];
+    hpx::opencl::device remote_device = remote_devices[device_id];
+
+    // Print info
+    hpx::cout << "Local device:" << hpx::endl;
+    print_testdevice_info(local_device, device_id, local_devices.size());
+    hpx::cout << "Remote device:" << hpx::endl;
+    print_testdevice_info(remote_device, device_id, remote_devices.size());
+
+    // return the devices
+    std::vector<hpx::opencl::device> devices;
+    devices.push_back(local_device);
+    devices.push_back(remote_device);
+    return devices;
 
 }
 
 int hpx_main(variables_map & vm)
 {
     {
-        hpx::opencl::device cldevice = init(vm);   
-        cl_test(cldevice);
+        auto devices = init(vm);   
+        cl_test(devices[0], devices[1]);
     }
     
     hpx::finalize();

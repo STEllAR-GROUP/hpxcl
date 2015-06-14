@@ -57,6 +57,7 @@ CREATE_BUFFER(refdata1, "Help, World!");
 CREATE_BUFFER(refdata2, "World");
 CREATE_BUFFER(refdata3, "Hello Wolp,!");
 CREATE_BUFFER(refdata4, "HDEFGjihgld!");
+CREATE_BUFFER(refdata5, "Helello rld!");
 
 
 static const buffer_type modifydata("p,", 2, buffer_type::init_mode::reference);
@@ -66,13 +67,17 @@ static const intbuffer_type modifydata2(intarr, 2,
                                         intbuffer_type::init_mode::reference);
 
 
-static void cl_test(hpx::opencl::device cldevice)
+static void cl_test( hpx::opencl::device local_device,
+                     hpx::opencl::device remote_device )
 {
 
-    hpx::opencl::buffer buffer = cldevice.create_buffer(CL_MEM_READ_WRITE,
-                                                              DATASIZE);
-    hpx::opencl::buffer buffer2 = cldevice.create_buffer(CL_MEM_READ_WRITE,
-                                                              DATASIZE);
+    hpx::opencl::buffer buffer =
+        remote_device.create_buffer(CL_MEM_READ_WRITE, DATASIZE);
+    hpx::opencl::buffer buffer2 =
+        remote_device.create_buffer(CL_MEM_READ_WRITE, DATASIZE);
+
+    hpx::opencl::buffer remote_buffer =
+        local_device.create_buffer(CL_MEM_READ_WRITE, DATASIZE);
 
     // test if buffer initialization worked
     size_t buffer_size = buffer.size().get();
@@ -150,44 +155,45 @@ static void cl_test(hpx::opencl::device cldevice)
         COMPARE_RESULT_INT(result_buffer, modifydata2);
     }
 
+    // test buffer-buffer copy local
+    {
+        // write to both src and dst buffer
+        auto data_write_future = buffer.enqueue_write(0, initdata);
+        auto data_write_future2 = buffer2.enqueue_write(0, initdata);
 
-    // TODO local wait test, remote continuation test
-/*
-    // read and compare
-    TEST_CL_BUFFER(buffer, initdata);
+        // send src to dst buffer with offset 
+        auto futures = buffer.enqueue_send( buffer2, 1, 3, 5,
+                                            data_write_future,
+                                            data_write_future2);
 
-    // write to buffer
-    hpx::lcos::future<hpx::opencl::event> write_event = 
-                        buffer.enqueue_write(3, 2, modifydata);
+        // read the src and dst buffer
+        auto src_data = buffer.enqueue_read(0, DATASIZE, futures.src_future);
+        auto dst_data = buffer2.enqueue_read(0, DATASIZE, futures.dst_future);
 
-    // change modifydata to test wether write caches internally 
-//    modifydata[1] = '.';
+        COMPARE_RESULT(src_data.get(), initdata);
+        COMPARE_RESULT(dst_data.get(), refdata5);
+    }
 
-    // wait for write to finish
-    write_event.get().await();
+    // test buffer-buffer copy remote
+    {
+        // write to both src and dst buffer
+        auto data_write_future = buffer.enqueue_write(0, initdata);
+        auto data_write_future2 = remote_buffer.enqueue_write(0, initdata);
 
-    // read and compare
-    TEST_CL_BUFFER(buffer, refdata1);
-    
-    // test offsetted read
-    boost::shared_ptr<std::vector<char>> out = 
-                               buffer.enqueue_read(6, 5).get().get_data().get();
-    HPX_TEST_EQ(std::string(refdata2), std::string(out->begin(), out->end()));
+        // send src to dst buffer with offset 
+        auto futures = buffer.enqueue_send( remote_buffer, 1, 3, 5,
+                                            data_write_future,
+                                            data_write_future2);
 
-    
-    
-    // Create second buffer
-    hpx::opencl::buffer buffer2 = cldevice.create_buffer(CL_MEM_READ_WRITE,
-                                                               DATASIZE,
-                                                               initdata);
+        // read the src and dst buffer
+        auto src_data = buffer.enqueue_read(0, DATASIZE, futures.src_future);
+        auto dst_data = remote_buffer.enqueue_read(0, DATASIZE, futures.dst_future);
 
-    // Buffer copy test
-    buffer2.enqueue_copy(buffer, 2, 8, 3).get().await();
+        COMPARE_RESULT(src_data.get(), initdata);
+        COMPARE_RESULT(dst_data.get(), refdata5);
+    }
 
-    // read and compare
-    TEST_CL_BUFFER(buffer2, refdata3);
 
-*/
 }
 
 

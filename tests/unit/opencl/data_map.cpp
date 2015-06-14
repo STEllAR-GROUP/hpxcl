@@ -7,7 +7,8 @@
 
 #include "../../../opencl/server/util/data_map.hpp"
 
-static void cl_test(hpx::opencl::device cldevice)
+static void cl_test( hpx::opencl::device local_device,
+                     hpx::opencl::device cldevice )
 {
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
