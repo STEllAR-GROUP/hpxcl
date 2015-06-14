@@ -14,6 +14,26 @@
 
 #include "../lcos/event.hpp"
 
+namespace hpx{ namespace opencl{ namespace util{
+    
+    struct resolved_events{
+        public:
+            std::vector<hpx::naming::id_type> event_ids;
+            std::vector<hpx::naming::gid_type> device_ids;
+            bool are_from_device(const hpx::naming::id_type& device_id){
+                hpx::naming::gid_type device_gid = device_id.get_gid();
+                for(const auto& id : device_ids){
+                    if(device_gid != id)
+                        return false;
+                }
+                return true;
+            }
+    };
+
+    
+
+}}}
+
 namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 
 
@@ -21,7 +41,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     // This is the function that actually extrudes the GID from the futures.
     template<typename Future>
     hpx::naming::id_type
-    extrude_id(const Future & fut){
+    extrude_id(const Future & fut, hpx::naming::gid_type& device_id){
         typedef typename std::remove_reference<Future>::type::result_type
             result_type;
         typedef typename hpx::opencl::lcos::event<result_type>::wrapped_type
@@ -32,6 +52,8 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 
         hpx::cout << typeid(shared_state).name() << hpx::endl;
         hpx::cout << ev->get_gid() << hpx::endl;
+
+        device_id = ev->get_device_gid();
         
         return ev->get_gid();
     }
@@ -71,11 +93,13 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     struct extrude_all_ids<false>
     {
         template<typename T>
-        std::vector<hpx::naming::id_type>
-        operator()(const T & t){
-            std::vector<hpx::naming::id_type> res;
-            res.push_back(std::move(extrude_id(t)));
-            return res;
+        void
+        operator()(const T & t, 
+                   std::vector<hpx::naming::id_type> &event_ids,
+                   std::vector<hpx::naming::gid_type> &device_ids){
+            hpx::naming::gid_type device_id;
+            event_ids.push_back(std::move(extrude_id(t, device_id)));
+            device_ids.push_back(std::move(device_id));
         }
     };
 
@@ -83,14 +107,15 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     struct extrude_all_ids<true>
     {
         template<typename T>
-        std::vector<hpx::naming::id_type>
-        operator()(const std::vector<T> & t_vec){
-            std::vector<hpx::naming::id_type> res;
-            res.reserve(t_vec.size());
+        void
+        operator()(const std::vector<T> & t_vec,
+                   std::vector<hpx::naming::id_type> &event_ids,
+                   std::vector<hpx::naming::gid_type> &device_ids){
             for(const T & t : t_vec){
-                res.push_back(std::move(extrude_id(t)));
+                hpx::naming::gid_type device_id;
+                event_ids.push_back(std::move(extrude_id(t, device_id)));
+                device_ids.push_back(std::move(device_id));
             }
-            return res;
         }
     };
 
@@ -98,31 +123,43 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     // The resolver recursive template functions are here to convert
     // an arbitrary number of future and std::vector<future> to
     // one single std::vector<id_type>.
-    std::vector<hpx::naming::id_type>
-    resolver();
+    void
+    resolver_impl(std::vector<hpx::naming::id_type>&,
+                  std::vector<hpx::naming::gid_type>&);
 
     template<typename Dep>
-    std::vector<hpx::naming::id_type>
-    resolver(Dep&& dep){
-        return extrude_all_ids<detail::is_container<Dep>::value>()(dep);
+    void
+    resolver_impl(std::vector<hpx::naming::id_type>& event_ids,
+                  std::vector<hpx::naming::gid_type>& device_ids,    
+                  Dep&& dep){
+        extrude_all_ids<detail::is_container<Dep>::value>()( dep, event_ids,
+                                                                  device_ids);
     }
 
     template<typename Dep, typename ...Deps>
-    std::vector<hpx::naming::id_type>
-    resolver(Dep&& dep, Deps&&... deps){
+    void
+    resolver_impl(std::vector<hpx::naming::id_type>& event_ids,
+                  std::vector<hpx::naming::gid_type>& device_ids,    
+                  Dep&& dep, Deps&&... deps){
+
+        // process current dep
+        extrude_all_ids<detail::is_container<Dep>::value>()( dep, event_ids,
+                                                                  device_ids );
 
         // recursive call
-        std::vector<hpx::naming::id_type> result
-            = resolver(std::forward<Deps>(deps)...);
+        resolver_impl(event_ids, device_ids, std::forward<Deps>(deps)...);
 
-        std::vector<hpx::naming::id_type> ids
-            = extrude_all_ids<detail::is_container<Dep>::value>()(dep);
-
-        result.reserve(result.size() + ids.size());
-        std::move(ids.begin(), ids.end(), std::back_inserter(result));
-        return result;
     }
 
+    template<typename ...Deps>
+    resolved_events
+    resolver(Deps&&... deps)
+    {
+        resolved_events res;
+        resolver_impl( res.event_ids, res.device_ids,
+                       std::forward<Deps>(deps)... );
+        return res;
+    }
 
 }}}}
 
@@ -130,7 +167,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 #define HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(return_value, name, args...)      \
                                                                                 \
     return_value                                                                \
-    name##_impl(args, std::vector<hpx::naming::id_type> &&);                    \
+    name##_impl(args, hpx::opencl::util::resolved_events &&);                   \
                                                                                 \
     /*                                                                          \
      * This class  splits the arguments from the dependencies.                  \

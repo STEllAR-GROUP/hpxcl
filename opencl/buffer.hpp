@@ -79,6 +79,7 @@ namespace opencl {
                 // combine dependency futures in one std::vector
                 using hpx::opencl::util::enqueue_overloads::resolver;
                 auto deps = resolver(std::forward<Deps>(dependencies)...);
+                HPX_ASSERT(deps.are_from_device(device_gid));
                 
                 // create local event
                 using hpx::opencl::lcos::event;
@@ -90,7 +91,7 @@ namespace opencl {
                                   ev.get_gid(),
                                   offset,
                                   data,
-                                  deps );
+                                  deps.event_ids );
                                  
             
                 // return future connected to event
@@ -147,6 +148,7 @@ namespace opencl {
                 // combine dependency futures in one std::vector
                 using hpx::opencl::util::enqueue_overloads::resolver;
                 auto deps = resolver(std::forward<Deps>(dependencies)...);
+                HPX_ASSERT(deps.are_from_device(device_gid));
                 
                 // check if the component is a on a different locality
                 bool is_remote_call = false;
@@ -173,7 +175,7 @@ namespace opencl {
                                              data.size() * sizeof(T),
                                              reinterpret_cast<std::uintptr_t>
                                                 ( data.data() ),
-                                             deps );
+                                             deps.event_ids );
  
                 } else {
                     // is local call, send direct reference to buffer
@@ -183,7 +185,7 @@ namespace opencl {
                                             ev.get_gid(),
                                             offset,
                                             data,
-                                            deps );
+                                            deps.event_ids );
                 }
            
                 // return future connected to event

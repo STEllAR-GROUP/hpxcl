@@ -27,12 +27,14 @@ buffer::size() const
 
 hpx::future<hpx::serialization::serialize_buffer<char> >
 buffer::enqueue_read_alloc_impl(
-                        std::size_t offset,
-                        std::size_t size,
-                        std::vector<hpx::naming::id_type> && dependencies )
+    std::size_t offset,
+    std::size_t size,
+    hpx::opencl::util::resolved_events && dependencies )
 {
     using hpx::opencl::lcos::event;
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
+
+    HPX_ASSERT(dependencies.are_from_device(device_gid));
 
     // create local event
     event<buffer_type> ev( device_gid );
@@ -43,7 +45,7 @@ buffer::enqueue_read_alloc_impl(
                       ev.get_gid(),
                       offset,
                       size,
-                      dependencies ); 
+                      dependencies.event_ids ); 
 
     // return future connected to event
     return ev.get_future();

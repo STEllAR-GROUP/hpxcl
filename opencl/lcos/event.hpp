@@ -139,6 +139,12 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         ////////////////////////////////////////////////////////////////////////
         // Internal stuff
         //
+    public:
+        hpx::naming::gid_type get_device_gid()
+        {
+            return device_id.get_gid();
+        }
+
     private:
 
         hpx::naming::id_type device_id;
@@ -233,6 +239,12 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         ////////////////////////////////////////////////////////////////////////
         // Internal stuff
         //
+    public:
+        hpx::naming::gid_type get_device_gid()
+        {
+            return device_id.get_gid();
+        }
+
     private:
 
         hpx::naming::id_type device_id;

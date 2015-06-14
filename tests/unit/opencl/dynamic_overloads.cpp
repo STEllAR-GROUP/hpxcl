@@ -17,8 +17,8 @@ class test_client{
 
 
 hpx::future<int>
-test_client::func_impl(int a, int b, std::vector<hpx::naming::id_type> && ids){
-    return hpx::make_ready_future<int>(ids.size() + 1000 * a + 100 * b);
+test_client::func_impl( int a, int b, hpx::opencl::util::resolved_events && ids){
+    return hpx::make_ready_future<int>(ids.event_ids.size() + 1000 * a + 100 * b);
 };
 
 
