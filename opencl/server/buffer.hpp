@@ -153,9 +153,12 @@ namespace hpx { namespace opencl{ namespace server{
             &buffer::template enqueue_read_to_userbuffer_local<T>,
             enqueue_read_to_userbuffer_local_action<T> >
     {};
-    private:
+
+
         //////////////////////////////////////////////////
         //  Private Member Variables
+        //
+    private:
         boost::shared_ptr<device> parent_device;
         cl_mem device_mem;
         hpx::naming::id_type parent_device_id;
@@ -171,42 +174,11 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, size);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_read);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_send);
-namespace hpx { namespace traits
-{
-    template <typename T>
-    struct action_stacksize<
-        hpx::opencl::server::buffer::enqueue_write_action<T>,
-        typename util::always_void<
-            typename
-            hpx::opencl::server::buffer::enqueue_write_action<T>::type
-        >::type
-    >
-    {
-        enum { value = hpx::threads::thread_stacksize_large };
-    };
-    template <typename T>
-    struct action_stacksize<
-        hpx::opencl::server::buffer::enqueue_read_to_userbuffer_local_action<T>,
-        typename util::always_void<
-            typename
-            hpx::opencl::server::buffer::enqueue_read_to_userbuffer_local_action<T>::type
-        >::type
-    >
-    {
-        enum { value = hpx::threads::thread_stacksize_large };
-    };
-    template <typename T>
-    struct action_stacksize<
-        hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote_action<T>,
-        typename util::always_void<
-            typename
-            hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote_action<T>::type
-        >::type
-    >
-    {
-        enum { value = hpx::threads::thread_stacksize_large };
-    };
-}}
+HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer, enqueue_write);
+HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
+                                            enqueue_read_to_userbuffer_local);
+HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
+                                            enqueue_read_to_userbuffer_remote);
 //]
 
 
