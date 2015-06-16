@@ -69,6 +69,17 @@ namespace opencl {
              */
             hpx::lcos::future<void> build(std::string build_options) const;
 
+            /**
+             *  @brief Retrieves the binary of a built program.
+             *         It can be used to create programs with
+             *         device::create_program_with_binary().
+             *
+             *  @return A future to the binary code
+             */
+            hpx::lcos::future<hpx::serialization::serialize_buffer<char> >
+            get_binary() const;
+
+
         private:
             hpx::naming::id_type device_gid;
 

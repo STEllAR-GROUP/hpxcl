@@ -47,8 +47,11 @@ namespace hpx { namespace opencl{ namespace server{
         // mutually exclusive to compile() and link().
         void build(std::string options);
 
+        // Returns the binary representation of the program
+        hpx::serialization::serialize_buffer<char> get_binary();
 
     HPX_DEFINE_COMPONENT_ACTION(program, build);
+    HPX_DEFINE_COMPONENT_ACTION(program, get_binary);
 
         //////////////////////////////////////////////////
         // Private Member Functions
@@ -76,6 +79,7 @@ namespace hpx { namespace opencl{ namespace server{
 
 //[opencl_management_registration_declarations
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(program, build);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(program, get_binary);
 //]
 
 #endif

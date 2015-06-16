@@ -208,3 +208,51 @@ program::build(std::string options)
 
 }
 
+hpx::serialization::serialize_buffer<char>
+program::get_binary()
+{
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+    cl_int err;
+
+    // get number of devices
+    cl_uint num_devices;
+    err = clGetProgramInfo(program_id, CL_PROGRAM_NUM_DEVICES, sizeof(cl_uint),
+                           &num_devices, NULL);
+    cl_ensure(err, "clGetProgramInfo()");
+    
+    // ensure that only one device is associated
+    if(num_devices != 1)
+    {
+        HPX_THROW_EXCEPTION(hpx::internal_server_error, "program::get_binary()",
+                            "Internal Error: More than one device linked!");
+    }
+
+    // get binary size
+    std::size_t binary_size;
+    err = clGetProgramInfo(program_id, CL_PROGRAM_BINARY_SIZES,
+                           sizeof(std::size_t), &binary_size, NULL);
+    cl_ensure(err, "clGetProgramInfo()");
+
+    // ensure that there actually is binary code
+    if(binary_size == 0)
+    {
+        HPX_THROW_EXCEPTION(hpx::no_success, "program::get_binary()",
+                            "Unable to fetch binary code!");
+    }
+
+    // get binary code
+    buffer_type binary( new char[binary_size], binary_size,
+                        buffer_type::init_mode::take );
+    char* binary_ptr = binary.data();
+    err = clGetProgramInfo( program_id, CL_PROGRAM_BINARIES,
+                            sizeof(unsigned char*),
+                            &binary_ptr,
+                            NULL );
+    cl_ensure(err, "clGetProgramInfo()");
+
+    // return vector
+    return binary;
+
+}

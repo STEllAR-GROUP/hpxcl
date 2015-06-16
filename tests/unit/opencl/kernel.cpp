@@ -115,7 +115,21 @@ static void cl_test( hpx::opencl::device local_device,
     }
 
     // test with create_from_binary
-    // TODO
+    {
+        // test if program can be created from source
+        hpx::opencl::program program1 =
+            cldevice.create_program_with_source(program_src);
+
+        // test if program can be compiled
+        program1.build("-Werror").get();
+
+        // retrieve binary of program1
+        auto program_binary = program1.get_binary().get();
+
+        hpx::cout << "Binary:" << hpx::endl;
+        hpx::cout << to_string(program_binary) << hpx::endl << hpx::endl;;
+        // TODO
+    }
 
     // Test compiler error detection
     {
@@ -128,7 +142,8 @@ static void cl_test( hpx::opencl::device local_device,
         try{
             program.build().get();
         } catch (hpx::exception e){
-            hpx::cout << e.what() << hpx::endl;
+            hpx::cout << "Build error:" << hpx::endl;
+            hpx::cout << e.what() << hpx::endl << hpx::endl;
             caught_exception = true;
         }
         HPX_TEST(caught_exception);

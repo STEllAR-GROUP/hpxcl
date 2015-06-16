@@ -143,6 +143,7 @@ int hpx_main(variables_map & vm)
 {
     {
         auto devices = init(vm);   
+        hpx::cout << hpx::endl;
         cl_test(devices[0], devices[1]);
     }
     

@@ -27,4 +27,14 @@ program::build(std::string build_options) const
     return async<func>(this->get_gid(), build_options);
 }
 
+hpx::lcos::future<hpx::serialization::serialize_buffer<char> >
+program::get_binary() const
+{
+    HPX_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::program::get_binary_action func;
+
+    return async<func>(this->get_gid());
+}
+
 

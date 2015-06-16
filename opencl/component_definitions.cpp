@@ -45,6 +45,7 @@ typedef hpx::components::managed_component<program_type> program_component_type;
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(program_component_type, hpx_opencl_program);
 
 HPX_REGISTER_ACTION(program_type::build_action);
+HPX_REGISTER_ACTION(program_type::get_binary_action);
 
 // GLOBAL ACTIONS
 HPX_REGISTER_ACTION(hpx::opencl::server::get_devices_action,
