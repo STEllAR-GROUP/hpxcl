@@ -72,6 +72,36 @@ namespace opencl {
             create_buffer(cl_mem_flags flags, std::size_t size) const;
 
             /**
+             *  @brief Creates an OpenCL program object
+             *  
+             *  After creating a program object, one usually compiles the
+             *  program an creates kernels from it.
+             *
+             *  One program can contain code for multiple kernels.
+             *
+             *  @param source   The source code string for the program.
+             *  @return         A program object associated with the calling
+             *                  device.
+             */             
+            hpx::opencl::program
+            create_program_with_source(
+                const hpx::serialization::serialize_buffer<char> source) const;
+            
+            /**
+             *  @brief Creates an OpenCL program object from a prebuilt binary
+             *
+             *  One can create a prebuilt binary from a compiled
+             *  \ref hpx::opencl::program with \ref program::get_binary()
+             *
+             *  @param binary   The binary execution code for the program.
+             *  @return         A program object associated with the calling
+             *                  device.
+             */
+            hpx::opencl::program
+            create_program_with_binary(
+                const hpx::serialization::serialize_buffer<char> binary) const;
+
+            /**
              *  @brief Queries device infos.
              *  
              *         The template argument defines the type of information.
@@ -133,7 +163,7 @@ namespace opencl {
             hpx::opencl::util::generic_buffer
             get_device_info_raw(cl_device_info info_type) const;
 
-             /**
+            /**
              *  @brief Queries platform infos.
              *  
              *  @param info_type    The type of information.<BR>

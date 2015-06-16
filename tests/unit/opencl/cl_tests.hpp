@@ -28,6 +28,45 @@ static void cl_test(hpx::opencl::device, hpx::opencl::device);
 }                                                           
 */
 
+#define CREATE_BUFFER(name, data)                                               \
+    static const buffer_type name(data, sizeof(data),                           \
+                                  buffer_type::init_mode::reference)
+
+#define COMPARE_RESULT_INT( result_data, correct_result )                       \
+{                                                                               \
+    auto lhs = result_data;                                                     \
+    auto rhs = correct_result;                                                  \
+    HPX_TEST_EQ(lhs.size(), rhs.size());                                        \
+    for(std::size_t i = 0; i < lhs.size(); i++){                                \
+        std::cout << std::hex << lhs[i] << "-" << rhs[i] << std::endl;          \
+        HPX_TEST_EQ(lhs[i], rhs[i]);                                            \
+    }                                                                           \
+}
+
+typedef hpx::serialization::serialize_buffer<char> buffer_type;
+typedef hpx::serialization::serialize_buffer<uint32_t> intbuffer_type;
+
+std::string to_string(buffer_type buf){
+    std::size_t length = 0; 
+    while(length < buf.size())
+    {
+        if(buf[length] == '\0') break;
+        length++;
+    }
+    return std::string(buf.data(), buf.data() + length);
+}
+
+#define COMPARE_RESULT( result_data, correct_result )                           \
+{                                                                               \
+    auto lhs = result_data;                                                     \
+    auto rhs = correct_result;                                                  \
+    HPX_TEST_EQ(lhs.size(), rhs.size());                                        \
+    std::string correct_string = to_string(rhs);                                \
+    std::string result_string = to_string(lhs);                                 \
+    HPX_TEST_EQ(correct_string, result_string);                                 \
+}
+
+
 static void print_testdevice_info(hpx::opencl::device & cldevice,
                                   std::size_t device_id,
                                   std::size_t num_devices){

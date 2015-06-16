@@ -11,6 +11,7 @@
 
 // other hpxcl dependencies
 #include "buffer.hpp"
+#include "program.hpp"
 #include "util/hpx_cl_interop.hpp"
 
 // HPX dependencies
@@ -217,13 +218,33 @@ device::create_buffer( cl_mem_flags flags, std::size_t size )
     hpx::id_type buf = hpx::components::new_<hpx::opencl::server::buffer>
                                                      ( hpx::find_here() ).get();
 
-    // Initialzie buffer locally
+    // Initialize buffer locally
     boost::shared_ptr<hpx::opencl::server::buffer> buffer_server = 
                         hpx::get_ptr<hpx::opencl::server::buffer>( buf ).get();
 
     buffer_server->init(get_gid(), flags, size);
 
     return buf;           
+}
+
+hpx::id_type
+device::create_program_with_source(
+    hpx::serialization::serialize_buffer<char> src )
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    // Create new program
+    hpx::id_type prog = hpx::components::new_<hpx::opencl::server::program>
+                                                     ( hpx::find_here() ).get();
+
+    // Initialize buffer locally
+    boost::shared_ptr<hpx::opencl::server::program> program_server = 
+                        hpx::get_ptr<hpx::opencl::server::program>( prog ).get();
+
+    program_server->init_with_source( get_gid(), src );
+
+    return prog;
 }
 
 void

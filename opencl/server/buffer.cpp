@@ -28,6 +28,7 @@ buffer::buffer()
 // This is needed because OpenCL calls only run properly on large stack size.
 static void buffer_cleanup(uintptr_t device_mem_ptr)
 {
+    cl_int err;
 
     HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
 
@@ -36,7 +37,8 @@ static void buffer_cleanup(uintptr_t device_mem_ptr)
     // Release the device memory
     if(device_mem)
     {
-         clReleaseMemObject(device_mem);
+        err = clReleaseMemObject(device_mem);
+        cl_ensure_nothrow(err, "clReleaseMemObject()");
     }
 }
 

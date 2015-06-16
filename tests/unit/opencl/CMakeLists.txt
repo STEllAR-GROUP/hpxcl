@@ -14,7 +14,7 @@ set(tests
     data_map
     dynamic_overloads
 #    events_and_futures
-#    kernel
+    kernel
 #    future_enqueues
 #    program_from_binary
    )

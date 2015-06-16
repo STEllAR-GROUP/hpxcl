@@ -60,6 +60,14 @@ namespace hpx { namespace opencl{ namespace server{
         hpx::id_type
         create_buffer(cl_mem_flags flags, std::size_t size);
 
+        // creates a new program from source
+        hpx::id_type
+        create_program_with_source(hpx::serialization::serialize_buffer<char>);
+
+        // creates a new program from binary
+        hpx::id_type
+        create_program_with_binary(hpx::serialization::serialize_buffer<char>);
+
         /////////////////////////////////////////////////
         /// Behind-the-scenes functionality of this component
         /// 
@@ -79,6 +87,8 @@ namespace hpx { namespace opencl{ namespace server{
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_info);
     HPX_DEFINE_COMPONENT_ACTION(device, get_platform_info);
     HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
+    HPX_DEFINE_COMPONENT_ACTION(device, create_program_with_source);
+    HPX_DEFINE_COMPONENT_ACTION(device, create_program_with_binary);
     HPX_DEFINE_COMPONENT_ACTION(device, release_event);
     HPX_DEFINE_COMPONENT_ACTION(device, activate_deferred_event);
 
@@ -146,6 +156,8 @@ namespace hpx { namespace opencl{ namespace server{
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, get_device_info);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, get_platform_info);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, create_buffer);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, create_program_with_source);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, create_program_with_binary);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, release_event);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, activate_deferred_event);
 //]

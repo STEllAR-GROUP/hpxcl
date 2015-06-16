@@ -20,12 +20,14 @@ namespace opencl {
 
     class device;
     class buffer;
+    class program;
 
     // The OpenCL server namespace
     namespace server {
         
         class device;
         class buffer;
+        class program;
 
     }
 

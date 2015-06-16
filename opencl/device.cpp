@@ -11,9 +11,11 @@
 
 // Dependencies
 #include "buffer.hpp"
+#include "program.hpp"
 #include "util/generic_buffer.hpp"
 
 using hpx::opencl::device;
+
 hpx::opencl::util::generic_buffer
 device::get_device_info_raw(cl_device_info info_type) const
 {
@@ -56,3 +58,20 @@ device::create_buffer(cl_mem_flags flags, std::size_t size) const
     return buffer(std::move(buffer_server), this->get_gid());
 
 }
+
+hpx::opencl::program
+device::create_program_with_source(
+    hpx::serialization::serialize_buffer<char> src ) const
+{
+
+    HPX_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::device::create_program_with_source_action func;
+    
+    hpx::future<hpx::id_type> program_server =
+                                 hpx::async<func>(this->get_gid(), src);
+
+    return program(std::move(program_server), this->get_gid());
+
+}
+

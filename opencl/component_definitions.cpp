@@ -9,6 +9,7 @@
 #include "server/get_devices.hpp"
 #include "server/device.hpp"
 #include "server/buffer.hpp"
+#include "server/program.hpp"
 
 HPX_REGISTER_COMPONENT_MODULE();
 
@@ -21,6 +22,8 @@ HPX_REGISTER_COMPONENT(device_component_type, hpx_opencl_device);
 HPX_REGISTER_ACTION(device_type::get_device_info_action);
 HPX_REGISTER_ACTION(device_type::get_platform_info_action);
 HPX_REGISTER_ACTION(device_type::create_buffer_action);
+HPX_REGISTER_ACTION(device_type::create_program_with_source_action);
+HPX_REGISTER_ACTION(device_type::create_program_with_binary_action);
 HPX_REGISTER_ACTION(device_type::release_event_action);
 HPX_REGISTER_ACTION(device_type::activate_deferred_event_action);
 
@@ -34,6 +37,14 @@ HPX_REGISTER_ACTION(buffer_type::size_action);
 HPX_REGISTER_ACTION(buffer_type::enqueue_read_action);
 HPX_REGISTER_ACTION(buffer_type::enqueue_send_action);
 HPX_REGISTER_ACTION(buffer_type::get_parent_device_id_action);
+
+
+// PROGRAM
+typedef hpx::opencl::server::program program_type;
+typedef hpx::components::managed_component<program_type> program_component_type;
+HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(program_component_type, hpx_opencl_program);
+
+
 
 // GLOBAL ACTIONS
 HPX_REGISTER_ACTION(hpx::opencl::server::get_devices_action,
