@@ -13,6 +13,18 @@
 
 using hpx::opencl::program;
 
+void
+program::build_sync() const
+{
+    build("").get();
+}
+
+void
+program::build_sync(std::string build_options) const
+{
+    build(std::move(build_options)).get();
+}
+
 hpx::lcos::future<void>
 program::build() const
 {

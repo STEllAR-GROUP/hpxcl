@@ -101,9 +101,8 @@ static void create_and_run_kernel( hpx::opencl::device cldevice,
     // set kernel arguments
     {
         auto future1 = kernel.set_arg(0, buffer_src);
-        auto future2 = kernel.set_arg(1, buffer_dst);
+        kernel.set_arg_sync(1, buffer_dst);
         future1.get();
-        future2.get();
     }
     
     // set work dimensions
@@ -190,7 +189,7 @@ static void cl_test( hpx::opencl::device local_device,
             cldevice.create_program_with_binary(program_binary);
 
         // test if program can be compiled
-        program2.build().get();
+        program2.build_sync();
 
         // test if program can be used for computation
         create_and_run_kernel(cldevice, program2);

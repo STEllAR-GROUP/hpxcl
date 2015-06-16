@@ -14,7 +14,7 @@ foreach(subdir ${subdirs})
 endforeach()
 
 set(example_programs
-#    hello_world
+    hello_world
 #    _tmp_test
 #    events_and_futures
     list_devices
