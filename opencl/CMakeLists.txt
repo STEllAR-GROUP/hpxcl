@@ -39,12 +39,14 @@ add_hpx_component(opencl
             tools.cpp
             buffer.cpp
             program.cpp
+            kernel.cpp
             util/generic_buffer.cpp
             util/enqueue_overloads.cpp
             lcos/event.cpp
             server/device.cpp
             server/buffer.cpp
             server/program.cpp
+            server/kernel.cpp
             server/get_devices.cpp
             server/util/event_map.cpp
             server/util/data_map.cpp
@@ -57,6 +59,7 @@ add_hpx_component(opencl
             tools.hpp
             buffer.hpp
             program.hpp
+            kernel.hpp
             cl_headers.hpp
             util/generic_buffer.hpp
             util/enqueue_overloads.hpp
@@ -66,6 +69,7 @@ add_hpx_component(opencl
             server/device.hpp
             server/buffer.hpp
             server/program.hpp
+            server/kernel.hpp
             server/get_devices.hpp
             server/util/event_map.hpp
             server/util/data_map.hpp

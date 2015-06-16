@@ -65,7 +65,7 @@ buffer::init( hpx::naming::id_type device_id, cl_mem_flags flags,
 
     HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
 
-    this->parent_device_id = device_id;
+    this->parent_device_id = std::move(device_id);
     this->parent_device = hpx::get_ptr
                           <hpx::opencl::server::device>(parent_device_id).get();
     this->device_mem = NULL;

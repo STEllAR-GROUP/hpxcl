@@ -79,6 +79,17 @@ namespace opencl {
             hpx::lcos::future<hpx::serialization::serialize_buffer<char> >
             get_binary() const;
 
+            /**
+             *  @brief Creates a kernel.
+             *
+             *  The kernel with the name kernel_name has to be defined and
+             *  implemented in the program source code.
+             *
+             *  @param kernel_name  The name of the kernel to be created
+             *  @return             A kernel object.
+             */
+            hpx::opencl::kernel
+            create_kernel(std::string kernel_name) const;
 
         private:
             hpx::naming::id_type device_gid;

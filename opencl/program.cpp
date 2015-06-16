@@ -9,6 +9,8 @@
 // Internal Dependencies
 #include "server/program.hpp"
 
+#include "kernel.hpp"
+
 using hpx::opencl::program;
 
 hpx::lcos::future<void>
@@ -35,6 +37,21 @@ program::get_binary() const
     typedef hpx::opencl::server::program::get_binary_action func;
 
     return async<func>(this->get_gid());
+}
+
+hpx::opencl::kernel
+program::create_kernel(std::string kernel_name) const
+{
+
+    HPX_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::program::create_kernel_action func;
+    
+    hpx::future<hpx::id_type> kernel_server =
+                                 hpx::async<func>(this->get_gid(), kernel_name);
+
+    return kernel(std::move(kernel_server), this->get_gid());
+
 }
 
 

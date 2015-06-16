@@ -11,6 +11,6 @@
     #include "opencl/get_devices.hpp"
     #include "opencl/buffer.hpp"
     #include "opencl/program.hpp"
-//    #include "opencl/kernel.hpp"
+    #include "opencl/kernel.hpp"
 
 #endif

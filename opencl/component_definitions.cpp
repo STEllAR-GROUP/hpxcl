@@ -10,6 +10,7 @@
 #include "server/device.hpp"
 #include "server/buffer.hpp"
 #include "server/program.hpp"
+#include "server/kernel.hpp"
 
 HPX_REGISTER_COMPONENT_MODULE();
 
@@ -46,6 +47,15 @@ HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(program_component_type, hpx_opencl_progra
 
 HPX_REGISTER_ACTION(program_type::build_action);
 HPX_REGISTER_ACTION(program_type::get_binary_action);
+HPX_REGISTER_ACTION(program_type::create_kernel_action);
+
+
+// KERNEL
+typedef hpx::opencl::server::kernel kernel_type;
+typedef hpx::components::managed_component<kernel_type> kernel_component_type;
+HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(kernel_component_type, hpx_opencl_kernel);
+
+
 
 // GLOBAL ACTIONS
 HPX_REGISTER_ACTION(hpx::opencl::server::get_devices_action,

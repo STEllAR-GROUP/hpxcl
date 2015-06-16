@@ -12,10 +12,10 @@
 // other hpxcl dependencies
 #include "device.hpp"
 #include "util/hpx_cl_interop.hpp"
+#include "kernel.hpp"
 
 // HPX dependencies
 #include <hpx/include/thread_executors.hpp>
-
 
 using hpx::opencl::server::program;
 
@@ -66,7 +66,7 @@ program::init_with_source( hpx::naming::id_type device_id,
 
     HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
 
-    this->parent_device_id = device_id;
+    this->parent_device_id = std::move(device_id);
     this->parent_device = hpx::get_ptr
                           <hpx::opencl::server::device>(parent_device_id).get();
     this->program_id = NULL;
@@ -254,5 +254,24 @@ program::get_binary()
 
     // return vector
     return binary;
+
+}
+
+hpx::naming::id_type
+program::create_kernel(std::string kernel_name)
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    // Create new kernel
+    hpx::id_type kernel = hpx::components::new_<hpx::opencl::server::kernel>
+                                                     ( hpx::find_here() ).get();
+
+    // Initialize kernel locally
+    auto kernel_server = hpx::get_ptr<hpx::opencl::server::kernel>(kernel).get();
+
+    kernel_server->init(parent_device_id, program_id, kernel_name);
+
+    return kernel;
 
 }

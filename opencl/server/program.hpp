@@ -50,8 +50,12 @@ namespace hpx { namespace opencl{ namespace server{
         // Returns the binary representation of the program
         hpx::serialization::serialize_buffer<char> get_binary();
 
+        // creates a kernel from the buffer
+        hpx::naming::id_type create_kernel(std::string kernel_name);
+
     HPX_DEFINE_COMPONENT_ACTION(program, build);
     HPX_DEFINE_COMPONENT_ACTION(program, get_binary);
+    HPX_DEFINE_COMPONENT_ACTION(program, create_kernel);
 
         //////////////////////////////////////////////////
         // Private Member Functions
@@ -80,6 +84,7 @@ namespace hpx { namespace opencl{ namespace server{
 //[opencl_management_registration_declarations
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(program, build);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(program, get_binary);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(program, create_kernel);
 //]
 
 #endif

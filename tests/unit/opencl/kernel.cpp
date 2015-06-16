@@ -51,11 +51,10 @@ CREATE_BUFFER(refdata1, "Hello, World!");
 
 static void create_and_run_kernel(hpx::opencl::program program){
 
-/*
-
     // test if kernel can be created
     hpx::opencl::kernel kernel = program.create_kernel("hello_world");
 
+/*
     // create source and destination buffers
     hpx::opencl::buffer buffer_src =
         cldevice.create_buffer(CL_MEM_READ_WRITE, DATASIZE);
