@@ -54,6 +54,17 @@ static void create_and_run_kernel(hpx::opencl::program program){
     // test if kernel can be created
     hpx::opencl::kernel kernel = program.create_kernel("hello_world");
 
+    // test if creation of invalid kernels throws
+    {
+        bool caught_exception = false;
+        try{
+            hpx::opencl::kernel kernel = program.create_kernel("blub");
+            kernel.get_gid();
+        } catch (hpx::exception e){
+            caught_exception = true;
+        }
+        HPX_ASSERT(caught_exception);
+    }
 /*
     // create source and destination buffers
     hpx::opencl::buffer buffer_src =
