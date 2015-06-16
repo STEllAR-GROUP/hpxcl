@@ -100,3 +100,43 @@ kernel::set_arg(cl_uint arg_index, hpx::naming::id_type buffer_id)
     cl_ensure(err, "clSetKernelArg()");
 
 }
+
+void
+kernel::enqueue( hpx::naming::id_type && event_gid,
+                 std::vector<std::size_t> size_vec,
+                 std::vector<hpx::naming::id_type> && dependencies )
+{
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    
+    cl_int err;
+    cl_event return_event;
+
+    // retrieve the dependency cl_events
+    util::event_dependencies events( dependencies, parent_device.get() );
+
+    // retrieve the command queue
+    cl_command_queue command_queue = parent_device->get_kernel_command_queue();
+
+    // prepare args for OpenCL call
+    HPX_ASSERT( size_vec.size() % 3 == 0 );
+    std::size_t size = size_vec.size() / 3;
+    std::size_t* global_work_offset = size_vec.data() + 0 * size;
+    std::size_t* global_work_size   = size_vec.data() + 1 * size;
+    std::size_t* local_work_size    = size_vec.data() + 2 * size;
+
+    // run the OpenCL-call
+    err = clEnqueueNDRangeKernel( command_queue, kernel_id,
+                                  static_cast<cl_uint>(size),
+                                  global_work_offset,
+                                  global_work_size,
+                                  local_work_size,
+                                  static_cast<cl_uint>(events.size()),
+                                  events.get_cl_events(),
+                                  &return_event );
+    cl_ensure(err, "clEnqueueNDRangeKernel()");
+
+    // register the cl_event to the client event
+    parent_device->register_event(event_gid, return_event);
+
+}
+    

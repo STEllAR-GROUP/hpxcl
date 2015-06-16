@@ -45,8 +45,14 @@ namespace hpx { namespace opencl{ namespace server{
         
         // Sets an argument of the kernel
         void set_arg(cl_uint arg_index, hpx::naming::id_type buffer);
-        
+       
+        // Runs the kernel
+        void enqueue( hpx::naming::id_type && event_gid,
+                      std::vector<std::size_t> size,
+                      std::vector<hpx::naming::id_type> && dependencies );
+
     HPX_DEFINE_COMPONENT_ACTION(kernel, set_arg);
+    HPX_DEFINE_COMPONENT_ACTION(kernel, enqueue);
 
         //////////////////////////////////////////////////
         // Private Member Functions
@@ -68,6 +74,7 @@ namespace hpx { namespace opencl{ namespace server{
 
 //[opencl_management_registration_declarations
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(kernel, set_arg);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(kernel, enqueue);
 //]
 
 #endif

@@ -22,7 +22,7 @@ namespace opencl {
 
 
     //////////////////////////////////////
-    /// @brief Device memory.
+    /// @brief An OpenCL program consisting of one or multiple kernels.
     ///
     /// Every program belongs to one \ref device.
     ///

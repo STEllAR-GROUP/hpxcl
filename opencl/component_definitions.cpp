@@ -56,6 +56,7 @@ typedef hpx::components::managed_component<kernel_type> kernel_component_type;
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(kernel_component_type, hpx_opencl_kernel);
 
 HPX_REGISTER_ACTION(kernel_type::set_arg_action);
+HPX_REGISTER_ACTION(kernel_type::enqueue_action);
 
 
 // GLOBAL ACTIONS

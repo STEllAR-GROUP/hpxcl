@@ -24,4 +24,23 @@ kernel::set_arg(cl_uint arg_index, const hpx::opencl::buffer &arg) const
 
 }
 
+hpx::future<void>
+kernel::enqueue_impl( std::vector<std::size_t> && size_vec,
+                      hpx::opencl::util::resolved_events && deps )
+{
 
+    // create local event
+    using hpx::opencl::lcos::event;
+    event<void> ev( device_gid );
+
+    // send command to server class
+    typedef hpx::opencl::server::kernel::enqueue_action func;
+    hpx::apply<func>( this->get_gid(),
+                      ev.get_gid(),
+                      size_vec,
+                      deps.event_ids );
+
+    // return future connected to event
+    return ev.get_future();
+
+}
