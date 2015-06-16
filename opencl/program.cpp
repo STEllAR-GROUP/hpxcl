@@ -50,7 +50,7 @@ program::create_kernel(std::string kernel_name) const
     hpx::future<hpx::id_type> kernel_server =
                                  hpx::async<func>(this->get_gid(), kernel_name);
 
-    return kernel(std::move(kernel_server), this->get_gid());
+    return kernel(std::move(kernel_server), device_gid);
 
 }
 

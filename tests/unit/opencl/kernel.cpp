@@ -38,16 +38,32 @@ const char initdata_arr[] = { ('H'  - static_cast<char>( 0)),
                               ('l'  - static_cast<char>( 2)), 
                               ('l'  - static_cast<char>( 3)), 
                               ('o'  - static_cast<char>( 4)), 
-                              (' '  - static_cast<char>( 5)), 
-                              ('W'  - static_cast<char>( 6)), 
-                              ('o'  - static_cast<char>( 7)), 
-                              ('r'  - static_cast<char>( 8)), 
-                              ('l'  - static_cast<char>( 9)), 
-                              ('d'  - static_cast<char>(10)), 
-                              ('!'  - static_cast<char>(11)), 
-                              ('\0' - static_cast<char>(12)) };
+                              (','  - static_cast<char>( 5)), 
+                              (' '  - static_cast<char>( 6)), 
+                              ('W'  - static_cast<char>( 7)), 
+                              ('o'  - static_cast<char>( 8)), 
+                              ('r'  - static_cast<char>( 9)), 
+                              ('l'  - static_cast<char>(10)), 
+                              ('d'  - static_cast<char>(11)), 
+                              ('!'  - static_cast<char>(12)), 
+                              ('\0' - static_cast<char>(13)) };
+const char refdata2_arr[] = { ('H'  + static_cast<char>( 0)), 
+                              ('e'  + static_cast<char>( 1)), 
+                              ('l'  + static_cast<char>( 2)), 
+                              ('l'  + static_cast<char>( 3)), 
+                              ('o'  + static_cast<char>( 4)), 
+                              (','  + static_cast<char>( 5)), 
+                              (' '  + static_cast<char>( 6)), 
+                              ('W'  + static_cast<char>( 7)), 
+                              ('o'  + static_cast<char>( 8)), 
+                              ('r'  + static_cast<char>( 9)), 
+                              ('l'  + static_cast<char>(10)), 
+                              ('d'  + static_cast<char>(11)), 
+                              ('!'  + static_cast<char>(12)), 
+                              ('\0' + static_cast<char>(13)) };
 CREATE_BUFFER(initdata, initdata_arr);
 CREATE_BUFFER(refdata1, "Hello, World!");
+CREATE_BUFFER(refdata2, refdata2_arr);
 
 static void create_and_run_kernel( hpx::opencl::device cldevice,
                                    hpx::opencl::program program ){
@@ -91,14 +107,35 @@ static void create_and_run_kernel( hpx::opencl::device cldevice,
     }
     
     // set work dimensions
+    hpx::opencl::work_size<1> size;
+    size[0].offset = 0;
+    size[0].size = DATASIZE;
 
+    // test if kernel can get executed (blocking)
+    {
+        // Initialize src buffer
+        buffer_src.enqueue_write(0, initdata).get();
 
-    // test if kernel can get executed
-    // TODO
-    
-    // test if computation result is correct
-    // TODO
-    
+        // Execute
+        kernel.enqueue(size).get();
+
+        // Check for correct result
+        auto result_future = buffer_dst.enqueue_read(0, DATASIZE);
+        COMPARE_RESULT(result_future.get(), refdata1);
+    }
+
+    // test if kernel can get executed (non-blocking)
+    {
+        // Send result of blocking execution to src buffer
+        auto fut1 = buffer_dst.enqueue_send(buffer_src, 0, 0, DATASIZE);
+
+        // Execute
+        auto fut2 = kernel.enqueue(size, fut1.dst_future);
+
+        // Read data
+        auto result_future = buffer_dst.enqueue_read(0, DATASIZE, fut2);
+        COMPARE_RESULT(result_future.get(), refdata2);
+    }
 
 }
 
@@ -140,7 +177,7 @@ static void cl_test( hpx::opencl::device local_device,
             cldevice.create_program_with_source(program_src);
 
         // test if program can be compiled
-        program1.build("-Werror").get();
+        program1.build().get();
 
         // retrieve binary of program1
         auto program_binary = program1.get_binary().get();

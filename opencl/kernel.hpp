@@ -128,7 +128,7 @@ namespace opencl {
 
             hpx::lcos::future<void>
             enqueue_impl( std::vector<std::size_t> && size_vec,
-                          hpx::opencl::util::resolved_events && deps );
+                          hpx::opencl::util::resolved_events && deps ) const;
 
  
         private:

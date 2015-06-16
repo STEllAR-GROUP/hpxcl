@@ -124,6 +124,11 @@ kernel::enqueue( hpx::naming::id_type && event_gid,
     std::size_t* global_work_size   = size_vec.data() + 1 * size;
     std::size_t* local_work_size    = size_vec.data() + 2 * size;
 
+    // If local_work_size is not specified, let the OpenCL driver decide
+    if(local_work_size[0] == 0){
+        local_work_size = NULL;
+    }
+
     // run the OpenCL-call
     err = clEnqueueNDRangeKernel( command_queue, kernel_id,
                                   static_cast<cl_uint>(size),

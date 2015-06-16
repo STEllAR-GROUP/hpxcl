@@ -26,7 +26,7 @@ kernel::set_arg(cl_uint arg_index, const hpx::opencl::buffer &arg) const
 
 hpx::future<void>
 kernel::enqueue_impl( std::vector<std::size_t> && size_vec,
-                      hpx::opencl::util::resolved_events && deps )
+                      hpx::opencl::util::resolved_events && deps ) const
 {
 
     // create local event

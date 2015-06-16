@@ -50,7 +50,7 @@ static void cl_test( hpx::opencl::device local_device,
     // test if buffer can be written to
     {
         auto data_write_future = buffer.enqueue_write(0, initdata);
-        data_write_future.wait();
+        data_write_future.get();
     }
 
     // test when_all
