@@ -94,7 +94,8 @@ static void cl_test( hpx::opencl::device local_device,
             cldevice.create_program_with_source(program_src);
 
         // test if program can be compiled
-        program.build().wait();
+        // IMPORTANT! use get(). wait() does not throw errors.
+        program.build().get();
 
         // test if program can be used for computation
         create_and_run_kernel(program);
@@ -107,7 +108,7 @@ static void cl_test( hpx::opencl::device local_device,
             cldevice.create_program_with_source(program_src);
 
         // test if program can be compiled
-        program.build("-Werror").wait();
+        program.build("-Werror").get();
 
         // test if program can be used for computation
         create_and_run_kernel(program);
