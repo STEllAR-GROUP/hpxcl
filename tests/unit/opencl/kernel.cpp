@@ -11,6 +11,15 @@
  * This test is meant to verify the kernel creation and execution functionality.
  */
 
+CREATE_BUFFER(invalid_program_src,
+"                                                                          \n"
+"   __kernel void hello_world(__global char * in, __global char * out)     \n"
+"   {                                                                      \n"
+"       size_t tid = get_global_id(0);                                     \n"
+"       out[tid] = (char)(in[unknown_variable] + tid);                     \n"
+"   }                                                                      \n"
+"                                                                          \n");
+
 CREATE_BUFFER(program_src,
 "                                                                          \n"
 "   __kernel void hello_world(__global char * in, __global char * out)     \n"
@@ -78,21 +87,51 @@ static void cl_test( hpx::opencl::device local_device,
                      hpx::opencl::device cldevice )
 {
 
+    // standard hello-world test
     {
         // test if program can be created from source
         hpx::opencl::program program =
             cldevice.create_program_with_source(program_src);
 
         // test if program can be compiled
-        //program.build().wait();
+        program.build().wait();
 
+        // test if program can be used for computation
+        create_and_run_kernel(program);
     }
 
     // same test with build arguments
-    // TODO
+    {
+        // test if program can be created from source
+        hpx::opencl::program program =
+            cldevice.create_program_with_source(program_src);
+
+        // test if program can be compiled
+        program.build("-Werror").wait();
+
+        // test if program can be used for computation
+        create_and_run_kernel(program);
+    }
 
     // test with create_from_binary
     // TODO
+
+    // Test compiler error detection
+    {
+        // create program from source. this should not throw 
+        hpx::opencl::program program =
+            cldevice.create_program_with_source(invalid_program_src);
+
+        // Try to build. This should throw an error.
+        bool caught_exception = false;
+        try{
+            program.build().get();
+        } catch (hpx::exception e){
+            hpx::cout << e.what() << hpx::endl;
+            caught_exception = true;
+        }
+        HPX_TEST(caught_exception);
+    }
 
 }
 

@@ -42,7 +42,7 @@ namespace hpx { namespace opencl{ namespace server{
         void init(cl_device_id device_id, bool enable_profiling=false);
 
         cl_context get_context();
-
+        cl_device_id get_device_id();
 
         //////////////////////////////////////////////////
         /// Exposed functionality of this component

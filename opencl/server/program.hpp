@@ -43,12 +43,31 @@ namespace hpx { namespace opencl{ namespace server{
         /// Exposed functionality of this component
         ///
 
+        // builds the program.
+        // mutually exclusive to compile() and link().
+        void build(std::string options);
+
+
+    HPX_DEFINE_COMPONENT_ACTION(program, build);
+
+        //////////////////////////////////////////////////
+        // Private Member Functions
+        //
+    private:
+
+        // returns the build log
+        std::string acquire_build_log();
+
+        // checks for build errors
+        void throw_on_build_errors(const char* function_name);
+
+
         //////////////////////////////////////////////////
         //  Private Member Variables
         //
     private:
         boost::shared_ptr<device> parent_device;
-        cl_program program_cl;
+        cl_program program_id;
         hpx::naming::id_type parent_device_id;
 
     };
@@ -56,6 +75,7 @@ namespace hpx { namespace opencl{ namespace server{
 }}}
 
 //[opencl_management_registration_declarations
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(program, build);
 //]
 
 #endif

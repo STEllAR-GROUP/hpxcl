@@ -11,4 +11,20 @@
 
 using hpx::opencl::program;
 
+hpx::lcos::future<void>
+program::build() const
+{
+    return build("");
+}
+
+hpx::lcos::future<void>
+program::build(std::string build_options) const
+{
+    HPX_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::program::build_action func;
+
+    return async<func>(this->get_gid(), build_options);
+}
+
 

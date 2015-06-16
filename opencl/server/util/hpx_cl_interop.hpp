@@ -16,5 +16,9 @@ void set_promise_from_external( hpx::runtime * rt,
                                 hpx::lcos::local::promise<cl_int> * promise,
                                 cl_int value );
 
+// This function triggers an hpx::lcos::local::event from an external thread
+void set_promise_from_external( hpx::runtime * rt,
+                                hpx::lcos::local::promise<void> * promise );
+
 
 }}}}

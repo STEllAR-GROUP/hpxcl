@@ -49,6 +49,26 @@ namespace opencl {
             // Exposed Component functionality
             // 
  
+            // Build the program, non-blocking
+            /**
+             *  @brief Builds the program, non-blocking.
+             *
+             *  @return A future that will trigger upon build completion.
+             */
+            hpx::lcos::future<void> build() const;
+            /**
+             *  @brief Builds the program, non-blocking.
+             *
+             *  @param build_options    A string with specific build options.<BR>
+             *                          Look at the official 
+             *                          <A HREF="http://www.khronos.org/registry
+             * /cl/sdk/1.2/docs/man/xhtml/clBuildProgram.html">
+             *                          OpenCL Reference</A> for further
+             *                          information.
+             *  @return A future that will trigger upon build completion.
+             */
+            hpx::lcos::future<void> build(std::string build_options) const;
+
         private:
             hpx::naming::id_type device_gid;
 

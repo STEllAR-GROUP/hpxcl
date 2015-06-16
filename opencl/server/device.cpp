@@ -208,6 +208,12 @@ device::get_context()
     return context;
 }
 
+cl_device_id
+device::get_device_id()
+{
+    return device_id;
+}
+
 hpx::id_type
 device::create_buffer( cl_mem_flags flags, std::size_t size )
 {
