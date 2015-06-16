@@ -49,7 +49,8 @@ const char initdata_arr[] = { ('H'  - static_cast<char>( 0)),
 CREATE_BUFFER(initdata, initdata_arr);
 CREATE_BUFFER(refdata1, "Hello, World!");
 
-static void create_and_run_kernel(hpx::opencl::program program){
+static void create_and_run_kernel( hpx::opencl::device cldevice,
+                                   hpx::opencl::program program ){
 
     // test if kernel can be created
     hpx::opencl::kernel kernel = program.create_kernel("hello_world");
@@ -65,7 +66,7 @@ static void create_and_run_kernel(hpx::opencl::program program){
         }
         HPX_ASSERT(caught_exception);
     }
-/*
+
     // create source and destination buffers
     hpx::opencl::buffer buffer_src =
         cldevice.create_buffer(CL_MEM_READ_WRITE, DATASIZE);
@@ -79,11 +80,19 @@ static void create_and_run_kernel(hpx::opencl::program program){
         size_t buffer_dst_size = buffer_dst.size().get();
         HPX_TEST_EQ(buffer_dst_size, DATASIZE);
     }
-*/
+
     
     // set kernel arguments
-    // TODO
+    {
+        auto future1 = kernel.set_arg(0, buffer_src);
+        auto future2 = kernel.set_arg(1, buffer_dst);
+        future1.get();
+        future2.get();
+    }
     
+    // set work dimensions
+
+
     // test if kernel can get executed
     // TODO
     
@@ -108,7 +117,7 @@ static void cl_test( hpx::opencl::device local_device,
         program.build().get();
 
         // test if program can be used for computation
-        create_and_run_kernel(program);
+        create_and_run_kernel(cldevice, program);
     }
 
     // same test with build arguments
@@ -121,7 +130,7 @@ static void cl_test( hpx::opencl::device local_device,
         program.build("-Werror").get();
 
         // test if program can be used for computation
-        create_and_run_kernel(program);
+        create_and_run_kernel(cldevice, program);
     }
 
     // test with create_from_binary

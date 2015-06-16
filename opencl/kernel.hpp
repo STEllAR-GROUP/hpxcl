@@ -17,6 +17,10 @@
 // Forward Declarations
 #include "fwd_declarations.hpp"
 
+// OpenCL Headers
+#include "cl_headers.hpp"
+
+
 namespace hpx {
 namespace opencl { 
 
@@ -48,6 +52,18 @@ namespace opencl {
             // ///////////////////////////////////////////////
             // Exposed Component functionality
             // 
+
+            /**
+             *  @brief Sets a kernel argument
+             *
+             *  @param arg_index    The argument index to which the buffer will
+             *                      be connected.
+             *  @param arg          The \ref buffer that will be connected.
+             *  @return             A future that will trigger upon completion.
+             */
+            hpx::lcos::future<void>
+            set_arg(cl_uint arg_index, const hpx::opencl::buffer &arg) const;
+
  
         private:
             hpx::naming::id_type device_gid;

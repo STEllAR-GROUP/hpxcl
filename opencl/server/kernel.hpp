@@ -42,7 +42,11 @@ namespace hpx { namespace opencl{ namespace server{
         //////////////////////////////////////////////////
         /// Exposed functionality of this component
         ///
-
+        
+        // Sets an argument of the kernel
+        void set_arg(cl_uint arg_index, hpx::naming::id_type buffer);
+        
+    HPX_DEFINE_COMPONENT_ACTION(kernel, set_arg);
 
         //////////////////////////////////////////////////
         // Private Member Functions
@@ -63,6 +67,7 @@ namespace hpx { namespace opencl{ namespace server{
 }}}
 
 //[opencl_management_registration_declarations
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(kernel, set_arg);
 //]
 
 #endif

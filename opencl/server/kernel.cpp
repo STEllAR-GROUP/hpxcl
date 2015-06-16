@@ -11,6 +11,7 @@
 
 // other hpxcl dependencies
 #include "device.hpp"
+#include "buffer.hpp"
 #include "util/hpx_cl_interop.hpp"
 
 // HPX dependencies
@@ -80,3 +81,22 @@ kernel::init( hpx::naming::id_type device_id, cl_program program,
 
 }
 
+
+void
+kernel::set_arg(cl_uint arg_index, hpx::naming::id_type buffer_id)
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    cl_int err;
+
+    // Get direct pointer to buffer
+    auto buffer = hpx::get_ptr<hpx::opencl::server::buffer>(buffer_id).get();
+
+    // Get cl_mem
+    cl_mem mem_id = buffer->get_cl_mem();
+
+    // Set the argument
+    err = clSetKernelArg(kernel_id, arg_index, sizeof(cl_mem), &mem_id);
+    cl_ensure(err, "clSetKernelArg()");
+
+}

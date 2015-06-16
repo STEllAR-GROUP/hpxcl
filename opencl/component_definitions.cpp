@@ -55,8 +55,12 @@ typedef hpx::opencl::server::kernel kernel_type;
 typedef hpx::components::managed_component<kernel_type> kernel_component_type;
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(kernel_component_type, hpx_opencl_kernel);
 
+HPX_REGISTER_ACTION(kernel_type::set_arg_action);
 
 
 // GLOBAL ACTIONS
 HPX_REGISTER_ACTION(hpx::opencl::server::get_devices_action,
                     hpx_opencl_server_get_devices_action);
+
+
+

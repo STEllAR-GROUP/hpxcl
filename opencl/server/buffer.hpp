@@ -41,6 +41,8 @@ namespace hpx { namespace opencl{ namespace server{
         /// 
         void init(hpx::naming::id_type device_id, cl_mem_flags flags,
                                                   std::size_t size);
+        
+        cl_mem get_cl_mem();
 
         //////////////////////////////////////////////////
         /// Exposed functionality of this component

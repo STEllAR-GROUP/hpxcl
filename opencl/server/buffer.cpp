@@ -323,4 +323,8 @@ buffer::enqueue_send( hpx::naming::id_type && dst,
 
 }
 
-
+cl_mem
+buffer::get_cl_mem()
+{
+    return device_mem;
+}
