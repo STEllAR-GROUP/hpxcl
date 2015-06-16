@@ -253,6 +253,26 @@ device::create_program_with_source(
     return prog;
 }
 
+hpx::id_type
+device::create_program_with_binary(
+    hpx::serialization::serialize_buffer<char> binary )
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    // Create new program
+    hpx::id_type prog = hpx::components::new_<hpx::opencl::server::program>
+                                                     ( hpx::find_here() ).get();
+
+    // Initialize buffer locally
+    boost::shared_ptr<hpx::opencl::server::program> program_server = 
+                        hpx::get_ptr<hpx::opencl::server::program>( prog ).get();
+
+    program_server->init_with_binary( get_gid(), binary );
+
+    return prog;
+}
+
 void
 device::release_event(hpx::naming::gid_type gid)
 {

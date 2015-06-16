@@ -184,7 +184,16 @@ static void cl_test( hpx::opencl::device local_device,
 
         hpx::cout << "Binary:" << hpx::endl;
         hpx::cout << to_string(program_binary) << hpx::endl << hpx::endl;;
-        // TODO
+
+        // test if program can be created from binary
+        hpx::opencl::program program2 =
+            cldevice.create_program_with_binary(program_binary);
+
+        // test if program can be compiled
+        program2.build().get();
+
+        // test if program can be used for computation
+        create_and_run_kernel(cldevice, program2);
     }
 
     // Test compiler error detection

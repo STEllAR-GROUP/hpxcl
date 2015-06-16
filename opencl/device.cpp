@@ -75,3 +75,19 @@ device::create_program_with_source(
 
 }
 
+hpx::opencl::program
+device::create_program_with_binary(
+    hpx::serialization::serialize_buffer<char> binary ) const
+{
+
+    HPX_ASSERT(this->get_gid());
+
+    typedef hpx::opencl::server::device::create_program_with_binary_action func;
+    
+    hpx::future<hpx::id_type> program_server =
+                                 hpx::async<func>(this->get_gid(), binary);
+
+    return program(std::move(program_server), this->get_gid());
+
+}
+

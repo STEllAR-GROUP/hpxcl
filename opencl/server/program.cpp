@@ -93,6 +93,40 @@ program::init_with_source( hpx::naming::id_type device_id,
     cl_ensure(err, "clCreateProgramWithSource()");
 
 }
+        
+void
+program::init_with_binary( hpx::naming::id_type device_id,
+                           hpx::serialization::serialize_buffer<char> binary )
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    this->parent_device_id = std::move(device_id);
+    this->parent_device = hpx::get_ptr
+                          <hpx::opencl::server::device>(parent_device_id).get();
+    this->program_id = NULL;
+
+    // Retrieve the context from parent class
+    cl_context context = parent_device->get_context();
+
+    // The opencl error variable
+    cl_int err;
+
+    // Set up data for OpenCL call
+    HPX_ASSERT(binary.size() > 0);
+    cl_device_id device = parent_device->get_device_id();
+    const std::size_t size = binary.size();
+    const unsigned char* bin = reinterpret_cast<unsigned char*>(binary.data());
+
+    // Create the cl_program
+    cl_int binary_status;
+    program_id = clCreateProgramWithBinary( context,
+                                            1, &device, &size, &bin,
+                                            &binary_status, &err );
+    cl_ensure(err, "clCreateProgramWithBinary()");
+    cl_ensure(binary_status, "clCreateProgramWithBinary().binary_status");
+
+}
 
 std::string
 program::acquire_build_log()

@@ -38,6 +38,8 @@ namespace hpx { namespace opencl{ namespace server{
         /// 
         void init_with_source( hpx::naming::id_type device_id,
                                hpx::serialization::serialize_buffer<char> src);
+        void init_with_binary( hpx::naming::id_type device_id,
+                               hpx::serialization::serialize_buffer<char> binary);
 
         //////////////////////////////////////////////////
         /// Exposed functionality of this component
