@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
     program prog = cldevice.create_program_with_source(hello_world_src);
 
     // Compile the program
-    prog.build();
+    prog.build_sync();
 
     // Create hello_world kernel
     kernel hello_world_kernel = prog.create_kernel("hello_world");
