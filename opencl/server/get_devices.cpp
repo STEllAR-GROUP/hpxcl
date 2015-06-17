@@ -63,9 +63,8 @@ static void clear_device_list()
         // get static device list
         static_device_list_type devices;
 
-        // take the device out of the list
-        std::move( devices.get().begin(), devices.get().end(),
-                   std::back_inserter(local_devicelist) );
+        // take the devices out of the list
+        std::swap( devices.get(), local_devicelist );
     }
 
     // Clear locally. Clear _might_ cause a thread suspension and can
