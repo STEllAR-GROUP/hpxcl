@@ -31,14 +31,10 @@ int hpx_main()
 
 
         auto gid2 = shared_state->get_gid();
-
         auto gid = promise.get_gid();
         
-        auto msb1 = gid.get_msb() & 0x0000000000FFFFFF;
-        auto msb2 = gid2.get_msb() & 0x0000000000FFFFFF;
 
-        HPX_TEST_EQ(msb1, msb2);
-        HPX_TEST_EQ(gid.get_lsb(), gid2.get_lsb());
+        HPX_TEST_EQ(gid, gid2);
 
         hpx::cout << gid << hpx::endl;
         hpx::cout << gid2 << hpx::endl;
