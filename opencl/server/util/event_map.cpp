@@ -24,7 +24,6 @@ void
 event_map::add(const hpx::naming::id_type & gid, cl_event event){
     hpx::naming::gid_type key = gid.get_gid();
 
-    std::cout << key << std::endl;
     {
         // Lock
         lock_type::scoped_lock l(lock);

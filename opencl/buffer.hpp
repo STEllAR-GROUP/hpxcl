@@ -207,7 +207,6 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
                 if(is_remote_call){
                     // is remote call
 
-                    std::cout << "remote call!" << std::endl;
                     hpx::apply<func_remote>( std::move(buffer_id),
                                              std::move(event_id),
                                              offset,
@@ -219,7 +218,6 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
                 } else {
                     // is local call, send direct reference to buffer
 
-                    std::cout << "local call!" << std::endl;
                     hpx::apply<func_local>( std::move(buffer_id),
                                             std::move(event_id),
                                             offset,

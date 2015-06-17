@@ -121,10 +121,8 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         virtual
         ~event()
         {
-            std::cout << "destroying event ..." << std::endl;
             unregister_event( device_id, 
                               this->get_base_gid() );
-            std::cout << "event destroyed!" << std::endl;
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -190,10 +188,8 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         virtual
         ~event()
         {
-            std::cout << "destroying event ..." << std::endl;
             unregister_event( device_id, 
                               this->get_base_gid() );
-            std::cout << "event destroyed!" << std::endl;
         }
 
         ////////////////////////////////////////////////////////////////////////
