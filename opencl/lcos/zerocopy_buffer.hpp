@@ -25,7 +25,6 @@ namespace hpx { namespace opencl { namespace lcos
         zerocopy_buffer() BOOST_NOEXCEPT
           : pointer_(0), size_(0)
         {
-            std::cout << "zerocopy_buffer(0-0)" << std::endl;
         }
     
         zerocopy_buffer(std::uintptr_t p, std::size_t size,
@@ -33,7 +32,6 @@ namespace hpx { namespace opencl { namespace lcos
           : pointer_(p), size_(size), buffer_(buffer)
         {
 
-            std::cout << "zerocopy_buffer(" << size_ << ")" << std::endl;
             HPX_ASSERT(buffer.size() == size_);
             //HPX_ASSERT(data_() == static_cast<char*>(buffer.data()));
 
@@ -55,13 +53,11 @@ namespace hpx { namespace opencl { namespace lcos
             // write data to adress
             char* dest_addr = reinterpret_cast<char*>(pointer_);
             ar >> hpx::serialization::make_array(dest_addr, size_);
-            std::cout << "zerocopy_buffer_load(" << size_ << ")" << std::endl;
         }
     
         template <typename Archive>
         void save(Archive& ar, unsigned int const version) const
         {
-            std::cout << "zerocopy_buffer_save(" << size_ << ")" << std::endl;
             // send size, adress and data
             ar << size_ << pointer_
                << hpx::serialization::make_array(buffer_.data(), size_);

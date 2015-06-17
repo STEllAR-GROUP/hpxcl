@@ -291,7 +291,6 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote(
     cl_command_queue command_queue = parent_device->get_read_command_queue();
 
     // create new target buffer
-    std::cout << "siz: " << size << std::endl;
     buffer_type data( new char[size], size, buffer_type::init_mode::take );
 
     // run the OpenCL-call
