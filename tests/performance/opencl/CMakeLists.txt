@@ -10,12 +10,10 @@ set(tests
    )
 
 
-set(events_and_futures_PARAMETERS THREADS_PER_LOCALITY 4)
-
-
 foreach(test ${tests})
   set(sources
-      ${test}.cpp)
+      ${test}.cpp
+      util/testresults.cpp)
 
   set(${test}_FLAGS ${${test}_FLAGS} DEPENDENCIES opencl_component)
 

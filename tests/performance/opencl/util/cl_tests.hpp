@@ -4,13 +4,14 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 
+#include <hpx/config.hpp>
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
 #include <hpx/util/lightweight_test.hpp>
 //#include <hpx/util/static.hpp>
 #include <hpx/include/iostreams.hpp>
 
-#include "../../../opencl.hpp"
+#include "../../../../opencl.hpp"
 
 using boost::program_options::variables_map;
 using boost::program_options::options_description;
@@ -77,16 +78,16 @@ static void print_testdevice_info(hpx::opencl::device & cldevice,
     std::string version = cldevice.get_device_info<CL_DEVICE_VERSION>().get();
 
     // Write Info Code
-    hpx::cout << "Device ID:  " << device_id << " / " << num_devices
-                                << hpx::endl;
-    hpx::cout << "Device GID: " << cldevice.get_gid() << hpx::endl;
-    hpx::cout << "Version:    " << version << hpx::endl;
-    hpx::cout << "Name:       " << cldevice.get_device_info<CL_DEVICE_NAME>().get()
-                                << hpx::endl;
-    hpx::cout << "Vendor:     " << cldevice.get_device_info<CL_DEVICE_VENDOR>().get()
-                                << hpx::endl;
-    hpx::cout << "Profile:    " << cldevice.get_device_info<CL_DEVICE_PROFILE>().get()
-                                << hpx::endl;
+    std::cout << "Device ID:  " << device_id << " / " << num_devices
+                                << std::endl;
+    std::cout << "Device GID: " << cldevice.get_gid() << std::endl;
+    std::cout << "Version:    " << version << std::endl;
+    std::cout << "Name:       " << cldevice.get_device_info<CL_DEVICE_NAME>().get()
+                                << std::endl;
+    std::cout << "Vendor:     " << cldevice.get_device_info<CL_DEVICE_VENDOR>().get()
+                                << std::endl;
+    std::cout << "Profile:    " << cldevice.get_device_info<CL_DEVICE_PROFILE>().get()
+                                << std::endl;
 }
 
 static std::vector<hpx::opencl::device> init(variables_map & vm)
@@ -114,9 +115,9 @@ static std::vector<hpx::opencl::device> init(variables_map & vm)
     hpx::opencl::device remote_device = remote_devices[device_id];
 
     // Print info
-    hpx::cout << "Local device:" << hpx::endl;
+    std::cout << "Local device:" << std::endl;
     print_testdevice_info(local_device, device_id, local_devices.size());
-    hpx::cout << "Remote device:" << hpx::endl;
+    std::cout << "Remote device:" << std::endl;
     print_testdevice_info(remote_device, device_id, remote_devices.size());
 
     // return the devices
@@ -131,7 +132,7 @@ int hpx_main(variables_map & vm)
 {
     {
         auto devices = init(vm);   
-        hpx::cout << hpx::endl;
+        std::cout << std::endl;
         cl_test(devices[0], devices[1]);
     }
     
