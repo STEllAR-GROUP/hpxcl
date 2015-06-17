@@ -19,14 +19,10 @@ using boost::program_options::value;
 // the main test function
 static void cl_test(hpx::opencl::device, hpx::opencl::device);
 
-/*
-#define TEST_CL_BUFFER(buffer, value)                                          \
-{                                                                              \
-    boost::shared_ptr<std::vector<char>> out1 =                                \
-                       buffer.enqueue_read(0, DATASIZE).get().get_data().get();\
-    HPX_TEST_EQ(std::string((const char*)(value)), std::string(out1->data()));  \
-}                                                           
-*/
+#define die( message )                                                          \
+{                                                                               \
+    HPX_THROW_EXCEPTION(hpx::no_success, "die()", (message));                   \
+}
 
 #define CREATE_BUFFER(name, data)                                               \
     static const buffer_type name(data, sizeof(data),                           \
@@ -36,10 +32,13 @@ static void cl_test(hpx::opencl::device, hpx::opencl::device);
 {                                                                               \
     auto lhs = result_data;                                                     \
     auto rhs = correct_result;                                                  \
-    HPX_TEST_EQ(lhs.size(), rhs.size());                                        \
+    if(lhs.size() != rhs.size()){                                               \
+        die("Result is incorrect! (Sizes don't match)");                        \
+    }                                                                           \
     for(std::size_t i = 0; i < lhs.size(); i++){                                \
         std::cout << std::hex << lhs[i] << "-" << rhs[i] << std::endl;          \
-        HPX_TEST_EQ(lhs[i], rhs[i]);                                            \
+        if(lhs[i] != rhs[i]){                                                   \
+            die("Result is incorrect!");                                        \
     }                                                                           \
 }
 
@@ -60,12 +59,15 @@ std::string to_string(buffer_type buf){
 {                                                                               \
     auto lhs = result_data;                                                     \
     auto rhs = correct_result;                                                  \
-    HPX_TEST_EQ(lhs.size(), rhs.size());                                        \
+    if(lhs.size() != rhs.size()){                                               \
+        die("Result is incorrect! (Sizes don't match)");                        \
+    }                                                                           \
     std::string correct_string = to_string(rhs);                                \
     std::string result_string = to_string(lhs);                                 \
-    HPX_TEST_EQ(correct_string, result_string);                                 \
+    if(correct_string != result_string){                                        \
+        die("Result is incorrect!");                                            \
+    }                                                                           \
 }
-
 
 static void print_testdevice_info(hpx::opencl::device & cldevice,
                                   std::size_t device_id,
@@ -73,10 +75,6 @@ static void print_testdevice_info(hpx::opencl::device & cldevice,
 
     // Test whether get_device_info works
     std::string version = cldevice.get_device_info<CL_DEVICE_VERSION>().get();
-
-    // Test whether version is a valid OpenCL version string
-    std::string versionstring = std::string("OpenCL ");
-    HPX_TEST(0 == version.compare(0, versionstring.length(), versionstring));
 
     // Write Info Code
     hpx::cout << "Device ID:  " << device_id << " / " << num_devices
@@ -89,11 +87,6 @@ static void print_testdevice_info(hpx::opencl::device & cldevice,
                                 << hpx::endl;
     hpx::cout << "Profile:    " << cldevice.get_device_info<CL_DEVICE_PROFILE>().get()
                                 << hpx::endl;
-
-    // Test for valid device client
-    HPX_TEST(cldevice.get_gid());
-
-
 }
 
 static std::vector<hpx::opencl::device> init(variables_map & vm)
@@ -111,15 +104,10 @@ static std::vector<hpx::opencl::device> init(variables_map & vm)
     std::vector<hpx::opencl::device> local_devices
             = hpx::opencl::get_local_devices( CL_DEVICE_TYPE_ALL,
                                               "OpenCL 1.1" ).get();
-    // If no remote devices present, get local device
-    if(remote_devices.empty()){
-        hpx::cout << "WARNING: No remote devices found." << hpx::endl;
-        remote_devices = local_devices;
-    }
-    HPX_ASSERT(!remote_devices.empty());
-    HPX_ASSERT(!local_devices.empty());
-    HPX_TEST(local_devices.size() > device_id);
-    HPX_TEST(remote_devices.size() > device_id);
+    if(remote_devices.empty()) die("No remote devices found!");
+    if(local_devices.empty()) die("No local devices found!");
+    if(local_devices.size() <= device_id || remote_devices.size() <= device_id)
+        die("deviceid is out of range!");
 
     // Choose device
     hpx::opencl::device local_device  = local_devices[device_id];
