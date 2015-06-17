@@ -20,28 +20,17 @@ static void printinfo(size_t i, size_t j, std::string info_type,
               << info_type << ": " << info << hpx::endl;
 
 }
-
+            
 static std::string
-device_uint_to_string(hpx::future<std::vector<char>> data_future)
+device_uint_to_string(cl_uint res)
 {
-
-    std::vector<char> data_raw = data_future.get();
-
-    cl_uint res = *((cl_uint*)data_raw.data());
-    
     std::stringstream ss;
-
     ss << res;
-
     return ss.str();
-
 }
 static std::string
-device_type_to_string(hpx::future<std::vector<char>> type_future)
+device_type_to_string(cl_device_type type)
 {
-
-    std::vector<char> type_raw = type_future.get();
-    cl_device_type type = *((cl_device_type*) type_raw.data());
 
     std::vector<std::string> typelist;
 
@@ -98,7 +87,7 @@ int hpx_main(int argc, char* argv[])
 
         // print a lot of information about every device
         size_t i = 1;
-        BOOST_FOREACH(device & cldevice, devices)
+        for(auto &cldevice : devices)
         {
    
             size_t j = 1;
@@ -107,51 +96,42 @@ int hpx_main(int argc, char* argv[])
             std::string str;
              
             // print name
-            str = cldevice.device_info_to_string(
-                        cldevice.get_device_info(CL_DEVICE_NAME));
+            str = cldevice.get_device_info<CL_DEVICE_NAME>().get();
             hpx::cout << i << ". " << str << hpx::endl;
 
             // print platform name
-            str = cldevice.device_info_to_string(
-                        cldevice.get_platform_info(CL_PLATFORM_NAME));
+            str = cldevice.get_platform_info<CL_PLATFORM_NAME>().get();
             printinfo(i, j++, "Platform", str);
 
             // print supported opencl version
-            str = cldevice.device_info_to_string(
-                        cldevice.get_device_info(CL_DEVICE_VERSION));
+            str = cldevice.get_device_info<CL_DEVICE_VERSION>().get();
             printinfo(i, j++, "OpenCL Version", str);
 
             // print device type
             str = device_type_to_string(
-                        cldevice.get_device_info(CL_DEVICE_TYPE));
+                        cldevice.get_device_info<CL_DEVICE_TYPE>().get());
             printinfo(i, j++, "Type", str);
 
             // print driver version
-            str = cldevice.device_info_to_string(
-                        cldevice.get_device_info(CL_DRIVER_VERSION));
+            str = cldevice.get_device_info<CL_DRIVER_VERSION>().get();
             printinfo(i, j++, "Driver Version", str);
 
             // print vendor
             str = device_uint_to_string(
-                        cldevice.get_device_info(CL_DEVICE_VENDOR_ID));
+                    cldevice.get_device_info<CL_DEVICE_VENDOR_ID>().get());
             str += " - ";
-            str += cldevice.device_info_to_string(
-                        cldevice.get_device_info(CL_DEVICE_VENDOR));
+            str += cldevice.get_device_info<CL_DEVICE_VENDOR>().get();
             printinfo(i, j++, "Vendor", str);
 
             // print profile
-            str = cldevice.device_info_to_string(
-                        cldevice.get_device_info(CL_DEVICE_PROFILE));
+            str = cldevice.get_device_info<CL_DEVICE_PROFILE>().get();
             printinfo(i, j++, "Profile", str);
 
             // print compiler c version
-            str = cldevice.device_info_to_string(
-                        cldevice.get_device_info(CL_DEVICE_OPENCL_C_VERSION));
+            str = cldevice.get_device_info<CL_DEVICE_OPENCL_C_VERSION>().get();
             printinfo(i, j++, "Compiler Version", str);
             
             /*** TO BE CONTINUED ***/
-
-
 
 
             // add newline before starting a new device

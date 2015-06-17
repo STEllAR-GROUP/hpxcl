@@ -7,72 +7,55 @@
 #ifndef HPX_OPENCL_PROGRAM_HPP_
 #define HPX_OPENCL_PROGRAM_HPP_
 
-#include "export_definitions.hpp"
-
-#include "server/program.hpp"
-
+// Default includes
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
-#include <hpx/include/components.hpp>
 
+// Export definitions
+#include "export_definitions.hpp"
+
+// Forward Declarations
 #include "fwd_declarations.hpp"
 
 namespace hpx {
 namespace opencl { 
 
+
     //////////////////////////////////////
-    /// @brief A collection of kernels.
-    /// 
-    /// One program represents one or multiple kernels.
-    /// It can be created from one (TODO multiple) source files.
+    /// @brief An OpenCL program consisting of one or multiple kernels.
+    ///
+    /// Every program belongs to one \ref device.
     ///
     class HPX_OPENCL_EXPORT program
-      : public hpx::components::client_base<
-          program, hpx::components::stub_base<server::program>
-        >
+      : public hpx::components::client_base<program, server::program>
     {
     
-        typedef hpx::components::client_base<
-            program, hpx::components::stub_base<server::program>
-            > base_type;
+        typedef hpx::components::client_base<program, server::program> base_type;
 
         public:
             // Empty constructor, necessary for hpx purposes
             program(){}
 
             // Constructor
-            program(hpx::shared_future<hpx::naming::id_type> const& gid)
-              : base_type(gid)
+            program(hpx::shared_future<hpx::naming::id_type> const& gid,
+                    hpx::naming::id_type device_gid_)
+              : base_type(gid), device_gid(std::move(device_gid_))
             {}
             
-            /////////////////////////////////////////////////
-            /// Exposed Component functionality
-            /// 
+            // initialization
             
-            // Build the Program, blocking
-            /**
-             *  @brief Builds the program, blocking.
-             */
-            void build() const;
-            /**
-             *  @brief Builds the program, blocking.
-             *
-             *  @param build_options    A string with specific build options.<BR>
-             *                          Look at the official 
-             *                          <A HREF="http://www.khronos.org/registry
-             * /cl/sdk/1.2/docs/man/xhtml/clBuildProgram.html">
-             *                          OpenCL Reference</A> for further
-             *                          information.
-             */
-            void build(std::string build_options) const;
 
-            // Build the program, non-blocking
+            // ///////////////////////////////////////////////
+            // Exposed Component functionality
+            // 
+ 
             /**
              *  @brief Builds the program, non-blocking.
              *
              *  @return A future that will trigger upon build completion.
              */
-            hpx::lcos::future<void> build_async() const;
+            hpx::lcos::future<void> build() const;
+
             /**
              *  @brief Builds the program, non-blocking.
              *
@@ -84,16 +67,37 @@ namespace opencl {
              *                          information.
              *  @return A future that will trigger upon build completion.
              */
-            hpx::lcos::future<void> build_async(std::string build_options) const;
+            hpx::lcos::future<void> build(std::string build_options) const;
 
-            // Get the binary of a built program
             /**
-             *  @brief
+             *  @brief Builds the program, blocking.
              *
-             *
-             *
+             *  @return A future that will trigger upon build completion.
              */
-            hpx::lcos::future<std::vector<char>> get_binary() const;
+            void build_sync() const;
+
+            /**
+             *  @brief Builds the program, blocking.
+             *
+             *  @param build_options    A string with specific build options.<BR>
+             *                          Look at the official 
+             *                          <A HREF="http://www.khronos.org/registry
+             * /cl/sdk/1.2/docs/man/xhtml/clBuildProgram.html">
+             *                          OpenCL Reference</A> for further
+             *                          information.
+             *  @return A future that will trigger upon build completion.
+             */
+            void build_sync(std::string build_options) const;
+
+            /**
+             *  @brief Retrieves the binary of a built program.
+             *         It can be used to create programs with
+             *         device::create_program_with_binary().
+             *
+             *  @return A future to the binary code
+             */
+            hpx::lcos::future<hpx::serialization::serialize_buffer<char> >
+            get_binary() const;
 
             /**
              *  @brief Creates a kernel.
@@ -107,10 +111,11 @@ namespace opencl {
             hpx::opencl::kernel
             create_kernel(std::string kernel_name) const;
 
+        private:
+            hpx::naming::id_type device_gid;
+
     };
 
 }}
-
-
 
 #endif

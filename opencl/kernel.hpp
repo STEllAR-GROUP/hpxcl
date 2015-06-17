@@ -7,21 +7,25 @@
 #ifndef HPX_OPENCL_KERNEL_HPP_
 #define HPX_OPENCL_KERNEL_HPP_
 
-#include "export_definitions.hpp"
-
-#include "server/kernel.hpp"
-
+// Default includes
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
-#include <hpx/include/components.hpp>
-#include <hpx/lcos/when_all.hpp>
-#include <boost/serialization/vector.hpp>
 
-#include "event.hpp"
+// Export definitions
+#include "export_definitions.hpp"
+
+// Forward Declarations
 #include "fwd_declarations.hpp"
 
+// OpenCL Headers
+#include "cl_headers.hpp"
+
+// Crazy function overloading
+#include "util/enqueue_overloads.hpp"
+
+
 namespace hpx {
-namespace opencl {
+namespace opencl { 
 
     ////////////////////////
     /// @brief Kernel execution dimensions.
@@ -69,50 +73,37 @@ namespace opencl {
         public:
             dimension& operator[](size_t idx){ return dims[idx]; }
     };
-    
-    /////////////////////////
+
+    //////////////////////////////////////
     /// @brief An OpenCL kernel.
     ///
-    /// This represents one specific OpenCL task that can be directly executed
-    /// on an OpenCL device.
+    /// Every kernel belongs to one \ref device.
     ///
     class HPX_OPENCL_EXPORT kernel
-      : public hpx::components::client_base<
-          kernel, hpx::components::stub_base<server::kernel>
-        >
-    
+      : public hpx::components::client_base<kernel, server::kernel>
     {
     
-        typedef hpx::components::client_base<
-            kernel, hpx::components::stub_base<server::kernel>
-            > base_type;
+        typedef hpx::components::client_base<kernel, server::kernel> base_type;
 
         public:
+            // Empty constructor, necessary for hpx purposes
             kernel(){}
 
-            kernel(hpx::shared_future<hpx::naming::id_type> const& gid)
-              : base_type(gid)
+            // Constructor
+            kernel(hpx::shared_future<hpx::naming::id_type> const& gid,
+                    hpx::naming::id_type device_gid_)
+              : base_type(gid), device_gid(std::move(device_gid_))
             {}
             
-            // ///////////////////////////////////////
-            //  Exposed Component functionality
-            //  
+            // initialization
+            
 
-
-            /**
-             *  @brief Sets a kernel argument
-             *
-             *  @param arg_index    The argument index to which the buffer will
-             *                      be connected.
-             *  @param arg          The \ref buffer that will be connected.
-             */
-            void
-            set_arg(cl_uint arg_index, hpx::opencl::buffer arg) const;
+            // ///////////////////////////////////////////////
+            // Exposed Component functionality
+            // 
 
             /**
              *  @brief Sets a kernel argument
-             *
-             *  This is the non-blocking version of \ref set_arg.
              *
              *  @param arg_index    The argument index to which the buffer will
              *                      be connected.
@@ -120,325 +111,71 @@ namespace opencl {
              *  @return             A future that will trigger upon completion.
              */
             hpx::lcos::future<void>
-            set_arg_async(cl_uint arg_index, hpx::opencl::buffer arg) const;
-            
-            // Runs the kernel
-            /**
-             *  @name Starts execution of a kernel.
-             *
-             *  @param work_dim     The number of dimensions the kernel should
-             *                      get executed in.
-             *  @param global_work_offset   The offset id with which to start
-             *                              the execution.<BR>
-             *                              This needs to be a pointer to a
-             *                              work_dim-dimensional array.
-             *  @param global_work_size     The total number of work-items per
-             *                              dimensions on which the kernel
-             *                              will be executed.<BR>
-             *                              This needs to be a pointer to a
-             *                              work_dim-dimensional array.
-             *  @param local_work_size      The size of one OpenCL work-group.
-             *                              <BR> This needs to be a pointer to a
-             *                              work_dim-dimensional array, or NULL
-             *                              for being set automatically by the
-             *                              OpenCL runtime.
-             *  @return             An \ref event that triggers upon completion.
-             */
-            //@{
-            /**
-             *  @brief Starts kernel immediately
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue(cl_uint work_dim,
-                    const size_t *global_work_offset,
-                    const size_t *global_work_size,
-                    const size_t *local_work_size) const;
+            set_arg(cl_uint arg_index, const hpx::opencl::buffer &arg) const;
 
             /**
-             *  @brief Depends on an event
+             *  @brief Sets a kernel argument
              *
-             *  This is an overloaded version of \ref enqueue with the
-             *  possibility to add an event as dependency.
+             *  This is the blocking version of set_arg
              *
-             *  The kernel will not execute before the event triggered.
-             *  
-             *  @param event    The \ref event to wait for.
+             *  @param arg_index    The argument index to which the buffer will
+             *                      be connected.
+             *  @param arg          The \ref buffer that will be connected.
+             *  @return             A future that will trigger upon completion.
              */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue(cl_uint work_dim,
-                    const size_t *global_work_offset,
-                    const size_t *global_work_size,
-                    const size_t *local_work_size,
-                    hpx::opencl::event event) const;
-            
-            /**
-             *  @brief Depends on multiple events
-             *
-             *  This is an overloaded version of \ref enqueue with the
-             *  possibility to add multiple events as dependency.
-             *
-             *  The kernel will not execute before the events triggered.
-             *  
-             *  @param events   The \ref event "events" to wait for.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue(cl_uint work_dim,
-                    const size_t *global_work_offset,
-                    const size_t *global_work_size,
-                    const size_t *local_work_size,
-                    std::vector<hpx::opencl::event> events) const;
+            void
+            set_arg_sync(cl_uint arg_index, const hpx::opencl::buffer &arg) const;
 
             /**
-             *  @brief Depends on one future event
-             *
-             *  The kernel will not execute before the future event tirggered.
-             *
-             *  @param event    The future \ref event to wait for.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue(cl_uint work_dim,
-                    const size_t *global_work_offset,
-                    const size_t *global_work_size,
-                    const size_t *local_work_size,
-                             hpx::lcos::shared_future<hpx::opencl::event> event) const;
-
-            /**
-             *  @brief Depends on multiple future events
-             *
-             *  The kernel will not execute before the future events triggered.
-             *
-             *  @param events   The future \ref event "events" to wait for.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue(cl_uint work_dim,
-                    const size_t *global_work_offset,
-                    const size_t *global_work_size,
-                    const size_t *local_work_size,
-               std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
-             //@}
-
-            // Runs the kernel with hpx::opencl::work_size
-            /**
-             *  @name Starts execution of a kernel, using work_size.
-             *
-             *  This is an overloaded version of \ref enqueue that takes a 
-             *  \ref hpx::opencl::work_size for convenience purposes.
+             *  @name Starts execution of a kernel, using work_size as work
+             *        dimensions.
              *
              *  @param size     The work dimensions on which the kernel should
              *                  get executed on.
              *  @return         An \ref event that triggers upon completion.
              */
-            //@{
-            /**
-             *  @brief Starts kernel immediately
-             */
-            template<size_t DIM>
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue(hpx::opencl::work_size<DIM> size) const;
-            
-            /**
-             *  @brief Depends on an event
-             *
-             *  The kernel will not execute before the event triggered.
-             *
-             *  @param event    The \ref event to wait for.
-             */
-            template<size_t DIM>
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue(hpx::opencl::work_size<DIM> size,
-                    hpx::opencl::event event) const;
+            template<std::size_t DIM, typename ...Deps>
+            hpx::lcos::future<void>
+            enqueue( hpx::opencl::work_size<DIM> size,
+                     Deps &&... dependencies ) const;
 
-            /**
-             *  @brief Depends on multiple events
-             *
-             *  The kernel will not execute before the events triggered.
-             *
-             *  @param events   The \ref event "events" to wait for.
-             */
-            template<size_t DIM>
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue(hpx::opencl::work_size<DIM> size,
-                    std::vector<hpx::opencl::event> events) const;
+            hpx::lcos::future<void>
+            enqueue_impl( std::vector<std::size_t> && size_vec,
+                          hpx::opencl::util::resolved_events && deps ) const;
 
-            /**
-             *  @brief Depends on one future event
-             *
-             *  The kernel will not execute before the future event tirggered.
-             *
-             *  @param event    The future \ref event to wait for.
-             */
-            template<size_t DIM>
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue(hpx::opencl::work_size<DIM> size,
-                             hpx::lcos::shared_future<hpx::opencl::event> event) const;
-
-            /**
-             *  @brief Depends on multiple future events
-             *
-             *  The kernel will not execute before the future events triggered.
-             *
-             *  @param events   The future \ref event "events" to wait for.
-             */
-            template<size_t DIM>
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue(hpx::opencl::work_size<DIM> size,
-               std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
-             //@}
-
-        private:
-            // LOCAL HELPER CALLBACK FUNCTIONS
-            template<size_t DIM>
-            static
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_future_single_callback_tpl(kernel cl,
-                                              hpx::opencl::work_size<DIM> size,
-                            hpx::lcos::shared_future<hpx::opencl::event> event);
  
-            template<size_t DIM>
-            static
-            hpx::lcos::future<hpx::opencl::event>                                
-            enqueue_future_multi_callback_tpl(kernel cl,
-                            hpx::opencl::work_size<DIM> size,
-                            hpx::lcos::future<std::vector<
-                                hpx::lcos::shared_future<hpx::opencl::event>
-                                                          >> futures);
+        private:
+            hpx::naming::id_type device_gid;
 
     };
-
-    template<size_t DIM>
-    hpx::lcos::future<hpx::opencl::event>
-    kernel::enqueue(hpx::opencl::work_size<DIM> dim,
-                    std::vector<hpx::opencl::event> events) const
-    {
-
-        // Casts everything to pointers
-        size_t global_work_offset[DIM];
-        size_t global_work_size[DIM];
-        size_t local_work_size_[DIM];
-        size_t *local_work_size = NULL;
-
-        // Write work_size to size_t arrays
-        for(size_t i = 0; i < DIM; i++)
-        {
-            global_work_offset[i] = dim[i].offset;
-            global_work_size[i] = dim[i].size;
-            local_work_size_[i] = dim[i].local_size;
-        }
-
-        // Checks for local_work_size == NULL
-        for(size_t i = 0; i < DIM; i++)
-        {
-            if(local_work_size_[i] != 0)
-            {
-                local_work_size = local_work_size_;
-                break;
-            }
-        }
-
-        // run with casted parameters
-        return enqueue(DIM, global_work_offset, global_work_size,
-                       local_work_size, events);
-
-    }
-
-    template<size_t DIM>
-    hpx::lcos::future<hpx::opencl::event>
-    kernel::enqueue(hpx::opencl::work_size<DIM> size,
-                    hpx::opencl::event event) const
-    {
-        // Create vector with events
-        std::vector<hpx::opencl::event> events(1);
-        events[0] = event;
-
-        // Run
-        return enqueue(size, events);
-    }
-
-    template<size_t DIM>
-    hpx::lcos::future<hpx::opencl::event>
-    kernel::enqueue(hpx::opencl::work_size<DIM> size) const
-    {
-        // Create vector with events
-        std::vector<hpx::opencl::event> events(0);
-
-        // Run
-        return enqueue(size, events);
-    }
-    
-    // Callback for template function for a single future event
-    template<size_t DIM>
-    hpx::lcos::future<hpx::opencl::event>
-    kernel::enqueue_future_single_callback_tpl(kernel cl,
-                                              hpx::opencl::work_size<DIM> size,
-                            hpx::lcos::shared_future<hpx::opencl::event> event)
-    {
-        return cl.enqueue(size, event.get());
-    }
-
-
-    template<size_t DIM>
-    hpx::lcos::future<hpx::opencl::event>
-    kernel::enqueue(hpx::opencl::work_size<DIM> size,
-                    hpx::lcos::shared_future<hpx::opencl::event> event) const
-    {
-        return event.then(                                                      
-            hpx::util::bind(                                                
-                    &(enqueue_future_single_callback_tpl<DIM>),
-                    *this,                                                  
-                    size,
-                    util::placeholders::_1
-            )                                                               
-        );                                                                      
-    
-    }
-
-    template<size_t DIM>
-    hpx::lcos::future<hpx::opencl::event>                                
-    kernel::enqueue_future_multi_callback_tpl(kernel cl,
-                hpx::opencl::work_size<DIM> size,    
-               hpx::lcos::future<std::vector<                            
-                            hpx::lcos::shared_future<hpx::opencl::event>        
-                                                                >> futures)     
-    {                                                                           
-                                                                                
-        /* Get list of futures */                                               
-        std::vector<hpx::lcos::shared_future<hpx::opencl::event>>               
-        futures_list = futures.get();                                           
-                                                                                
-        /* Create list of events */                                             
-        std::vector<hpx::opencl::event> events;
-        events.reserve(futures_list.size());            
-                                                                                
-        /* Put events into list */                                              
-        BOOST_FOREACH(hpx::lcos::shared_future<hpx::opencl::event> & future,    
-                        futures_list)                                           
-        {                                                                       
-            events.push_back(future.get());                                     
-        }                                                                       
-                                                                                
-        /* Call actual function */                                              
-        return cl.enqueue(size, events);                         
-                                                                                
-    }                                                                           
-  
-
-    template<size_t DIM>
-    hpx::lcos::future<hpx::opencl::event>
-    kernel::enqueue(hpx::opencl::work_size<DIM> size,
-               std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const
-    {
-        return hpx::when_all(events).then(                                      
-            hpx::util::bind(                                                    
-                &(enqueue_future_multi_callback_tpl<DIM>),
-                *this,
-                size,
-                util::placeholders::_1
-            )
-        );
-    }
 
 }}
 
 
+////////////////////////////////////////////////////////////////////////////////
+// IMPLEMENTATIONS
+//
+template<std::size_t DIM, typename ...Deps>
+hpx::future<void>
+hpx::opencl::kernel::enqueue( hpx::opencl::work_size<DIM> size,
+                             Deps &&... dependencies ) const
+{
+    // combine dependency futures in one std::vector
+    using hpx::opencl::util::enqueue_overloads::resolver;
+    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    HPX_ASSERT(deps.are_from_device(device_gid));
+ 
+    // extract information from work_size struct
+    std::vector<std::size_t> size_vec(3*DIM);
+    for(std::size_t i = 0; i < DIM; i++){
+        size_vec[i + 0*DIM] = size[i].offset;
+        size_vec[i + 1*DIM] = size[i].size;
+        size_vec[i + 2*DIM] = size[i].local_size;
+    }
+
+    // forward to enqueue_impl
+    return enqueue_impl( std::move(size_vec), std::move(deps) );
+
+} 
 
 #endif

@@ -7,18 +7,19 @@
 #ifndef HPX_OPENCL_TOOLS_HPP_
 #define HPX_OPENCL_TOOLS_HPP_
 
-#include <CL/cl.h>
-#include <sstream>
-
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 #include <hpx/include/iostreams.hpp>
+
+#include <sstream>
+
+#include "cl_headers.hpp"
 
 #ifndef CL_VERSION_1_1
 #error "OpenCL 1.1 required!"
 #endif
 
-namespace hpx { namespace opencl {
+namespace hpx { namespace opencl { namespace tools {
 
     // Used to disable the empty constructor of classes
     #define CL_FORBID_EMPTY_CONSTRUCTOR(classname)                           \
@@ -29,38 +30,42 @@ namespace hpx { namespace opencl {
         }
 
     // To be called on OpenCL errorcodes, throws an exception on OpenCL Error
-    #define cl_ensure(errCode, functionname){                   \
-        if(errCode != CL_SUCCESS)                               \
-        {                                                       \
-            std::stringstream errorMessage;                     \
-            errorMessage << "CL_ERROR("                         \
-                         << (errCode)                           \
-                         << "): "                               \
-                         << hpx::opencl::cl_err_to_str(errCode);\
-            HPX_THROW_EXCEPTION(hpx::no_success,                \
-                                (functionname),                 \
-                                errorMessage.str().c_str());    \
-        }                                                       \
+    #define cl_ensure(errCode, functionname){                          \
+        if(errCode != CL_SUCCESS)                                      \
+        {                                                              \
+            std::stringstream errorMessage;                            \
+            errorMessage << "CL_ERROR("                                \
+                         << (errCode)                                  \
+                         << "): "                                      \
+                         << hpx::opencl::tools::cl_err_to_str(errCode);\
+            HPX_THROW_EXCEPTION(hpx::no_success,                       \
+                                (functionname),                        \
+                                errorMessage.str());                   \
+        }                                                              \
     }
     
      // To be called on OpenCL errorcodes in destructors, does not throw
-    #define cl_ensure_nothrow(errCode, functionname){           \
-        if(errCode != CL_SUCCESS)                               \
-        {                                                       \
-            hpx::cerr << (functionname)                         \
-                      << ": CL_ERROR("                          \
-                      << (errCode)                              \
-                      << "): "                                  \
-                      << hpx::opencl::cl_err_to_str(errCode)    \
-                      << hpx::endl;                             \
-        }                                                       \
+    #define cl_ensure_nothrow(errCode, functionname){                  \
+        if(errCode != CL_SUCCESS)                                      \
+        {                                                              \
+            hpx::cerr << (functionname)                                \
+                      << ": CL_ERROR("                                 \
+                      << (errCode)                                     \
+                      << "): "                                         \
+                      << hpx::opencl::tools::cl_err_to_str(errCode)    \
+                      << hpx::endl;                                    \
+        }                                                              \
     }
     
     
     // Translates CL errorcode to descriptive string
     const char* cl_err_to_str(cl_int errCode);
 
-}}
+    // Returns true if curren thread runs on a large stack
+    bool runs_on_large_stack();
+
+}}}
 
 #endif//HPX_OPENCL_TOOLS_HPP_
+
 

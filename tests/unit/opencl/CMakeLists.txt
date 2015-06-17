@@ -8,10 +8,15 @@
 set(tests
     initialization
     buffer_read_write
-    events_and_futures
+    event
+    info
+    event_map
+    data_map
+    dynamic_overloads
+#    events_and_futures
     kernel
-    future_enqueues
-    program_from_binary
+#    future_enqueues
+#    program_from_binary
    )
 
 

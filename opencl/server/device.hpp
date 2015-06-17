@@ -7,27 +7,16 @@
 #ifndef HPX_OPENCL_SERVER_DEVICE_HPP_
 #define HPX_OPENCL_SERVER_DEVICE_HPP_
 
-#include <cstdint>
-
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
-#include <hpx/include/iostreams.hpp>
-#include <hpx/util/serialize_buffer.hpp>
-#include <hpx/lcos/local/mutex.hpp>
-#include <hpx/lcos/local/spinlock.hpp>
 
-#include <hpx/runtime/components/server/managed_component_base.hpp>
+#include "../cl_headers.hpp"
 
-#include <queue>
-#include <map>
+#include "util/event_map.hpp"
+#include "util/data_map.hpp"
 
-#include <CL/cl.h>
-
-#include "../fwd_declarations.hpp"
-#include "../event.hpp"
-
-// ! This component header may NOT include other component headers !
-// (To avoid recurcive includes)
+// REGISTER_ACTION_DECLARATION templates
+#include "util/server_definitions.hpp"
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
@@ -39,69 +28,99 @@ namespace hpx { namespace opencl{ namespace server{
     class device
       : public hpx::components::managed_component_base<device>
     {
+        typedef hpx::lcos::local::spinlock lock_type;
+        typedef hpx::serialization::serialize_buffer<char> buffer_type;
+
     public:
         // Constructor
         device();
-        device(clx_device_id device_id, bool enable_profiling=false);
-
         ~device();
-
 
         //////////////////////////////////////////////////
         /// Local public functions
         ///
+        void init(cl_device_id device_id, bool enable_profiling=false);
+
         cl_context get_context();
         cl_device_id get_device_id();
-        cl_command_queue get_read_command_queue();
-        cl_command_queue get_write_command_queue();
-        cl_command_queue get_work_command_queue();
-
-        // Registers a read buffer
-        void put_event_data(cl_event, boost::shared_ptr<std::vector<char>>);
-
-        // Registers a const buffer
-        void put_event_const_data(cl_event, hpx::util::serialize_buffer<char>);
-
-        // Delete all ressources registered with specific cl_event
-        void release_event_resources(cl_event);
-
-        // Returns the data associated with a certain cl_event
-        boost::shared_ptr<std::vector<char>>
-        get_event_data(cl_event event);
-
-        // blocks until event triggers
-        void wait_for_event(cl_event event);
-        
-        // Schedules mem object for deletion
-        //
-        // this is a workaround for the clSetEventStatus <-> clReleaseMemObj
-        // problem; further information:
-        // http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clSetUserEventStatus.html
-        // 
-        void schedule_cl_mem_deletion(cl_mem mem);
-
-        // triggers an event previously generated with create_user_event()
-        void trigger_user_event(cl_event event);
-        
-
 
         //////////////////////////////////////////////////
         /// Exposed functionality of this component
         ///
-        
-        // creates an opencl event that can be triggered by the user
-        hpx::opencl::event create_user_event();
 
         // returns device specific information
-        std::vector<char> get_device_info(cl_device_info info_type);
+        hpx::serialization::serialize_buffer<char>
+        get_device_info(cl_device_info info_type);
         
         // returns platform specific information
-        std::vector<char> get_platform_info(cl_platform_info info_type);
+        hpx::serialization::serialize_buffer<char>
+        get_platform_info(cl_platform_info info_type);
 
+        // creates a new buffer
+        hpx::id_type
+        create_buffer(cl_mem_flags flags, std::size_t size);
 
-    HPX_DEFINE_COMPONENT_ACTION(device, create_user_event);
+        // creates a new program from source
+        hpx::id_type
+        create_program_with_source(hpx::serialization::serialize_buffer<char>);
+
+        // creates a new program from binary
+        hpx::id_type
+        create_program_with_binary(hpx::serialization::serialize_buffer<char>);
+
+        /////////////////////////////////////////////////
+        /// Behind-the-scenes functionality of this component
+        /// 
+
+        // releases an event registered to a GID
+        void
+        release_event(hpx::naming::gid_type);
+
+        // activates a deferred event
+        void
+        activate_deferred_event(hpx::naming::id_type);
+     
+        // activates a deferred event<serialize_buffer<char> >
+        void
+        activate_deferred_event_with_data(hpx::naming::id_type);
+
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_info);
     HPX_DEFINE_COMPONENT_ACTION(device, get_platform_info);
+    HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
+    HPX_DEFINE_COMPONENT_ACTION(device, create_program_with_source);
+    HPX_DEFINE_COMPONENT_ACTION(device, create_program_with_binary);
+    HPX_DEFINE_COMPONENT_ACTION(device, release_event);
+    HPX_DEFINE_COMPONENT_ACTION(device, activate_deferred_event);
+
+    public:
+        /////////////////////////////////////////////////
+        // Public Member Functions
+
+        // registers an event-GID pair
+        void
+        register_event(const hpx::naming::id_type & gid, cl_event);
+
+        // retrieves an event from a GID
+        cl_event
+        retrieve_event(const hpx::naming::id_type & gid);
+
+        // command queue retrievals
+        cl_command_queue get_read_command_queue();
+        cl_command_queue get_write_command_queue();
+        cl_command_queue get_kernel_command_queue();
+
+        // event data handling. needed to keep clEnqueue* data alive 
+        // (like clEnqueueWriteBuffer)
+        template<typename T>
+        void put_event_data( cl_event event,
+                             hpx::serialization::serialize_buffer<T> data )
+        {
+            event_data_map.add(event, data);
+        }
+
+        // Waits for an opencl event.
+        // Necessary to offload wait from hpx to os thread.
+        void wait_for_cl_event(cl_event);
 
     private:
         ///////////////////////////////////////////////
@@ -110,21 +129,13 @@ namespace hpx { namespace opencl{ namespace server{
         
         // Error Callback
         static void CL_CALLBACK error_callback(const char*, const void*,
-                                               size_t, void*);
-        // Try to delete buffers
-        void try_delete_cl_mem();
-        // same as above, but doesn't lock user_events_mutex internally.
-        // calling function needs to assure that user_events_mutex is already
-        // locked.
-        void try_delete_cl_mem_nolock();
-        
-        // same as trigger_user_event, but doesn't lock user_events_mutex.
-        // calling function needs to lock user_events_mutex manually.
-        void trigger_user_event_nolock(cl_event);
+                                               std::size_t, void*);
 
-        // cleans up all the possible leftover user events an cl_mems
-        void cleanup_user_events();
+        // cl_event Deletion Callback
+        static void delete_event(cl_event);
 
+        // Releases the data that was being kept alive
+        void delete_event_data(cl_event);
 
     private:
         ///////////////////////////////////////////////
@@ -135,50 +146,20 @@ namespace hpx { namespace opencl{ namespace server{
         cl_context          context;
         cl_command_queue    command_queue;
 
-        // lock typedefs
-        typedef hpx::lcos::local::mutex mutex_type;
-        typedef hpx::lcos::local::spinlock spinlock_type;
-
-        // Map for data returned from opencl calls
-        // (e.g. from buffer::enqueue_read)
-        std::map<cl_event, boost::shared_ptr<std::vector<char>>> event_data;
-        spinlock_type event_data_mutex;
-
-        // Map for the input data needed for opencl calls
-        // (e.g. for buffer::enqueue_write)
-        std::map<cl_event, hpx::util::serialize_buffer<char>> event_const_data;
-        spinlock_type event_const_data_mutex;
+        util::event_map     event_map;
+        util::data_map      event_data_map;
         
-        // List for all the user generated events (e.g. from futures)
-        // Store hpx::opencl::event client with them to keep reference counter up
-        std::map<cl_event, hpx::opencl::event> user_events;
-        spinlock_type user_events_mutex;
-
-        // List of pending cl_mem deletions
-        // this is a workaround for the clSetEventStatus problem
-        std::queue<cl_mem> pending_cl_mem_deletions; 
-        spinlock_type pending_cl_mem_deletions_mutex;
-
-        // List of waiting events with respective mutexes
-        std::map<cl_event, boost::shared_ptr<hpx::lcos::local::event>>
-                                                            cl_event_waitlist;
-        spinlock_type cl_event_waitlist_mutex;
-
     };
 }}}
 
 //[opencl_management_registration_declarations
-HPX_REGISTER_ACTION_DECLARATION(
-        hpx::opencl::server::device::create_user_event_action,
-        opencl_device_create_user_event_action);
-HPX_REGISTER_ACTION_DECLARATION(
-        hpx::opencl::server::device::get_device_info_action,
-        opencl_device_get_device_info_action);
-HPX_REGISTER_ACTION_DECLARATION(
-        hpx::opencl::server::device::get_platform_info_action,
-        opencl_device_get_platform_info_action);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, get_device_info);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, get_platform_info);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, create_buffer);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, create_program_with_source);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, create_program_with_binary);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, release_event);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(device, activate_deferred_event);
 //]
-
-
 
 #endif

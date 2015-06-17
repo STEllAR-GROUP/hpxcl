@@ -6,7 +6,8 @@
 
 #include "cl_tests.hpp"
 
-static void cl_test(hpx::opencl::device cldevice)
+static void cl_test(hpx::opencl::device local_device,
+                    hpx::opencl::device remote_device)
 {
     // do nothing. this file only tests the initialization
 }

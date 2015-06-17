@@ -8,61 +8,210 @@
 
 
 /*
- * This test is meant to verify the buffer read and buffer write functionality.
+ * This test is meant to verify the kernel creation and execution functionality.
  */
 
-
-static const char square_src[] = 
+CREATE_BUFFER(invalid_program_src,
 "                                                                          \n"
-"   __kernel void square(__global int * val)                               \n"
+"   __kernel void hello_world(__global char * in, __global char * out)     \n"
 "   {                                                                      \n"
 "       size_t tid = get_global_id(0);                                     \n"
-"       val[tid] = val[tid]*val[tid];                                      \n"
+"       out[tid] = (char)(in[unknown_variable] + tid);                     \n"
 "   }                                                                      \n"
-"                                                                          \n";
+"                                                                          \n");
 
-static const int initdata[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-#define DATASIZE ((size_t)10)
+CREATE_BUFFER(program_src,
+"                                                                          \n"
+"   __kernel void hello_world(__global char * in, __global char * out)     \n"
+"   {                                                                      \n"
+"       size_t tid = get_global_id(0);                                     \n"
+"       out[tid] = (char)(in[tid] + tid);                                  \n"
+"   }                                                                      \n"
+"                                                                          \n");
 
-static const char refdata1[] = {0, 1, 2, 9, 16, 25, 36, 49, 8, 9};
 
-static void cl_test(hpx::opencl::device cldevice)
-{
 
-    hpx::opencl::buffer buffer = cldevice.create_buffer(CL_MEM_READ_WRITE,
-                                                              DATASIZE,
-                                                              initdata);
+#define DATASIZE (sizeof("Hello, World!"))
+
+const char initdata_arr[] = { ('H'  - static_cast<char>( 0)), 
+                              ('e'  - static_cast<char>( 1)), 
+                              ('l'  - static_cast<char>( 2)), 
+                              ('l'  - static_cast<char>( 3)), 
+                              ('o'  - static_cast<char>( 4)), 
+                              (','  - static_cast<char>( 5)), 
+                              (' '  - static_cast<char>( 6)), 
+                              ('W'  - static_cast<char>( 7)), 
+                              ('o'  - static_cast<char>( 8)), 
+                              ('r'  - static_cast<char>( 9)), 
+                              ('l'  - static_cast<char>(10)), 
+                              ('d'  - static_cast<char>(11)), 
+                              ('!'  - static_cast<char>(12)), 
+                              ('\0' - static_cast<char>(13)) };
+const char refdata2_arr[] = { ('H'  + static_cast<char>( 0)), 
+                              ('e'  + static_cast<char>( 1)), 
+                              ('l'  + static_cast<char>( 2)), 
+                              ('l'  + static_cast<char>( 3)), 
+                              ('o'  + static_cast<char>( 4)), 
+                              (','  + static_cast<char>( 5)), 
+                              (' '  + static_cast<char>( 6)), 
+                              ('W'  + static_cast<char>( 7)), 
+                              ('o'  + static_cast<char>( 8)), 
+                              ('r'  + static_cast<char>( 9)), 
+                              ('l'  + static_cast<char>(10)), 
+                              ('d'  + static_cast<char>(11)), 
+                              ('!'  + static_cast<char>(12)), 
+                              ('\0' + static_cast<char>(13)) };
+CREATE_BUFFER(initdata, initdata_arr);
+CREATE_BUFFER(refdata1, "Hello, World!");
+CREATE_BUFFER(refdata2, refdata2_arr);
+
+static void create_and_run_kernel( hpx::opencl::device cldevice,
+                                   hpx::opencl::program program ){
+
+    // test if kernel can be created
+    hpx::opencl::kernel kernel = program.create_kernel("hello_world");
+
+    // test if creation of invalid kernels throws
+    {
+        bool caught_exception = false;
+        try{
+            hpx::opencl::kernel kernel = program.create_kernel("blub");
+            kernel.get_gid();
+        } catch (hpx::exception e){
+            caught_exception = true;
+        }
+        HPX_ASSERT(caught_exception);
+    }
+
+    // create source and destination buffers
+    hpx::opencl::buffer buffer_src =
+        cldevice.create_buffer(CL_MEM_READ_WRITE, DATASIZE);
+    hpx::opencl::buffer buffer_dst =
+        cldevice.create_buffer(CL_MEM_READ_WRITE, DATASIZE);
 
     // test if buffer initialization worked
-    size_t buffer_size = buffer.size().get();
-    HPX_TEST_EQ(buffer_size, DATASIZE);
+    {
+        size_t buffer_src_size = buffer_src.size().get();
+        HPX_TEST_EQ(buffer_src_size, DATASIZE);
+        size_t buffer_dst_size = buffer_dst.size().get();
+        HPX_TEST_EQ(buffer_dst_size, DATASIZE);
+    }
 
-    // read and compare
-    TEST_CL_BUFFER(buffer, initdata);
+    
+    // set kernel arguments
+    {
+        auto future1 = kernel.set_arg(0, buffer_src);
+        kernel.set_arg_sync(1, buffer_dst);
+        future1.get();
+    }
+    
+    // set work dimensions
+    hpx::opencl::work_size<1> size;
+    size[0].offset = 0;
+    size[0].size = DATASIZE;
 
-    // create program
-    hpx::opencl::program prog = cldevice.create_program_with_source(
-                                                                    square_src);
+    // test if kernel can get executed (blocking)
+    {
+        // Initialize src buffer
+        buffer_src.enqueue_write(0, initdata).get();
 
-    // build program
-    prog.build();
+        // Execute
+        kernel.enqueue(size).get();
 
-    // create kernel
-    hpx::opencl::kernel square_kernel = prog.create_kernel("square");
+        // Check for correct result
+        auto result_future = buffer_dst.enqueue_read(0, DATASIZE);
+        COMPARE_RESULT(result_future.get(), refdata1);
+    }
 
-    // set kernel arg
-    square_kernel.set_arg(0, buffer);
+    // test if kernel can get executed (non-blocking)
+    {
+        // Send result of blocking execution to src buffer
+        auto fut1 = buffer_dst.enqueue_send(buffer_src, 0, 0, DATASIZE);
 
-    // create work_size
-    hpx::opencl::work_size<1> dim;
-    dim[0].offset = 3;
-    dim[0].size = 5;
+        // Execute
+        auto fut2 = kernel.enqueue(size, fut1.dst_future);
 
-    // run kernel
-    square_kernel.enqueue(dim).get().await();
+        // Read data
+        auto result_future = buffer_dst.enqueue_read(0, DATASIZE, fut2);
+        COMPARE_RESULT(result_future.get(), refdata2);
+    }
 
-    // test if kernel executed successfully
-    TEST_CL_BUFFER(buffer, refdata1);
+}
+
+static void cl_test( hpx::opencl::device local_device,
+                     hpx::opencl::device cldevice )
+{
+
+    // standard hello-world test
+    {
+        // test if program can be created from source
+        hpx::opencl::program program =
+            cldevice.create_program_with_source(program_src);
+
+        // test if program can be compiled
+        // IMPORTANT! use get(). wait() does not throw errors.
+        program.build().get();
+
+        // test if program can be used for computation
+        create_and_run_kernel(cldevice, program);
+    }
+
+    // same test with build arguments
+    {
+        // test if program can be created from source
+        hpx::opencl::program program =
+            cldevice.create_program_with_source(program_src);
+
+        // test if program can be compiled
+        program.build("-Werror").get();
+
+        // test if program can be used for computation
+        create_and_run_kernel(cldevice, program);
+    }
+
+    // test with create_from_binary
+    {
+        // test if program can be created from source
+        hpx::opencl::program program1 =
+            cldevice.create_program_with_source(program_src);
+
+        // test if program can be compiled
+        program1.build().get();
+
+        // retrieve binary of program1
+        auto program_binary = program1.get_binary().get();
+
+        hpx::cout << "Binary:" << hpx::endl;
+        hpx::cout << to_string(program_binary) << hpx::endl << hpx::endl;;
+
+        // test if program can be created from binary
+        hpx::opencl::program program2 =
+            cldevice.create_program_with_binary(program_binary);
+
+        // test if program can be compiled
+        program2.build_sync();
+
+        // test if program can be used for computation
+        create_and_run_kernel(cldevice, program2);
+    }
+
+    // Test compiler error detection
+    {
+        // create program from source. this should not throw 
+        hpx::opencl::program program =
+            cldevice.create_program_with_source(invalid_program_src);
+
+        // Try to build. This should throw an error.
+        bool caught_exception = false;
+        try{
+            program.build().get();
+        } catch (hpx::exception e){
+            hpx::cout << "Build error:" << hpx::endl;
+            hpx::cout << e.what() << hpx::endl << hpx::endl;
+            caught_exception = true;
+        }
+        HPX_TEST(caught_exception);
+    }
 
 }
 

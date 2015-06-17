@@ -10,8 +10,9 @@ if(NOT HPX_ROOT)
     #  message("HPX_DIR not set, checking environment variables...")
     #  set(HPX_DIR $ENV{HPX_ROOT}/lib/cmake/hpx)
     #  if(NOT DEFINED HPX_DIR)
-    message(FATAL_ERROR "HPX_ROOT not set, unable to find HPX!")
+    #message(FATAL_ERROR "HPX_ROOT not set, unable to find HPX!")
     #  endif()
+    set(HPX_ROOT /usr/local)
 endif()
 
 set(HPX_DIR "${HPX_ROOT}/lib/cmake/hpx")
@@ -97,6 +98,9 @@ endif()
 ###############################################################################
 
 if(HPX_BUILD_TESTS)
+
+  file(COPY ${HPX_ROOT}/bin/hpxrun.py DESTINATION ${CMAKE_BINARY_DIR}/bin)
+
   hpx_option(HPX_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
   hpx_option(HPX_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
   hpx_option(HPX_BUILD_TESTS_UNIT BOOL "Build HPX unit tests (default: ON)" ON ADVANCED)

@@ -7,16 +7,20 @@
 #ifndef HPX_OPENCL_BUFFER_HPP_
 #define HPX_OPENCL_BUFFER_HPP_
 
-#include "export_definitions.hpp"
-
-#include "server/buffer.hpp"
-
+// Default includes
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
-#include <hpx/include/components.hpp>
-#include <hpx/lcos/future.hpp>
 
-#include <vector>
+// Export definitions
+#include "export_definitions.hpp"
+
+// Forward Declarations
+#include "fwd_declarations.hpp"
+
+// Crazy function overloading
+#include "util/enqueue_overloads.hpp"
+
+#include "server/buffer.hpp"
 
 namespace hpx {
 namespace opencl { 
@@ -28,381 +32,245 @@ namespace opencl {
     /// Every buffer belongs to one \ref device.
     ///
     class HPX_OPENCL_EXPORT buffer
-      : public hpx::components::client_base<
-          buffer, hpx::components::stub_base<server::buffer>
-        >
+      : public hpx::components::client_base<buffer, server::buffer>
     {
     
-        typedef hpx::components::client_base<
-            buffer, hpx::components::stub_base<server::buffer>
-            > base_type;
+        typedef hpx::components::client_base<buffer, server::buffer> base_type;
+
+        public:
+            // the result struct for enqueue_send
+            struct send_result{
+                public:
+                    send_result( hpx::future<void>&& fut1,
+                                 hpx::future<void>&& fut2 )
+                        : src_future(std::move(fut1)),
+                          dst_future(std::move(fut2)){};
+
+                    hpx::future< void > src_future;
+                    hpx::future< void > dst_future;
+            };
+
 
         public:
             // Empty constructor, necessary for hpx purposes
             buffer(){}
 
             // Constructor
-            buffer(hpx::shared_future<hpx::naming::id_type> const& gid)
-              : base_type(gid)
+            buffer(hpx::shared_future<hpx::naming::id_type> const& gid,
+                   hpx::naming::id_type device_gid_)
+              : base_type(gid), device_gid(std::move(device_gid_))
             {}
             
+            // initialization
+            
+
             // ///////////////////////////////////////////////
             // Exposed Component functionality
             // 
-            
+ 
             /**
              *  @brief Get the size of the buffer
+             *
              *  @return The size of the buffer
              */
-            hpx::lcos::future<size_t>
+            hpx::future<std::size_t>
             size() const;
 
-            // Read buffer
             /**
-             *  @name Reads data from the buffer
+             *  @brief Writes data to the buffer
+             *
+             *  @param offset   The start position of the area to write to.
+             *  @param data     The data to be written.
+             *  @return         An future that can be used for synchronization or
+             *                  dependency for other calls.
+             */
+            template<typename T, typename ...Deps>
+            hpx::future<void>
+            enqueue_write( std::size_t offset,
+                           const hpx::serialization::serialize_buffer<T> data,
+                           Deps &&... dependencies );
+
+            /**
+             *  @brief Reads data from the buffer
              *
              *  @param offset   The start position of the area to read.
              *  @param size     The size of the area to read.
-             *  @return         An \ref event that triggers upon completion.<BR>
-             *                  The actual data will be accessable via the
-             *                  \ref event class.
-             *  @see event
+             *  @return         A future that can be used for synchronization or
+             *                  dependency for other calls.
+             *                  Contains the result buffer of the call.
              */
-            //@{
+            template<typename ...Deps>
+            hpx::future<hpx::serialization::serialize_buffer<char> >
+            enqueue_read( std::size_t offset,
+                          std::size_t size,
+                          Deps &&... dependencies )
+            {
+                return enqueue_read_alloc(std::move(offset), std::move(size),
+                                          std::forward<Deps>(dependencies)...);
+            }
+            // This proxy function is necessary to prevent ambiguity with other
+            // overloads
+            HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(
+                hpx::future<hpx::serialization::serialize_buffer<char> >,
+                                   enqueue_read_alloc, std::size_t /*offset*/,
+                                                       std::size_t /*size*/);
+         
             /**
-             *  @brief Starts task immediately.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_read(size_t offset, size_t size) const;
-            
-            /**
-             *  @brief Depends on one event
+             *  @brief Reads data from the buffer
              *
-             *  This overloaded version accepts an event to wait for.
-             *
-             *  @param event    An \ref event that this task depends on. <BR>
-             *                  The task will be executed after this event is
-             *                  completed.
+             *  @param offset   The start position of the area to read.
+             *  @param data     The buffer the result will get written to.
+             *                  The buffer also contains information about the
+             *                  size of the data to read.
+             *                  The buffer will get returned and kept alive
+             *                  through the future.
+             *  @return         A future that can be used for synchronization or
+             *                  dependency for other calls.
+             *                  Contains the 'data' parameter with the result
+             *                  written to.
              */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_read(size_t offset, size_t size,
-                                       hpx::opencl::event event) const;
+            template<typename T, typename ...Deps>
+            hpx::future<hpx::serialization::serialize_buffer<T> >
+            enqueue_read( std::size_t offset,
+                          hpx::serialization::serialize_buffer<T> data,
+                          Deps &&... dependencies );
 
-            /**
-             *  @brief Depends on multiple events
-             *
-             *  This overloaded version accepts multiple events to wait for.
-             *
-             *  @param events   A list of \ref event "events" that this task
-             *                  depends on.
-             *                  <BR>
-             *                  The task will be executed after all given events
-             *                  are completed.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_read(size_t offset, size_t size,
-                                  std::vector<hpx::opencl::event> events) const;
-            
-            /**
-             *  @brief Depends on one future event
-             *
-             *  This overloaded version accepts a future event to wait for.
-             *
-             *  @param event    A future \ref event that this
-             *                  task depends on. <BR>
-             *                  The task will be executed after the given event
-             *                  is completed.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_read(size_t offset, size_t size,
-                             hpx::lcos::shared_future<hpx::opencl::event> event) const;
-
-            /**
-             *  @brief Depends on multiple future events
-             *
-             *  This overloaded version accepts multiple future events 
-             *  to wait for.
-             *
-             *  @param events   A list of future \ref event "events" that this
-             *                  task depends on. <BR>
-             *                  The task will be executed after all given events
-             *                  are completed.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_read(size_t offset, size_t size,
-            std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
-            //@}
-
-            // Write Buffer
-            /**
-             *  @name Writes data to the buffer
-             *
-             *  @param offset   The start position of the area to write to.
-             *  @param size     The size of the data to write.
-             *  @param data     The data to be written.
-             *  @return         An \ref event that triggers upon completion.
-             *                  
-             *  @see event
-             */
-            //@{
-            /**
-             *  @brief Starts task immediately.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_write(size_t offset, size_t size, const void* data) const;
-            
-            /**
-             *  @brief Depends on one event
-             *
-             *  This overloaded version accepts an event to wait for.
-             *
-             *  @param event    An \ref event that this write depends on. <BR>
-             *                  The write will be executed after this event is
-             *                  completed.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_write(size_t offset, size_t size, const void* data,
-                                       hpx::opencl::event event) const;
-            
-            /**
-             *  @brief Depends on multiple events
-             *
-             *  This overloaded version accepts multiple events to wait for.
-             *
-             *  @param events   A list of \ref event "events" that this write
-             *                  depends on.
-             *                  <BR>
-             *                  The write will be executed after all given
-             *                  events are completed.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_write(size_t offset, size_t size, const void* data,
-                                  std::vector<hpx::opencl::event> events) const;
- 
-            /**
-             *  @brief Depends on one future event
-             *
-             *  This overloaded version accepts a future event to wait for.
-             *
-             *  @param event    A future \ref event that this
-             *                  task depends on. <BR>
-             *                  The task will be executed after the given event
-             *                  is completed.
-             */
-             hpx::lcos::future<hpx::opencl::event>
-            enqueue_write(size_t offset, size_t size, const void* data,
-                             hpx::lcos::shared_future<hpx::opencl::event> event) const;
-
-            /**
-             *  @brief Depends on multiple future events
-             *
-             *  This overloaded version accepts multiple future events 
-             *  to wait for.
-             *
-             *  @param events   A list of future \ref event "events" that this
-             *                  task depends on. <BR>
-             *                  The task will be executed after all given events
-             *                  are completed.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_write(size_t offset, size_t size, const void* data,
-               std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
-            //@}
-#undef CL_VERSION_1_2            
-#ifdef CL_VERSION_1_2
-            // Fill Buffer
-            /**
-             *  @name Fills the buffer with a pattern
-             *
-             *  This function has the same argument restrictions as
-             *  <A HREF="http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xht
-             *  ml/clEnqueueFillBuffer.html">
-             *  clEnqueueFillBuffer</A>.
-             *
-             *  @param pattern  The pattern data.
-             *  @param pattern_size
-             *                  The size of the pattern.
-             *  @param offset   The start position of the area to write to.
-             *  @param size     The size of the area to write to.
-             *  @return         An \ref event that triggers upon completion.
-             *                  
-             *  @see event
-             */
-            //@{
-            /**
-             *  @brief Starts task immediately.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_fill(const void* pattern, size_t pattern_size,
-                                       size_t offset, size_t size) const;
-            
-            /**
-             *  @brief Depends on one event
-             *
-             *  This overloaded version accepts an event to wait for.
-             *  
-             *  @param event    An \ref event that this write depends on. <BR>
-             *                  The write will be executed after this event is
-             *                  completed.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_fill(const void* pattern, size_t pattern_size,
-                                       size_t offset, size_t size,
-                                       hpx::opencl::event event) const;
-            
-            /**
-             *  @brief Depends on multiple events
-             *
-             *  This overloaded version accepts multiple events to wait for.
-             *  
-             *  @param events   A list of \ref event "events" that this write
-             *                  depends on.
-             *                  <BR>
-             *                  The write will be executed after all given
-             *                  events are completed.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_fill(const void* pattern, size_t pattern_size,
-                                  size_t offset, size_t size,
-                                  std::vector<hpx::opencl::event> events) const;
- 
-            /**
-             *  @brief Depends on one future event
-             *
-             *  This overloaded version accepts a future event to wait for.
-             *
-             *  @param event    A future \ref event that this
-             *                  task depends on. <BR>
-             *                  The task will be executed after the given event
-             *                  is completed.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_fill(const void* pattern, size_t pattern_size,
-                                  size_t offset, size_t size,
-                             hpx::lcos::shared_future<hpx::opencl::event> event) const;
-
-            /**
-             *  @brief Depends on multiple future events
-             *
-             *  This overloaded version accepts multiple future events 
-             *  to wait for.
-             *
-             *  @param events   A list of future \ref event "events" that this
-             *                  task depends on. <BR>
-             *                  The task will be executed after all given events
-             *                  are completed.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_fill(const void* pattern, size_t pattern_size,
-                                  size_t offset, size_t size,
-               std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
-            //@}
-#endif
-
-            // Copy Buffer
-            /**
-             *  @name Copies data from another buffer.
+            /*
+             *  @name Copies data to another buffer.
              *
              *  The buffers do NOT need to be from the same device,
              *  neither do they have to be on the same node.
              *
-             *  @param src          The source buffer.
+             *  @param dst          The source buffer.
              *  @param src_offset   The offset on the source buffer.
              *  @param dst_offset   The offset on the destination buffer.
              *  @param size         The size of the area to copy.
-             *  @return         An \ref event on the destination \ref device
-             *                  that triggers upon completion.
+             *  @return             A future that can be used for synchronization
+             *                      or dependency for other calls.
              *                  
              *  @see event
-             */
-            //@{
-            /**
-             *  @brief Starts task immediately.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
-                                 size_t size) const;
-
-            /**
-             *  @brief Depends on one event
-             *
-             *  This overloaded version accepts an event to wait for.
-             *  
-             *  @param event    An \ref event that this copy depends on. <BR>
-             *                  The copy will be executed after this event is
-             *                  completed.
-             *                  <BR><B>
-             *                  The event has to be an event from the source
-             *                  \ref device!
-             *                  </B>
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
-                                 size_t size,
-                                 hpx::opencl::event event) const;
-
-            /**
-             *  @brief Depends on multiple events
-             *
-             *  This overloaded version accepts multiple events to wait for.
-             *  
-             *  @param events   A list of \ref event "events" that this copy
-             *                  depends on.
-             *                  <BR>
-             *                  The copy will be executed after all given
-             *                  events are completed.
-             *                  <BR><B>
-             *                  These events have to be events from the source
-             *                  \ref device!
-             *                  </B>
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
-                                 size_t size,
-                                 std::vector<hpx::opencl::event> events) const;
-            /**
-             *  @brief Depends on one future event
-             *
-             *  This overloaded version accepts a future event to wait for.
-             *
-             *  @param event    A future \ref event that this
-             *                  task depends on. <BR>
-             *                  The task will be executed after the given event
-             *                  is completed.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
-                                 size_t size,
-                             hpx::lcos::shared_future<hpx::opencl::event> event) const;
-
-            /**
-             *  @brief Depends on multiple future events
-             *
-             *  This overloaded version accepts multiple future events 
-             *  to wait for.
-             *
-             *  @param events   A list of future \ref event "events" that this
-             *                  task depends on. <BR>
-             *                  The task will be executed after all given events
-             *                  are completed.
-             */
-            hpx::lcos::future<hpx::opencl::event>
-            enqueue_copy(buffer src, size_t src_offset, size_t dst_offset,
-                                 size_t size,
-               std::vector<hpx::lcos::shared_future<hpx::opencl::event>> events) const;
-             //@}
-
-            /* TODO
-             * clEnqueueReadBufferRect
-             * clEnqueueWriteBufferRect
-             * clEnqueueCopyBuffer
-             * clEnqueueCopyBufferRect
-             */
+             */ 
+            HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(
+                send_result, enqueue_send,
+                                        const hpx::opencl::buffer& /*dst*/,
+                                        std::size_t         /*src_offset*/,
+                                        std::size_t         /*dst_offset*/,
+                                        std::size_t         /*size*/ );
+        private:
+            hpx::naming::id_type device_gid;
 
     };
 
 }}
 
 
+////////////////////////////////////////////////////////////////////////////////
+// IMPLEMENTATIONS
+//
+template<typename T, typename ...Deps>
+hpx::future<hpx::serialization::serialize_buffer<T> >
+hpx::opencl::buffer::enqueue_read( std::size_t offset,
+                                   hpx::serialization::serialize_buffer<T> data,
+                                   Deps &&... dependencies )
+{
+    typedef hpx::serialization::serialize_buffer<T> buffer_type;
 
-#endif// HPX_OPENCL_BUFFER_HPP_
+    // combine dependency futures in one std::vector
+    using hpx::opencl::util::enqueue_overloads::resolver;
+    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    HPX_ASSERT(deps.are_from_device(device_gid));
+    
+    // create local event
+    using hpx::opencl::lcos::event;
+    event<buffer_type> ev( device_gid, data );
+
+    // asynchronously: 
+    // check if the component is a on a different locality
+    hpx::get_colocation_id(get_gid()).then(
+        hpx::util::bind(
+            []( hpx::future<hpx::naming::id_type>&& location,
+                hpx::opencl::util::resolved_events& deps,
+                std::size_t& offset,
+                hpx::serialization::serialize_buffer<T>& data,
+                hpx::naming::id_type& buffer_id,
+                hpx::naming::id_type& event_id){
+
+                // Check if this is a remote call
+                bool is_remote_call =
+                    (location.get() != hpx::find_here());
+
+                // send command to server class
+                typedef hpx::opencl::server::buffer
+                    ::enqueue_read_to_userbuffer_local_action<T> func_local;
+                typedef hpx::opencl::server::buffer
+                    ::enqueue_read_to_userbuffer_remote_action<T> func_remote;
+                if(is_remote_call){
+                    // is remote call
+
+                    std::cout << "remote call!" << std::endl;
+                    hpx::apply<func_remote>( std::move(buffer_id),
+                                             std::move(event_id),
+                                             offset,
+                                             data.size() * sizeof(T),
+                                             reinterpret_cast<std::uintptr_t>
+                                                ( data.data() ),
+                                             deps.event_ids );
+ 
+                } else {
+                    // is local call, send direct reference to buffer
+
+                    std::cout << "local call!" << std::endl;
+                    hpx::apply<func_local>( std::move(buffer_id),
+                                            std::move(event_id),
+                                            offset,
+                                            data,
+                                            deps.event_ids );
+                }
+              
+            },
+            hpx::util::placeholders::_1,
+            std::move(deps),
+            std::move(offset),
+            std::move(data),
+            this->get_gid(),
+            ev.get_gid()
+        )
+
+    );
+
+    // return future connected to event
+    return ev.get_future();
+}
+
+template<typename T, typename ...Deps>
+hpx::future<void>
+hpx::opencl::buffer::enqueue_write( std::size_t offset,
+               const hpx::serialization::serialize_buffer<T> data,
+               Deps &&... dependencies )
+{
+    // combine dependency futures in one std::vector
+    using hpx::opencl::util::enqueue_overloads::resolver;
+    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    HPX_ASSERT(deps.are_from_device(device_gid));
+    
+    // create local event
+    using hpx::opencl::lcos::event;
+    event<void> ev( device_gid );
+
+    // send command to server class
+    typedef hpx::opencl::server::buffer::enqueue_write_action<T> func;
+    hpx::apply<func>( this->get_gid(),
+                      ev.get_gid(),
+                      offset,
+                      data,
+                      deps.event_ids );
+                     
+
+    // return future connected to event
+    return ev.get_future();
+}
+
+
+
+
+#endif

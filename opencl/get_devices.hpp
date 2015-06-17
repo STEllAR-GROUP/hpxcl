@@ -4,21 +4,15 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
-#ifndef HPX_OPENCL_STD_HPP_
-#define HPX_OPENCL_STD_HPP_
+#ifndef HPX_OPENCL_GET_DEVICES_HPP_
+#define HPX_OPENCL_GET_DEVICES_HPP_
+
+#include <hpx/hpx.hpp>
+#include <hpx/config.hpp>
 
 #include "export_definitions.hpp"
 
-#include "server/std.hpp"
-
-#include <hpx/config.hpp>
-#include <hpx/hpx.hpp>
-#include <hpx/include/iostreams.hpp>
-#include <hpx/lcos/future.hpp>
-
-#include <CL/cl.h>
-
-#include <vector>
+#include "cl_headers.hpp"
 
 #include "fwd_declarations.hpp"
 
@@ -48,7 +42,7 @@ namespace hpx { namespace opencl{
      */
     HPX_OPENCL_EXPORT
     hpx::lcos::future<std::vector<device>>
-    get_devices(hpx::naming::id_type node_id, cl_device_type device_type,
+    get_devices( hpx::naming::id_type node_id, cl_device_type device_type,
                  std::string required_cl_version );
 
     /**
@@ -77,8 +71,62 @@ namespace hpx { namespace opencl{
     get_all_devices( cl_device_type device_type,
                      std::string required_cl_version );
 
+    /**
+     * @brief Fetches a list of local accelerator devices present in the current 
+     *        hpx environment.
+     *
+     * It is recommended to only use OpenCL Version >= 1.1.
+     * Earlier devices seem to be blocking on every enqueue-call, which
+     * is counter-productive to the general idea of the hpx framework.
+     *
+     * @param device_type         The device type, according to OpenCL standard.
+     *                            <BR>
+     *                            For further information, look at the official 
+     *                            <A HREF="http://www.khronos.org/registry/cl/sd
+     * k/1.2/docs/man/xhtml/clGetDeviceIDs.html">
+     *                            OpenCL Reference</A>.
+     * @param required_cl_version All devices that don't support this OpenCL
+     *                            version will be ignored.<BR>
+     *                            Version number must have the following format:
+     *                            "OpenCL <major>.<minor>"<BR>
+     *                            Recommended value is "OpenCL 1.1".
+     * @return A list of suitable OpenCL devices
+     */
+    HPX_OPENCL_EXPORT
+    hpx::lcos::future<std::vector<device>>
+    get_local_devices( cl_device_type device_type,
+                       std::string required_cl_version );
+
+    /**
+     * @brief Fetches a list of remote accelerator devices present in the current 
+     *        hpx environment.
+     *
+     * It is recommended to only use OpenCL Version >= 1.1.
+     * Earlier devices seem to be blocking on every enqueue-call, which
+     * is counter-productive to the general idea of the hpx framework.
+     *
+     * @param device_type         The device type, according to OpenCL standard.
+     *                            <BR>
+     *                            For further information, look at the official 
+     *                            <A HREF="http://www.khronos.org/registry/cl/sd
+     * k/1.2/docs/man/xhtml/clGetDeviceIDs.html">
+     *                            OpenCL Reference</A>.
+     * @param required_cl_version All devices that don't support this OpenCL
+     *                            version will be ignored.<BR>
+     *                            Version number must have the following format:
+     *                            "OpenCL <major>.<minor>"<BR>
+     *                            Recommended value is "OpenCL 1.1".
+     * @return A list of suitable OpenCL devices
+     */
+    HPX_OPENCL_EXPORT
+    hpx::lcos::future<std::vector<device>>
+    get_remote_devices( cl_device_type device_type,
+                        std::string required_cl_version );
+
+
 }}
 
 
 
 #endif
+
