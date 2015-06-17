@@ -54,23 +54,30 @@ event_map::get(const hpx::naming::id_type& id)
 cl_event
 event_map::get(const hpx::naming::gid_type& key){
 
-    map_type::iterator it;
+    cl_event result = NULL;
     {
+        map_type::iterator it;
+
         // Lock
         lock_type::scoped_lock l(lock);
         
         // Try to retrieve
         it = events.find(key);
+    
+        // On success, return
+        if(it != events.end()){
+            result = it->second;
+        }
     }
 
-    // On success, return
-    if(it != events.end()){
-        return it->second;
-    }
+    // Return if event found
+    if(result) return result;
 
     // On failure, try again and register callback
     waitmap_type::value_type waits_entry(key, std::make_shared<condition_type>());
     {
+        map_type::iterator it;
+
         // Lock
         lock_type::scoped_lock l(lock);
         
