@@ -23,7 +23,7 @@ void hpx::opencl::lcos::detail::event<void, hpx::util::unused_type>::arm(){
     // Tell the device server that we'd like to be informed when the cl_event
     // is completed
     typedef hpx::opencl::server::device::activate_deferred_event_action func;
-    hpx::apply<func>(device_id, this->get_event_id());
+    hpx::apply<func>(device_id, event_id);
 
 }
 

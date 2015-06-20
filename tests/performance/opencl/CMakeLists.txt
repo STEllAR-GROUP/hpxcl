@@ -7,6 +7,7 @@
 
 set(tests
     bandwith
+    deadlock
    )
 
 

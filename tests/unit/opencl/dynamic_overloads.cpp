@@ -28,7 +28,7 @@ static void cl_test( hpx::opencl::device local_device,
                      hpx::opencl::device cldevice ){
 
     hpx::opencl::lcos::event<void> event(cldevice.get_gid());
-    register_event(cldevice, event.get_gid());
+    register_event(cldevice, event.get_event_id());
 
     hpx::shared_future<void> sfut = event.get_future();
     std::vector<hpx::shared_future<void>> vsfut1 = {sfut};
