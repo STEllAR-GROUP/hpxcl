@@ -141,26 +141,61 @@ static void run_hpxcl_send_test( hpx::opencl::device device1,
     do
     {
         // initialize the buffer
-        hpx::future<void> fut =
-            buffer1.enqueue_write(0, test_data);
-        fut.wait();
+        hpx::future<void> fut = buffer1.enqueue_write(0, test_data);
 
+        fut.wait();
+ 
         // RUN!
+            {
+                std::stringstream str;
+                str << "before sleep" << std::endl;
+                std::cout << str.str() << std::flush;
+            }
+            hpx::this_thread::sleep_for(boost::chrono::milliseconds(10));
+            {
+                std::stringstream str;
+                str << "after sleep" << std::endl;
+                std::cout << str.str() << std::flush;
+            }
         hpx::util::high_resolution_timer walltime;
         for(std::size_t it = 0; it < num_iterations; it ++)
         {
+            hpx::this_thread::sleep_for(boost::chrono::milliseconds(10));
+            {
+                std::stringstream str;
+                str << "before enqueue_send1" << std::endl;
+                std::cout << str.str() << std::flush;
+            }
             // Copy from buffer1 to buffer2
             auto send_result =
                 buffer1.enqueue_send(buffer2, 0, 0, test_data.size(), fut);
+            {
+                std::stringstream str;
+                str << "after enqueue_send1" << std::endl;
+                std::cout << str.str() << std::flush;
+            }
 
+
+            hpx::this_thread::sleep_for(boost::chrono::milliseconds(10));
+            {
+                std::stringstream str;
+                str << "before enqueue_send2" << std::endl;
+                std::cout << str.str() << std::flush;
+            }
+            // Copy from buffer2 to buffer1
             auto send_result2 = 
                 buffer2.enqueue_send(buffer1, 0, 0, test_data.size(),
                                      send_result.dst_future);
             fut = std::move(send_result2.dst_future);
+            {
+                std::stringstream str;
+                str << "after enqueue_send2" << std::endl;
+                std::cout << str.str() << std::flush;
+            }
         }
 
         // wait for last send to finish
-        fut.wait();
+        fut.get();
 
         // Measure elapsed time
         const double duration = walltime.elapsed();
@@ -279,8 +314,8 @@ static void cl_test(hpx::opencl::device local_device,
 {
 
 
-    const std::size_t testdata_size = static_cast<std::size_t>(1) << 22;
-    num_iterations = 50;
+    const std::size_t testdata_size = static_cast<std::size_t>(1) << 1;
+    num_iterations = 2;
 
     // Get localities
     hpx::naming::id_type remote_location =
@@ -301,7 +336,7 @@ static void cl_test(hpx::opencl::device local_device,
 
 
 
-    // Run local opencl test
+/*    // Run local opencl test
     run_opencl_local_test(local_device);
 
     // Run local hpxcl test
@@ -312,16 +347,16 @@ static void cl_test(hpx::opencl::device local_device,
 
     // Run hpx loopback test
     run_hpx_loopback_test(remote_location);
-
+*/
     // Run hpxcl send local-local test
     run_hpxcl_send_test(local_device, local_device);
-
+/*
     // Run hpxcl send remote-remote test
     run_hpxcl_send_test(remote_device, remote_device);
 
     // Run hpxcl send local-remote test
     run_hpxcl_send_test(local_device, remote_device);
-
+*/
 
     std::cout << results << std::endl;
 }

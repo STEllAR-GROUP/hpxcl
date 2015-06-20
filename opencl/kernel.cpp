@@ -42,7 +42,7 @@ kernel::enqueue_impl( std::vector<std::size_t> && size_vec,
     // send command to server class
     typedef hpx::opencl::server::kernel::enqueue_action func;
     hpx::apply<func>( this->get_gid(),
-                      ev.get_gid(),
+                      ev.get_event_id(),
                       size_vec,
                       deps.event_ids );
 

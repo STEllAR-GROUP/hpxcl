@@ -231,7 +231,7 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
             std::move(offset),
             std::move(data),
             this->get_gid(),
-            ev.get_gid()
+            ev.get_event_id()
         )
 
     );
@@ -258,7 +258,7 @@ hpx::opencl::buffer::enqueue_write( std::size_t offset,
     // send command to server class
     typedef hpx::opencl::server::buffer::enqueue_write_action<T> func;
     hpx::apply<func>( this->get_gid(),
-                      ev.get_gid(),
+                      ev.get_event_id(),
                       offset,
                       data,
                       deps.event_ids );

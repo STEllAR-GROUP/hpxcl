@@ -45,8 +45,8 @@ buffer::enqueue_send_impl(
     typedef hpx::opencl::server::buffer::enqueue_send_action func;
     hpx::apply<func>( this->get_gid(),
                       dst.get_gid(),
-                      src_event.get_gid(),
-                      dst_event.get_gid(),
+                      src_event.get_event_id(),
+                      dst_event.get_event_id(),
                       src_offset,
                       dst_offset,
                       size,
@@ -76,7 +76,7 @@ buffer::enqueue_read_alloc_impl(
     // send command to server class
     typedef hpx::opencl::server::buffer::enqueue_read_action func;
     hpx::apply<func>( this->get_gid(),
-                      ev.get_gid(),
+                      ev.get_event_id(),
                       offset,
                       size,
                       dependencies.event_ids ); 

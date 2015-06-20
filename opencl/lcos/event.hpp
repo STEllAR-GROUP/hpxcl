@@ -164,6 +164,46 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             HPX_ASSERT(this->gid_ == naming::invalid_gid);
             this->gid_ = bp->get_base_gid();
         }
+
+        ////////////////////////////////////////////////////////////////////////
+        // Stuff that enables id_type lookup
+        //
+    public:
+        hpx::naming::id_type get_event_id(){
+            return event_id;
+        }
+
+        void retrieve_event_id(){
+            event_id = this->get_gid();
+        }
+    private:
+
+        hpx::naming::id_type event_id;
+
+        bool requires_delete()
+        {
+            boost::unique_lock<naming::gid_type> l(this->gid_.get_mutex());
+            long counter = --this->count_;
+
+            // special case: counter == 1. (meaning: agas is the only one
+            // still holding a reference to this object. especially,
+            // all futures are out of scope.)
+            if (1 == counter)
+            {
+                HPX_ASSERT(event_id.get_gid() != naming::invalid_gid);
+
+                // delete local reference to prevent recursive dependency
+                event_id = hpx::naming::id_type();
+
+                return false;
+            }
+            else if (0 == counter)
+            {
+                return true;
+            }
+            return false;
+        }
+
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -262,6 +302,46 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             HPX_ASSERT(this->gid_ == naming::invalid_gid);
             this->gid_ = bp->get_base_gid();
         }
+
+        ////////////////////////////////////////////////////////////////////////
+        // Stuff that enables id_type lookup
+        //
+    public:
+        hpx::naming::id_type get_event_id(){
+            return event_id;
+        }
+
+        void retrieve_event_id(){
+            event_id = get_gid();
+        }
+    private:
+
+        hpx::naming::id_type event_id;
+
+        bool requires_delete()
+        {
+            boost::unique_lock<naming::gid_type> l(this->gid_.get_mutex());
+            long counter = --this->count_;
+
+            // special case: counter == 1. (meaning: agas is the only one
+            // still holding a reference to this object. especially,
+            // all futures are out of scope.)
+            if (1 == counter)
+            {
+                HPX_ASSERT(event_id.get_gid() != naming::invalid_gid);
+
+                // delete local reference to prevent recursive dependency
+                event_id = hpx::naming::id_type();
+
+                return false;
+            }
+            else if (0 == counter)
+            {
+                return true;
+            }
+            return false;
+        }
+
     };
 
 }}}}
@@ -308,6 +388,7 @@ namespace hpx { namespace opencl { namespace lcos
             future_obtained_(false)
         {
             LLCO_(info) << "event::event(" << impl_->get_gid() << ")";
+            (*impl_)->retrieve_event_id();
         }
 
     protected:
@@ -323,6 +404,12 @@ namespace hpx { namespace opencl { namespace lcos
         {
             (*impl_)->reset();
             future_obtained_ = false;
+        }
+
+        /// \brief Return the global id of this \a future instance
+        naming::id_type get_event_id() const
+        {
+            return (*impl_)->get_event_id();
         }
 
         /// \brief Return the global id of this \a future instance
@@ -402,6 +489,7 @@ namespace hpx { namespace opencl { namespace lcos
             future_obtained_(false)
         {
             LLCO_(info) << "event<void>::event(" << impl_->get_gid() << ")";
+            (*impl_)->retrieve_event_id();
         }
 
     protected:
@@ -417,6 +505,12 @@ namespace hpx { namespace opencl { namespace lcos
         {
             (*impl_)->reset();
             future_obtained_ = false;
+        }
+
+        /// \brief Return the global id of this \a future instance
+        naming::id_type get_event_id() const
+        {
+            return (*impl_)->get_event_id();
         }
 
         /// \brief Return the global id of this \a future instance

@@ -62,7 +62,8 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 
         device_id = ev->get_device_gid();
         
-        return ev->get_gid();
+        auto event_id = ev->get_event_id();
+        return event_id;
     }
 
 
