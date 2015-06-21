@@ -416,7 +416,7 @@ device::activate_deferred_event(hpx::naming::id_type event_id)
     wait_for_cl_event(event);
 
     // trigger the client event
-    hpx::trigger_lco_event(event_id);
+    hpx::trigger_lco_event(event_id, false);
 
         {
             std::stringstream str;
