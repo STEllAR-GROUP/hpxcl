@@ -23,7 +23,7 @@ namespace hpx { namespace opencl{ namespace server{
     // /////////////////////////////////////////////////////
     //  This class represents an opencl program.
 
-    class program
+    class HPX_OPENCL_EXPORT program
       : public hpx::components::managed_component_base<program>
     {
     public:
@@ -35,7 +35,7 @@ namespace hpx { namespace opencl{ namespace server{
 
         ///////////////////////////////////////////////////
         /// Local functions
-        /// 
+        ///
         void init_with_source( hpx::naming::id_type device_id,
                                hpx::serialization::serialize_buffer<char> src);
         void init_with_binary( hpx::naming::id_type device_id,

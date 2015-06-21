@@ -24,7 +24,7 @@ using namespace hpx::opencl::server;
 device::device()
 {
     // Register the event deletion callback function at the event map
-    event_map.register_deletion_callback(delete_event);
+    event_map.register_deletion_callback(&delete_event);
 }
 
 // External destructor.
@@ -33,7 +33,7 @@ static void device_cleanup(uintptr_t command_queue_ptr,
                            uintptr_t context_ptr)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     cl_int err;
 
@@ -47,9 +47,9 @@ static void device_cleanup(uintptr_t command_queue_ptr,
         cl_ensure_nothrow(err, "clFinish()");
         err = clReleaseCommandQueue(command_queue);
         cl_ensure_nothrow(err, "clReleaseCommandQueue()");
-        command_queue = NULL; 
+        command_queue = NULL;
     }
-    
+
     // Release context
     if(context)
     {
@@ -80,19 +80,19 @@ void
 device::init(cl_device_id _device_id, bool enable_profiling)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     this->device_id = _device_id;
 
     cl_int err;
-    
+
     // Retrieve platformID
     err = clGetDeviceInfo(this->device_id, CL_DEVICE_PLATFORM,
                           sizeof(platform_id), &platform_id, NULL);
     cl_ensure(err, "clGetDeviceInfo()");
 
     // Create Context
-    cl_context_properties context_properties[] = 
+    cl_context_properties context_properties[] =
                         {CL_CONTEXT_PLATFORM,
                          (cl_context_properties) platform_id,
                          0};
@@ -105,7 +105,7 @@ device::init(cl_device_id _device_id, bool enable_profiling)
     cl_ensure(err, "clCreateContext()");
 
     // Get supported device queue properties
-    hpx::serialization::serialize_buffer<char> supported_queue_properties_data = 
+    hpx::serialization::serialize_buffer<char> supported_queue_properties_data =
                                     get_device_info(CL_DEVICE_QUEUE_PROPERTIES);
     cl_command_queue_properties supported_queue_properties =
                 *( reinterpret_cast<cl_command_queue_properties *>(
@@ -142,8 +142,8 @@ device::init(cl_device_id _device_id, bool enable_profiling)
 hpx::serialization::serialize_buffer<char>
 device::get_device_info(cl_device_info info_type)
 {
-    
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     // Declairing the cl error code variable
     cl_int err;
@@ -169,8 +169,8 @@ device::get_device_info(cl_device_info info_type)
 hpx::serialization::serialize_buffer<char>
 device::get_platform_info(cl_platform_info info_type)
 {
-    
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     // Declairing the cl error code variable
     cl_int err;
@@ -218,19 +218,19 @@ hpx::id_type
 device::create_buffer( cl_mem_flags flags, std::size_t size )
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     // Create new buffer
     hpx::id_type buf = hpx::components::new_<hpx::opencl::server::buffer>
                                                      ( hpx::find_here() ).get();
 
     // Initialize buffer locally
-    boost::shared_ptr<hpx::opencl::server::buffer> buffer_server = 
+    boost::shared_ptr<hpx::opencl::server::buffer> buffer_server =
                         hpx::get_ptr<hpx::opencl::server::buffer>( buf ).get();
 
     buffer_server->init(get_gid(), flags, size);
 
-    return buf;           
+    return buf;
 }
 
 hpx::id_type
@@ -238,14 +238,14 @@ device::create_program_with_source(
     hpx::serialization::serialize_buffer<char> src )
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     // Create new program
     hpx::id_type prog = hpx::components::new_<hpx::opencl::server::program>
                                                      ( hpx::find_here() ).get();
 
     // Initialize buffer locally
-    boost::shared_ptr<hpx::opencl::server::program> program_server = 
+    boost::shared_ptr<hpx::opencl::server::program> program_server =
                         hpx::get_ptr<hpx::opencl::server::program>( prog ).get();
 
     program_server->init_with_source( get_gid(), src );
@@ -258,14 +258,14 @@ device::create_program_with_binary(
     hpx::serialization::serialize_buffer<char> binary )
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     // Create new program
     hpx::id_type prog = hpx::components::new_<hpx::opencl::server::program>
                                                      ( hpx::find_here() ).get();
 
     // Initialize buffer locally
-    boost::shared_ptr<hpx::opencl::server::program> program_server = 
+    boost::shared_ptr<hpx::opencl::server::program> program_server =
                         hpx::get_ptr<hpx::opencl::server::program>( prog ).get();
 
     program_server->init_with_binary( get_gid(), binary );
@@ -276,7 +276,7 @@ device::create_program_with_binary(
 void
 device::release_event(hpx::naming::gid_type gid)
 {
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     // release data registered on event
     delete_event_data(event_map.get(gid));
@@ -291,7 +291,7 @@ void
 device::delete_event( cl_event event )
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     // delete the actual cl_event object
     cl_int err;
@@ -305,7 +305,7 @@ device::register_event( const hpx::naming::id_type & gid, cl_event event )
 {
 
     // Add pair to event_map
-    event_map.add(gid, event); 
+    event_map.add(gid, event);
 
 }
 
@@ -336,7 +336,7 @@ device::get_kernel_command_queue()
 {
     return command_queue;
 }
-    
+
 
 
 struct wait_for_cl_event_args{
@@ -359,7 +359,7 @@ wait_for_cl_event_callback( cl_event event, cl_int exec_status, void* user_data 
 void
 device::wait_for_cl_event(cl_event event)
 {
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     cl_int err;
 
@@ -376,7 +376,7 @@ device::wait_for_cl_event(cl_event event)
 
     // Attach callback
     err = clSetEventCallback(event, CL_COMPLETE, wait_for_cl_event_callback,
-                             &args); 
+                             &args);
     cl_ensure(err, "clSetEventCallback()");
 
     // Wait for the event to complete
@@ -389,10 +389,10 @@ void
 device::delete_event_data(cl_event event)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     cl_int err;
-    
+
     // return if no data is registered
     if(!event_data_map.has_data(event))
         return;

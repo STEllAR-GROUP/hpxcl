@@ -38,10 +38,10 @@ static void register_event(hpx::opencl::device cldevice,
 
 int main()
 {
-        typedef typename hpx::opencl::lcos::event<void>::wrapped_type
+        typedef hpx::opencl::lcos::event<void>::wrapped_type
             event_type;
 
-        auto devices = 
+        auto devices =
             hpx::opencl::get_all_devices( CL_DEVICE_TYPE_ALL,
                                           "OpenCL 1.1" ).get();
         HPX_ASSERT(!devices.empty());
@@ -62,7 +62,7 @@ int main()
             ATOMIC_PRINT("ev " << ev->get_event_id());
         }
 
-    
+
         hpx::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
         {
@@ -70,13 +70,13 @@ int main()
             auto ev = boost::static_pointer_cast<event_type>(shared_state);
 
             ATOMIC_PRINT("trigger_lco_event_manually " << ev->get_event_id());
-            hpx::trigger_lco_event(ev->get_event_id());
+            hpx::trigger_lco_event(ev->get_event_id(), false);
         }
 
         ATOMIC_PRINT("before sleep");
         hpx::this_thread::sleep_for(boost::chrono::milliseconds(10));
         ATOMIC_PRINT("after sleep");
-        
+
         {
             auto shared_state = hpx::lcos::detail::get_shared_state(fut);
             auto ev = boost::static_pointer_cast<event_type>(shared_state);

@@ -12,6 +12,7 @@
 
 #include <hpx/lcos/promise.hpp>
 
+#include "../export_definitions.hpp"
 #include "zerocopy_buffer.hpp"
 
 namespace hpx { namespace opencl { namespace lcos
@@ -27,7 +28,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     template <typename Result, typename RemoteResult>
     class event;
 }}}}
- 
+
 ///////////////////////////////////////////////////////////////////////////////
 namespace hpx { namespace components { namespace detail
 {
@@ -47,7 +48,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
 
     ///////////////////////////////////////////////////////////////////////////
 
-    void unregister_event( hpx::naming::id_type device_id,
+    HPX_OPENCL_EXPORT void unregister_event( hpx::naming::id_type device_id,
                            hpx::naming::gid_type event_gid );
 
     //////////////////////////////////////////////////////////////////////////
@@ -98,7 +99,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             &set_zerocopy_data<T>,
             set_zerocopy_data_action<T> >
     {};
- 
+
     ///////////////////////////////////////////////////////////////////////////
     template <typename Result, typename RemoteResult>
     class event
@@ -108,10 +109,10 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     private:
         typedef hpx::lcos::detail::promise<Result, RemoteResult> parent_type;
         typedef typename hpx::lcos::detail::future_data<Result>::data_type
-            data_type; 
+            data_type;
 
     public:
-       
+
         event(hpx::naming::id_type && device_id_, Result && result_buffer_)
             : device_id(std::move(device_id_)),
               result_buffer(std::move(result_buffer_))
@@ -121,7 +122,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         virtual
         ~event()
         {
-            unregister_event( device_id, 
+            unregister_event( device_id,
                               this->get_base_gid() );
         }
 
@@ -133,7 +134,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         // This holds the buffer that will get returned by the future.
         Result result_buffer;
 
-        
+
         ////////////////////////////////////////////////////////////////////////
         // Internal stuff
         //
@@ -215,11 +216,11 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     private:
         typedef hpx::lcos::detail::promise<void, hpx::util::unused_type>
             parent_type;
-        typedef typename hpx::lcos::detail::future_data<void>::data_type
-            data_type; 
+        typedef hpx::lcos::detail::future_data<void>::data_type
+            data_type;
 
     public:
-       
+
         event(hpx::naming::id_type && device_id_)
             : device_id(std::move(device_id_)), is_armed(false)
         {
@@ -231,8 +232,8 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
                 std::stringstream str;
                 str << "delete <void> " << this->get_base_gid() << std::endl;
                 std::cout << str.str() << std::flush;
-            
-            unregister_event( device_id, 
+
+            unregister_event( device_id,
                               this->get_base_gid() );
         }
 
@@ -242,13 +243,13 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     private:
         boost::atomic<bool> is_armed;
 
-        void arm();
+        HPX_OPENCL_EXPORT void arm();
 
     public:
         // Gets called by when_all, wait_all, etc
         virtual void execute_deferred(error_code& ec = throws){
             if(!is_armed.exchange(true)){
-                this->arm(); 
+                this->arm();
             }
         }
 
@@ -275,7 +276,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             else
                 return this->parent_type::wait_until(abs_time, ec);
         };
-        
+
         ////////////////////////////////////////////////////////////////////////
         // Internal stuff
         //

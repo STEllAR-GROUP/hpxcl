@@ -15,7 +15,7 @@
 #include "../lcos/event.hpp"
 
 namespace hpx{ namespace opencl{ namespace util{
-    
+
     struct resolved_events{
         public:
             std::vector<hpx::naming::id_type> event_ids;
@@ -40,7 +40,7 @@ namespace hpx{ namespace opencl{ namespace util{
             }
     };
 
-    
+
 
 }}}
 
@@ -56,12 +56,12 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
             result_type;
         typedef typename hpx::opencl::lcos::event<result_type>::wrapped_type
             event_type;
-        
+
         auto shared_state = hpx::lcos::detail::get_shared_state(fut);
         auto ev = boost::static_pointer_cast<event_type>(shared_state);
 
         device_id = ev->get_device_gid();
-        
+
         auto event_id = ev->get_event_id();
         return event_id;
     }
@@ -102,7 +102,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     {
         template<typename T>
         void
-        operator()(const T & t, 
+        operator()(const T & t,
                    std::vector<hpx::naming::id_type> &event_ids,
                    std::vector<hpx::naming::gid_type> &device_ids){
             hpx::naming::gid_type device_id;
@@ -138,7 +138,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     template<typename Dep>
     void
     resolver_impl(std::vector<hpx::naming::id_type>& event_ids,
-                  std::vector<hpx::naming::gid_type>& device_ids,    
+                  std::vector<hpx::naming::gid_type>& device_ids,
                   Dep&& dep){
         extrude_all_ids<detail::is_container<Dep>::value>()( dep, event_ids,
                                                                   device_ids);
@@ -147,7 +147,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     template<typename Dep, typename ...Deps>
     void
     resolver_impl(std::vector<hpx::naming::id_type>& event_ids,
-                  std::vector<hpx::naming::gid_type>& device_ids,    
+                  std::vector<hpx::naming::gid_type>& device_ids,
                   Dep&& dep, Deps&&... deps){
 
         // process current dep
@@ -172,10 +172,10 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 }}}}
 
 
-#define HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(return_value, name, args...)      \
+#define HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(return_value, name, ...)          \
                                                                                 \
     return_value                                                                \
-    name##_impl(args, hpx::opencl::util::resolved_events &&);                   \
+    name##_impl(__VA_ARGS__, hpx::opencl::util::resolved_events &&);            \
                                                                                 \
     /*                                                                          \
      * This class  splits the arguments from the dependencies.                  \
@@ -199,7 +199,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     return_value                                                                \
     name (Params &&... params)                                                  \
     {                                                                           \
-        return name##_caller<args>()(this, std::forward<Params>(params)...);    \
+        return name##_caller<__VA_ARGS__>()(this, std::forward<Params>(params)...); \
     }
 
 

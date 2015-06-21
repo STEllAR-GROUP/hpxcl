@@ -26,7 +26,7 @@ namespace hpx { namespace opencl{ namespace server{
     // /////////////////////////////////////////////////////
     //  This class represents an opencl buffer.
 
-    class buffer
+    class HPX_OPENCL_EXPORT buffer
       : public hpx::components::managed_component_base<buffer>
     {
     public:
@@ -38,10 +38,10 @@ namespace hpx { namespace opencl{ namespace server{
 
         ///////////////////////////////////////////////////
         /// Local functions
-        /// 
+        ///
         void init(hpx::naming::id_type device_id, cl_mem_flags flags,
                                                   std::size_t size);
-        
+
         cl_mem get_cl_mem();
 
         //////////////////////////////////////////////////
@@ -203,8 +203,8 @@ hpx::opencl::server::buffer::enqueue_write(
                        std::size_t offset,
                        hpx::serialization::serialize_buffer<T> data,
                        std::vector<hpx::naming::id_type> && dependencies ){
-    
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     cl_int err;
     cl_event return_event;
@@ -238,8 +238,8 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_local(
                        std::size_t offset,
                        hpx::serialization::serialize_buffer<T> data,
                        std::vector<hpx::naming::id_type> && dependencies ){
-    
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     cl_int err;
     cl_event return_event;
@@ -277,7 +277,7 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote(
     std::uintptr_t remote_data_addr,
     std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
