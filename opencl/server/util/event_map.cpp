@@ -25,11 +25,6 @@ event_map::add(const hpx::naming::id_type & gid, cl_event event){
     hpx::naming::gid_type key = gid.get_gid();
 
     {
-        std::stringstream str;
-        str << "add  " << gid << std::endl;
-        std::cout << str.str() << std::flush;
-    }
-    {
         // Lock
         lock_type::scoped_lock l(lock);
         
@@ -58,11 +53,7 @@ event_map::get(const hpx::naming::id_type& id)
 
 cl_event
 event_map::get(const hpx::naming::gid_type& key){
-    {
-        std::stringstream str;
-        str << "get " << key << std::endl;
-        std::cout << str.str() << std::flush;
-    }
+
     cl_event result = NULL;
     {
         map_type::iterator it;
@@ -82,12 +73,6 @@ event_map::get(const hpx::naming::gid_type& key){
     // Return if event found
     if(result) return result;
 
-    {
-        std::stringstream str;
-        str << "get2 " << key << std::endl;
-        std::cout << str.str() << std::flush;
-    }
-
     // On failure, try again and register callback
     waitmap_type::value_type waits_entry(key, std::make_shared<condition_type>());
     {
@@ -104,12 +89,6 @@ event_map::get(const hpx::naming::gid_type& key){
             return it->second;
         }
 
-        {
-            std::stringstream str;
-            str << "wait " << key << std::endl;
-            std::cout << str.str() << std::flush;
-        }
-
         // On failure, register condition variable (or retrieve existing one)
         auto inserted_condvar = waits.insert(std::move(waits_entry));
         
@@ -124,12 +103,6 @@ event_map::get(const hpx::naming::gid_type& key){
         it = events.find(key);
         HPX_ASSERT(it != events.end());
 
-        {
-            std::stringstream str;
-            str << "wait_done " << key << std::endl;
-            std::cout << str.str() << std::flush;
-        }
-
         return it->second;
 
     }
@@ -139,11 +112,7 @@ event_map::get(const hpx::naming::gid_type& key){
 void 
 event_map::remove(const hpx::naming::gid_type &gid)
 {
-    {
-        std::stringstream str;
-        str << "rem " << gid << std::endl;
-        std::cout << str.str() << std::flush;
-    }
+
     cl_event event;
     {
         // Lock
@@ -157,19 +126,9 @@ event_map::remove(const hpx::naming::gid_type &gid)
         event = it->second;
     }
 
-    {
-        std::stringstream str;
-        str << "rem2 " << gid << std::endl;
-        std::cout << str.str() << std::flush;
-    }
     // run deletion callback
     deletion_callback(event);
 
-    {
-        std::stringstream str;
-        str << "rem3 " << gid << std::endl;
-        std::cout << str.str() << std::flush;
-    }
     {
         // Lock
         lock_type::scoped_lock l(lock);
@@ -177,11 +136,7 @@ event_map::remove(const hpx::naming::gid_type &gid)
         // Remove element
         events.erase(gid);
     }
-    {
-        std::stringstream str;
-        str << "rem4 " << gid << std::endl;
-        std::cout << str.str() << std::flush;
-    }
+
 }
 
 void

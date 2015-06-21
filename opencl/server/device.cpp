@@ -418,11 +418,6 @@ device::activate_deferred_event(hpx::naming::id_type event_id)
     // trigger the client event
     hpx::trigger_lco_event(event_id, false);
 
-        {
-            std::stringstream str;
-            str << "trigger_lco_event " << event_id << std::endl;
-            std::cout << str.str() << std::flush;
-        }
 }
 
 void

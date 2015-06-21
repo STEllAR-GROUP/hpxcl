@@ -43,9 +43,6 @@ buffer::enqueue_send_impl(
     
     // send command to server class
     typedef hpx::opencl::server::buffer::enqueue_send_action func;
-    std::stringstream str;
-    str << "enqueue_send" << std::endl;
-    std::cout << str.str() << std::flush;
     hpx::apply<func>( this->get_gid(),
                       dst.get_gid(),
                       src_event.get_event_id(),
@@ -55,7 +52,6 @@ buffer::enqueue_send_impl(
                       size,
                       dependencies.event_ids,
                       dependencies.device_ids ); 
-
 
     // return futures
     return send_result( std::move(src_event.get_future()),

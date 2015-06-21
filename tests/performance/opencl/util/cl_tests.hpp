@@ -100,7 +100,7 @@ static std::vector<hpx::opencl::device> init(variables_map & vm)
 
     // Try to get remote devices
     std::vector<hpx::opencl::device> remote_devices
-            = hpx::opencl::get_local_devices( CL_DEVICE_TYPE_ALL,
+            = hpx::opencl::get_remote_devices( CL_DEVICE_TYPE_ALL,
                                                "OpenCL 1.1" ).get();
     std::vector<hpx::opencl::device> local_devices
             = hpx::opencl::get_local_devices( CL_DEVICE_TYPE_ALL,

@@ -229,10 +229,6 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         virtual
         ~event()
         {
-                std::stringstream str;
-                str << "delete <void> " << this->get_base_gid() << std::endl;
-                std::cout << str.str() << std::flush;
-
             unregister_event( device_id,
                               this->get_base_gid() );
         }
@@ -327,9 +323,6 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         {
             boost::unique_lock<naming::gid_type> l(this->gid_.get_mutex());
             long counter = --this->count_;
-                std::stringstream str;
-                str << "requires_delete(" << counter << ") " << event_id << " " << naming::detail::has_credits(this->gid_) << std::endl;
-                std::cout << str.str() << std::flush;
 
             // special case: counter == 1. (meaning: agas is the only one
             // still holding a reference to this object. especially,
