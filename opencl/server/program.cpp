@@ -31,7 +31,7 @@ static void program_cleanup(uintptr_t program_id_ptr)
 
     cl_int err;
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     cl_program program_id = reinterpret_cast<cl_program>(program_id_ptr);
 
@@ -60,11 +60,11 @@ program::~program()
 
 
 void
-program::init_with_source( hpx::naming::id_type device_id, 
+program::init_with_source( hpx::naming::id_type device_id,
                            hpx::serialization::serialize_buffer<char> src )
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     this->parent_device_id = std::move(device_id);
     this->parent_device = hpx::get_ptr
@@ -93,13 +93,13 @@ program::init_with_source( hpx::naming::id_type device_id,
     cl_ensure(err, "clCreateProgramWithSource()");
 
 }
-        
+
 void
 program::init_with_binary( hpx::naming::id_type device_id,
                            hpx::serialization::serialize_buffer<char> binary )
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     this->parent_device_id = std::move(device_id);
     this->parent_device = hpx::get_ptr
@@ -138,7 +138,7 @@ program::acquire_build_log()
     // Query size
     err = clGetProgramBuildInfo(program_id, parent_device->get_device_id(),
                                 CL_PROGRAM_BUILD_LOG, 0, NULL, &build_log_size);
-   
+
     // Create buffer
     std::vector<char> buf(build_log_size);
 
@@ -158,7 +158,7 @@ program::acquire_build_log()
     sstream << "/// OPENCL BUILD LOG END" << std::endl;
     sstream << "//////////////////////////////////////" << std::endl;
     sstream << std::endl;
-    
+
     // return the nice looking error string.
     return sstream.str();
 
@@ -167,7 +167,7 @@ program::acquire_build_log()
 void
 program::throw_on_build_errors(const char* function_name){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     cl_int err;
     cl_build_status build_status;
@@ -207,7 +207,7 @@ build_callback( cl_program program_id, void* user_data )
 void
 program::build(std::string options)
 {
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     cl_int err;
 
@@ -218,7 +218,7 @@ program::build(std::string options)
     hpx::lcos::local::promise<void> promise;
 
     // Retrieve the future
-    hpx::future<void> future = promise.get_future(); 
+    hpx::future<void> future = promise.get_future();
 
     // Create args for build_callback
     build_callback_args args;
@@ -237,7 +237,7 @@ program::build(std::string options)
     // Wait for compilation to finish
     future.wait();
 
-    // check build status 
+    // check build status
     throw_on_build_errors("clBuildProgram()");
 
 }
@@ -245,7 +245,7 @@ program::build(std::string options)
 hpx::serialization::serialize_buffer<char>
 program::get_binary()
 {
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
     cl_int err;
@@ -255,7 +255,7 @@ program::get_binary()
     err = clGetProgramInfo(program_id, CL_PROGRAM_NUM_DEVICES, sizeof(cl_uint),
                            &num_devices, NULL);
     cl_ensure(err, "clGetProgramInfo()");
-    
+
     // ensure that only one device is associated
     if(num_devices != 1)
     {
@@ -295,7 +295,7 @@ hpx::naming::id_type
 program::create_kernel(std::string kernel_name)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     // Create new kernel
     hpx::id_type kernel = hpx::components::new_<hpx::opencl::server::kernel>

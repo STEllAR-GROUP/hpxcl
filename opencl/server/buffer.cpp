@@ -30,7 +30,7 @@ static void buffer_cleanup(uintptr_t device_mem_ptr)
 {
     cl_int err;
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     cl_mem device_mem = reinterpret_cast<cl_mem>(device_mem_ptr);
 
@@ -63,7 +63,7 @@ buffer::init( hpx::naming::id_type device_id, cl_mem_flags flags,
                                               std::size_t size)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     this->parent_device_id = std::move(device_id);
     this->parent_device = hpx::get_ptr
@@ -80,7 +80,7 @@ buffer::init( hpx::naming::id_type device_id, cl_mem_flags flags,
     cl_mem_flags modified_flags = flags &! (CL_MEM_USE_HOST_PTR
                                             | CL_MEM_ALLOC_HOST_PTR
                                             | CL_MEM_COPY_HOST_PTR);
-    
+
     // Create the Context
     device_mem = clCreateBuffer(context, modified_flags, size, NULL, &err);
     cl_ensure(err, "clCreateBuffer()");
@@ -92,7 +92,7 @@ std::size_t
 buffer::size()
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     std::size_t size;
     cl_int err;
@@ -112,8 +112,8 @@ buffer::enqueue_read( hpx::naming::id_type && event_gid,
                       std::size_t size,
                       std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
-    
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
     cl_int err;
@@ -158,8 +158,8 @@ buffer::send_bruteforce( hpx::naming::id_type && dst,
                          std::vector<hpx::naming::id_type> && dst_dependencies)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
-    
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+
     ////////////////////////////////////////////////////////////////////////////
     // Read
     //
@@ -214,8 +214,8 @@ buffer::send_direct( hpx::naming::id_type && dst,
                      std::vector<hpx::naming::id_type> && dst_dependencies)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack()); 
-    
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+
     cl_int err;
     cl_event return_event;
 

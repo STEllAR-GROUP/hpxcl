@@ -23,7 +23,7 @@ namespace hpx { namespace opencl{ namespace server{
     // /////////////////////////////////////////////////////
     //  This class represents an opencl kernel.
 
-    class kernel
+    class HPX_OPENCL_EXPORT kernel
       : public hpx::components::managed_component_base<kernel>
     {
     public:
@@ -35,17 +35,17 @@ namespace hpx { namespace opencl{ namespace server{
 
         ///////////////////////////////////////////////////
         /// Local functions
-        /// 
+        ///
         void init ( hpx::naming::id_type device_id, cl_program program,
                     std::string kernel_name );
 
         //////////////////////////////////////////////////
         /// Exposed functionality of this component
         ///
-        
+
         // Sets an argument of the kernel
         void set_arg(cl_uint arg_index, hpx::naming::id_type buffer);
-       
+
         // Runs the kernel
         void enqueue( hpx::naming::id_type && event_gid,
                       std::vector<std::size_t> size,

@@ -11,7 +11,7 @@
 // This file forward-declares all hpxcl classes.
 // This is important to remove circular dependencies and improve compile speed.
 
-
+#include "export_definitions.hpp"
 
 namespace hpx {
 
@@ -25,11 +25,11 @@ namespace opencl {
 
     // The OpenCL server namespace
     namespace server {
-        
-        class device;
-        class buffer;
-        class program;
-        class kernel;
+
+        class HPX_OPENCL_EXPORT device;
+        class HPX_OPENCL_EXPORT buffer;
+        class HPX_OPENCL_EXPORT program;
+        class HPX_OPENCL_EXPORT kernel;
 
     }
 
