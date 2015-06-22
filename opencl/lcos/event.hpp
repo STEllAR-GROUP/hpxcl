@@ -193,6 +193,8 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             {
                 HPX_ASSERT(event_id.get_gid() != naming::invalid_gid);
 
+                l.unlock();
+
                 // delete local reference to prevent recursive dependency
                 event_id = hpx::naming::id_type();
 
@@ -330,6 +332,8 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             if (1 == counter)
             {
                 HPX_ASSERT(event_id.get_gid() != naming::invalid_gid);
+
+                l.unlock();
 
                 // delete local reference to prevent recursive dependency
                 event_id = hpx::naming::id_type();
