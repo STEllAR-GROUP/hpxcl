@@ -103,18 +103,8 @@ namespace opencl {
             hpx::future<hpx::serialization::serialize_buffer<char> >
             enqueue_read( std::size_t offset,
                           std::size_t size,
-                          Deps &&... dependencies )
-            {
-                return enqueue_read_alloc(std::move(offset), std::move(size),
-                                          std::forward<Deps>(dependencies)...);
-            }
-            // This proxy function is necessary to prevent ambiguity with other
-            // overloads
-            HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(
-                hpx::future<hpx::serialization::serialize_buffer<char> >,
-                                   enqueue_read_alloc, std::size_t /*offset*/,
-                                                       std::size_t /*size*/);
-         
+                          Deps &&... dependencies );
+
             /**
              *  @brief Reads data from the buffer
              *
@@ -150,12 +140,29 @@ namespace opencl {
              *                  
              *  @see event
              */ 
-            HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(
-                send_result, enqueue_send,
-                                        const hpx::opencl::buffer& /*dst*/,
-                                        std::size_t         /*src_offset*/,
-                                        std::size_t         /*dst_offset*/,
-                                        std::size_t         /*size*/ );
+            template<typename ...Deps>
+            send_result enqueue_send( const hpx::opencl::buffer& dst,
+                                      std::size_t         src_offset,
+                                      std::size_t         dst_offset,
+                                      std::size_t         size,
+                                      Deps &&... dependencies );
+
+
+            ////////////////////////////////////////////////////////////////////
+            // Proxied functions
+            //
+        private:
+            hpx::future<hpx::serialization::serialize_buffer<char> >
+            enqueue_read_impl( std::size_t && offset,
+                               std::size_t && size,
+                               hpx::opencl::util::resolved_events && deps );
+
+            send_result
+            enqueue_send_impl( const hpx::opencl::buffer& dst,
+                               std::size_t && src_offset,
+                               std::size_t && dst_offset,
+                               std::size_t && size,
+                               hpx::opencl::util::resolved_events && deps );
         private:
             hpx::naming::id_type device_gid;
 
@@ -269,6 +276,40 @@ hpx::opencl::buffer::enqueue_write( std::size_t offset,
 }
 
 
+template<typename ...Deps>
+hpx::future<hpx::serialization::serialize_buffer<char> >
+hpx::opencl::buffer::enqueue_read( std::size_t offset,
+                                   std::size_t size,
+                                   Deps &&... dependencies )
+{
+    // combine dependency futures in one std::vector
+    using hpx::opencl::util::enqueue_overloads::resolver;
+    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    HPX_ASSERT(deps.are_from_device(device_gid));
 
+    return enqueue_read_impl( std::move(offset),
+                              std::move(size),
+                              std::move(deps) );
+}
+
+template<typename ...Deps>
+hpx::opencl::buffer::send_result
+hpx::opencl::buffer::enqueue_send( const hpx::opencl::buffer& dst,
+                                   std::size_t src_offset,
+                                   std::size_t dst_offset,
+                                   std::size_t size,
+                                   Deps &&... dependencies )
+{
+    // combine dependency futures in one std::vector
+    using hpx::opencl::util::enqueue_overloads::resolver;
+    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    HPX_ASSERT(deps.are_from_device(device_gid));
+
+    return enqueue_send_impl( dst,
+                              std::move(src_offset),
+                              std::move(dst_offset),
+                              std::move(size),
+                              std::move(deps) );
+}
 
 #endif

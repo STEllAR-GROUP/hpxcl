@@ -28,9 +28,9 @@ buffer::size() const
 buffer::send_result
 buffer::enqueue_send_impl(
     const hpx::opencl::buffer &dst,
-    std::size_t src_offset,
-    std::size_t dst_offset,
-    std::size_t size,
+    std::size_t && src_offset,
+    std::size_t && dst_offset,
+    std::size_t && size,
     hpx::opencl::util::resolved_events && dependencies )
 {
     using hpx::opencl::lcos::event;
@@ -60,9 +60,9 @@ buffer::enqueue_send_impl(
 
 
 hpx::future<hpx::serialization::serialize_buffer<char> >
-buffer::enqueue_read_alloc_impl(
-    std::size_t offset,
-    std::size_t size,
+buffer::enqueue_read_impl(
+    std::size_t && offset,
+    std::size_t && size,
     hpx::opencl::util::resolved_events && dependencies )
 {
     using hpx::opencl::lcos::event;

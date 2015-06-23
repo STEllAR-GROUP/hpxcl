@@ -172,7 +172,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 }}}}
 
 
-#define HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(return_value, name, ...)          \
+//#define HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(return_value, name, ...)          \
                                                                                 \
     return_value                                                                \
     name##_impl(__VA_ARGS__, hpx::opencl::util::resolved_events &&);            \

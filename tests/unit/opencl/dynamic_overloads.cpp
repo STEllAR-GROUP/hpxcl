@@ -12,12 +12,24 @@
 
 class test_client{
     public:
-    HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(hpx::future<int>, func, int, int);
+    template<typename ...Deps>
+    hpx::future<int> func(int a, int b, Deps &&... dependencies )
+    {
+        // combine dependency futures in one std::vector
+        using hpx::opencl::util::enqueue_overloads::resolver;
+        auto deps = resolver(std::forward<Deps>(dependencies)...);
+
+        return func_impl( std::move(a), std::move(b), std::move(deps) );
+    }
+
+    hpx::future<int> func_impl( int && a, int && b,
+                                hpx::opencl::util::resolved_events && ids );
 };
 
 
 hpx::future<int>
-test_client::func_impl( int a, int b, hpx::opencl::util::resolved_events && ids){
+test_client::func_impl( int && a, int && b,
+                        hpx::opencl::util::resolved_events && ids){
     return hpx::make_ready_future<int>(ids.event_ids.size() + 1000 * a + 100 * b);
 };
 
