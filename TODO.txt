@@ -1,0 +1,3 @@
+- investigate bottleneck
+- move deadlock.cpp to regression tests
+- add local opencl send test
