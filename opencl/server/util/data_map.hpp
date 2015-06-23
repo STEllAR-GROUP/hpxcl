@@ -38,8 +38,8 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
             // The data itself does not need to explicitely get kept alive,
             // it gets kept alive inside of the bind.
             
-            send_callback = hpx::util::bind(send_to_client_impl<T, Alloc>, data,
-                                            hpx::util::placeholders::_1);
+            send_callback = hpx::util::bind(&send_to_client_impl<T, Alloc>, data,
+                                             hpx::util::placeholders::_1);
         }
 
         // Sends the data to the client event (to trigger client future)

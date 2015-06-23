@@ -14,7 +14,7 @@ hpx::future<std::string>
 generic_buffer_impl<std::string>::get(data_type && data)
 {
     return data.then(
-        [] (data_type && data)
+        [] (data_type && data) -> std::string
         {
             hpx::serialization::serialize_buffer<char> char_array =
                 data.get();

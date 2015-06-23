@@ -28,7 +28,7 @@ namespace util {
                     static hpx::future<T>
                     get(data_type && data){
                         return data.then(
-                            [] (data_type && data)
+                            [] (data_type && data) -> T
                             {
                                 hpx::serialization::serialize_buffer<char>
                                 raw_data = data.get();
@@ -49,7 +49,7 @@ namespace util {
                     static hpx::future<std::vector<T>>
                     get(data_type && data){
                         return data.then(
-                            [] (data_type && data)
+                            [] (data_type && data) -> std::vector<T>
                             {
         
                                 hpx::serialization::serialize_buffer<char>
