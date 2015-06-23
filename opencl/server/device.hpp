@@ -10,6 +10,7 @@
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
+#include "../export_definitions.hpp"
 #include "../cl_headers.hpp"
 
 #include "util/event_map.hpp"
@@ -20,12 +21,12 @@
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{
-    
+
 
     // /////////////////////////////////////////////////////
     // This class represents an OpenCL accelerator device.
     //
-    class device
+    class HPX_OPENCL_EXPORT device
       : public hpx::components::managed_component_base<device>
     {
         typedef hpx::lcos::local::spinlock lock_type;
@@ -51,7 +52,7 @@ namespace hpx { namespace opencl{ namespace server{
         // returns device specific information
         hpx::serialization::serialize_buffer<char>
         get_device_info(cl_device_info info_type);
-        
+
         // returns platform specific information
         hpx::serialization::serialize_buffer<char>
         get_platform_info(cl_platform_info info_type);
@@ -70,7 +71,7 @@ namespace hpx { namespace opencl{ namespace server{
 
         /////////////////////////////////////////////////
         /// Behind-the-scenes functionality of this component
-        /// 
+        ///
 
         // releases an event registered to a GID
         void
@@ -79,7 +80,7 @@ namespace hpx { namespace opencl{ namespace server{
         // activates a deferred event
         void
         activate_deferred_event(hpx::naming::id_type);
-     
+
         // activates a deferred event<serialize_buffer<char> >
         void
         activate_deferred_event_with_data(hpx::naming::id_type);
@@ -109,7 +110,7 @@ namespace hpx { namespace opencl{ namespace server{
         cl_command_queue get_write_command_queue();
         cl_command_queue get_kernel_command_queue();
 
-        // event data handling. needed to keep clEnqueue* data alive 
+        // event data handling. needed to keep clEnqueue* data alive
         // (like clEnqueueWriteBuffer)
         template<typename T>
         void put_event_data( cl_event event,
@@ -126,7 +127,7 @@ namespace hpx { namespace opencl{ namespace server{
         ///////////////////////////////////////////////
         // Private Member Functions
         //
-        
+
         // Error Callback
         static void CL_CALLBACK error_callback(const char*, const void*,
                                                std::size_t, void*);
@@ -148,7 +149,7 @@ namespace hpx { namespace opencl{ namespace server{
 
         util::event_map     event_map;
         util::data_map      event_data_map;
-        
+
     };
 }}}
 

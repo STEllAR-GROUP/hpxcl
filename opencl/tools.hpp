@@ -13,6 +13,7 @@
 
 #include <sstream>
 
+#include "export_definitions.hpp"
 #include "cl_headers.hpp"
 
 #ifndef CL_VERSION_1_1
@@ -43,7 +44,7 @@ namespace hpx { namespace opencl { namespace tools {
                                 errorMessage.str());                   \
         }                                                              \
     }
-    
+
      // To be called on OpenCL errorcodes in destructors, does not throw
     #define cl_ensure_nothrow(errCode, functionname){                  \
         if(errCode != CL_SUCCESS)                                      \
@@ -56,10 +57,10 @@ namespace hpx { namespace opencl { namespace tools {
                       << hpx::endl;                                    \
         }                                                              \
     }
-    
-    
+
+
     // Translates CL errorcode to descriptive string
-    const char* cl_err_to_str(cl_int errCode);
+    HPX_OPENCL_EXPORT const char* cl_err_to_str(cl_int errCode);
 
     // Returns true if curren thread runs on a large stack
     bool runs_on_large_stack();

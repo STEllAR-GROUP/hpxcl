@@ -3,49 +3,36 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <hpx/hpx.hpp>
-#include <hpx/config.hpp>
-#include <hpx/hpx_main.hpp>
+#include "cl_tests.hpp"
+#include "register_event.hpp"
 
-#include <hpx/util/lightweight_test.hpp>
-
-#include <hpx/include/iostreams.hpp>
-
-void dummy(){}
-
-
-int hpx_main()
+void cl_test( hpx::opencl::device cldevice, hpx::opencl::device )
 {
-
-    {
-        typedef hpx::lcos::promise<void> promise_type;
-        typedef typename promise_type::wrapped_type shared_state_type;
+    typedef hpx::opencl::lcos::event<void> event_type;
+    typedef typename event_type::wrapped_type shared_state_type;
 
 
-        promise_type promise;
+    event_type event(cldevice.get_gid());
 
 
-        auto future = promise.get_future();
-        auto future_data = hpx::lcos::detail::get_shared_state(future);
-        auto shared_state = boost::static_pointer_cast<shared_state_type>(future_data);
+
+    auto future = event.get_future();
+    auto future_data = hpx::lcos::detail::get_shared_state(future);
+    auto shared_state = boost::static_pointer_cast<shared_state_type>(future_data);
 
 
-        auto gid2 = shared_state->get_gid();
-        auto gid = promise.get_gid();
-        
+    auto gid2 = shared_state->get_event_id();
+    auto gid = event.get_event_id();
+    
+    register_event(cldevice, gid);
 
-        HPX_TEST_EQ(gid, gid2);
+    HPX_TEST_EQ(gid, gid2);
 
-        hpx::cout << gid << hpx::endl;
-        hpx::cout << gid2 << hpx::endl;
-    }
+    future.wait();
 
-    hpx::finalize();
-    return hpx::util::report_errors();
-}
+    hpx::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
-///////////////////////////////////////////////////////////////////////////////
-int main(int argc, char* argv[])
-{
-    return hpx::init(argc, argv);
+    hpx::cout << gid << hpx::endl;
+    hpx::cout << gid2 << hpx::endl;
+
 }

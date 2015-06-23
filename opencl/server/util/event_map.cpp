@@ -112,6 +112,7 @@ event_map::get(const hpx::naming::gid_type& key){
 void 
 event_map::remove(const hpx::naming::gid_type &gid)
 {
+
     cl_event event;
     {
         // Lock
@@ -135,6 +136,7 @@ event_map::remove(const hpx::naming::gid_type &gid)
         // Remove element
         events.erase(gid);
     }
+
 }
 
 void

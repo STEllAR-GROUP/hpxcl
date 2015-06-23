@@ -27,7 +27,7 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         send_to_client_impl( hpx::serialization::serialize_buffer<T, Alloc> data,
                              const hpx::naming::id_type& event_id )
         {
-            hpx::set_lco_value(event_id, data); 
+            hpx::set_lco_value(event_id, data, false); 
         }
 
     public:
