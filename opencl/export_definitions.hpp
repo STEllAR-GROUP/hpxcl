@@ -7,6 +7,7 @@
 #ifndef HPX_OPENCL_EXPORT_DEFINITIONS_HPP_
 #define HPX_OPENCL_EXPORT_DEFINITIONS_HPP_
 
+#include <hpx/config.hpp>
 #include <hpx/config/export_definitions.hpp>
 
 

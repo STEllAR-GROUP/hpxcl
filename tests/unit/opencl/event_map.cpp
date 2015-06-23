@@ -14,12 +14,12 @@ using hpx::naming::id_type;
 
 static hpx::opencl::server::util::event_map *map;
 
-static std::atomic_ulong id_counter(1);
+static std::atomic<ulong> id_counter(1);
 static id_type next_id(){
     return id_type(0, id_counter++, id_type::management_type::unmanaged); 
 }
 
-static std::atomic_size_t num_deleted;
+static std::atomic<size_t> num_deleted;
 static void deletion_callback(cl_event e){
     num_deleted++;
     hpx::cout << "deletion_callback: " << (long) e << hpx::endl;
@@ -46,7 +46,7 @@ static void cl_test( hpx::opencl::device local_device,
     map = new hpx::opencl::server::util::event_map();
 
     // Register the desctruction callback
-    map->register_deletion_callback(deletion_callback);
+    map->register_deletion_callback(&deletion_callback);
 
     // Test default functionality
     {

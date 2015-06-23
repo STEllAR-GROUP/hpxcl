@@ -43,8 +43,11 @@ static void cl_test( hpx::opencl::device local_device,
     register_event(cldevice, event.get_event_id());
 
     hpx::shared_future<void> sfut = event.get_future();
-    std::vector<hpx::shared_future<void>> vsfut1 = {sfut};
-    std::vector<hpx::shared_future<void>> vsfut2 = {sfut, sfut};
+    std::vector<hpx::shared_future<void>> vsfut1;
+    vsfut1.push_back( sfut );
+    std::vector<hpx::shared_future<void>> vsfut2;
+    vsfut2.push_back( sfut );
+    vsfut2.push_back( sfut );
 
     test_client t;
 
