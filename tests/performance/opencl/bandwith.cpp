@@ -16,7 +16,6 @@ typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
 
 // global variables
-hpx::opencl::tests::performance::testresults results;
 static buffer_type test_data;
 static std::size_t num_iterations;
 
@@ -65,7 +64,7 @@ static void run_opencl_local_test( hpx::opencl::device device )
 
 
     double throughput_gbps = 0.0;
-    do
+    while(results.needs_more_testing())
     {
         // initialize the buffer
         buffer_type buf ( new char[test_data.size()], test_data.size(),
@@ -108,7 +107,8 @@ static void run_opencl_local_test( hpx::opencl::device device )
         const double throughput = data_transfer_per_test / duration;
         throughput_gbps = throughput/(1024.0*1024.0*1024.0);
         
-    } while(results.add(throughput_gbps));
+        results.add(throughput_gbps);
+    }
 
 
 
@@ -144,7 +144,7 @@ static void run_opencl_local_send_test( hpx::opencl::device device )
 
 
     double throughput_gbps = 0.0;
-    do
+    while(results.needs_more_testing())
     {
         // initialize the buffer
         buffer_type buf ( new char[test_data.size()], test_data.size(),
@@ -227,7 +227,8 @@ static void run_opencl_local_send_test( hpx::opencl::device device )
         const double throughput = data_transfer_per_test / duration;
         throughput_gbps = throughput/(1024.0*1024.0*1024.0);
         
-    } while(results.add(throughput_gbps));
+        results.add(throughput_gbps);
+    }
 
 
 
@@ -260,7 +261,7 @@ static void run_hpxcl_send_test( hpx::opencl::device device1,
         test_data.size() * 2 * num_iterations;
 
     double throughput_gbps = 0.0;
-    do
+    while(results.needs_more_testing())
     {
         // initialize the buffer
         hpx::future<void> fut = buffer1.enqueue_write(0, test_data);
@@ -295,7 +296,8 @@ static void run_hpxcl_send_test( hpx::opencl::device device1,
         const double throughput = data_transfer_per_test / duration;
         throughput_gbps = throughput/(1024.0*1024.0*1024.0);
         
-    } while(results.add(throughput_gbps));
+        results.add(throughput_gbps);
+    }
 
 }
 
@@ -316,7 +318,7 @@ static void run_hpxcl_read_write_test( hpx::opencl::device device )
         test_data.size() * 2 * num_iterations;
 
     double throughput_gbps = 0.0;
-    do
+    while(results.needs_more_testing())
     {
         // initialize the buffer
         buffer_type read_buf ( new char[test_data.size()], test_data.size(),
@@ -351,7 +353,8 @@ static void run_hpxcl_read_write_test( hpx::opencl::device device )
         const double throughput = data_transfer_per_test / duration;
         throughput_gbps = throughput/(1024.0*1024.0*1024.0);
         
-    } while(results.add(throughput_gbps));
+        results.add(throughput_gbps);
+    }
 
 }
 
@@ -365,7 +368,7 @@ static void run_hpx_loopback_test( hpx::naming::id_type target_location )
 
 
     double throughput_gbps = 0.0;
-    do
+    while(results.needs_more_testing())
     {
         hpx::util::high_resolution_timer walltime;
 
@@ -391,14 +394,16 @@ static void run_hpx_loopback_test( hpx::naming::id_type target_location )
         const double throughput = data_transfer_per_test / duration;
         throughput_gbps = throughput/(1024.0*1024.0*1024.0);
         
-    } while(results.add(throughput_gbps));
+        results.add(throughput_gbps);
+    }
 
 }
 
 
 
 static void cl_test(hpx::opencl::device local_device,
-                    hpx::opencl::device remote_device)
+                    hpx::opencl::device remote_device,
+                    bool distributed)
 {
 
 
@@ -429,23 +434,29 @@ static void cl_test(hpx::opencl::device local_device,
     // Run local opencl send test
     run_opencl_local_send_test(local_device);
 
-    // Run hpx loopback test
-    run_hpx_loopback_test(remote_location);
+    if(distributed){
+        // Run hpx loopback test
+        run_hpx_loopback_test(remote_location);
+    }
 
     // Run local hpxcl test
     run_hpxcl_read_write_test(local_device);
 
-    // Run remote hpxcl test
-    run_hpxcl_read_write_test(remote_device);
+    if(distributed){
+        // Run remote hpxcl test
+        run_hpxcl_read_write_test(remote_device);
+    }
 
     // Run hpxcl send local-local test
     run_hpxcl_send_test(local_device, local_device);
 
-    // Run hpxcl send remote-remote test
-    run_hpxcl_send_test(remote_device, remote_device);
+    if(distributed){
+        // Run hpxcl send remote-remote test
+        run_hpxcl_send_test(remote_device, remote_device);
 
-    // Run hpxcl send local-remote test
-    run_hpxcl_send_test(local_device, remote_device);
+        // Run hpxcl send local-remote test
+        run_hpxcl_send_test(local_device, remote_device);
+    }
 
 
     std::cout << results << std::endl;

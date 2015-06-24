@@ -14,35 +14,72 @@
 using hpx::opencl::tests::performance::testresults;
 
 void
+testresults::set_enabled_tests( std::vector<std::string> enabled_tests )
+{
+
+    enabled_tests_set.insert(enabled_tests.begin(), enabled_tests.end());
+
+}
+
+void
+testresults::set_output_json( bool enable )
+{
+
+    output_json = enable;
+
+}
+
+void
 testresults::start_test( std::string name,
                          std::string unit,
                          std::map<std::string, std::string> atts )
 {
 
-    std::cout << "Running '" << name << "' " << std::flush;
+    std::cerr << "Running '" << name << "' " << std::flush;
 
-    testseries new_test;
+    // If test is allowed to run
+    if( enabled_tests_set.empty() ||
+                      enabled_tests_set.find(name) != enabled_tests_set.end()) {
 
-    new_test.series_name = name;
-    new_test.atts = atts;
-    new_test.unit = unit;
+        testseries new_test;
+    
+        new_test.series_name = name;
+        new_test.atts = atts;
+        new_test.unit = unit;
+    
+        results.push_back(new_test);
 
-    results.push_back(new_test);
+        current_test_valid = true;
 
+    } else {
+    
+        std::cerr << "- disabled" << std::endl; 
+        current_test_valid = false;
+
+    }
+}
+
+void
+testresults::add( double result )
+{
+    std::cerr << "." << std::flush;
+    results.back().test_entries.push_back(result);
+    if(results.back().test_entries.size() >= 10){
+        std::cerr << std::endl;
+    }
 }
 
 bool
-testresults::add( double result )
+testresults::needs_more_testing()
 {
-    std::cout << "." << std::flush;
-    results.back().test_entries.push_back(result);
-    if(results.back().test_entries.size() >= 10){
-        std::cout << std::endl;
+    if(!current_test_valid)
         return false;
-    }
+
+    if(results.back().test_entries.size() >= 10)
+        return false;
+
     return true;
 }
-
 
 std::ostream&
 hpx::opencl::tests::performance::operator<<(std::ostream& os, const testresults& result)

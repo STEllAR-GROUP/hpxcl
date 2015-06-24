@@ -5,6 +5,7 @@
 
 #include <string>
 #include <map>
+#include <set>
 #include <vector>
 #include <iostream>
 
@@ -33,16 +34,28 @@ namespace hpx{ namespace opencl{ namespace tests{ namespace performance{
             std::vector<testseries> results;
 
         public:
+            void set_enabled_tests( std::vector<std::string> enabled_tests );
+
+            void set_output_json( bool enable );
+
             void start_test( std::string name,
                              std::string unit,
                              std::map<std::string, std::string> atts
                                 = std::map<std::string, std::string>() );
 
-            bool add( double result );
+            void add( double result );
+
+            bool needs_more_testing();
 
         private:
             friend std::ostream& operator<<( std::ostream& os,
                                              const testresults& result );
+
+            bool current_test_valid = false;
+
+            // Settings
+            std::set<std::string> enabled_tests_set;
+            bool output_json = false;
 
     };
 

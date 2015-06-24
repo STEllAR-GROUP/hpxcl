@@ -13,12 +13,17 @@
 
 #include "../../../../opencl.hpp"
 
+#include "testresults.hpp"
+
 using boost::program_options::variables_map;
 using boost::program_options::options_description;
 using boost::program_options::value;
 
+// the formatter for the test results
+hpx::opencl::tests::performance::testresults results;
+
 // the main test function
-static void cl_test(hpx::opencl::device, hpx::opencl::device);
+static void cl_test(hpx::opencl::device, hpx::opencl::device, bool distributed);
 
 #define die( message )                                                          \
 {                                                                               \
@@ -105,8 +110,13 @@ static std::vector<hpx::opencl::device> init(variables_map & vm)
     std::vector<hpx::opencl::device> local_devices
             = hpx::opencl::get_local_devices( CL_DEVICE_TYPE_ALL,
                                               "OpenCL 1.1" ).get();
-    if(remote_devices.empty()) die("No remote devices found!");
+
+    if(remote_devices.empty()){
+        remote_devices = local_devices;
+        std::cerr << "WARNING: no remote devices found!" << std::endl;
+    }
     if(local_devices.empty()) die("No local devices found!");
+    if(remote_devices.empty()) die("No remote devices found!");
     if(local_devices.size() <= device_id || remote_devices.size() <= device_id)
         die("deviceid is out of range!");
 
@@ -117,8 +127,11 @@ static std::vector<hpx::opencl::device> init(variables_map & vm)
     // Print info
     std::cout << "Local device:" << std::endl;
     print_testdevice_info(local_device, device_id, local_devices.size());
-    std::cout << "Remote device:" << std::endl;
-    print_testdevice_info(remote_device, device_id, remote_devices.size());
+    if(local_device != remote_device)
+    {
+        std::cout << "Remote device:" << std::endl;
+        print_testdevice_info(remote_device, device_id, remote_devices.size());
+    }
 
     // return the devices
     std::vector<hpx::opencl::device> devices;
@@ -131,9 +144,15 @@ static std::vector<hpx::opencl::device> init(variables_map & vm)
 int hpx_main(variables_map & vm)
 {
     {
+        if (vm.count("output_json"))
+            results.set_output_json(true);
+        if (vm.count("enable"))
+            results.set_enabled_tests( vm["enable"]
+                                           .as<std::vector<std::string> >() );
+
         auto devices = init(vm);   
         std::cout << std::endl;
-        cl_test(devices[0], devices[1]);
+        cl_test(devices[0], devices[1], devices[0] != devices[1]);
     }
     
     hpx::finalize();
@@ -150,7 +169,13 @@ int main(int argc, char* argv[])
     cmdline.add_options()
         ( "deviceid"
         , value<std::size_t>()->default_value(0)
-        , "the ID of the device we will run our tests on") ;
+        , "the ID of the device we will run our tests on" )
+        ( "output_json"
+        , "Prints the test results in JSON format" )
+        ( "enable"
+        , value<std::vector<std::string> >()
+        , "only enables certain tests" )
+        ;
 
     return hpx::init(cmdline, argc, argv);
 }
