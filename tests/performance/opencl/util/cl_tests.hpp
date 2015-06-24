@@ -42,7 +42,7 @@ static void cl_test(hpx::opencl::device, hpx::opencl::device, bool distributed);
         die("Result is incorrect! (Sizes don't match)");                        \
     }                                                                           \
     for(std::size_t i = 0; i < lhs.size(); i++){                                \
-        std::cout << std::hex << lhs[i] << "-" << rhs[i] << std::endl;          \
+        std::cerr << std::hex << lhs[i] << "-" << rhs[i] << std::endl;          \
         if(lhs[i] != rhs[i]){                                                   \
             die("Result is incorrect!");                                        \
     }                                                                           \
@@ -83,15 +83,15 @@ static void print_testdevice_info(hpx::opencl::device & cldevice,
     std::string version = cldevice.get_device_info<CL_DEVICE_VERSION>().get();
 
     // Write Info Code
-    std::cout << "Device ID:  " << device_id << " / " << num_devices
+    std::cerr << "Device ID:  " << device_id << " / " << num_devices
                                 << std::endl;
-    std::cout << "Device GID: " << cldevice.get_gid() << std::endl;
-    std::cout << "Version:    " << version << std::endl;
-    std::cout << "Name:       " << cldevice.get_device_info<CL_DEVICE_NAME>().get()
+    std::cerr << "Device GID: " << cldevice.get_gid() << std::endl;
+    std::cerr << "Version:    " << version << std::endl;
+    std::cerr << "Name:       " << cldevice.get_device_info<CL_DEVICE_NAME>().get()
                                 << std::endl;
-    std::cout << "Vendor:     " << cldevice.get_device_info<CL_DEVICE_VENDOR>().get()
+    std::cerr << "Vendor:     " << cldevice.get_device_info<CL_DEVICE_VENDOR>().get()
                                 << std::endl;
-    std::cout << "Profile:    " << cldevice.get_device_info<CL_DEVICE_PROFILE>().get()
+    std::cerr << "Profile:    " << cldevice.get_device_info<CL_DEVICE_PROFILE>().get()
                                 << std::endl;
 }
 
@@ -125,11 +125,11 @@ static std::vector<hpx::opencl::device> init(variables_map & vm)
     hpx::opencl::device remote_device = remote_devices[device_id];
 
     // Print info
-    std::cout << "Local device:" << std::endl;
+    std::cerr << "Local device:" << std::endl;
     print_testdevice_info(local_device, device_id, local_devices.size());
     if(local_device != remote_device)
     {
-        std::cout << "Remote device:" << std::endl;
+        std::cerr << "Remote device:" << std::endl;
         print_testdevice_info(remote_device, device_id, remote_devices.size());
     }
 
@@ -144,15 +144,29 @@ static std::vector<hpx::opencl::device> init(variables_map & vm)
 int hpx_main(variables_map & vm)
 {
     {
-        if (vm.count("output_json"))
-            results.set_output_json(true);
-        if (vm.count("enable"))
+        if (vm.count("format")){
+            std::string format = vm["format"].as<std::string>();
+            if(format == "json")
+                results.set_output_json();
+            else if (format == "tabbed")
+                results.set_output_tabbed();
+            else
+                die("Format '" + format + "' not supported!");
+        }
+        if (vm.count("enable")){
             results.set_enabled_tests( vm["enable"]
                                            .as<std::vector<std::string> >() );
+        }
 
         auto devices = init(vm);   
-        std::cout << std::endl;
+
+        std::cerr << std::endl;
         cl_test(devices[0], devices[1], devices[0] != devices[1]);
+        std::cerr << std::endl;
+
+        std::cout << results;
+
+        std::cerr << std::endl;
     }
     
     hpx::finalize();
@@ -170,8 +184,9 @@ int main(int argc, char* argv[])
         ( "deviceid"
         , value<std::size_t>()->default_value(0)
         , "the ID of the device we will run our tests on" )
-        ( "output_json"
-        , "Prints the test results in JSON format" )
+        ( "format"
+        , value<std::string>()
+        , "Formats the output in a certain way.\nSupports: json, tabbed" )
         ( "enable"
         , value<std::vector<std::string> >()
         , "only enables certain tests" )

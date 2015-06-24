@@ -419,10 +419,10 @@ static void cl_test(hpx::opencl::device local_device,
         die("Internal ERROR! local_location is not here.");
 
     // Generate random vector
-    std::cout << "Generating test data ..." << std::endl;
+    std::cerr << "Generating test data ..." << std::endl;
     test_data = buffer_type ( new char[testdata_size], testdata_size,
                               buffer_type::init_mode::take );
-    std::cout << "Test data generated." << std::endl;
+    std::cerr << "Test data generated." << std::endl;
     for(std::size_t i = 0; i < testdata_size; i++){
         test_data[i] = static_cast<char>(rand());
     }
@@ -459,7 +459,6 @@ static void cl_test(hpx::opencl::device local_device,
     }
 
 
-    std::cout << results << std::endl;
 }
 
 

@@ -29,6 +29,7 @@ namespace hpx{ namespace opencl{ namespace tests{ namespace performance{
                     double get_stddev() const;
                     double get_min() const;
                     double get_max() const;
+                    std::string get_atts() const;
             };
 
             std::vector<testseries> results;
@@ -36,7 +37,8 @@ namespace hpx{ namespace opencl{ namespace tests{ namespace performance{
         public:
             void set_enabled_tests( std::vector<std::string> enabled_tests );
 
-            void set_output_json( bool enable );
+            void set_output_json();
+            void set_output_tabbed();
 
             void start_test( std::string name,
                              std::string unit,
@@ -48,6 +50,10 @@ namespace hpx{ namespace opencl{ namespace tests{ namespace performance{
             bool needs_more_testing();
 
         private:
+            void print_default( std::ostream& os ) const;
+            void print_tabbed( std::ostream& os ) const;
+            void print_json( std::ostream& os ) const;
+
             friend std::ostream& operator<<( std::ostream& os,
                                              const testresults& result );
 
@@ -55,7 +61,9 @@ namespace hpx{ namespace opencl{ namespace tests{ namespace performance{
 
             // Settings
             std::set<std::string> enabled_tests_set;
-            bool output_json = false;
+
+            enum output_formats { DEFAULT, TABBED, JSON };
+            output_formats output_format = DEFAULT;
 
     };
 

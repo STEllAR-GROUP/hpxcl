@@ -22,11 +22,15 @@ testresults::set_enabled_tests( std::vector<std::string> enabled_tests )
 }
 
 void
-testresults::set_output_json( bool enable )
+testresults::set_output_json()
 {
+    output_format = JSON;
+}
 
-    output_json = enable;
-
+void
+testresults::set_output_tabbed()
+{
+    output_format = TABBED;
 }
 
 void
@@ -81,16 +85,119 @@ testresults::needs_more_testing()
     return true;
 }
 
-std::ostream&
-hpx::opencl::tests::performance::operator<<(std::ostream& os, const testresults& result)
+static std::size_t
+get_column_width( const std::vector<std::vector<std::string> > & matrix,
+                  std::size_t column )
+{
+    std::size_t max_width = 0;
+
+    for(const auto& row : matrix){
+
+        if(row.size() <= column)
+            continue;
+
+        if(row[column].length() > max_width)
+            max_width = row[column].length();
+
+    }
+
+    return max_width;
+
+}
+
+static std::string
+double_to_str(double num)
+{
+    std::stringstream str;
+    str << num;
+    return str.str();
+}
+
+void
+testresults::print_default( std::ostream& os ) const
+{
+    std::vector<std::vector<std::string> > output;
+
+    std::vector<std::string> headline;
+    headline.push_back("test");
+    headline.push_back("atts");
+    headline.push_back("units");
+    headline.push_back("median");
+    headline.push_back("mean");
+    headline.push_back("stddev");
+    headline.push_back("min");
+    headline.push_back("max");
+    headline.push_back("trial0");
+    headline.push_back("trial1");
+    headline.push_back("trial2");
+    headline.push_back("trial3");
+    headline.push_back("trial4");
+    headline.push_back("trial5");
+    headline.push_back("trial6");
+    headline.push_back("trial7");
+    headline.push_back("trial8");
+    headline.push_back("trial9");
+    output.push_back(headline);
+
+    // fill with results
+    for(const auto& row : results){
+
+        if(row.test_entries.size() != 10)
+        {
+            os << "ERROR! test_entries.size() != 10!" << std::endl;
+            break;
+        }
+
+        std::vector<std::string> line;
+
+        line.push_back(row.series_name);
+        line.push_back(row.get_atts());
+        line.push_back(row.unit);
+        line.push_back(double_to_str(row.get_median()));
+        line.push_back(double_to_str(row.get_mean()));
+        line.push_back(double_to_str(row.get_stddev()));
+        line.push_back(double_to_str(row.get_min()));
+        line.push_back(double_to_str(row.get_max()));
+
+        for(const auto& res : row.test_entries){
+            line.push_back(double_to_str(res));
+        }
+
+        output.push_back(line);
+    }
+
+    // compute widths of columns
+    std::vector<std::size_t> column_widths;
+    for(std::size_t col = 0; col < headline.size(); col++){
+        column_widths.push_back(get_column_width(output,col));
+    }
+
+    // print
+    for(const auto& row : output){
+        for(std::size_t i = 0; i < row.size() && i < column_widths.size(); i++){
+            if(i != 0)
+                os << " ";
+
+            os << row[i];
+
+            for(std::size_t j = row[i].length(); j < column_widths[i]; j++){
+                os << " ";
+            }
+        }
+        os << std::endl;
+    }
+
+}
+
+void
+testresults::print_tabbed( std::ostream& os ) const
 {
     // print headline
-    os << std::endl;
     os << "test\tatts\tunits\tmedian\tmean\tstddev\tmin\tmax\ttrial0\ttrial1\t"
        << "trial2\ttrial3\ttrial4\ttrial5\ttrial6\ttrial7\ttrial8\ttrial9"
        << std::endl;
 
-    for(const auto& row : result.results){
+    for(const auto& row : results){
 
         if(row.test_entries.size() != 10)
         {
@@ -100,8 +207,7 @@ hpx::opencl::tests::performance::operator<<(std::ostream& os, const testresults&
 
         os << row.series_name << "\t";
 
-        // TODO atts
-        os << "TODO" << "\t";
+        os << row.get_atts() << "\t";
 
         os << row.unit << "\t";
 
@@ -123,6 +229,26 @@ hpx::opencl::tests::performance::operator<<(std::ostream& os, const testresults&
 
         os << std::endl;
 
+    }
+
+}
+
+void
+testresults::print_json( std::ostream& os ) const {
+
+}
+
+std::ostream&
+hpx::opencl::tests::performance::operator<<(std::ostream& os, const testresults& result)
+{
+
+    switch(result.output_format){
+        case testresults::DEFAULT: result.print_default(os);    break;
+        case testresults::TABBED:  result.print_tabbed(os);     break;
+        case testresults::JSON:    result.print_json(os);       break;
+        default:
+            HPX_ASSERT(false);
+            break;
     }
 
     return os;
@@ -208,4 +334,12 @@ testresults::testseries::get_median() const
     }
 
     return median;
+}
+
+std::string
+testresults::testseries::get_atts() const
+{
+
+    return "-";
+
 }
