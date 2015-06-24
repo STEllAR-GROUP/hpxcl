@@ -127,7 +127,7 @@ static std::vector<hpx::opencl::device> init(variables_map & vm)
     // Print info
     std::cerr << "Local device:" << std::endl;
     print_testdevice_info(local_device, device_id, local_devices.size());
-    if(local_device != remote_device)
+    if(local_device.get_gid() != remote_device.get_gid())
     {
         std::cerr << "Remote device:" << std::endl;
         print_testdevice_info(remote_device, device_id, remote_devices.size());
@@ -161,7 +161,8 @@ int hpx_main(variables_map & vm)
         auto devices = init(vm);   
 
         std::cerr << std::endl;
-        cl_test(devices[0], devices[1], devices[0] != devices[1]);
+        cl_test( devices[0], devices[1],
+                 devices[0].get_gid() != devices[1].get_gid());
         std::cerr << std::endl;
 
         std::cout << results;

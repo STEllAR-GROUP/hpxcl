@@ -234,8 +234,54 @@ testresults::print_tabbed( std::ostream& os ) const
 }
 
 void
-testresults::print_json( std::ostream& os ) const {
+testresults::print_json( std::ostream& os ) const
+{
+    os << "{" << std::endl;
+    os << "  \"tests\": {" << std::endl;
 
+    for(std::size_t i = 0; i < results.size(); i++){
+        const auto& row = results[i];
+        os << "    \"" << row.series_name << "\": {" << std::endl;
+
+        HPX_ASSERT(row.test_entries.size() == 10);
+
+        // atts
+        os << "      \"atts\": {" << std::endl;
+        // TODO
+        os << "      }," << std::endl;
+
+        // unit
+        os << "      \"unit\": \"" << row.unit << "\"," << std::endl;
+
+        // stats
+        os << "      \"median\": " << row.get_median() << "," << std::endl;
+        os << "      \"mean\":   " << row.get_mean() << "," << std::endl;
+        os << "      \"stddev\": " << row.get_stddev() << "," << std::endl;
+        os << "      \"min\":    " << row.get_min() << "," << std::endl;
+        os << "      \"max\":    " << row.get_max() << "," << std::endl;
+
+        // trials
+        os << "      \"trials\": [" << std::endl;
+        for(std::size_t j = 0; j < row.test_entries.size(); j++){
+            const auto& res = row.test_entries[j];
+
+            os << "        " << res;
+
+            if(j < row.test_entries.size() - 1)
+                os << "," << std::endl;
+            else
+                os << std::endl;
+        }
+        os << "      ]" << std::endl;
+
+        if(i < results.size() - 1)
+            os << "    }," << std::endl;
+        else
+            os << "    }" << std::endl;
+    }
+
+    os << "  }" << std::endl;
+    os << "}" << std::endl;
 }
 
 std::ostream&
