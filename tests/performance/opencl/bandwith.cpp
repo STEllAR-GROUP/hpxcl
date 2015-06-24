@@ -58,7 +58,7 @@ static void run_opencl_local_test( hpx::opencl::device device )
     cl_command_queue read_command_queue = device_ptr->get_read_command_queue();
     cl_mem buffer_id = buffer_ptr->get_cl_mem();
 
-    results.start_test("OpenCL_local", "GB/s");
+    results.start_test("OpenCL_local_host_to_local_device", "GB/s");
    
     const std::size_t data_transfer_per_test =
         test_data.size() * 2 * num_iterations;
@@ -89,6 +89,7 @@ static void run_opencl_local_test( hpx::opencl::device device )
                                         buf.size(),
                                         buf.data(),
                                         0, NULL, NULL );
+            cl_ensure(err, "clEnqueueWriteBuffer()");
 
             err = clEnqueueReadBuffer( read_command_queue,
                                        buffer_id,
@@ -97,10 +98,130 @@ static void run_opencl_local_test( hpx::opencl::device device )
                                        buf.size(),
                                        buf.data(),
                                        0, NULL, NULL );
+            cl_ensure(err, "clEnqueueReadBuffer()");
         }
 
 
         const double duration = walltime.elapsed();
+        ensure_valid(buf); 
+
+        const double throughput = data_transfer_per_test / duration;
+        throughput_gbps = throughput/(1024.0*1024.0*1024.0);
+        
+    } while(results.add(throughput_gbps));
+
+
+
+}
+
+
+static void run_opencl_local_send_test( hpx::opencl::device device )
+{
+
+    hpx::opencl::buffer buffer1 =
+        device.create_buffer(CL_MEM_READ_WRITE, test_data.size());
+    hpx::opencl::buffer buffer2 =
+        device.create_buffer(CL_MEM_READ_WRITE, test_data.size());
+
+    auto device_ptr =
+        hpx::get_ptr<hpx::opencl::server::device>(device.get_gid()).get();
+    auto buffer1_ptr =
+        hpx::get_ptr<hpx::opencl::server::buffer>(buffer1.get_gid()).get();
+    auto buffer2_ptr =
+        hpx::get_ptr<hpx::opencl::server::buffer>(buffer2.get_gid()).get();
+
+
+    cl_context context = device_ptr->get_context();
+    cl_command_queue command_queue = device_ptr->get_write_command_queue();
+    cl_mem buffer1_id = buffer1_ptr->get_cl_mem();
+    cl_mem buffer2_id = buffer2_ptr->get_cl_mem();
+
+
+    results.start_test("OpenCL_local_device_to_local_device", "GB/s");
+   
+    const std::size_t data_transfer_per_test =
+        test_data.size() * 2 * num_iterations;
+
+
+    double throughput_gbps = 0.0;
+    do
+    {
+        // initialize the buffer
+        buffer_type buf ( new char[test_data.size()], test_data.size(),
+                          buffer_type::init_mode::take );
+        std::copy(test_data.data(), test_data.data()+test_data.size(), buf.data());
+
+        cl_int err;
+        cl_event event, new_event;
+
+        err = clEnqueueWriteBuffer( command_queue,
+                                    buffer1_id,
+                                    CL_TRUE,
+                                    0,
+                                    buf.size(),
+                                    buf.data(),
+                                    0, NULL, &event );
+        cl_ensure(err, "clEnqueueWriteBuffer()");
+
+        err = clFinish(command_queue);
+        cl_ensure(err, "clFinish()");
+
+        hpx::util::high_resolution_timer walltime;
+        for(std::size_t it = 0; it < num_iterations; it ++)
+        {
+            err = clEnqueueCopyBuffer( command_queue,
+                                       buffer1_id,
+                                       buffer2_id,
+                                       0, 0,
+                                       buf.size(),
+                                       1, &event,
+                                       &new_event );
+            cl_ensure(err, "clEnqueueCopyBuffer()");
+
+            err = clReleaseEvent(event);
+            cl_ensure(err, "clReleaseEvent()");
+            event = new_event;
+
+            err = clEnqueueCopyBuffer( command_queue,
+                                       buffer2_id,
+                                       buffer1_id,
+                                       0, 0,
+                                       buf.size(),
+                                       1, &event,
+                                       &new_event );
+            cl_ensure(err, "clEnqueueCopyBuffer()");
+
+            err = clReleaseEvent(event);
+            cl_ensure(err, "clReleaseEvent()");
+            event = new_event;
+        }
+
+        err = clWaitForEvents(1, &event);
+        cl_ensure(err, "clWaitForEvents()");
+
+        const double duration = walltime.elapsed();
+
+        err = clReleaseEvent(event);
+        cl_ensure(err, "clReleaseEvent()");
+
+        err = clEnqueueReadBuffer( command_queue,
+                                   buffer1_id,
+                                   CL_TRUE,
+                                   0,
+                                   buf.size(),
+                                   buf.data(),
+                                   0, NULL, NULL );
+        cl_ensure(err, "clEnqueueReadBuffer()");
+        ensure_valid(buf); 
+
+        err = clEnqueueReadBuffer( command_queue,
+                                   buffer2_id,
+                                   CL_TRUE,
+                                   0,
+                                   buf.size(),
+                                   buf.data(),
+                                   0, NULL, NULL );
+        cl_ensure(err, "clEnqueueReadBuffer()");
         ensure_valid(buf); 
 
         const double throughput = data_transfer_per_test / duration;
@@ -131,7 +252,8 @@ static void run_hpxcl_send_test( hpx::opencl::device device1,
     if(hpx::get_colocation_id_sync(device2.get_gid()) == hpx::find_here())
         device2_location = "local";
 
-    results.start_test("HPXCL_send_" + device1_location + "_" + device2_location,
+    results.start_test("HPXCL_" + device1_location + "_device_to_" +
+                        device2_location + "_device",
                        "GB/s");
    
     const std::size_t data_transfer_per_test =
@@ -186,9 +308,9 @@ static void run_hpxcl_read_write_test( hpx::opencl::device device )
     
 
     if(hpx::get_colocation_id_sync(device.get_gid()) == hpx::find_here())
-        results.start_test("HPXCL_write_local", "GB/s");
+        results.start_test("HPXCL_local_host_to_local_device", "GB/s");
     else
-        results.start_test("HPXCL_write_remote", "GB/s");
+        results.start_test("HPXCL_local_host_to_remote_device", "GB/s");
    
     const std::size_t data_transfer_per_test =
         test_data.size() * 2 * num_iterations;
@@ -236,7 +358,7 @@ static void run_hpxcl_read_write_test( hpx::opencl::device device )
 static void run_hpx_loopback_test( hpx::naming::id_type target_location )
 {
 
-    results.start_test("HPX_remote", "GB/s");
+    results.start_test("HPX_local_host_to_remote_host", "GB/s");
    
     const std::size_t data_transfer_per_test =
         test_data.size() * 2 * num_iterations;
@@ -280,7 +402,7 @@ static void cl_test(hpx::opencl::device local_device,
 {
 
 
-    const std::size_t testdata_size = static_cast<std::size_t>(1) << 1;
+    const std::size_t testdata_size = static_cast<std::size_t>(1) << 20;
     num_iterations = 50;
 
     // Get localities
@@ -301,18 +423,20 @@ static void cl_test(hpx::opencl::device local_device,
     }
 
 
-
     // Run local opencl test
     run_opencl_local_test(local_device);
+
+    // Run local opencl send test
+    run_opencl_local_send_test(local_device);
+
+    // Run hpx loopback test
+    run_hpx_loopback_test(remote_location);
 
     // Run local hpxcl test
     run_hpxcl_read_write_test(local_device);
 
     // Run remote hpxcl test
     run_hpxcl_read_write_test(remote_device);
-
-    // Run hpx loopback test
-    run_hpx_loopback_test(remote_location);
 
     // Run hpxcl send local-local test
     run_hpxcl_send_test(local_device, local_device);
