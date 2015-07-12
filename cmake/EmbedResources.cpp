@@ -31,7 +31,7 @@ std::vector<std::string> split(const std::string& s, const std::string& delim) {
 
 static bool is_not_alnum(char c)
 {
-    return !std::isalnum(c);
+    return !std::isalnum(c, std::locale("C"));
 }
 
 int main(int argc, const char** argv)
@@ -75,26 +75,26 @@ int main(int argc, const char** argv)
     }
 
     // open namespace brackets
-    for(int i = 0; i < namespaces.size(); i++)
+    for(std::size_t i = 0; i < namespaces.size(); i++)
     {
         ofile << "namespace " << namespaces[i] << "{" << std::endl;
     }
 
     // write all bytes to the array
-    ofile << "extern const char " << varname << "[] = \"";
+    ofile << "extern const char " << varname << "[] = \"\"";
     unsigned long numchars = 0;
     unsigned char c = ifile.get();
     while(ifile.good()){
         if(numchars % 20 == 0){
-            ofile << "\"\n    \"";
+            ofile << "\n    ";
         }
         numchars++;
 
-        ofile << "\\x" << std::hex << std::setw(2) << std::setfill('0')
-              << (int)c;
+        ofile << "\"\\x" << std::hex << std::setw(2) << std::setfill('0')
+              << (int)c << "\"";
         c = ifile.get();
     }
-    ofile << "\";" << std::endl;
+    ofile << ";" << std::endl;
 
     // write the array length
     ofile << "extern const unsigned long " << varname << "_len = " << std::dec << std::setw(0)
@@ -102,7 +102,7 @@ int main(int argc, const char** argv)
 
         
     // close namespace brackets
-    for(int i = 0; i < namespaces.size(); i++)
+    for(std::size_t i = 0; i < namespaces.size(); i++)
     {
         ofile << "}" << std::endl;
     };
