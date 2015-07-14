@@ -247,7 +247,16 @@ testresults::print_json( std::ostream& os ) const
 
         // atts
         os << "      \"atts\": {" << std::endl;
-        // TODO
+        for( auto it = row.atts.begin(); it != row.atts.end(); ){
+            os << "        \"" << it->first << "\": \"" << it->second << "\"";
+
+            it++;
+
+            if(it != row.atts.end())
+                os << ",";
+
+            os << std::endl;
+        }
         os << "      }," << std::endl;
 
         // unit
