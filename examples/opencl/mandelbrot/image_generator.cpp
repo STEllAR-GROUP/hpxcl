@@ -35,7 +35,7 @@ image_generator(size_t img_size_hint_x_,
                        <std::vector <boost::shared_ptr <mandelbrotworker> > >();
 
     // starting workers
-    BOOST_FOREACH(hpx::opencl::device & device, devices)
+    for( auto& device : devices)
     {
 
         // add a worker
@@ -112,7 +112,7 @@ wait_for_startup_finished()
 {
 
     // wait for all workers to finish startup
-    BOOST_FOREACH(boost::shared_ptr<mandelbrotworker> & worker, *workers)
+    for( auto& worker : *workers)
     {
 
         worker->wait_for_startup_finished();
@@ -200,11 +200,11 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
                 for(size_t x = 0; x < size_x; x++)
                 {
                     (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 0] =
-                        (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 0];  
+                        done_workload->pixeldata[(y * size_x + x) * 3 + 0];  
                     (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 1] =
-                        (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 1];  
+                        done_workload->pixeldata[(y * size_x + x) * 3 + 1];  
                     (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 2] =
-                        (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 2];  
+                        done_workload->pixeldata[(y * size_x + x) * 3 + 2];  
                 }
             }
         }

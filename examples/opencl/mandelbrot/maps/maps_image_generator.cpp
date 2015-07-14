@@ -37,7 +37,7 @@ maps_image_generator(size_t img_size_hint_x_,
     size_t num_retrieve_workers = hpx::get_os_thread_count();
    
     // starting workers
-    BOOST_FOREACH(hpx::opencl::device & device, devices)
+    for( auto& device : devices)
     {
 
         // add a worker
@@ -373,7 +373,7 @@ wait_for_startup_finished()
 {
 
     // wait for all workers to finish startup
-    BOOST_FOREACH(boost::shared_ptr<mandelbrotworker> & worker, workers)
+    for( auto& worker : workers)
     {
 
         worker->wait_for_startup_finished();
@@ -396,7 +396,7 @@ shutdown()
     new_request_available.notify_all(); 
 
     // wait for all workers to finish
-    BOOST_FOREACH(boost::shared_ptr<mandelbrotworker> & worker, workers)
+    for( auto& worker : workers)
     {
         worker->join(); 
     }
@@ -465,13 +465,13 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
             {
                 (*(img_request->data))
                        [((y + start_y) * line_offset + (x + start_x)) * 3 + 0] =
-                    (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 0];  
+                    done_workload->pixeldata[(y * size_x + x) * 3 + 0];  
                 (*(img_request->data))
                        [((y + start_y) * line_offset + (x + start_x)) * 3 + 1] =
-                    (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 1];  
+                    done_workload->pixeldata[(y * size_x + x) * 3 + 1];  
                 (*(img_request->data))
                        [((y + start_y) * line_offset + (x + start_x)) * 3 + 2] =
-                    (*(done_workload->pixeldata))[(y * size_x + x) * 3 + 2];  
+                    done_workload->pixeldata[(y * size_x + x) * 3 + 2];  
             }
         }
 

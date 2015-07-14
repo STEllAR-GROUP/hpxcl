@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <vector>
 
+#include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -34,7 +35,7 @@ class workload
                  size_t line_offset_);
         
         // Will hold the calculated pixels
-        boost::shared_ptr<std::vector<char>> pixeldata;
+        hpx::serialization::serialize_buffer<char> pixeldata;
         // the number of pixels on the rectangle
         size_t num_pixels_x;
         size_t num_pixels_y;

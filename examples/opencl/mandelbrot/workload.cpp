@@ -17,7 +17,7 @@ workload::workload(size_t num_pixels_x_,
                    size_t pos_in_img_x_,
                    size_t pos_in_img_y_,
                    size_t line_offset_)
-                   : pixeldata(boost::shared_ptr<std::vector<char>>()),
+                   : pixeldata(hpx::serialization::serialize_buffer<char>()),
                      num_pixels_x(num_pixels_x_),
                      num_pixels_y(num_pixels_y_),
                      topleft_x(topleft_x_),

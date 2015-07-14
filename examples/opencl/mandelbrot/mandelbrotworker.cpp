@@ -120,13 +120,13 @@ mandelbrotworker::worker_main(
                                                      KERNEL_INPUT_ARGUMENT_COUNT * sizeof(double));
     
         // connect buffers to kernel 
-        kernel.set_arg(0, precalc_buffer);
-        kernel.set_arg(1, output_buffer);
-        kernel.set_arg(2, input_buffer);
+        kernel.set_arg_sync(0, precalc_buffer);
+        kernel.set_arg_sync(1, output_buffer);
+        kernel.set_arg_sync(2, input_buffer);
     
         // connect buffers to precalc kernel 
-        precalc_kernel.set_arg(0, precalc_buffer);
-        precalc_kernel.set_arg(1, input_buffer);
+        precalc_kernel.set_arg_sync(0, precalc_buffer);
+        precalc_kernel.set_arg_sync(1, input_buffer);
     
     
         // main loop
@@ -150,6 +150,7 @@ mandelbrotworker::worker_main(
                                         * 3
                                         * sizeof(char);
 
+
             // change output buffer if needed buffersize changed
             if (current_buffer_size != needed_buffer_size)
             {
@@ -157,7 +158,7 @@ mandelbrotworker::worker_main(
                 output_buffer = buffermanager.get_buffer( needed_buffer_size );
 
                 // attach new buffer
-                kernel.set_arg(1, output_buffer);
+                kernel.set_arg_sync(1, output_buffer);
 
                 // update current buffer size
                 current_buffer_size = needed_buffer_size;
@@ -176,8 +177,8 @@ mandelbrotworker::worker_main(
                                                          needed_precalc_size );
 
                 // attach new buffer
-                kernel.set_arg(0, precalc_buffer);
-                precalc_kernel.set_arg(0, precalc_buffer);
+                kernel.set_arg_sync(0, precalc_buffer);
+                precalc_kernel.set_arg_sync(0, precalc_buffer);
 
                 // update current buffer size
                 current_precalc_size = needed_precalc_size;
@@ -191,29 +192,28 @@ mandelbrotworker::worker_main(
             args[3] = next_workload->hor_pixdist_y;
             args[4] = next_workload->vert_pixdist_x;
             args[5] = next_workload->vert_pixdist_y;
+            typedef hpx::serialization::serialize_buffer<double> double_buffer_type;
+            double_buffer_type args_buf( args, KERNEL_INPUT_ARGUMENT_COUNT,
+                                         double_buffer_type::init_mode::reference );
     
             // send calculation dimensions to gpu
-            hpx::lcos::shared_future<hpx::opencl::event> ev1 = 
-                          input_buffer.enqueue_write(0, KERNEL_INPUT_ARGUMENT_COUNT*sizeof(double), args);
-            
+            auto ev1 = input_buffer.enqueue_write(0, args_buf);
+
             // run precalculation
             precalc_dim[0].size = next_workload->num_pixels_x + 2;
             precalc_dim[1].size = next_workload->num_pixels_y + 2;
-            hpx::lcos::shared_future<hpx::opencl::event> ev2 = 
-                                      precalc_kernel.enqueue(precalc_dim, ev1);
-
+            auto ev2 = precalc_kernel.enqueue(precalc_dim, ev1);
+            
              // run calculation
             dim[0].size = next_workload->num_pixels_x * 8;
             dim[1].size = next_workload->num_pixels_y * 8;
-            hpx::lcos::shared_future<hpx::opencl::event> ev3 = 
-                                                       kernel.enqueue(dim, ev2);
+            auto ev3 = kernel.enqueue(dim, ev2);
     
             // query calculation result 
-            hpx::opencl::event ev4 =
-                    output_buffer.enqueue_read(0, current_buffer_size, ev3).get();
+            auto ev4 = output_buffer.enqueue_read(0, current_buffer_size, ev3);
     
             // wait for calculation result to arrive
-            boost::shared_ptr<std::vector<char>> readdata = ev4.get_data().get();
+            hpx::serialization::serialize_buffer<char> readdata = ev4.get();
     
             // copy calculation result to output buffer
             next_workload->pixeldata = readdata;
@@ -240,12 +240,9 @@ mandelbrotworker::worker_starter(
 
     try{
 
-        std::string device_vendor = device.device_info_to_string(
-                                    device.get_device_info(CL_DEVICE_VENDOR));
-        std::string device_name = device.device_info_to_string(
-                                  device.get_device_info(CL_DEVICE_NAME));
-        std::string device_version = device.device_info_to_string(
-                                     device.get_device_info(CL_DEVICE_VERSION));
+        std::string device_vendor = device.get_device_info<CL_DEVICE_VENDOR>().get();
+        std::string device_name = device.get_device_info<CL_DEVICE_NAME>().get();
+        std::string device_version = device.get_device_info<CL_DEVICE_VERSION>().get();
 
         // print device name
         hpx::cerr << "#" << id << ": "
@@ -255,11 +252,16 @@ mandelbrotworker::worker_starter(
                   << hpx::endl;
     
         // build opencl program
+        typedef hpx::serialization::serialize_buffer<char> char_buffer_type;
+        char_buffer_type mandelbrotkernel_buf
+            ( mandelbrotkernel_cl, mandelbrotkernel_cl_len,
+              char_buffer_type::init_mode::reference );
+                                                
         hpx::opencl::program mandelbrot_program =
-                     device.create_program_with_source(mandelbrotkernel_cl);
+                     device.create_program_with_source(mandelbrotkernel_buf);
         if(verbose)
             hpx::cout << "#" << id << ": " << "compiling" << hpx::endl;
-        mandelbrot_program.build();
+        mandelbrot_program.build_sync();
         if(verbose)
             hpx::cout << "#" << id << ": " << "compiling done." << hpx::endl;
     
