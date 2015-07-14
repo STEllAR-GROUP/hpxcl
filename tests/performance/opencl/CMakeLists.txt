@@ -8,6 +8,7 @@
 set(tests
     bandwith
     deadlock
+    overhead
    )
 
 
