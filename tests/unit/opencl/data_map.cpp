@@ -50,7 +50,7 @@ static void cl_test( hpx::opencl::device local_device,
     HPX_TEST(!future.is_ready());
 
     // Trigger the promise
-    map.get(event).send_data_to_client(promise.get_gid());    
+    map.get(event).send_data_to_client(promise.get_id());
     
     // Make sure the promise got triggered
     hpx::this_thread::sleep_for(boost::chrono::milliseconds(100));

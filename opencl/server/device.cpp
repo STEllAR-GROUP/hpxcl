@@ -228,7 +228,7 @@ device::create_buffer( cl_mem_flags flags, std::size_t size )
     boost::shared_ptr<hpx::opencl::server::buffer> buffer_server =
                         hpx::get_ptr<hpx::opencl::server::buffer>( buf ).get();
 
-    buffer_server->init(get_gid(), flags, size);
+    buffer_server->init(get_id(), flags, size);
 
     return buf;
 }
@@ -248,7 +248,7 @@ device::create_program_with_source(
     boost::shared_ptr<hpx::opencl::server::program> program_server =
                         hpx::get_ptr<hpx::opencl::server::program>( prog ).get();
 
-    program_server->init_with_source( get_gid(), src );
+    program_server->init_with_source( get_id(), src );
 
     return prog;
 }
@@ -268,7 +268,7 @@ device::create_program_with_binary(
     boost::shared_ptr<hpx::opencl::server::program> program_server =
                         hpx::get_ptr<hpx::opencl::server::program>( prog ).get();
 
-    program_server->init_with_binary( get_gid(), binary );
+    program_server->init_with_binary( get_id(), binary );
 
     return prog;
 }

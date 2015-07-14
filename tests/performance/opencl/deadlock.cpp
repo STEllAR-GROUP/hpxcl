@@ -57,7 +57,7 @@ int main()
         hpx::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
         {
-            auto shared_state = hpx::lcos::detail::get_shared_state(fut);
+            auto shared_state = hpx::traits::detail::get_shared_state(fut);
             auto ev = boost::static_pointer_cast<event_type>(shared_state);
             ATOMIC_PRINT("ev " << ev->get_event_id());
         }
@@ -66,7 +66,7 @@ int main()
         hpx::this_thread::sleep_for(boost::chrono::milliseconds(10));
 
         {
-            auto shared_state = hpx::lcos::detail::get_shared_state(fut);
+            auto shared_state = hpx::traits::detail::get_shared_state(fut);
             auto ev = boost::static_pointer_cast<event_type>(shared_state);
 
             ATOMIC_PRINT("trigger_lco_event_manually " << ev->get_event_id());
@@ -78,7 +78,7 @@ int main()
         ATOMIC_PRINT("after sleep");
 
         {
-            auto shared_state = hpx::lcos::detail::get_shared_state(fut);
+            auto shared_state = hpx::traits::detail::get_shared_state(fut);
             auto ev = boost::static_pointer_cast<event_type>(shared_state);
             ATOMIC_PRINT("ev " << ev->get_event_id());
         }

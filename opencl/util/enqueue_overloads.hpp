@@ -57,7 +57,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
         typedef typename hpx::opencl::lcos::event<result_type>::wrapped_type
             event_type;
 
-        auto shared_state = hpx::lcos::detail::get_shared_state(fut);
+        auto shared_state = hpx::traits::detail::get_shared_state(fut);
         auto ev = boost::static_pointer_cast<event_type>(shared_state);
 
         device_id = ev->get_device_gid();

@@ -175,7 +175,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         }
 
         void retrieve_event_id(){
-            event_id = this->get_gid();
+            event_id = this->get_id();
         }
     private:
 
@@ -315,7 +315,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         }
 
         void retrieve_event_id(){
-            event_id = get_gid();
+            event_id = get_id();
         }
     private:
 
@@ -392,7 +392,7 @@ namespace hpx { namespace opencl { namespace lcos
             )),
             future_obtained_(false)
         {
-            LLCO_(info) << "event::event(" << impl_->get_gid() << ")";
+            LLCO_(info) << "event::event(" << (*impl_)->get_unmanaged_id() << ")";
             (*impl_)->retrieve_event_id();
         }
 
@@ -418,16 +418,16 @@ namespace hpx { namespace opencl { namespace lcos
         }
 
         /// \brief Return the global id of this \a future instance
-        naming::id_type get_gid() const
+        naming::id_type get_id() const
         {
             HPX_ASSERT(false);
-            return (*impl_)->get_gid();
+            return (*impl_)->get_id();
         }
 
         /// \brief Return the global id of this \a future instance
-        naming::gid_type get_base_gid() const
+        naming::gid_type get_unmanaged_gid() const
         {
-            return (*impl_)->get_base_gid();
+            return (*impl_)->get_unmanaged_gid();
         }
 
         /// Return whether or not the data is available for this
@@ -494,7 +494,7 @@ namespace hpx { namespace opencl { namespace lcos
             )),
             future_obtained_(false)
         {
-            LLCO_(info) << "event<void>::event(" << impl_->get_gid() << ")";
+            LLCO_(info) << "event<void>::event(" << (*impl_)->get_unmanaged_id() << ")";
             (*impl_)->retrieve_event_id();
         }
 
@@ -520,16 +520,16 @@ namespace hpx { namespace opencl { namespace lcos
         }
 
         /// \brief Return the global id of this \a future instance
-        naming::id_type get_gid() const
+        naming::id_type get_id() const
         {
             HPX_ASSERT(false);
-            return (*impl_)->get_gid();
+            return (*impl_)->get_id();
         }
 
         /// \brief Return the global id of this \a future instance
-        naming::gid_type get_base_gid() const
+        naming::gid_type get_unmanaged_gid() const
         {
-            return (*impl_)->get_base_gid();
+            return (*impl_)->get_unmanaged_id().get_gid();
         }
 
         /// Return whether or not the data is available for this

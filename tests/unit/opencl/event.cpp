@@ -17,7 +17,7 @@ void cl_test( hpx::opencl::device cldevice, hpx::opencl::device )
 
 
     auto future = event.get_future();
-    auto future_data = hpx::lcos::detail::get_shared_state(future);
+    auto future_data = hpx::traits::detail::get_shared_state(future);
     auto shared_state = boost::static_pointer_cast<shared_state_type>(future_data);
 
 
