@@ -22,6 +22,12 @@ using boost::program_options::value;
 // the formatter for the test results
 hpx::opencl::tests::performance::testresults results;
 
+// global variables
+static std::size_t num_iterations = 0;
+static std::size_t testdata_size = 0;
+
+
+
 // the main test function
 static void cl_test(hpx::opencl::device, hpx::opencl::device, bool distributed);
 
@@ -157,6 +163,12 @@ int hpx_main(variables_map & vm)
             results.set_enabled_tests( vm["enable"]
                                            .as<std::vector<std::string> >() );
         }
+        if (vm.count("size")){
+            testdata_size = vm["size"].as<std::size_t>();
+        }
+        if (vm.count("iterations")){
+            num_iterations = vm["iterations"].as<std::size_t>();
+        }
 
         auto devices = init(vm);   
 
@@ -185,6 +197,12 @@ int main(int argc, char* argv[])
         ( "deviceid"
         , value<std::size_t>()->default_value(0)
         , "the ID of the device we will run our tests on" )
+        ( "iterations"
+        , value<std::size_t>()->default_value(0)
+        , "the number of iterations every test shall get executed" )
+        ( "size"
+        , value<std::size_t>()->default_value(0)
+        , "the size of the test data" )
         ( "format"
         , value<std::string>()
         , "Formats the output in a certain way.\nSupports: json, tabbed" )

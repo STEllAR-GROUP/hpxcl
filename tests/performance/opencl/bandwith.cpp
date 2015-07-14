@@ -17,8 +17,6 @@ typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
 // global variables
 static buffer_type test_data;
-static std::size_t num_iterations;
-
 
 buffer_type
 loopback(buffer_type buf){
@@ -57,7 +55,10 @@ static void run_opencl_local_test( hpx::opencl::device device )
     cl_command_queue read_command_queue = device_ptr->get_read_command_queue();
     cl_mem buffer_id = buffer_ptr->get_cl_mem();
 
-    results.start_test("OpenCL_local_host_to_local_device", "GB/s");
+    std::map<std::string, std::string> atts;
+    atts["size"] = std::to_string(test_data.size());
+    atts["iterations"] = std::to_string(num_iterations);
+    results.start_test("OpenCL_local_host_to_local_device", "GB/s", atts);
    
     const std::size_t data_transfer_per_test =
         test_data.size() * 2 * num_iterations;
@@ -136,8 +137,10 @@ static void run_opencl_local_send_test( hpx::opencl::device device )
     cl_mem buffer1_id = buffer1_ptr->get_cl_mem();
     cl_mem buffer2_id = buffer2_ptr->get_cl_mem();
 
-
-    results.start_test("OpenCL_local_device_to_local_device", "GB/s");
+    std::map<std::string, std::string> atts;
+    atts["size"] = std::to_string(test_data.size());
+    atts["iterations"] = std::to_string(num_iterations);
+    results.start_test("OpenCL_local_device_to_local_device", "GB/s", atts);
    
     const std::size_t data_transfer_per_test =
         test_data.size() * 2 * num_iterations;
@@ -253,9 +256,12 @@ static void run_hpxcl_send_test( hpx::opencl::device device1,
     if(hpx::get_colocation_id_sync(device2.get_gid()) == hpx::find_here())
         device2_location = "local";
 
+    std::map<std::string, std::string> atts;
+    atts["size"] = std::to_string(test_data.size());
+    atts["iterations"] = std::to_string(num_iterations);
     results.start_test("HPXCL_" + device1_location + "_device_to_" +
                         device2_location + "_device",
-                       "GB/s");
+                       "GB/s", atts);
    
     const std::size_t data_transfer_per_test =
         test_data.size() * 2 * num_iterations;
@@ -309,10 +315,13 @@ static void run_hpxcl_read_write_test( hpx::opencl::device device )
 
     
 
+    std::map<std::string, std::string> atts;
+    atts["size"] = std::to_string(test_data.size());
+    atts["iterations"] = std::to_string(num_iterations);
     if(hpx::get_colocation_id_sync(device.get_gid()) == hpx::find_here())
-        results.start_test("HPXCL_local_host_to_local_device", "GB/s");
+        results.start_test("HPXCL_local_host_to_local_device", "GB/s", atts);
     else
-        results.start_test("HPXCL_local_host_to_remote_device", "GB/s");
+        results.start_test("HPXCL_local_host_to_remote_device", "GB/s", atts);
    
     const std::size_t data_transfer_per_test =
         test_data.size() * 2 * num_iterations;
@@ -361,7 +370,10 @@ static void run_hpxcl_read_write_test( hpx::opencl::device device )
 static void run_hpx_loopback_test( hpx::naming::id_type target_location )
 {
 
-    results.start_test("HPX_local_host_to_remote_host", "GB/s");
+    std::map<std::string, std::string> atts;
+    atts["size"] = std::to_string(test_data.size());
+    atts["iterations"] = std::to_string(num_iterations);
+    results.start_test("HPX_local_host_to_remote_host", "GB/s", atts);
    
     const std::size_t data_transfer_per_test =
         test_data.size() * 2 * num_iterations;
@@ -406,9 +418,10 @@ static void cl_test(hpx::opencl::device local_device,
                     bool distributed)
 {
 
-
-    const std::size_t testdata_size = static_cast<std::size_t>(1) << 20;
-    num_iterations = 50;
+    if(testdata_size == 0)
+        testdata_size = static_cast<std::size_t>(1) << 20;
+    if(num_iterations == 0)
+        num_iterations = 50;
 
     // Get localities
     hpx::naming::id_type remote_location =

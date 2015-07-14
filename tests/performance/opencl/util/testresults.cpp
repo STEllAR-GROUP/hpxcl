@@ -386,6 +386,29 @@ std::string
 testresults::testseries::get_atts() const
 {
 
-    return "-";
+    if(atts.empty())
+        return "-";
+
+    // get all keys
+    std::vector<std::string> keys;
+    for( const auto& it : atts ){
+        keys.push_back(it.first);
+    }
+
+    // sort keys
+    std::sort(keys.begin(), keys.end());
+
+    // print values
+    std::string result = "";
+    for( const auto& key : keys ){
+        if(result.size() > 0)
+            result += " ";
+
+        result += key;
+        result += "=";
+        result += atts.at(key);
+    }
+
+    return result;
 
 }

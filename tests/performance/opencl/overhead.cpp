@@ -17,8 +17,6 @@ typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
 // global variables
 static buffer_type test_data;
-static std::size_t num_iterations;
-
 
 buffer_type
 loopback(buffer_type buf){
@@ -64,7 +62,10 @@ static void send_test( hpx::opencl::device device1,
     if(sync)
         name += "_sync";
 
-    results.start_test(name, "ms");
+    std::map<std::string, std::string> atts;
+//    atts["size"] = std::to_string(test_data.size());
+    atts["iterations"] = std::to_string(num_iterations);
+    results.start_test(name, "ms", atts);
     
 
     while(results.needs_more_testing())
@@ -123,7 +124,10 @@ static void write_test( hpx::opencl::device device , bool sync )
     if(sync)
         name += "_sync";
 
-    results.start_test(name, "ms");
+    std::map<std::string, std::string> atts;
+//    atts["size"] = std::to_string(test_data.size());
+    atts["iterations"] = std::to_string(num_iterations);
+    results.start_test(name, "ms", atts);
    
     while(results.needs_more_testing())
     {
@@ -190,7 +194,10 @@ static void read_test( hpx::opencl::device device , bool sync )
     if(sync)
         name += "_sync";
 
-    results.start_test(name, "ms");
+    std::map<std::string, std::string> atts;
+//    atts["size"] = std::to_string(test_data.size());
+    atts["iterations"] = std::to_string(num_iterations);
+    results.start_test(name, "ms", atts);
    
     while(results.needs_more_testing())
     {
@@ -245,10 +252,10 @@ static void cl_test(hpx::opencl::device local_device,
                     bool distributed )
 {
 
+    testdata_size = 1;
 
-    const std::size_t testdata_size = 1;
-    // TODO make command line modifiable
-    num_iterations = 50;
+    if(num_iterations == 0)
+        num_iterations = 50;
 
     // Get localities
     hpx::naming::id_type remote_location =
