@@ -220,7 +220,7 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
                                              data.size() * sizeof(T),
                                              reinterpret_cast<std::uintptr_t>
                                                 ( data.data() ),
-                                             deps.event_ids );
+                                             std::move(deps.event_ids) );
  
                 } else {
                     // is local call, send direct reference to buffer
@@ -229,7 +229,7 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
                                             std::move(event_id),
                                             offset,
                                             data,
-                                            deps.event_ids );
+                                            std::move(deps.event_ids) );
                 }
               
             },
@@ -268,7 +268,7 @@ hpx::opencl::buffer::enqueue_write( std::size_t offset,
                       ev.get_event_id(),
                       offset,
                       data,
-                      deps.event_ids );
+                      std::move(deps.event_ids) );
                      
 
     // return future connected to event

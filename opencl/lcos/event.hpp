@@ -94,7 +94,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     // Action delcaration
     template <typename T>
     struct set_zerocopy_data_action
-      : hpx::actions::make_action<void (*)( hpx::naming::id_type,
+      : hpx::actions::make_direct_action<void (*)( hpx::naming::id_type,
                                             hpx::opencl::lcos::zerocopy_buffer ),
             &set_zerocopy_data<T>,
             set_zerocopy_data_action<T> >

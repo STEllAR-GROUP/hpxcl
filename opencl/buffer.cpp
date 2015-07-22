@@ -50,8 +50,8 @@ buffer::enqueue_send_impl(
                       src_offset,
                       dst_offset,
                       size,
-                      dependencies.event_ids,
-                      dependencies.device_ids ); 
+                      std::move(dependencies.event_ids),
+                      std::move(dependencies.device_ids) ); 
 
     // return futures
     return send_result( std::move(src_event.get_future()),
@@ -79,7 +79,7 @@ buffer::enqueue_read_impl(
                       ev.get_event_id(),
                       offset,
                       size,
-                      dependencies.event_ids ); 
+                      std::move(dependencies.event_ids) ); 
 
     // return future connected to event
     return ev.get_future();
