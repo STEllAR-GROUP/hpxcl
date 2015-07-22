@@ -106,6 +106,68 @@ static void send_test( hpx::opencl::device device1,
 
 }
 
+static void wait_test( hpx::opencl::device device )
+{
+
+    hpx::opencl::buffer buffer =
+        device.create_buffer(CL_MEM_READ_WRITE, test_data.size());
+
+    
+    std::string name = "wait_";
+
+
+    if(hpx::get_colocation_id_sync(device.get_gid()) == hpx::find_here())
+        name += "local";
+    else
+        name += "remote";
+
+    std::map<std::string, std::string> atts;
+//    atts["size"] = std::to_string(test_data.size());
+    atts["iterations"] = std::to_string(num_iterations);
+    results.start_test(name, "ms", atts);
+   
+    while(results.needs_more_testing())
+    {
+        // initialize the buffer
+        buffer_type write_buf1 ( new char[test_data.size()], test_data.size(),
+                                 buffer_type::init_mode::take );
+        buffer_type write_buf2 ( new char[test_data.size()], test_data.size(),
+                                 buffer_type::init_mode::take );
+        std::copy( test_data.data(), test_data.data()+test_data.size(),
+                   write_buf1.data() );
+        std::copy( test_data.data(), test_data.data()+test_data.size(),
+                   write_buf2.data() );
+
+        double duration = 0.0;
+
+        // RUN!
+        for(std::size_t it = 0; it < num_iterations; it ++)
+        {
+            // Copy to device
+            auto fut1 = buffer.enqueue_write(0, write_buf1);
+
+            // Copy to device again, with dependency to fut1
+            auto fut2 = buffer.enqueue_write(0, write_buf2, fut1);
+
+            // wait for fut2
+            fut2.get();
+
+            // fut1 is definitely ready now, but unchecked.
+            // now measure how long it takes to check fut1
+            hpx::util::high_resolution_timer walltime;
+            fut1.get();
+            duration += walltime.elapsed();
+
+        }
+
+        // Calculate overhead
+        const double overhead = duration * 1000.0 / num_iterations;
+        
+        results.add(overhead);
+    }
+
+}
+
 static void write_test( hpx::opencl::device device , bool sync )
 {
 
@@ -287,6 +349,8 @@ static void cl_test(hpx::opencl::device local_device,
     send_test(local_device, local_device, false);
     send_test(local_device, local_device, true);
 
+    // Run wait test
+    wait_test(local_device);
 
     if(distributed){
 
@@ -305,6 +369,9 @@ static void cl_test(hpx::opencl::device local_device,
         send_test(remote_device, local_device,  true);
         send_test(remote_device, remote_device, false);
         send_test(remote_device, remote_device, true);
+
+        // Run wait test
+        wait_test(remote_device);
 
     }
 
