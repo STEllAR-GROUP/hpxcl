@@ -13,13 +13,13 @@
 using hpx::opencl::kernel;
 
 void
-kernel::set_arg_sync(cl_uint arg_index, const hpx::opencl::buffer &arg) const
+kernel::set_arg(cl_uint arg_index, const hpx::opencl::buffer &arg) const
 {
-    set_arg(arg_index, arg).get();
+    set_arg_async(arg_index, arg).get();
 }
 
 hpx::lcos::future<void>
-kernel::set_arg(cl_uint arg_index, const hpx::opencl::buffer &arg) const
+kernel::set_arg_async(cl_uint arg_index, const hpx::opencl::buffer &arg) const
 {
 
     HPX_ASSERT(this->get_gid());

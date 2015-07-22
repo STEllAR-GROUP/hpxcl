@@ -120,13 +120,13 @@ mandelbrotworker::worker_main(
                                                      KERNEL_INPUT_ARGUMENT_COUNT * sizeof(double));
     
         // connect buffers to kernel 
-        kernel.set_arg_sync(0, precalc_buffer);
-        kernel.set_arg_sync(1, output_buffer);
-        kernel.set_arg_sync(2, input_buffer);
+        kernel.set_arg(0, precalc_buffer);
+        kernel.set_arg(1, output_buffer);
+        kernel.set_arg(2, input_buffer);
     
         // connect buffers to precalc kernel 
-        precalc_kernel.set_arg_sync(0, precalc_buffer);
-        precalc_kernel.set_arg_sync(1, input_buffer);
+        precalc_kernel.set_arg(0, precalc_buffer);
+        precalc_kernel.set_arg(1, input_buffer);
     
     
         // main loop
@@ -158,7 +158,7 @@ mandelbrotworker::worker_main(
                 output_buffer = buffermanager.get_buffer( needed_buffer_size );
 
                 // attach new buffer
-                kernel.set_arg_sync(1, output_buffer);
+                kernel.set_arg(1, output_buffer);
 
                 // update current buffer size
                 current_buffer_size = needed_buffer_size;
@@ -177,8 +177,9 @@ mandelbrotworker::worker_main(
                                                          needed_precalc_size );
 
                 // attach new buffer
-                kernel.set_arg_sync(0, precalc_buffer);
-                precalc_kernel.set_arg_sync(0, precalc_buffer);
+                auto fut = kernel.set_arg_async(0, precalc_buffer);
+                precalc_kernel.set_arg(0, precalc_buffer);
+                fut.get();
 
                 // update current buffer size
                 current_precalc_size = needed_precalc_size;
@@ -261,7 +262,7 @@ mandelbrotworker::worker_starter(
                      device.create_program_with_source(mandelbrotkernel_buf);
         if(verbose)
             hpx::cout << "#" << id << ": " << "compiling" << hpx::endl;
-        mandelbrot_program.build_sync();
+        mandelbrot_program.build();
         if(verbose)
             hpx::cout << "#" << id << ": " << "compiling done." << hpx::endl;
     

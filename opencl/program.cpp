@@ -14,25 +14,25 @@
 using hpx::opencl::program;
 
 void
-program::build_sync() const
+program::build() const
 {
-    build("").get();
+    build_async("").get();
 }
 
 void
-program::build_sync(std::string build_options) const
-{
-    build(std::move(build_options)).get();
-}
-
-hpx::lcos::future<void>
-program::build() const
-{
-    return build("");
-}
-
-hpx::lcos::future<void>
 program::build(std::string build_options) const
+{
+    build_async(std::move(build_options)).get();
+}
+
+hpx::lcos::future<void>
+program::build_async() const
+{
+    return build_async("");
+}
+
+hpx::lcos::future<void>
+program::build_async(std::string build_options) const
 {
     HPX_ASSERT(this->get_gid());
 

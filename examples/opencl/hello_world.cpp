@@ -53,13 +53,13 @@ int main(int argc, char* argv[])
     program prog = cldevice.create_program_with_source(hello_world_src);
 
     // Compile the program
-    prog.build_sync();
+    prog.build();
 
     // Create hello_world kernel
     kernel hello_world_kernel = prog.create_kernel("hello_world");
 
     // Set our buffer as argument
-    hello_world_kernel.set_arg_sync(0, outbuffer);
+    hello_world_kernel.set_arg(0, outbuffer);
 
     // Run the kernel
     hpx::opencl::work_size<1> dim;

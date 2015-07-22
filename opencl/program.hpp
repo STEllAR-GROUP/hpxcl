@@ -54,7 +54,7 @@ namespace opencl {
              *
              *  @return A future that will trigger upon build completion.
              */
-            hpx::lcos::future<void> build() const;
+            hpx::lcos::future<void> build_async() const;
 
             /**
              *  @brief Builds the program, non-blocking.
@@ -67,14 +67,14 @@ namespace opencl {
              *                          information.
              *  @return A future that will trigger upon build completion.
              */
-            hpx::lcos::future<void> build(std::string build_options) const;
+            hpx::lcos::future<void> build_async(std::string build_options) const;
 
             /**
              *  @brief Builds the program, blocking.
              *
              *  @return A future that will trigger upon build completion.
              */
-            void build_sync() const;
+            void build() const;
 
             /**
              *  @brief Builds the program, blocking.
@@ -87,7 +87,7 @@ namespace opencl {
              *                          information.
              *  @return A future that will trigger upon build completion.
              */
-            void build_sync(std::string build_options) const;
+            void build(std::string build_options) const;
 
             /**
              *  @brief Retrieves the binary of a built program.

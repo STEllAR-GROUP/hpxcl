@@ -105,18 +105,18 @@ namespace opencl {
             /**
              *  @brief Sets a kernel argument
              *
+             *  This is the non-blocking version of set_arg
+             *
              *  @param arg_index    The argument index to which the buffer will
              *                      be connected.
              *  @param arg          The \ref buffer that will be connected.
              *  @return             A future that will trigger upon completion.
              */
             hpx::lcos::future<void>
-            set_arg(cl_uint arg_index, const hpx::opencl::buffer &arg) const;
+            set_arg_async(cl_uint arg_index, const hpx::opencl::buffer &arg) const;
 
             /**
              *  @brief Sets a kernel argument
-             *
-             *  This is the blocking version of set_arg
              *
              *  @param arg_index    The argument index to which the buffer will
              *                      be connected.
@@ -124,7 +124,7 @@ namespace opencl {
              *  @return             A future that will trigger upon completion.
              */
             void
-            set_arg_sync(cl_uint arg_index, const hpx::opencl::buffer &arg) const;
+            set_arg(cl_uint arg_index, const hpx::opencl::buffer &arg) const;
 
             /**
              *  @name Starts execution of a kernel, using work_size as work

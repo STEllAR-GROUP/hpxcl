@@ -100,8 +100,8 @@ static void create_and_run_kernel( hpx::opencl::device cldevice,
     
     // set kernel arguments
     {
-        auto future1 = kernel.set_arg(0, buffer_src);
-        kernel.set_arg_sync(1, buffer_dst);
+        auto future1 = kernel.set_arg_async(0, buffer_src);
+        kernel.set_arg(1, buffer_dst);
         future1.get();
     }
     
@@ -150,7 +150,7 @@ static void cl_test( hpx::opencl::device local_device,
 
         // test if program can be compiled
         // IMPORTANT! use get(). wait() does not throw errors.
-        program.build().get();
+        program.build_async().get();
 
         // test if program can be used for computation
         create_and_run_kernel(cldevice, program);
@@ -163,7 +163,7 @@ static void cl_test( hpx::opencl::device local_device,
             cldevice.create_program_with_source(program_src);
 
         // test if program can be compiled
-        program.build("-Werror").get();
+        program.build_async("-Werror").get();
 
         // test if program can be used for computation
         create_and_run_kernel(cldevice, program);
@@ -176,7 +176,7 @@ static void cl_test( hpx::opencl::device local_device,
             cldevice.create_program_with_source(program_src);
 
         // test if program can be compiled
-        program1.build().get();
+        program1.build_async().get();
 
         // retrieve binary of program1
         auto program_binary = program1.get_binary().get();
@@ -189,7 +189,7 @@ static void cl_test( hpx::opencl::device local_device,
             cldevice.create_program_with_binary(program_binary);
 
         // test if program can be compiled
-        program2.build_sync();
+        program2.build();
 
         // test if program can be used for computation
         create_and_run_kernel(cldevice, program2);
@@ -204,7 +204,7 @@ static void cl_test( hpx::opencl::device local_device,
         // Try to build. This should throw an error.
         bool caught_exception = false;
         try{
-            program.build().get();
+            program.build_async().get();
         } catch (hpx::exception e){
             hpx::cout << "Build error:" << hpx::endl;
             hpx::cout << e.what() << hpx::endl << hpx::endl;
