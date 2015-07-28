@@ -1,7 +1,2 @@
 - investigate bottleneck
 - move deadlock.cpp to regression tests
-- make_local_action instead of action for local cases
-- add local case to enqueue_write()
-- add local case to pretty much all of them
-
-- fix mandelbrot
