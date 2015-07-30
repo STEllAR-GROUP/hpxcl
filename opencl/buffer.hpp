@@ -59,7 +59,12 @@ namespace opencl {
             buffer(hpx::shared_future<hpx::naming::id_type> const& gid,
                    hpx::naming::id_type device_gid_)
               : base_type(gid), device_gid(std::move(device_gid_))
-            {}
+            {
+                // try to get a local pointer to the server class if possible
+                if(hpx::get_colocation_id_sync(get_gid()) == hpx::find_here()){
+                    local_ptr = hpx::get_ptr<hpx::opencl::server::buffer>(get_gid()).get();
+                }
+            }
             
             // initialization
             
@@ -165,6 +170,7 @@ namespace opencl {
                                hpx::opencl::util::resolved_events && deps );
         private:
             hpx::naming::id_type device_gid;
+            boost::shared_ptr<hpx::opencl::server::buffer> local_ptr;
 
     };
 
@@ -191,57 +197,42 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
     using hpx::opencl::lcos::event;
     event<buffer_type> ev( device_gid, data );
 
-    // asynchronously: 
-    // check if the component is a on a different locality
-    hpx::get_colocation_id(get_gid()).then(
-        hpx::util::bind(
-            []( hpx::future<hpx::naming::id_type>&& location,
-                hpx::opencl::util::resolved_events& deps,
-                std::size_t& offset,
-                hpx::serialization::serialize_buffer<T>& data,
-                hpx::naming::id_type& buffer_id,
-                hpx::naming::id_type& event_id){
+    // send command to server class
+    typedef hpx::opencl::server::buffer
+        ::enqueue_read_to_userbuffer_remote_action<T> func_remote;
+    if(!local_ptr){
+        // is remote call
 
-                // Check if this is a remote call
-                bool is_remote_call =
-                    (location.get() != hpx::find_here());
-
-                // send command to server class
-                typedef hpx::opencl::server::buffer
-                    ::enqueue_read_to_userbuffer_local_action<T> func_local;
-                typedef hpx::opencl::server::buffer
-                    ::enqueue_read_to_userbuffer_remote_action<T> func_remote;
-                if(is_remote_call){
-                    // is remote call
-
-                    hpx::apply<func_remote>( std::move(buffer_id),
-                                             std::move(event_id),
-                                             offset,
-                                             data.size() * sizeof(T),
-                                             reinterpret_cast<std::uintptr_t>
-                                                ( data.data() ),
-                                             std::move(deps.event_ids) );
+        hpx::apply<func_remote>( std::move(get_gid()),
+                                 std::move(ev.get_event_id()),
+                                 offset,
+                                 data.size() * sizeof(T),
+                                 reinterpret_cast<std::uintptr_t>
+                                    ( data.data() ),
+                                 std::move(deps.event_ids) );
  
-                } else {
-                    // is local call, send direct reference to buffer
-
-                    hpx::apply<func_local>( std::move(buffer_id),
-                                            std::move(event_id),
-                                            offset,
-                                            data,
-                                            std::move(deps.event_ids) );
-                }
-              
+    } else {
+        // is local call, send direct reference to buffer
+        hpx::apply(
+            [] ( boost::shared_ptr<hpx::opencl::server::buffer> local_ptr,
+                 hpx::naming::id_type && event_id,
+                 std::size_t offset,
+                 hpx::serialization::serialize_buffer<T> data,
+                 hpx::opencl::util::resolved_events && deps )
+            {
+                local_ptr->enqueue_read_to_userbuffer_local<T>(
+                    std::move(event_id),
+                    offset,
+                    data,
+                    std::move(deps.event_ids) );
             },
-            hpx::util::placeholders::_1,
-            std::move(deps),
-            std::move(offset),
-            std::move(data),
-            this->get_gid(),
-            ev.get_event_id()
-        )
+            local_ptr,
+            std::move(ev.get_event_id()),
+            offset,
+            data,
+            std::move(deps) );
 
-    );
+    }
 
     // return future connected to event
     return ev.get_future();
@@ -263,12 +254,19 @@ hpx::opencl::buffer::enqueue_write( std::size_t offset,
     event<void> ev( device_gid );
 
     // send command to server class
-    typedef hpx::opencl::server::buffer::enqueue_write_action<T> func;
-    hpx::apply<func>( this->get_gid(),
-                      ev.get_event_id(),
-                      offset,
-                      data,
-                      std::move(deps.event_ids) );
+    if(local_ptr){
+        local_ptr->enqueue_write<T>( ev.get_event_id(),
+                                     offset,
+                                     data,
+                                     std::move(deps.event_ids) );
+    } else {
+        typedef hpx::opencl::server::buffer::enqueue_write_action<T> func;
+        hpx::apply<func>( this->get_gid(),
+                          ev.get_event_id(),
+                          offset,
+                          data,
+                          std::move(deps.event_ids) );
+    }
                      
 
     // return future connected to event

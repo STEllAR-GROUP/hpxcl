@@ -42,16 +42,50 @@ buffer::enqueue_send_impl(
     event<void> dst_event( dst.device_gid );
     
     // send command to server class
-    typedef hpx::opencl::server::buffer::enqueue_send_action func;
-    hpx::apply<func>( this->get_gid(),
-                      dst.get_gid(),
-                      src_event.get_event_id(),
-                      dst_event.get_event_id(),
-                      src_offset,
-                      dst_offset,
-                      size,
-                      std::move(dependencies.event_ids),
-                      std::move(dependencies.device_ids) ); 
+    if(!local_ptr){
+        // is remote call
+        typedef hpx::opencl::server::buffer::enqueue_send_action func;
+        hpx::apply<func>( this->get_gid(),
+                          dst.get_gid(),
+                          src_event.get_event_id(),
+                          dst_event.get_event_id(),
+                          src_offset,
+                          dst_offset,
+                          size,
+                          std::move(dependencies.event_ids),
+                          std::move(dependencies.device_ids) ); 
+    } else {
+        // is local call
+
+        hpx::apply(
+            []( boost::shared_ptr<hpx::opencl::server::buffer> local_ptr,
+                hpx::naming::id_type dst_id,
+                hpx::naming::id_type && src_event_id,
+                hpx::naming::id_type && dst_event_id,
+                std::size_t src_offset,
+                std::size_t dst_offset,
+                std::size_t size,
+                hpx::opencl::util::resolved_events && dependencies )
+            {
+                local_ptr->enqueue_send( dst_id,
+                                         std::move(src_event_id),
+                                         std::move(dst_event_id),
+                                         src_offset,
+                                         dst_offset,
+                                         size,
+                                         std::move(dependencies.event_ids),
+                                         std::move(dependencies.device_ids) );
+            },
+            local_ptr,
+            dst.get_gid(),
+            src_event.get_event_id(),
+            dst_event.get_event_id(),
+            src_offset,
+            dst_offset,
+            size,
+            std::move(dependencies));
+
+    }
 
     // return futures
     return send_result( std::move(src_event.get_future()),
