@@ -84,7 +84,7 @@ namespace hpx { namespace opencl{ namespace server{
                             std::vector<hpx::naming::id_type> && dependencies );
 
         // Copies data from this buffer to a remote buffer
-        void enqueue_send( hpx::naming::id_type && dst,
+        void enqueue_send( hpx::naming::id_type dst,
                            hpx::naming::id_type && src_event,
                            hpx::naming::id_type && dst_event,
                            std::size_t src_offset,

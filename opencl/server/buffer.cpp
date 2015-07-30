@@ -256,7 +256,7 @@ buffer::send_direct( hpx::naming::id_type && dst,
 }
 
 void
-buffer::enqueue_send( hpx::naming::id_type && dst,
+buffer::enqueue_send( hpx::naming::id_type dst,
                       hpx::naming::id_type && src_event,
                       hpx::naming::id_type && dst_event,
                       std::size_t src_offset,
