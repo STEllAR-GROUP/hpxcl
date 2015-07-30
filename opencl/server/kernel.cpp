@@ -12,7 +12,6 @@
 // other hpxcl dependencies
 #include "device.hpp"
 #include "buffer.hpp"
-#include "util/hpx_cl_interop.hpp"
 
 // HPX dependencies
 #include <hpx/include/thread_executors.hpp>

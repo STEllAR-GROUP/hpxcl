@@ -12,7 +12,6 @@
 // other hpxcl dependencies
 #include "buffer.hpp"
 #include "program.hpp"
-#include "util/hpx_cl_interop.hpp"
 
 // HPX dependencies
 #include <hpx/include/thread_executors.hpp>
@@ -337,52 +336,32 @@ device::get_kernel_command_queue()
     return command_queue;
 }
 
-
-
-struct wait_for_cl_event_args{
-    hpx::runtime* rt;
-    hpx::lcos::local::promise<cl_int>* promise;
-};
-
-static void CL_CALLBACK
-wait_for_cl_event_callback( cl_event event, cl_int exec_status, void* user_data )
-{
-    // Cast arguments
-    wait_for_cl_event_args* args =
-        static_cast<wait_for_cl_event_args*>(user_data);
-
-    // Send exec status to waiting future
-    using hpx::opencl::server::util::set_promise_from_external;
-    set_promise_from_external ( args->rt, args->promise, exec_status );
-}
-
 void
 device::wait_for_cl_event(cl_event event)
 {
     HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     cl_int err;
+    cl_int execution_state = CL_RUNNING;
 
-    // Create a new promise
-    hpx::lcos::local::promise<cl_int> promise;
+    // Loop until the event state turns to true.
+    // Previous attempts used clSetEventCallback, but it turned out to
+    // be really slow.
+    for(std::size_t i = 0; execution_state != CL_COMPLETE; i++){
 
-    // Retrieve the future
-    hpx::future<cl_int> future = promise.get_future();
+        // Do exponential backup, stolen from the hpx spinlock class
+        hpx::lcos::local::spinlock::yield(i);
 
-    // Build arguments struct for callback
-    wait_for_cl_event_args args;
-    args.rt = hpx::get_runtime_ptr();
-    args.promise = &promise;
+        // Query OpenCL for the event state
+        err = clGetEventInfo( event, CL_EVENT_COMMAND_EXECUTION_STATUS,
+                              sizeof(cl_int), &execution_state, NULL );
+        cl_ensure(err, "clGetEventInfo");
 
-    // Attach callback
-    err = clSetEventCallback(event, CL_COMPLETE, wait_for_cl_event_callback,
-                             &args);
-    cl_ensure(err, "clSetEventCallback()");
+    }
 
-    // Wait for the event to complete
-    // ! Cannot just return the future, as the promise would go out of scope.
-    err = future.get();
-    cl_ensure(err, "OpenCL Internal Function");
+    // Check for internal errors
+    cl_ensure(execution_state, "OpenCL Internal Error!");
+
 }
 
 void

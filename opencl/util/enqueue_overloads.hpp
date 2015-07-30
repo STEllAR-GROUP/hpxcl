@@ -164,6 +164,8 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     resolver(Deps&&... deps)
     {
         resolved_events res;
+        res.event_ids.reserve(sizeof...(deps));
+        res.device_ids.reserve(sizeof...(deps));
         resolver_impl( res.event_ids, res.device_ids,
                        std::forward<Deps>(deps)... );
         return res;
