@@ -6,3 +6,7 @@
 - Add serializaton to hpxcl futures, via
     - hpx::opencl::get_event_id(future)
     - add event_id
+    - or something like a send_buffer-recv_buffer pair
+
+! - Add write/read-rect functions!!
+
