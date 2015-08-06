@@ -46,6 +46,7 @@ static void cl_test(hpx::opencl::device, hpx::opencl::device);
 
 typedef hpx::serialization::serialize_buffer<char> buffer_type;
 typedef hpx::serialization::serialize_buffer<uint32_t> intbuffer_type;
+typedef hpx::serialization::serialize_buffer<uint16_t> int16buffer_type;
 
 std::string to_string(buffer_type buf){
     std::size_t length = 0; 

@@ -20,6 +20,7 @@
 
 // REGISTER_ACTION_DECLARATION templates
 #include "util/server_definitions.hpp"
+#include "../util/rect_props.hpp"
 
 namespace hpx { namespace opencl{ namespace server{
 
@@ -57,6 +58,14 @@ namespace hpx { namespace opencl{ namespace server{
         template <typename T>
         void enqueue_write( hpx::naming::id_type && event_gid,
                             std::size_t offset,
+                            hpx::serialization::serialize_buffer<T> data,
+                            std::vector<hpx::naming::id_type> && dependencies );
+
+        // Writes to the buffer
+        template <typename T>
+        void enqueue_write_rect(
+                            hpx::naming::id_type && event_gid,
+                            hpx::opencl::rect_props && rect_properties,
                             hpx::serialization::serialize_buffer<T> data,
                             std::vector<hpx::naming::id_type> && dependencies );
 
@@ -135,6 +144,15 @@ namespace hpx { namespace opencl{ namespace server{
             &buffer::template enqueue_write<T>, enqueue_write_action<T> >
     {};
     template <typename T>
+    struct enqueue_write_rect_action
+      : hpx::actions::make_action<void (buffer::*)(
+                        hpx::naming::id_type &&,
+                        hpx::opencl::rect_props &&,
+                        hpx::serialization::serialize_buffer<T>,
+                        std::vector<hpx::naming::id_type> &&),
+            &buffer::template enqueue_write_rect<T>, enqueue_write_rect_action<T> >
+    {};
+    template <typename T>
     struct enqueue_read_to_userbuffer_remote_action
       : hpx::actions::make_action<void (buffer::*)(
                         hpx::naming::id_type &&,
@@ -177,6 +195,7 @@ HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, size);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_read);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_send);
 HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer, enqueue_write);
+HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer, enqueue_write_rect);
 HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
                                             enqueue_read_to_userbuffer_local);
 HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
@@ -221,6 +240,64 @@ hpx::opencl::server::buffer::enqueue_write(
                                 static_cast<cl_uint>(events.size()),
                                 events.get_cl_events(), &return_event );
     cl_ensure(err, "clEnqueueWriteBuffer()");
+
+    // register the data to prevent deallocation
+    parent_device->put_event_data(return_event, data);
+
+    // register the cl_event to the client event
+    parent_device->register_event(event_gid, return_event);
+
+}
+
+
+template <typename T>
+void
+hpx::opencl::server::buffer::enqueue_write_rect(
+                       hpx::naming::id_type && event_gid,
+                       hpx::opencl::rect_props && rect_properties,
+                       hpx::serialization::serialize_buffer<T> data,
+                       std::vector<hpx::naming::id_type> && dependencies ){
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+
+    cl_int err;
+    cl_event return_event;
+
+    // retrieve the dependency cl_events
+    util::event_dependencies events( dependencies, parent_device.get() );
+
+    // retrieve the command queue
+    cl_command_queue command_queue = parent_device->get_write_command_queue();
+    
+    // prepare arguments for OpenCL call
+    std::size_t host_origin[] = { rect_properties.src_x * sizeof(T),
+                                  rect_properties.src_y,
+                                  rect_properties.src_z };
+    std::size_t buffer_origin[] = { rect_properties.dst_x * sizeof(T),
+                                    rect_properties.dst_y,
+                                    rect_properties.dst_z };
+    std::size_t region[] = { rect_properties.size_x * sizeof(T),
+                             rect_properties.size_y,
+                             rect_properties.size_z };
+
+    HPX_ASSERT(data.size() >
+        (rect_properties.size_x + rect_properties.src_x - 1)
+      + (rect_properties.size_y + rect_properties.src_y - 1)
+            * rect_properties.src_stride_y
+      + (rect_properties.size_z + rect_properties.src_z - 1)
+            * rect_properties.src_stride_z );
+
+    // run the OpenCL-call
+    err = clEnqueueWriteBufferRect( command_queue, device_mem, CL_FALSE,
+                                    buffer_origin, host_origin, region,
+                                    rect_properties.dst_stride_y * sizeof(T),
+                                    rect_properties.dst_stride_z * sizeof(T),
+                                    rect_properties.src_stride_y * sizeof(T),
+                                    rect_properties.src_stride_z * sizeof(T),
+                                    data.data(),
+                                    static_cast<cl_uint>(events.size()),
+                                    events.get_cl_events(), &return_event );
+    cl_ensure(err, "clEnqueueWriteBufferRect()");
 
     // register the data to prevent deallocation
     parent_device->put_event_data(return_event, data);

@@ -52,15 +52,15 @@ namespace opencl {
     ///
     /// \endcode
     ///
-    template <size_t DIM>
+    template <std::size_t DIM>
     struct work_size
     {
         private:
         struct dimension
         {
-            size_t offset;
-            size_t size;
-            size_t local_size;
+            std::size_t offset;
+            std::size_t size;
+            std::size_t local_size;
             dimension(){
                 offset = 0;
                 size = 0;
@@ -71,7 +71,7 @@ namespace opencl {
             // local_size be treated as NULL if all dimensions have local_size == 0
             dimension dims[DIM];
         public:
-            dimension& operator[](size_t idx){ return dims[idx]; }
+            dimension& operator[](std::size_t idx){ return dims[idx]; }
     };
 
     //////////////////////////////////////

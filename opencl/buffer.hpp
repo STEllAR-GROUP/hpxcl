@@ -19,12 +19,12 @@
 
 // Crazy function overloading
 #include "util/enqueue_overloads.hpp"
+#include "util/rect_props.hpp"
 
 #include "server/buffer.hpp"
 
 namespace hpx {
 namespace opencl { 
-
 
     //////////////////////////////////////
     /// @brief Device memory.
@@ -92,6 +92,22 @@ namespace opencl {
             enqueue_write( std::size_t offset,
                            const hpx::serialization::serialize_buffer<T> data,
                            Deps &&... dependencies );
+
+            /**
+             *  @brief Writes data to the buffer in a rectangular region
+             *
+             *  @param rect_properties  The parameters like size, offset, stride
+             *  @param data             The data to be written.
+             *
+             *  @return        An future that can be used for synchronization or
+             *                 dependency for other calls.
+             */
+            template<typename T, typename ...Deps>
+            hpx::future<void>
+            enqueue_write_rect(
+                            rect_props rect_properties,
+                            const hpx::serialization::serialize_buffer<T> data,
+                            Deps &&... dependencies );
 
             /**
              *  @brief Reads data from the buffer
@@ -253,6 +269,32 @@ hpx::opencl::buffer::enqueue_write( std::size_t offset,
     return ev.get_future();
 }
 
+template<typename T, typename ...Deps>
+hpx::future<void>
+hpx::opencl::buffer::enqueue_write_rect( rect_props rect_properties, 
+                    const hpx::serialization::serialize_buffer<T> data,
+                    Deps &&... dependencies )
+{
+    // combine dependency futures in one std::vector
+    using hpx::opencl::util::enqueue_overloads::resolver;
+    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    HPX_ASSERT(deps.are_from_device(device_gid));
+    
+    // create local event
+    using hpx::opencl::lcos::event;
+    event<void> ev( device_gid );
+
+    // send command to server class
+    typedef hpx::opencl::server::buffer::enqueue_write_rect_action<T> func;
+    hpx::apply<func>( this->get_id(),
+                      ev.get_event_id(),
+                      rect_properties,
+                      data,
+                      std::move(deps.event_ids) );
+
+    // return future connected to event
+    return ev.get_future();
+}
 
 template<typename ...Deps>
 hpx::future<hpx::serialization::serialize_buffer<char> >
