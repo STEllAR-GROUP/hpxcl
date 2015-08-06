@@ -1,5 +1,5 @@
 #!/bin/bash
 
 export HPXRUN_ARGS="--hpx:bind=none"
-make test
+ctest -R tests.unit --output-on-failure
 
