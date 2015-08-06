@@ -163,7 +163,7 @@ static void cl_test( hpx::opencl::device local_device,
             cldevice.create_program_with_source(program_src);
 
         // test if program can be compiled
-        program.build_async("-Werror").get();
+        program.build_async("-cl-std=CL1.1").get();
 
         // test if program can be used for computation
         create_and_run_kernel(cldevice, program);
