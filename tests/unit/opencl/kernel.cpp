@@ -76,7 +76,7 @@ static void create_and_run_kernel( hpx::opencl::device cldevice,
         bool caught_exception = false;
         try{
             hpx::opencl::kernel kernel = program.create_kernel("blub");
-            kernel.get_gid();
+            kernel.get_id();
         } catch (hpx::exception e){
             caught_exception = true;
         }

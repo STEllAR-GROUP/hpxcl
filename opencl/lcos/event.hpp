@@ -108,8 +108,8 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
 
     private:
         typedef hpx::lcos::detail::promise<Result, RemoteResult> parent_type;
-        typedef typename hpx::lcos::detail::future_data<Result>::data_type
-            data_type;
+        typedef typename hpx::lcos::detail::future_data<Result>::result_type
+            result_type;
 
     public:
 
@@ -218,8 +218,8 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     private:
         typedef hpx::lcos::detail::promise<void, hpx::util::unused_type>
             parent_type;
-        typedef hpx::lcos::detail::future_data<void>::data_type
-            data_type;
+        typedef hpx::lcos::detail::future_data<void>::result_type
+            result_type;
 
     public:
 
@@ -252,7 +252,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         }
 
         // retrieving the value
-        virtual data_type& get_result(error_code& ec = throws)
+        virtual result_type* get_result(error_code& ec = throws)
         {
             this->execute_deferred();
             return this->parent_type::get_result(ec);

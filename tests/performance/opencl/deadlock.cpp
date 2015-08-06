@@ -14,7 +14,7 @@ static void register_event(hpx::opencl::device cldevice,
 
     boost::shared_ptr<hpx::opencl::server::device>
     parent_device = hpx::get_ptr<hpx::opencl::server::device>
-                        (cldevice.get_gid()).get();
+                        (cldevice.get_id()).get();
 
     // create a fake event
     cl_int err;
@@ -49,7 +49,7 @@ int main()
 
         hpx::shared_future<void> fut;
         {
-            hpx::opencl::lcos::event<void> ev(device.get_gid());
+            hpx::opencl::lcos::event<void> ev(device.get_id());
             register_event(device, ev.get_event_id());
             fut = ev.get_future();
         }

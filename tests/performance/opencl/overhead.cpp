@@ -49,12 +49,12 @@ static void send_test( hpx::opencl::device device1,
 
     std::string name = "send_";
     
-    if(hpx::get_colocation_id_sync(device1.get_gid()) == hpx::find_here())
+    if(hpx::get_colocation_id_sync(device1.get_id()) == hpx::find_here())
         name += "local_";
     else
         name += "remote_";
 
-    if(hpx::get_colocation_id_sync(device2.get_gid()) == hpx::find_here())
+    if(hpx::get_colocation_id_sync(device2.get_id()) == hpx::find_here())
         name += "local";
     else
         name += "remote";
@@ -116,7 +116,7 @@ static void wait_test( hpx::opencl::device device )
     std::string name = "wait_";
 
 
-    if(hpx::get_colocation_id_sync(device.get_gid()) == hpx::find_here())
+    if(hpx::get_colocation_id_sync(device.get_id()) == hpx::find_here())
         name += "local";
     else
         name += "remote";
@@ -178,7 +178,7 @@ static void write_test( hpx::opencl::device device , bool sync )
     std::string name = "write_";
 
 
-    if(hpx::get_colocation_id_sync(device.get_gid()) == hpx::find_here())
+    if(hpx::get_colocation_id_sync(device.get_id()) == hpx::find_here())
         name += "local";
     else
         name += "remote";
@@ -248,7 +248,7 @@ static void read_test( hpx::opencl::device device , bool sync )
     std::string name = "read_";
 
 
-    if(hpx::get_colocation_id_sync(device.get_gid()) == hpx::find_here())
+    if(hpx::get_colocation_id_sync(device.get_id()) == hpx::find_here())
         name += "local";
     else
         name += "remote";
@@ -321,9 +321,9 @@ static void cl_test(hpx::opencl::device local_device,
 
     // Get localities
     hpx::naming::id_type remote_location =
-        hpx::get_colocation_id_sync(remote_device.get_gid());
+        hpx::get_colocation_id_sync(remote_device.get_id());
     hpx::naming::id_type local_location =
-        hpx::get_colocation_id_sync(local_device.get_gid());
+        hpx::get_colocation_id_sync(local_device.get_id());
     if(local_location != hpx::find_here())
         die("Internal ERROR! local_location is not here.");
 

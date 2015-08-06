@@ -45,9 +45,9 @@ static void run_opencl_local_test( hpx::opencl::device device )
         device.create_buffer(CL_MEM_READ_WRITE, test_data.size());
 
     auto device_ptr =
-        hpx::get_ptr<hpx::opencl::server::device>(device.get_gid()).get();
+        hpx::get_ptr<hpx::opencl::server::device>(device.get_id()).get();
     auto buffer_ptr =
-        hpx::get_ptr<hpx::opencl::server::buffer>(buffer.get_gid()).get();
+        hpx::get_ptr<hpx::opencl::server::buffer>(buffer.get_id()).get();
 
 
     cl_context context = device_ptr->get_context();
@@ -125,11 +125,11 @@ static void run_opencl_local_send_test( hpx::opencl::device device )
         device.create_buffer(CL_MEM_READ_WRITE, test_data.size());
 
     auto device_ptr =
-        hpx::get_ptr<hpx::opencl::server::device>(device.get_gid()).get();
+        hpx::get_ptr<hpx::opencl::server::device>(device.get_id()).get();
     auto buffer1_ptr =
-        hpx::get_ptr<hpx::opencl::server::buffer>(buffer1.get_gid()).get();
+        hpx::get_ptr<hpx::opencl::server::buffer>(buffer1.get_id()).get();
     auto buffer2_ptr =
-        hpx::get_ptr<hpx::opencl::server::buffer>(buffer2.get_gid()).get();
+        hpx::get_ptr<hpx::opencl::server::buffer>(buffer2.get_id()).get();
 
 
     cl_context context = device_ptr->get_context();
@@ -250,10 +250,10 @@ static void run_hpxcl_send_test( hpx::opencl::device device1,
 
     
     std::string device1_location = "remote"; 
-    if(hpx::get_colocation_id_sync(device1.get_gid()) == hpx::find_here())
+    if(hpx::get_colocation_id_sync(device1.get_id()) == hpx::find_here())
         device1_location = "local";
     std::string device2_location = "remote"; 
-    if(hpx::get_colocation_id_sync(device2.get_gid()) == hpx::find_here())
+    if(hpx::get_colocation_id_sync(device2.get_id()) == hpx::find_here())
         device2_location = "local";
 
     std::map<std::string, std::string> atts;
@@ -318,7 +318,7 @@ static void run_hpxcl_read_write_test( hpx::opencl::device device )
     std::map<std::string, std::string> atts;
     atts["size"] = std::to_string(test_data.size());
     atts["iterations"] = std::to_string(num_iterations);
-    if(hpx::get_colocation_id_sync(device.get_gid()) == hpx::find_here())
+    if(hpx::get_colocation_id_sync(device.get_id()) == hpx::find_here())
         results.start_test("HPXCL_local_host_to_local_device", "GB/s", atts);
     else
         results.start_test("HPXCL_local_host_to_remote_device", "GB/s", atts);
@@ -425,9 +425,9 @@ static void cl_test(hpx::opencl::device local_device,
 
     // Get localities
     hpx::naming::id_type remote_location =
-        hpx::get_colocation_id_sync(remote_device.get_gid());
+        hpx::get_colocation_id_sync(remote_device.get_id());
     hpx::naming::id_type local_location =
-        hpx::get_colocation_id_sync(local_device.get_gid());
+        hpx::get_colocation_id_sync(local_device.get_id());
     if(local_location != hpx::find_here())
         die("Internal ERROR! local_location is not here.");
 

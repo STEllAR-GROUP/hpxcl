@@ -91,7 +91,7 @@ static void print_testdevice_info(hpx::opencl::device & cldevice,
     // Write Info Code
     std::cerr << "Device ID:  " << device_id << " / " << num_devices
                                 << std::endl;
-    std::cerr << "Device GID: " << cldevice.get_gid() << std::endl;
+    std::cerr << "Device GID: " << cldevice.get_id() << std::endl;
     std::cerr << "Version:    " << version << std::endl;
     std::cerr << "Name:       " << cldevice.get_device_info<CL_DEVICE_NAME>().get()
                                 << std::endl;
@@ -133,7 +133,7 @@ static std::vector<hpx::opencl::device> init(variables_map & vm)
     // Print info
     std::cerr << "Local device:" << std::endl;
     print_testdevice_info(local_device, device_id, local_devices.size());
-    if(local_device.get_gid() != remote_device.get_gid())
+    if(local_device.get_id() != remote_device.get_id())
     {
         std::cerr << "Remote device:" << std::endl;
         print_testdevice_info(remote_device, device_id, remote_devices.size());
@@ -174,7 +174,7 @@ int hpx_main(variables_map & vm)
 
         std::cerr << std::endl;
         cl_test( devices[0], devices[1],
-                 devices[0].get_gid() != devices[1].get_gid());
+                 devices[0].get_id() != devices[1].get_id());
         std::cerr << std::endl;
 
         std::cout << results;

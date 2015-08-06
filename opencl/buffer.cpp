@@ -18,10 +18,10 @@ hpx::future<std::size_t>
 buffer::size() const
 {
     
-    HPX_ASSERT(this->get_gid());
+    HPX_ASSERT(this->get_id());
     typedef hpx::opencl::server::buffer::size_action func;
 
-    return hpx::async<func>(this->get_gid());
+    return hpx::async<func>(this->get_id());
 
 }
 
@@ -34,7 +34,7 @@ buffer::enqueue_send_impl(
     hpx::opencl::util::resolved_events && dependencies )
 {
     using hpx::opencl::lcos::event;
-    HPX_ASSERT(this->get_gid()); 
+    HPX_ASSERT(this->get_id());
     HPX_ASSERT(dependencies.are_from_devices(device_gid, dst.device_gid));
 
     // create events
@@ -43,8 +43,8 @@ buffer::enqueue_send_impl(
     
     // send command to server class
     typedef hpx::opencl::server::buffer::enqueue_send_action func;
-    hpx::apply<func>( this->get_gid(),
-                      dst.get_gid(),
+    hpx::apply<func>( this->get_id(),
+                      dst.get_id(),
                       src_event.get_event_id(),
                       dst_event.get_event_id(),
                       src_offset,
@@ -75,7 +75,7 @@ buffer::enqueue_read_impl(
    
     // send command to server class
     typedef hpx::opencl::server::buffer::enqueue_read_action func;
-    hpx::apply<func>( this->get_gid(),
+    hpx::apply<func>( this->get_id(),
                       ev.get_event_id(),
                       offset,
                       size,

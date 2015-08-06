@@ -82,7 +82,7 @@ static void print_testdevice_info(hpx::opencl::device & cldevice,
     // Write Info Code
     hpx::cout << "Device ID:  " << device_id << " / " << num_devices
                                 << hpx::endl;
-    hpx::cout << "Device GID: " << cldevice.get_gid() << hpx::endl;
+    hpx::cout << "Device GID: " << cldevice.get_id() << hpx::endl;
     hpx::cout << "Version:    " << version << hpx::endl;
     hpx::cout << "Name:       " << cldevice.get_device_info<CL_DEVICE_NAME>().get()
                                 << hpx::endl;
@@ -92,7 +92,7 @@ static void print_testdevice_info(hpx::opencl::device & cldevice,
                                 << hpx::endl;
 
     // Test for valid device client
-    HPX_TEST(cldevice.get_gid());
+    HPX_TEST(cldevice.get_id());
 
 
 }

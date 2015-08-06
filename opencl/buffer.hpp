@@ -61,7 +61,7 @@ namespace opencl {
               : base_type(gid), device_gid(std::move(device_gid_))
             {
                 is_local =
-                    (hpx::get_colocation_id_sync(get_gid()) == hpx::find_here());
+                    (hpx::get_colocation_id_sync(get_id()) == hpx::find_here());
             }
 
             // initialization
@@ -203,7 +203,7 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
     if(!is_local){
         // is remote call
 
-        hpx::apply<func_remote>( std::move(get_gid()),
+        hpx::apply<func_remote>( std::move(get_id()),
                                  std::move(ev.get_event_id()),
                                  offset,
                                  data.size() * sizeof(T),
@@ -214,7 +214,7 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
     } else {
         // is local call, send direct reference to buffer
 
-        hpx::apply<func_local>( std::move(get_gid()),
+        hpx::apply<func_local>( std::move(get_id()),
                                 std::move(ev.get_event_id()),
                                 offset,
                                 data,
@@ -242,7 +242,7 @@ hpx::opencl::buffer::enqueue_write( std::size_t offset,
 
     // send command to server class
     typedef hpx::opencl::server::buffer::enqueue_write_action<T> func;
-    hpx::apply<func>( this->get_gid(),
+    hpx::apply<func>( this->get_id(),
                       ev.get_event_id(),
                       offset,
                       data,

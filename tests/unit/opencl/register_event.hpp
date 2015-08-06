@@ -21,7 +21,7 @@ static void register_event(hpx::opencl::device cldevice,
 
     boost::shared_ptr<hpx::opencl::server::device>
     parent_device = hpx::get_ptr<hpx::opencl::server::device>
-                        (cldevice.get_gid()).get();
+                        (cldevice.get_id()).get();
 
     // create a fake event
     cl_int err;

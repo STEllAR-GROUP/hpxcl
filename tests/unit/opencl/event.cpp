@@ -12,7 +12,7 @@ void cl_test( hpx::opencl::device cldevice, hpx::opencl::device )
     typedef typename event_type::wrapped_type shared_state_type;
 
 
-    event_type event(cldevice.get_gid());
+    event_type event(cldevice.get_id());
 
 
 

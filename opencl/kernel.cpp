@@ -22,11 +22,11 @@ hpx::lcos::future<void>
 kernel::set_arg_async(cl_uint arg_index, const hpx::opencl::buffer &arg) const
 {
 
-    HPX_ASSERT(this->get_gid());
+    HPX_ASSERT(this->get_id());
 
     typedef hpx::opencl::server::kernel::set_arg_action func;
 
-    return hpx::async<func>(this->get_gid(), arg_index, arg.get_gid());
+    return hpx::async<func>(this->get_id(), arg_index, arg.get_id());
 
 }
 
@@ -41,7 +41,7 @@ kernel::enqueue_impl( std::vector<std::size_t> && size_vec,
 
     // send command to server class
     typedef hpx::opencl::server::kernel::enqueue_action func;
-    hpx::apply<func>( this->get_gid(),
+    hpx::apply<func>( this->get_id(),
                       std::move(ev.get_event_id()),
                       size_vec,
                       std::move(deps.event_ids) );

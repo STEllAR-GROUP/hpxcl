@@ -237,7 +237,7 @@ ensure_device_components_initialization()
             // Initialize device server locally
             boost::shared_ptr<hpx::opencl::server::device> device_server =
                                  hpx::get_ptr<hpx::opencl::server::device>
-                                                (device_client.get_gid()).get();
+                                                (device_client.get_id()).get();
             device_server->init(device);
 
             // Add device to list of valid devices

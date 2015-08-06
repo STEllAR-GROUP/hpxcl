@@ -34,33 +34,33 @@ program::build_async() const
 hpx::lcos::future<void>
 program::build_async(std::string build_options) const
 {
-    HPX_ASSERT(this->get_gid());
+    HPX_ASSERT(this->get_id());
 
     typedef hpx::opencl::server::program::build_action func;
 
-    return async<func>(this->get_gid(), build_options);
+    return async<func>(this->get_id(), build_options);
 }
 
 hpx::lcos::future<hpx::serialization::serialize_buffer<char> >
 program::get_binary() const
 {
-    HPX_ASSERT(this->get_gid());
+    HPX_ASSERT(this->get_id());
 
     typedef hpx::opencl::server::program::get_binary_action func;
 
-    return async<func>(this->get_gid());
+    return async<func>(this->get_id());
 }
 
 hpx::opencl::kernel
 program::create_kernel(std::string kernel_name) const
 {
 
-    HPX_ASSERT(this->get_gid());
+    HPX_ASSERT(this->get_id());
 
     typedef hpx::opencl::server::program::create_kernel_action func;
     
     hpx::future<hpx::id_type> kernel_server =
-                                 hpx::async<func>(this->get_gid(), kernel_name);
+                                 hpx::async<func>(this->get_id(), kernel_name);
 
     return kernel(std::move(kernel_server), device_gid);
 
