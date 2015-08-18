@@ -7,7 +7,7 @@
 #define BUFFER_1_HPP
 
 #include <hpx/include/components.hpp>
-#include <hpx/util/serialize_buffer.hpp>
+#include <hpx/runtime/serialization/serialize_buffer.hpp>
 #include "stubs/buffer.hpp"
 
 namespace hpx
@@ -65,9 +65,9 @@ namespace hpx
                 {
                     BOOST_ASSERT(this->get_gid());
 
-                     hpx::util::serialize_buffer<char>
+                     hpx::serialization::serialize_buffer<char>
                         serializable_data((char*)const_cast<void*>(data), size,
-                             hpx::util::serialize_buffer<char>::init_mode::reference);
+                             hpx::erialization::serialize_buffer<char>::init_mode::reference);
 
                     this->base_type::enqueue_write(this->get_gid(), offset, serializable_data);
                 }

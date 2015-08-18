@@ -49,7 +49,7 @@ namespace hpx
                     return hpx::async<action_type>(gid, offset, size);
                 }
 
-                static hpx::lcos::future<void> enqueue_write(hpx::naming::id_type const& gid, size_t offset, hpx::util::serialize_buffer<char> data)
+                static hpx::lcos::future<void> enqueue_write(hpx::naming::id_type const& gid, size_t offset, hpx::serialize_buffer::serialize_buffer<char> data)
                 {
                     typedef server::buffer::enqueue_write_action action_type;
                     return hpx::async<action_type>(gid, offset, data);

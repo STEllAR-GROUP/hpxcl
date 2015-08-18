@@ -57,7 +57,7 @@ if(HPXCL_WITH_OPENCL)
 endif()
 
 if(HPXCL_WITH_CUDA)
-    find_package(CUDA REQUIRED)
+    find_package(CUDA 7.0 REQUIRED)
 endif()
 
 if(HPX_BUILD_EXAMPLES)

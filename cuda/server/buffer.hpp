@@ -11,7 +11,7 @@
 #include <hpx/runtime/components/server/locking_hook.hpp>
 #include <hpx/runtime/actions/component_action.hpp>
 #include <hpx/runtime/get_ptr.hpp>
-#include <hpx/util/serialize_buffer.hpp>
+#include <hpx/runtime/serialization/serialize_buffer.hpp>
 
 #include <cuda.h>
 
@@ -47,7 +47,7 @@
  			 	
  			 	void enqueue_read(size_t offset, size_t size) const;
 				
- 			 	void enqueue_write(size_t offset, hpx::util::serialize_buffer<char> data);
+ 			 	void enqueue_write(size_t offset, hpx::serialization::serialize_buffer<char> data);
  			 	
  			 	HPX_DEFINE_COMPONENT_ACTION(buffer, size);
  			 	HPX_DEFINE_COMPONENT_ACTION(buffer, set_size);
