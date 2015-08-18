@@ -39,7 +39,10 @@ foreach(test ${tests})
                      ${${test}_FLAGS}
                      FOLDER "Tests/Unit/OpenCL")
 
-  add_hpx_unit_test("opencl" ${test} ${${test}_PARAMETERS})
+  add_hpx_unit_test("opencl" ${test})
+  add_hpx_unit_test("opencl" ${test}_remote EXECUTABLE ${test}
+                                            LOCALITIES 2
+                                            THREADS_PER_LOCALITY 2)
 
   # add a custom target for this example
   add_hpx_pseudo_target(tests.unit.opencl.${test})
