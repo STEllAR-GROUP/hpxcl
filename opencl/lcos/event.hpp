@@ -85,7 +85,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         event_ptr event = static_cast<event_ptr>(lco_ptr);
 
         // Make sure sizes match
-        HPX_ASSERT( buf.size() == event->result_buffer.size() * sizeof(T) );
+        //HPX_ASSERT( buf.size() == event->result_buffer.size() * sizeof(T) );
 
         // Trigger the event
         event->set_value(std::move(event->result_buffer));

@@ -23,24 +23,21 @@ namespace hpx { namespace opencl { namespace lcos
     {
     public:
         zerocopy_buffer() BOOST_NOEXCEPT
-          : pointer_(0), size_(0)
+          : pointer_(0), size_x(0), size_y(0), size_z(0)
         {
         }
     
         zerocopy_buffer(std::uintptr_t p, std::size_t size,
                         hpx::serialization::serialize_buffer<char> buffer)
-          : pointer_(p), size_(size), buffer_(buffer)
+          : pointer_(p), size_x(size), buffer_(buffer),
+            size_y(1), size_z(1), stride_y(0), stride_z(0)
         {
 
-            HPX_ASSERT(buffer.size() == size_);
+            HPX_ASSERT(buffer.size() == size_x);
             //HPX_ASSERT(data_() == static_cast<char*>(buffer.data()));
 
         }
         
-        std::size_t size(){
-            return size_;
-        }
-    
     private:
         // serialization support
         friend class hpx::serialization::access;
@@ -49,25 +46,41 @@ namespace hpx { namespace opencl { namespace lcos
         void load(Archive& ar, unsigned int const version)
         {
             // read size and adress
-            ar >> size_ >> pointer_;
+            ar >> size_x >> size_y >> size_z >> stride_y >> stride_z >> pointer_;
             // write data to adress
             char* dest_addr = reinterpret_cast<char*>(pointer_);
-            ar >> hpx::serialization::make_array(dest_addr, size_);
+            for(std::size_t z = 0; z < size_z; z++){
+                for(std::size_t y = 0; y < size_y; y++){
+                    ar >> hpx::serialization::make_array(
+                            dest_addr + y * stride_y + z * stride_z,
+                            size_x);
+                }
+            }
         }
     
         template <typename Archive>
         void save(Archive& ar, unsigned int const version) const
         {
             // send size, adress and data
-            ar << size_ << pointer_
-               << hpx::serialization::make_array(buffer_.data(), size_);
+            ar << size_x << size_y << size_z << stride_y << stride_z << pointer_;
+            for(std::size_t z = 0; z < size_z; z++){
+                for(std::size_t y = 0; y < size_y; y++){
+                    ar << hpx::serialization::make_array(
+                            buffer_.data() + y * stride_y + z * stride_z,
+                            size_x);
+                }
+            }
         }
 
         HPX_SERIALIZATION_SPLIT_MEMBER()
     
     private:
         std::uintptr_t pointer_;
-        std::size_t size_;
+        std::size_t size_x;
+        std::size_t size_y;
+        std::size_t size_z;
+        std::size_t stride_y;
+        std::size_t stride_z;
         hpx::serialization::serialize_buffer<char> buffer_;
     };
 

@@ -38,6 +38,7 @@ namespace opencl {
             std::size_t src_stride_z;
             std::size_t dst_stride_y;
             std::size_t dst_stride_z;
+
             rect_props( std::size_t src_x_,
                         std::size_t src_y_,
                         std::size_t src_z_,
