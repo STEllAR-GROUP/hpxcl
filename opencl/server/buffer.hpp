@@ -92,6 +92,22 @@ namespace hpx { namespace opencl{ namespace server{
                             hpx::serialization::serialize_buffer<T> data,
                             std::vector<hpx::naming::id_type> && dependencies );
 
+        // Reads from the buffer. Needed for direct copy to user-supplied buffer
+        template <typename T>
+        void enqueue_read_to_userbuffer_rect_remote(
+                            hpx::naming::id_type && event_gid,
+                            hpx::opencl::rect_props && rect_properties,
+                            std::uintptr_t remote_data_addr,
+                            std::vector<hpx::naming::id_type> && dependencies );
+
+        // Reads from the buffer. Needed for direct copy to user-supplied buffer
+        template <typename T>
+        void enqueue_read_to_userbuffer_rect_local(
+                            hpx::naming::id_type && event_gid,
+                            hpx::opencl::rect_props && rect_properties,
+                            hpx::serialization::serialize_buffer<T> data,
+                            std::vector<hpx::naming::id_type> && dependencies );
+
         // Copies data from this buffer to a remote buffer
         void enqueue_send( hpx::naming::id_type dst,
                            hpx::naming::id_type && src_event,
@@ -173,6 +189,26 @@ namespace hpx { namespace opencl{ namespace server{
             &buffer::template enqueue_read_to_userbuffer_local<T>,
             enqueue_read_to_userbuffer_local_action<T> >
     {};
+    template <typename T>
+    struct enqueue_read_to_userbuffer_rect_remote_action
+      : hpx::actions::make_action<void (buffer::*)(
+                        hpx::naming::id_type &&,
+                        hpx::opencl::rect_props &&,
+                        std::uintptr_t,
+                        std::vector<hpx::naming::id_type> &&),
+            &buffer::template enqueue_read_to_userbuffer_remote<T>,
+            enqueue_read_to_userbuffer_remote_action<T> >
+    {};
+    template <typename T>
+    struct enqueue_read_to_userbuffer_rect_local_action
+      : hpx::actions::make_action<void (buffer::*)(
+                        hpx::naming::id_type &&,
+                        hpx::opencl::rect_props &&,
+                        hpx::serialization::serialize_buffer<T>,
+                        std::vector<hpx::naming::id_type> &&),
+            &buffer::template enqueue_read_to_userbuffer_local<T>,
+            enqueue_read_to_userbuffer_local_action<T> >
+    {};
 
 
         //////////////////////////////////////////////////
@@ -200,6 +236,10 @@ HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
                                             enqueue_read_to_userbuffer_local);
 HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
                                             enqueue_read_to_userbuffer_remote);
+HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
+                                            enqueue_read_to_userbuffer_rect_local);
+HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
+                                            enqueue_read_to_userbuffer_rect_remote);
 //]
 
 
@@ -399,7 +439,7 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote(
     // send the zerocopy_buffer to the lcos::event
     typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
         set_data_func;
-    hpx::apply_colocated<set_data_func>( event_gid, event_gid, zerocopy_buffer);
+    hpx::apply_colocated<set_data_func>(event_gid, event_gid, zerocopy_buffer);
 
 }
 
