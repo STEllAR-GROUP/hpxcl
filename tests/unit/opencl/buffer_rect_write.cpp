@@ -8,7 +8,7 @@
 
 
 /*
- * This test is meant to verify the buffer rect read/write functionality.
+ * This test is meant to verify the buffer rect write functionality.
  */
 
 

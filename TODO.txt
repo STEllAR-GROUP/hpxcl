@@ -10,4 +10,7 @@
 
 ! - Add write/read-rect functions!!
     - read_rect
+        - implement server functions
+        - write unit test
+        - implement zero-copy with rect
     - send_rect
