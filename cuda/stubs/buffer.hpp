@@ -9,6 +9,7 @@
 #include <hpx/runtime/components/stubs/stub_base.hpp>
 #include <hpx/runtime/applier/apply.hpp>
 #include <hpx/include/async.hpp>
+#include <hpx/include/serialization.hpp>
 
 #include "../server/buffer.hpp"
 
@@ -49,7 +50,7 @@ namespace hpx
                     return hpx::async<action_type>(gid, offset, size);
                 }
 
-                static hpx::lcos::future<void> enqueue_write(hpx::naming::id_type const& gid, size_t offset, hpx::serialize_buffer::serialize_buffer<char> data)
+                static hpx::lcos::future<void> enqueue_write(hpx::naming::id_type const& gid, size_t offset, hpx::serialization::serialize_buffer<char> data)
                 {
                     typedef server::buffer::enqueue_write_action action_type;
                     return hpx::async<action_type>(gid, offset, data);

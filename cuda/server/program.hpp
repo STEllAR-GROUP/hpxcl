@@ -6,12 +6,12 @@
 #if !defined(PROGRAM_2_HPP)
 #define PROGRAM_2_HPP
 
-#include <hpx/hpx_fwd.hpp>
-#include <hpx/runtime/components/server/managed_component_base.hpp>
-#include <hpx/runtime/components/server/locking_hook.hpp>
-#include <hpx/runtime/actions/component_action.hpp>
-#include <hpx/runtime/get_ptr.hpp>
-#include <hpx/include/util.hpp>
+//#include <hpx/hpx_fwd.hpp>
+//#include <hpx/runtime/components/server/managed_component_base.hpp>
+//#include <hpx/runtime/components/server/locking_hook.hpp>
+//#include <hpx/runtime/actions/component_action.hpp>
+//#include <hpx/runtime/get_ptr.hpp>
+//#include <hpx/include/util.hpp>
 
 #include <iostream>
 #include <cuda.h>
@@ -43,7 +43,7 @@
 
  			 	program(hpx::naming::id_type device_id, std::string code);
 
- 			 	program(hpx::naming::id_type device_id, hpx::util::serialize_buffer<char> binary);  			
+ 			 	program(hpx::naming::id_type device_id, hpx::serialization::serialize_buffer<char> binary);
  			
  			 	~program();
 
@@ -61,7 +61,7 @@
  		}
  	}
  }
-
+/*
 HPX_REGISTER_ACTION_DECLARATION(
 	hpx::cuda::server::program::build_action,
 	cuda_program_build_action);
@@ -71,5 +71,5 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
 	hpx::cuda::server::program::set_source_action,
 	cuda_program_set_source_action);
-
+*/
  #endif //PROGRAM_2_HPP

@@ -6,10 +6,10 @@
 #if !defined(KERNEL_2_HPP)
 #define KERNEL_2_HPP
 
-#include <hpx/hpx_fwd.hpp>
-#include <hpx/runtime/components/server/managed_component_base.hpp>
-#include <hpx/runtime/components/server/locking_hook.hpp>
-#include <hpx/runtime/actions/component_action.hpp>
+//#include <hpx/hpx_fwd.hpp>
+//#include <hpx/runtime/components/server/managed_component_base.hpp>
+//#include <hpx/runtime/components/server/locking_hook.hpp>
+//#include <hpx/runtime/actions/component_action.hpp>
 
 #include <cuda.h>
 
@@ -88,7 +88,7 @@ namespace hpx
         }
     }
 }
-
+/*
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::set_stream_action,
     cuda_kernel_set_stream_action);
@@ -119,5 +119,5 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::set_arg_action, 
     cuda_kernel_set_arg_action);
-
+*/
 #endif

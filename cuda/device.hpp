@@ -7,6 +7,7 @@
 #define DEVICE_1_HPP
 
 #include <hpx/include/components.hpp>
+#include <boost/assert.hpp>
 #include "stubs/device.hpp"
 #include "kernel.hpp"
 #include "buffer.hpp"

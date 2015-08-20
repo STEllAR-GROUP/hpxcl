@@ -67,7 +67,7 @@ namespace hpx
 
                      hpx::serialization::serialize_buffer<char>
                         serializable_data((char*)const_cast<void*>(data), size,
-                             hpx::erialization::serialize_buffer<char>::init_mode::reference);
+                             hpx::serialization::serialize_buffer<char>::init_mode::reference);
 
                     this->base_type::enqueue_write(this->get_gid(), offset, serializable_data);
                 }

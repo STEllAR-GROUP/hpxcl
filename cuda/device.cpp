@@ -4,12 +4,14 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
 #include <hpx/hpx.hpp>
+#include <hpx/hpx_main.hpp>
 #include <hpx/runtime/components/component_factory.hpp>
 //#include <hpx/util/portable_binary_iarchive.hpp>
 //#include <hpx/util/portable_binary_oarchive.hpp>
 
-#include <boost/serialization/version.hpp>
-#include <boost/serialization/export.hpp>
+#include <hpx/version.hpp>
+//#include <hpx/serialization/export.hpp>
+
 
 #include "server/device.hpp"
 
