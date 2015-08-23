@@ -23,13 +23,7 @@
 #include "../cuda/kernel.cuh"
 
 #include "device.hpp"
-#include "kernel.hpp"
-#include "buffer.hpp"
-#include "program.hpp"
 
-#include "../kernel.hpp"
-#include "../buffer.hpp"
-#include "../program.hpp"
 
 using namespace hpx::cuda::server;
         

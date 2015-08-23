@@ -26,7 +26,7 @@ program::program(){}
 
 program::program(hpx::naming::id_type device_id, std::string code){}
 
-program::program(hpx::naming::id_type device_id, hpx::serialization::serialize_buffer<char> binary){}
+program::program(hpx::naming::id_type device_id, hpx::util::serialize_buffer<char> binary){}
 
 program::~program(){}
 
@@ -45,8 +45,8 @@ hpx::cuda::kernel program::create_kernel(std::string module_name, std::string ke
 	return cu_kernel;
 }
 
-void program::build(std::string NVCC_FLAGS)
-{/*
+void program::build()
+{
 	CUjit_option options[6];
  	void* optionVals[6]
  	float walltime;
@@ -68,7 +68,6 @@ void program::build(std::string NVCC_FLAGS)
 	optionVals[4] = (void*) logSize;
 	options[5] = CU_JIT_LOG_VERBOSE;
 	optionVals[5] = (void*) 1;
-*/
 }
 
 //function used to build a gpu architecture specific cuda kernel

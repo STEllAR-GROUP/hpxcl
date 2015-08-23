@@ -1,5 +1,6 @@
 # Copyright (c)       2014 Martin Stumpf
 #                     2014 Damond Howard
+#                     2015 Patrick Diehl
 #
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -8,17 +9,21 @@ set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 cuda_add_library(cuda_kernels cuda/kernel.cu)
 
 
-add_hpx_component(cuda
+add_hpx_component(cudaHPX
    ESSENTIAL
-   SOURCES  buffer.cpp
+   SOURCES  get_devices.cpp
+            server/get_devices.cpp
             device.cpp
             server/device.cpp
-            #event.cpp
+            buffer.cpp
+            server/buffer.cpp
             kernel.cpp
             server/kernel.cpp
             program.cpp
-            server/program.cpp
+            server/program.cpp   
    HEADERS  fwd_declarations.hpp
+            get_devices.hpp
+            server/get_devices.hpp
             buffer.hpp
             device.hpp
             event.hpp
@@ -31,12 +36,6 @@ add_hpx_component(cuda
             server/event.hpp
             server/kernel.hpp
             server/program.hpp
-            stubs/buffer.hpp
-            stubs/device.hpp
-            stubs/event.hpp
-            stubs/kernel.hpp
-            stubs/program.hpp
-
    COMPONENT_DEPENDENCIES iostreams 
    DEPENDENCIES cuda cudart cuda_kernels
    )

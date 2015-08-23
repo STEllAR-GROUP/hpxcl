@@ -1,10 +1,11 @@
 // Copyright (c)		2013 Damond Howard
-//						2015 Patrick Diehl
+//
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
-#if !defined(DEVICE_2_HPP)
-#define DEVICE_2_HPP
+#pragma once
+#ifndef HPX_CUDA_SERVER_DEVICE_HPP_
+#define HPX_CUDA_SERVER_DEVICE_HPP_
 
 #include <hpx/hpx_fwd.hpp>
 #include <hpx/runtime/components/server/managed_component_base.hpp>
@@ -12,7 +13,6 @@
 #include <hpx/runtime/actions/component_action.hpp>
 #include <hpx/include/util.hpp>
 #include <hpx/include/runtime.hpp>
-#include <hpx/include/serialization.hpp>
 
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -129,7 +129,6 @@ namespace hpx
     }
 }
 
-/*
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::get_cuda_info_action,
     device_get_cuda_info_action);
@@ -173,5 +172,5 @@ HPX_REGISTER_ACTION_DECLARATION_TEMPLATE(
     (template <typename T>),
     (hpx::cuda::server::device::create_host_ptr_action<T>)
     )
-*/
+
 #endif //cuda_device_2_HPP

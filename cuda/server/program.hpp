@@ -3,15 +3,16 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#if !defined(PROGRAM_2_HPP)
-#define PROGRAM_2_HPP
+#pragma once
+#ifndef HPX_CUDA_SERVER_PROGRAM_HPP_
+#define HPX_CUDA_SERVER_PROGRAM_HPP_
 
-//#include <hpx/hpx_fwd.hpp>
-//#include <hpx/runtime/components/server/managed_component_base.hpp>
-//#include <hpx/runtime/components/server/locking_hook.hpp>
-//#include <hpx/runtime/actions/component_action.hpp>
-//#include <hpx/runtime/get_ptr.hpp>
-//#include <hpx/include/util.hpp>
+#include <hpx/hpx_fwd.hpp>
+#include <hpx/runtime/components/server/managed_component_base.hpp>
+#include <hpx/runtime/components/server/locking_hook.hpp>
+#include <hpx/runtime/actions/component_action.hpp>
+#include <hpx/runtime/get_ptr.hpp>
+#include <hpx/include/util.hpp>
 
 #include <iostream>
 #include <cuda.h>
@@ -61,7 +62,7 @@
  		}
  	}
  }
-/*
+
 HPX_REGISTER_ACTION_DECLARATION(
 	hpx::cuda::server::program::build_action,
 	cuda_program_build_action);
@@ -71,5 +72,5 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
 	hpx::cuda::server::program::set_source_action,
 	cuda_program_set_source_action);
-*/
+
  #endif //PROGRAM_2_HPP
