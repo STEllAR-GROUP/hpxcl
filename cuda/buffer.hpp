@@ -9,6 +9,10 @@
 
 #include <hpx/include/components.hpp>
 #include <hpx/include/serialization.hpp>
+#include <hpx/runtime/actions/component_action.hpp>
+#include <hpx/runtime/applier/apply.hpp>
+#include <hpx/include/async.hpp>
+
 #include "server/buffer.hpp"
 
 namespace hpx {
@@ -37,7 +41,7 @@ public:
 	}
 
 	hpx::lcos::future<void> set_size(size_t size) {
-		BOOST_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_gid());
 		typedef server::buffer::set_size_action action_type;
 		return hpx::async < action_type > (this->get_gid(), size);
 
@@ -49,7 +53,7 @@ public:
 	}
 
 	void enqueue_read(size_t offset, size_t size) const {
-		BOOST_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_gid());
 
 		typedef server::buffer::enqueue_read_action action_type;
 		hpx::async < action_type > (this->get_gid(), offset, size);
@@ -57,7 +61,7 @@ public:
 	}
 
 	void enqueue_write(size_t offset, size_t size, const void* data) const {
-		BOOST_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_gid());
 
 		hpx::serialization::serialize_buffer<char> serializable_data(
 				(char*) const_cast<void*>(data), size,

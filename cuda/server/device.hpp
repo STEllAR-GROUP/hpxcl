@@ -1,5 +1,5 @@
 // Copyright (c)		2013 Damond Howard
-//
+//						2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
@@ -43,7 +43,7 @@ namespace hpx
         //// This class represents a cuda device /////////
         class device
             :  public hpx::components::locking_hook<
-                    hpx::components::managed_component_base<device> 
+                    hpx::components::managed_component_base<device>
                     >
             {
               	private:
@@ -53,8 +53,8 @@ namespace hpx
                 CUdevice cu_device;
                 CUcontext cu_context;
                 std::string device_name;
-                cudaDeviceProp props;   
-                std::vector<Device_ptr> device_ptrs;           	 
+                cudaDeviceProp props;
+                std::vector<Device_ptr> device_ptrs;
                 std::vector<Host_ptr<int>> host_ptrs;
                 int num_args;
               	public:
@@ -62,17 +62,17 @@ namespace hpx
         	 	device();
 
         	 	device(int device_id);
- 
+
   				~device();
 
                 void free();
-	     			 
+
                 int get_device_count();
 
                 void set_device(int dev);
-                 
+
                 void get_cuda_info();
-                
+
                 int get_device_id();
 
                 int get_context();
@@ -81,7 +81,7 @@ namespace hpx
 
                 static void do_wait(boost::shared_ptr<hpx::lcos::local::promise<int> > p);
 
-                static hpx::lcos::future<int> wait();   
+                static hpx::lcos::future<int> wait();
 
                 void create_device_ptr(size_t const byte_count);
 
@@ -121,8 +121,8 @@ namespace hpx
 
                 template <typename T>
                 struct create_host_ptr_action
-                    :  hpx::actions::make_action<void (device::*)(T),
-                            &device::template create_host_ptr<T>, create_host_ptr_action<T> >
+                   :  hpx::actions::make_action<void (device::*)(T),
+                           &device::template create_host_ptr<T>, create_host_ptr_action<T> >
                     {};
             };
 	    }
@@ -151,10 +151,10 @@ HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::create_device_ptr_action,
     device_create_device_ptr_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::device::mem_cpy_d_to_h_action, 
+    hpx::cuda::server::device::mem_cpy_d_to_h_action,
     device_mem_cpy_h_to_d_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::device::mem_cpy_h_to_d_action, 
+    hpx::cuda::server::device::mem_cpy_h_to_d_action,
     device_mem_cpy_d_to_h_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::launch_kernel_action,
@@ -168,9 +168,6 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::create_buffer_action,
     device_create_buffer_action);
-HPX_REGISTER_ACTION_DECLARATION_TEMPLATE(
-    (template <typename T>),
-    (hpx::cuda::server::device::create_host_ptr_action<T>)
-    )
+
 
 #endif //cuda_device_2_HPP

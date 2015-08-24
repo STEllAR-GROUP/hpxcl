@@ -1,5 +1,5 @@
 // Copyright (c)		2013 Damond Howard
-// 
+//						2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -12,11 +12,15 @@
 #include <hpx/runtime/components/server/locking_hook.hpp>
 #include <hpx/runtime/actions/component_action.hpp>
 #include <hpx/runtime/get_ptr.hpp>
+#include <hpx/runtime/applier/apply.hpp>
+#include <hpx/include/async.hpp>
+#include <hpx/include/util.hpp>
+#include <hpx/include/runtime.hpp>
 
 #include <cuda.h>
 
 #include  "../fwd_declarations.hpp"
-#include  "../buffer.hpp"
+//#include  "../buffer.hpp"
 
  namespace hpx
  {

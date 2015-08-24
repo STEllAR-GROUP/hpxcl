@@ -11,7 +11,7 @@
 #include  "../fwd_declarations.hpp"
 
 #include "kernel.hpp"
-#include "../buffer.hpp"
+//#include "../buffer.hpp"
 
 using namespace hpx::cuda::server;
 

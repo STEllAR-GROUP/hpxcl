@@ -12,15 +12,15 @@ cuda_add_library(cuda_kernels cuda/kernel.cu)
 add_hpx_component(cudaHPX
    ESSENTIAL
    SOURCES  get_devices.cpp
-            server/get_devices.cpp
             device.cpp
-            server/device.cpp
             buffer.cpp
-            server/buffer.cpp
             kernel.cpp
-            server/kernel.cpp
             program.cpp
-            server/program.cpp   
+            server/program.cpp  
+            server/get_devices.cpp 
+            server/kernel.cpp
+            server/buffer.cpp
+            server/device.cpp
    HEADERS  fwd_declarations.hpp
             get_devices.hpp
             server/get_devices.hpp

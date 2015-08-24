@@ -1,5 +1,5 @@
 // Copyright (c)		2013 Damond Howard
-//
+//						2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
@@ -46,7 +46,7 @@ public:
 			unsigned int block_y, unsigned int block_z) {
 		HPX_ASSERT(this->get_gid());
 		typedef server::kernel::set_grid_dim_action action_type;
-		return hpx::async < action_type > (this->get_gid());
+		return hpx::async < action_type > (this->get_gid(),block_x,block_y,block_z);
 	}
 
 	void set_grid_dim_sync(unsigned int grid_x, unsigned int grid_y,
@@ -64,13 +64,13 @@ public:
 	hpx::lcos::future<void> load_module(std::string file_name) {
 		HPX_ASSERT(this->get_gid());
 		typedef server::kernel::load_module_action action_type;
-		return hpx::async < action_type > (this->get_gid());
+		return hpx::async < action_type > (this->get_gid(),file_name);
 	}
 
 	hpx::lcos::future<void> load_kernel(std::string file_name) {
 		HPX_ASSERT(this->get_gid());
 		typedef server::kernel::load_kernel_action action_type;
-		return hpx::async < action_type > (this->get_gid());
+		return hpx::async < action_type > (this->get_gid(),file_name);
 	}
 
 	void load_module_sync(std::string file_name) {
@@ -83,42 +83,45 @@ public:
 
 	hpx::lcos::future<hpx::cuda::server::kernel::Dim3> get_grid() {
 		HPX_ASSERT(this->get_gid());
-		return this->base_type::get_grid(this->get_gid());
+		typedef server::kernel::get_grid_action action_type;
+		return hpx::async < action_type > (this->get_gid());
 	}
 
 	hpx::cuda::server::kernel::Dim3 get_grid_sync() {
-		HPX_ASSERT(this->get_gid());
-		return this->base_type::get_grid_sync(this->get_gid());
+		return get_grid_sync();
 	}
 
 	hpx::lcos::future<hpx::cuda::server::kernel::Dim3> get_block() {
 		HPX_ASSERT(this->get_gid());
-		return this->base_type::get_block(this->get_gid());
+		typedef server::kernel::get_block_action action_type;
+		return hpx::async < action_type > (this->get_gid());
 	}
 
 	hpx::cuda::server::kernel::Dim3 get_block_sync() {
-		HPX_ASSERT(this->get_gid());
-		return this->base_type::get_block_sync(this->get_gid());
+
+		return get_block_sync();
 	}
 
 	hpx::lcos::future<std::string> get_function() {
 		HPX_ASSERT(this->get_gid());
-		return this->base_type::get_function(this->get_gid());
+		typedef server::kernel::get_function_action action_type;
+		return hpx::async < action_type > (this->get_gid());
 	}
 
 	std::string get_function_sync() {
 		HPX_ASSERT(this->get_gid());
-		return this->base_type::get_function_sync(this->get_gid());
+		return get_function_sync();
 	}
 
 	hpx::lcos::future<std::string> get_module() {
 		HPX_ASSERT(this->get_gid());
-		return this->base_type::get_module(this->get_gid());
+		typedef server::kernel::get_module_action action_type;
+		return hpx::async < action_type > (this->get_gid());
 	}
 
 	std::string get_module_sync() {
-		HPX_ASSERT(this->get_gid());
-		return this->base_type::get_module_sync(this->get_gid());
+
+		return get_module_sync();
 	}
 
 };

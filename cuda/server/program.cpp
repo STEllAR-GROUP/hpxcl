@@ -1,5 +1,5 @@
 // Copyright (c)		2013 Damond Howard
-//
+//						2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
@@ -26,7 +26,7 @@ program::program(){}
 
 program::program(hpx::naming::id_type device_id, std::string code){}
 
-program::program(hpx::naming::id_type device_id, hpx::util::serialize_buffer<char> binary){}
+program::program(hpx::naming::id_type device_id, hpx::serialization::serialize_buffer<char> binary){}
 
 program::~program(){}
 
@@ -45,8 +45,9 @@ hpx::cuda::kernel program::create_kernel(std::string module_name, std::string ke
 	return cu_kernel;
 }
 
-void program::build()
-{
+//void program::build()
+//{
+	/*
 	CUjit_option options[6];
  	void* optionVals[6]
  	float walltime;
@@ -68,22 +69,23 @@ void program::build()
 	optionVals[4] = (void*) logSize;
 	options[5] = CU_JIT_LOG_VERBOSE;
 	optionVals[5] = (void*) 1;
-}
+	*/
+//}
 
 //function used to build a gpu architecture specific cuda kernel
-/*void program::build(std::string NVCC_FLAGS)
+void program::build(std::string NVCC_FLAGS)
 {
-	std::string NVCC = " ";
-	std::string kernel_name = " ";
-    int nvcc_exit_status = system(
-		(std::string(NVCC) + " -ptx " + NVCC_FLAGS + " " + kernel_name
-			+ " -o " + kernel_name).c_str()
-			);
+	//std::string NVCC = " ";
+	//std::string kernel_name = " ";
+    //int nvcc_exit_status = system(
+	//	(std::string(NVCC) + " -ptx " + NVCC_FLAGS + " " + kernel_name
+		//	+ " -o " + kernel_name).c_str()
+			//);
 
-	if (nvcc_exit_status)
-	{
-		std::cerr << "ERROR: nvcc exits with status code: " << nvcc_exit_status	<< std::endl;
-		exit(1);
-	}
-}*/
+	//if (nvcc_exit_status)
+//	{
+	//	std::cerr << "ERROR: nvcc exits with status code: " << nvcc_exit_status	<< std::endl;
+	//	exit(1);
+	//}
+}
 
