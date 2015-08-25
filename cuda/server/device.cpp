@@ -18,9 +18,9 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <vector>
+//#include <vector>
 
-#include "../cuda/kernel.cuh"
+//#include "../cuda/kernel.cuh"
 
 #include "device.hpp"
 

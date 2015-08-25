@@ -1,14 +1,14 @@
-#include <hpx/hpx_fwd.hpp>
-#include <hpx/runtime/components/server/managed_component_base.hpp>
-#include <hpx/runtime/components/server/locking_hook.hpp>
-#include <hpx/runtime/actions/component_action.hpp>
+//#include <hpx/hpx_fwd.hpp>
+//#include <hpx/runtime/components/server/managed_component_base.hpp>
+//#include <hpx/runtime/components/server/locking_hook.hpp>
+//#include <hpx/runtime/actions/component_action.hpp>
 
-#include <cuda_runtime.h>
-#include <cuda.h>
+//#include <cuda_runtime.h>
+//#include <cuda.h>
 
-#include <string>
+//#include <string>
 
-#include  "../fwd_declarations.hpp"
+//#include  "../fwd_declarations.hpp"
 
 #include "kernel.hpp"
 //#include "../buffer.hpp"

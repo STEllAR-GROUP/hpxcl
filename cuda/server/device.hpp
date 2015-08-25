@@ -8,7 +8,7 @@
 #define HPX_CUDA_SERVER_DEVICE_HPP_
 
 #include <hpx/hpx_fwd.hpp>
-#include <hpx/runtime/components/server/managed_component_base.hpp>
+//#include <hpx/runtime/components/server/managed_component_base.hpp>
 #include <hpx/runtime/components/server/locking_hook.hpp>
 #include <hpx/runtime/actions/component_action.hpp>
 #include <hpx/include/util.hpp>

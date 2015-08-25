@@ -26,7 +26,6 @@ add_hpx_component(cudaHPX
             server/get_devices.hpp
             buffer.hpp
             device.hpp
-            event.hpp
             kernel.hpp
             program.hpp
             tools.hpp
