@@ -4,7 +4,7 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 set(example_programs
-    hello_world
+    #hello_world
     list_devices
 )
 
@@ -17,8 +17,8 @@ foreach(example_program ${example_programs})
  # add example executable
   add_hpx_executable(${example_program}
                      SOURCES ${sources}
-                     DEPENDENCIES opencl_component
-                     COMPONENT_DEPENDENCIES iostreams cuda
+                     DEPENDENCIES cuda_component cuda cudart
+                     COMPONENT_DEPENDENCIES iostreams
                      FOLDER "Examples/CUDA/${example_program}")
                      
  # add a custom target for this example
