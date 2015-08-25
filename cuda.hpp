@@ -10,4 +10,5 @@
     #include "cuda/kernel.hpp"
 	#include "cuda/program.hpp"
     #include "cuda/std.hpp"
+	#include "cuda/get_devices.hpp"
 #endif
