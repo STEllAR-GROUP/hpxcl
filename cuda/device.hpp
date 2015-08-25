@@ -6,8 +6,9 @@
 #pragma once
 #ifndef HPX_CUDA_DEVICE_HPP_
 #define HPX_CUDA_DEVICE_HPP_
-
+#include <hpx/hpx.hpp>
 #include <hpx/include/components.hpp>
+#include <hpx/runtime/components/component_factory.hpp>
 #include <hpx/include/async.hpp>
 #include <hpx/runtime/applier/apply.hpp>
 #include "kernel.hpp"
@@ -17,6 +18,7 @@
 #include "server/buffer.hpp"
 #include "server/program.hpp"
 #include "server/device.hpp"
+#include "fwd_declarations.hpp"
 
 namespace hpx {
 namespace cuda {

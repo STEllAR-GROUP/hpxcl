@@ -13,7 +13,6 @@
 
 #include "program.hpp"
 
-
 HPX_REGISTER_COMPONENT_MODULE();
 
 typedef hpx::components::managed_component<

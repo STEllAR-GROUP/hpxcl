@@ -8,19 +8,27 @@
 #define HPX_CUDA_SERVER_DEVICE_HPP_
 
 #include <hpx/hpx_fwd.hpp>
-//#include <hpx/runtime/components/server/managed_component_base.hpp>
+#include <hpx/runtime/components/server/managed_component_base.hpp>
 #include <hpx/runtime/components/server/locking_hook.hpp>
 #include <hpx/runtime/actions/component_action.hpp>
 #include <hpx/include/util.hpp>
+#include <hpx/hpx_init.hpp>
 #include <hpx/include/runtime.hpp>
 
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <thrust/version.h>
+#include <boost/make_shared.hpp>
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <vector>
 
 #include  "../fwd_declarations.hpp"
 #include  "../kernel.hpp"
 #include  "../buffer.hpp"
 #include  "../program.hpp"
+//#include "../device.hpp"
 
 namespace hpx
 {
