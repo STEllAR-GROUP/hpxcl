@@ -13,7 +13,7 @@
 
 #include "device.hpp"
 
-HPX_REGISTER_COMPONENT_MODULE();
+//HPX_REGISTER_COMPONENT_MODULE();
 
 typedef hpx::components::managed_component<
 	hpx::cuda::server::device

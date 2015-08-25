@@ -9,7 +9,7 @@ set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 cuda_add_library(cuda_kernels cuda/kernel.cu)
 
 
-add_hpx_component(cudaHPX
+add_hpx_component(cuda
    ESSENTIAL
    SOURCES  get_devices.cpp
             device.cpp
