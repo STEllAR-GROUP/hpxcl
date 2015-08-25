@@ -88,7 +88,7 @@ namespace hpx
         }
     }
 }
-
+/*
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::set_stream_action,
     cuda_kernel_set_stream_action);
@@ -119,5 +119,5 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::set_arg_action, 
     cuda_kernel_set_arg_action);
-
+*/
 #endif

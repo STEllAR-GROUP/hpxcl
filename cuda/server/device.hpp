@@ -135,7 +135,7 @@ namespace hpx
 	    }
     }
 }
-
+/*
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::get_cuda_info_action,
     device_get_cuda_info_action);
@@ -175,6 +175,6 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::create_buffer_action,
     device_create_buffer_action);
-
+*/
 
 #endif //cuda_device_2_HPP

@@ -61,7 +61,7 @@
  		}
  	}
  }
-
+/*
 HPX_REGISTER_ACTION_DECLARATION(
 	hpx::cuda::server::program::build_action,
 	cuda_program_build_action);
@@ -71,5 +71,5 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
 	hpx::cuda::server::program::set_source_action,
 	cuda_program_set_source_action);
-
+*/
  #endif //PROGRAM_2_HPP

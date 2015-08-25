@@ -63,7 +63,7 @@
  		}
  	}
  }
-
+/*
  HPX_REGISTER_ACTION_DECLARATION(
  	hpx::cuda::server::buffer::size_action,
  	buffer_size_action);
@@ -76,5 +76,5 @@
  HPX_REGISTER_ACTION_DECLARATION(
  	hpx::cuda::server::buffer::enqueue_write_action,
  	buffer_enqueue_write_action);
-
+*/
  #endif //BUFFER_2_HPP
