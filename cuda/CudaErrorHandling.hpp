@@ -14,21 +14,13 @@
 #include <sstream>
 #include <cuda.h>
 
-
-void checkCudaError() {
-
-	cudaError_t err = cudaGetLastError();
-	if (cudaSuccess != err) {
-
-		std::stringstream errorMessage;
-		errorMessage << "CudaError: " << cudaGetErrorString(err) << " in "
-				<< __FILE__ << " in line " << __LINE__ << std::endl;
-
-		HPX_THROW_EXCEPTION(hpx::no_success, "",
-				errorMessage.str().c_str());
-
+#define checkCudaError  \
+cudaError_t err = cudaGetLastError(); \
+if (cudaSuccess != err) { \
+	std::stringstream errorMessage; \
+	errorMessage << "CudaError: " << cudaGetErrorString(err) << " in "\
+	<< __FILE__ << " in line " << __LINE__ << std::endl;\
+	HPX_THROW_EXCEPTION(hpx::no_success, "" ,errorMessage.str().c_str());\
 	}
-
-}
 
 #endif /* CUDA_CUDA_CUDAERRORHANDLING_HPP_ */

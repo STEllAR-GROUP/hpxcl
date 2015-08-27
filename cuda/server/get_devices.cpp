@@ -26,12 +26,12 @@ std::vector<hpx::cuda::device> get_devices(int major, int minor) {
 	int count;
 
 	cudaGetDeviceCount(&count);
-	checkCudaError();
+	//checkCudaError();
 
 	for (unsigned int i = 0; i < count; i++) {
 		cudaDeviceProp prop;
 		cudaGetDeviceProperties(&prop, i);
-		checkCudaError();
+		//checkCudaError();
 		if (prop.major >= major && prop.minor >= minor) {
 			hpx::cuda::device device = hpx::cuda::device();
 			device.set_device(i);
