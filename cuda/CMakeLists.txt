@@ -23,13 +23,13 @@ add_hpx_component(cuda
             server/device.cpp
    HEADERS  fwd_declarations.hpp
             get_devices.hpp
-            server/get_devices.hpp
             buffer.hpp
             device.hpp
             kernel.hpp
             program.hpp
             tools.hpp
             cuda/kernel.cuh
+            server/get_devices.hpp
             server/buffer.hpp
             server/device.hpp
             server/event.hpp

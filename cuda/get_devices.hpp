@@ -8,13 +8,18 @@
 
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
+#include <hpx/runtime/actions/component_action.hpp>
+#include <hpx/runtime/applier/apply.hpp>
+#include <hpx/include/async.hpp>
 
 #include "export_definitions.hpp"
 
 #include <cuda.h>
+#include "server/get_devices.hpp"
 
 #include "fwd_declarations.hpp"
 #include "../cuda.hpp"
+
 ////////////////////////////////////////////////////////////////
 namespace hpx {
 namespace cuda {
@@ -40,10 +45,9 @@ namespace cuda {
  *                            Recommended value is "OpenCL 1.1".
  * @return A list of suitable OpenCL devices on target node
  */
-//HPX_CUDA_EXPORT
-//hpx::lcos::future<std::vector<device>>
-//get_devices( hpx::naming::id_type node_id, cl_device_type device_type,
-//           std::string required_cl_version );
+HPX_CUDA_EXPORT hpx::lcos::future<std::vector<device>>
+get_devices( hpx::naming::id_type node_id,
+		int major = 1 , int minor = 0 );
 /**
  * @brief Fetches a list of all accelerator devices present in the current
  *        hpx environment.
@@ -65,9 +69,8 @@ namespace cuda {
  *                            Recommended value is "OpenCL 1.1".
  * @return A list of suitable OpenCL devices
  */
-//HPX_CUDA_EXPORT hpx::lcos::future<std::vector<device>>
-//get_all_devices( std::string required_capability_version );
-
+HPX_CUDA_EXPORT hpx::lcos::future<std::vector<device>>
+get_all_devices( int major = 1, int minor = 0 );
 /**
  * @brief Fetches a list of local accelerator devices present in the current
  *        hpx environment.
@@ -89,10 +92,8 @@ namespace cuda {
  *                            Recommended value is "OpenCL 1.1".
  * @return A list of suitable OpenCL devices
  */
-// HPX_CUDA_EXPORT
-//  hpx::lcos::future<std::vector<device>>
-// get_local_devices( cl_device_type device_type,
-//                 std::string required_cl_version );
+HPX_CUDA_EXPORT hpx::lcos::future<std::vector<device>>
+get_local_devices(int major = 1, int minor = 0);
 /**
  * @brief Fetches a list of remote accelerator devices present in the current
  *        hpx environment.
@@ -114,11 +115,9 @@ namespace cuda {
  *                            Recommended value is "OpenCL 1.1".
  * @return A list of suitable OpenCL devices
  */
-//  HPX_CUDA_EXPORT
-//  hpx::lcos::future<std::vector<device>>
-//  get_remote_devices( cl_device_type device_type,
-//                  std::string required_cl_version );
-
+HPX_CUDA_EXPORT hpx::lcos::future<std::vector<device>>
+get_remote_devices(
+		int major = 1, int minor = 0 );
 }
 }
 
