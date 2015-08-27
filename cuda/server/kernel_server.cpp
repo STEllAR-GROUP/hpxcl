@@ -1,17 +1,18 @@
-//#include <hpx/hpx_fwd.hpp>
-//#include <hpx/runtime/components/server/managed_component_base.hpp>
-//#include <hpx/runtime/components/server/locking_hook.hpp>
-//#include <hpx/runtime/actions/component_action.hpp>
+// Copyright (c)    2013 Damond Howard
+//                  2015 Patrick Diehl
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
-//#include <cuda_runtime.h>
-//#include <cuda.h>
+#include <hpx/hpx.hpp>
 
-//#include <string>
+#include <cuda.h>
+#include <cuda_runtime.h>
 
-//#include  "../fwd_declarations.hpp"
+#include <string>
 
-#include "kernel.hpp"
-//#include "../buffer.hpp"
+#include "cuda/fwd_declarations.hpp"
+#include "cuda/buffer.hpp"
+#include "cuda/server/kernel.hpp"
 
 using namespace hpx::cuda::server;
 
@@ -19,58 +20,58 @@ kernel::kernel(){}
 
 kernel::kernel(std::string kernel_name)
 {
-    this->kernel_name = kernel_name;
+    kernel_name = kernel_name;
 }
 
 kernel::~kernel(){}
-            	
+
 void kernel::set_stream()
 {
     cuStreamCreate(&cu_stream, CU_STREAM_DEFAULT);
 }
-                
+
 void kernel::set_grid_dim(unsigned int grid_x, unsigned int grid_y, unsigned int grid_z)
 {
-    this->grid.x = grid_x;
-    this->grid.y = grid_y;
-    this->grid.z = grid_z;
+    grid.x = grid_x;
+    grid.y = grid_y;
+    grid.z = grid_z;
 }
 
 void kernel::set_block_dim(unsigned int block_x, unsigned int block_y, unsigned int block_z)
 {
-    this->block.x = block_x;
-    this->block.y = block_y;
-    this->block.z = block_z;
+    block.x = block_x;
+    block.y = block_y;
+    block.z = block_z;
 }
 
 void kernel::load_module(std::string file_name)
 {
-    this->module_name = file_name;
+    module_name = file_name;
 }
 
 void kernel::load_kernel(std::string kernel_name)
 {
-    this->kernel_name = kernel_name;
+    kernel_name = kernel_name;
 }
 
 std::string kernel::get_function()
 {
-    return this->kernel_name;
+    return kernel_name;
 }
 
 std::string kernel::get_module()
 {
-    return this->module_name;
+    return module_name;
 }
 
 kernel::Dim3 kernel::get_grid()
 {
-    return this->grid;
+    return grid;
 }
 
 kernel::Dim3 kernel::get_block()
 {
-    return this->block;
+    return block;
 }
 
 void kernel::set_arg(size_t size, hpx::cuda::buffer cu_buffer)

@@ -9,12 +9,10 @@
 #include <hpx/config.hpp>
 #include <hpx/config/export_definitions.hpp>
 
-
-#if defined(HPX_CUDAL_MODULE_EXPORTS)
+#if defined(HPX_CUDA_MODULE_EXPORTS)
 # define HPX_CUDA_EXPORT HPX_SYMBOL_EXPORT
 #else
 # define HPX_CUDA_EXPORT HPX_SYMBOL_IMPORT
 #endif
-
 
 #endif //HPX_CUDA_EXPORT_DEFINITIONS_HPP_

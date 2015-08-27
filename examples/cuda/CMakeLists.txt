@@ -13,14 +13,14 @@ foreach(example_program ${example_programs})
       ${example_program}.cpp)
 
   source_group("Source Files" FILES ${sources})
-  
+
  # add example executable
   add_hpx_executable(${example_program}
                      SOURCES ${sources}
-                     DEPENDENCIES cuda_component cuda
-                     COMPONENT_DEPENDENCIES iostreams 
+                     DEPENDENCIES cuda_component
+                     COMPONENT_DEPENDENCIES iostreams
                      FOLDER "Examples/CUDA/${example_program}")
-                     
+
  # add a custom target for this example
   add_hpx_pseudo_target(examples.cuda.${example_program})
 
@@ -32,5 +32,7 @@ foreach(example_program ${example_programs})
   add_hpx_pseudo_dependencies(examples.cuda.${example_program}
                               ${example_program}_exe)
 
-  target_link_libraries(${example_program}_exe cuda_component)
+  target_link_libraries(${example_program}_exe
+      ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY})
+
 endforeach()
