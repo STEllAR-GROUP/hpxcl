@@ -39,9 +39,4 @@ HPX_DEFINE_PLAIN_ACTION(get_devices, get_devices_action);
 }
 }
 
-
-//HPX_ACTION_USES_LARGE_STACK (hpx::cuda::server::get_devices_action);
-//HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::get_devices_action,
-//hpx_cuda_server_get_devices_action);
-
 #endif
