@@ -14,6 +14,7 @@ foreach(example_program ${example_programs})
 
   source_group("Source Files" FILES ${sources})
 
+ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../..)   
  # add example executable
   add_hpx_executable(${example_program}
                      SOURCES ${sources}

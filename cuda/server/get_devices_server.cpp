@@ -23,7 +23,6 @@ std::vector<hpx::cuda::device> get_devices(int major, int minor) {
     int count;
 
     cudaGetDeviceCount(&count);
-    checkCudaError();
 
     for (int i = 0; i < count; i++) {
         cudaDeviceProp prop;
