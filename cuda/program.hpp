@@ -1,64 +1,57 @@
 // Copyright (c)		2013 Damond Howard
-//
+//						2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
-#if !defined(PROGRAM_1_HPP)
-#define PROGRAM_1_HPP
+#ifndef HPX_CUDA_PROGRAM_HPP_
+#define HPX_CUDA_PROGRAM_HPP_
 
 #include <hpx/include/components.hpp>
-#include "stubs/program.hpp"
+#include "server/program.hpp"
 
-namespace hpx
-{
-    namespace cuda
-    {
-        class program
-            : public hpx::components::client_base<
-                program, stubs::program >
-        {
-            typedef hpx::components::client_base<
-                program, stubs::program>
-                base_type;
+namespace hpx {
+namespace cuda {
 
-            public:
-                program()
-                {}
+class program: public hpx::components::client_base<program, server::program> {
+    typedef hpx::components::client_base<program, server::program> base_type;
 
-                program(hpx::future<hpx::naming::id_type> && gid)
-                : base_type(std::move(gid))
-                {}
-
-                hpx::lcos::future<void> build(std::string NVCC_FLAGS)
-                {
-                    HPX_ASSERT(this->get_gid());
-                    return base_type::build(this->get_gid(), NVCC_FLAGS);
-                }
-
-                void build_sync(std::string NVCC_FLAGS)
-                {
-                    HPX_ASSERT(this->get_gid());
-                    base_type::build_sync(this->get_gid(), NVCC_FLAGS);
-                }
-
-                hpx::lcos::future<void> create_kernel(std::string module_name, std::string kernel_name)
-                {
-                    HPX_ASSERT(this->get_gid());
-                    return base_type::create_kernel(this->get_gid(), module_name, kernel_name);
-                }
-
-                void create_kernel_sync(std::string module_name, std::string kernel_name)
-                {
-                    HPX_ASSERT(this->get_gid());
-                    base_type::create_kernel_sync(this->get_gid(), module_name, kernel_name);
-                }
-
-                void set_source_sync(std::string source)
-                {
-                    HPX_ASSERT(this->get_gid());
-                    base_type::set_source_sync(this->get_gid(), source);
-                }
-        };
+public:
+    program() {
     }
+
+    program(hpx::future<hpx::naming::id_type> && gid) :
+            base_type(std::move(gid)) {
+    }
+
+    hpx::lcos::future<void> build(std::string NVCC_FLAGS) {
+        HPX_ASSERT(this->get_gid());
+        typedef server::program::build_action action_type;
+        return hpx::async < action_type > (this->get_gid(),NVCC_FLAGS);
+    }
+
+    void build_sync(std::string NVCC_FLAGS) {
+        HPX_ASSERT(this->get_gid());
+        build(NVCC_FLAGS).get();
+    }
+
+    hpx::lcos::future<void> create_kernel(std::string module_name,
+            std::string kernel_name) {
+        HPX_ASSERT(this->get_gid());
+        typedef server::program::create_kernel_action action_type;
+        hpx::async<action_type>(this->get_gid(),module_name,kernel_name);
+    }
+
+    void create_kernel_sync(std::string module_name, std::string kernel_name) {
+
+        create_kernel(module_name, kernel_name).get();
+    }
+
+    void set_source_sync(std::string source) {
+        HPX_ASSERT(this->get_gid());
+         typedef server::program::set_source_action action_type;
+         hpx::async<action_type>(this->get_gid(),source).get();
+    }
+};
+}
 }
 #endif //PROGRAM_1_HPP

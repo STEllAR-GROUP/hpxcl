@@ -38,7 +38,7 @@ include(EmbedResources)
 
 ########################################################################
 # configurations
-# 
+#
 hpx_option(HPX_BUILD_EXAMPLES BOOL "Build HPX examples (default: ON)" ON ADVANCED)
 hpx_option(HPX_BUILD_TESTS BOOL "Build HPX tests (default: ON)" ON ADVANCED)
 hpx_option(HPX_BUILD_DOCUMENTATION BOOL "The HPX documentation toolchain is available (default OFF)." OFF)
@@ -48,7 +48,7 @@ hpx_option(HPXCL_WITH_CUDA BOOL "Builds the CUDA part of HPXCL (default OFF)." O
 
 ########################################################################
 # further includes, depending on config
-# 
+#
 if(HPXCL_WITH_OPENCL)
     find_package(OpenCL REQUIRED)
     include_directories(${OPENCL_INCLUDE_DIRS})
@@ -57,7 +57,8 @@ if(HPXCL_WITH_OPENCL)
 endif()
 
 if(HPXCL_WITH_CUDA)
-    find_package(CUDA REQUIRED)
+    find_package(CUDA 7.0 REQUIRED)
+    include_directories(${CUDA_INCLUDE_DIRS})
 endif()
 
 if(HPX_BUILD_EXAMPLES)
@@ -67,10 +68,32 @@ if(HPX_BUILD_EXAMPLES)
     endif()
 endif()
 
+if(MSVC)
+  hpx_add_compile_flag(-Ox CONFIGURATIONS Release LANGUAGES CXX C)
+  hpx_add_compile_flag(-RTC1 CONFIGURATIONS Debug LANGUAGES CXX C)
+
+  # VS2012 and above has a special flag for improving the debug experience by
+  # adding more symbol information to the build (-d2Zi)
+  hpx_add_compile_flag(-d2Zi+ CONFIGURATIONS RelWithDebInfo)
+
+  # VS2013 and above know how to do link time constant data segment folding
+  # VS2013 update 2 and above know how to remove debug information for
+  #     non-referenced functions and data (-Zc:inline)
+  if(MSVC12 OR MSVC13)
+    hpx_add_compile_flag(-Zc:inline)
+    hpx_add_compile_flag(-Gw CONFIGURATIONS Release RelWithDebInfo MinSizeRelease)
+    hpx_add_compile_flag(-Zo CONFIGURATIONS RelWithDebInfo)
+  endif()
+  hpx_add_compile_flag(-EHsc)       # Exceptions
+  hpx_add_compile_flag(-GR)         # Runtime type information
+  hpx_add_compile_flag(-MP)         # Multiprocessor build
+  hpx_add_compile_flag(-bigobj)     # Increase the maximum size of object file sections
+endif()
+
 
 #########################
 # Builds
-# 
+#
 
 # build opencl
 if(HPXCL_WITH_OPENCL)
@@ -97,28 +120,28 @@ endif()
 
 ###############################################################################
 
-if(HPX_BUILD_TESTS)
-
-  file(COPY ${HPX_ROOT}/bin/hpxrun.py DESTINATION ${CMAKE_BINARY_DIR}/bin)
-
-  hpx_option(HPX_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
-  hpx_option(HPX_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
-  hpx_option(HPX_BUILD_TESTS_UNIT BOOL "Build HPX unit tests (default: ON)" ON ADVANCED)
-
-  add_hpx_pseudo_target(tests)
-
-  enable_testing()
-  include(CTest)
-
-  add_custom_command(TARGET tests POST_BUILD
-    COMMAND ctest --output-on-failure)
-
-  include_directories(tests)
-  add_subdirectory(tests)
-else()
+#if(HPX_BUILD_TESTS)
+#
+#  file(COPY ${HPX_ROOT}/bin/hpxrun.py DESTINATION ${CMAKE_BINARY_DIR}/bin)
+#
+#  hpx_option(HPX_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
+#  hpx_option(HPX_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
+#  hpx_option(HPX_BUILD_TESTS_UNIT BOOL "Build HPX unit tests (default: ON)" ON ADVANCED)
+#
+#  add_hpx_pseudo_target(tests)
+#
+#  enable_testing()
+#  include(CTest)
+#
+#  add_custom_command(TARGET tests POST_BUILD
+#    COMMAND ctest --output-on-failure)
+#
+#  include_directories(tests)
+#  add_subdirectory(tests)
+#else()
   unset(HPX_BUILD_TESTS_BENCHMARKS CACHE)
   unset(HPX_BUILD_TESTS_REGRESSIONS CACHE)
   unset(HPX_BUILD_TESTS_UNIT CACHE)
-endif()
+#endif()
 
 

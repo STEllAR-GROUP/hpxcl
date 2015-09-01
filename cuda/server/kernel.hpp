@@ -1,20 +1,18 @@
- // Copyright (c)		2013 Damond Howard
-//
+// Copyright (c)    2013 Damond Howard
+//                  2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
-#if !defined(KERNEL_2_HPP)
-#define KERNEL_2_HPP
+#ifndef HPX_CUDA_SERVER_KERNEL_HPP_
+#define HPX_CUDA_SERVER_KERNEL_HPP_
 
-#include <hpx/hpx_fwd.hpp>
-#include <hpx/runtime/components/server/managed_component_base.hpp>
-#include <hpx/runtime/components/server/locking_hook.hpp>
-#include <hpx/runtime/actions/component_action.hpp>
+#include <hpx/hpx.hpp>
 
 #include <cuda.h>
 
-#include "../buffer.hpp"
-#include  "../fwd_declarations.hpp"
+#include "cuda/fwd_declarations.hpp"
+#include "cuda/export_definitions.hpp"
+#include "cuda/buffer.hpp"
 
 namespace hpx
 {
@@ -22,11 +20,11 @@ namespace hpx
     {
         namespace server
         {
-            class kernel
+            class HPX_CUDA_EXPORT kernel
                 : public hpx::components::locking_hook<
                     hpx::components::managed_component_base<kernel>
                 >
-            {  
+            {
 
                 public:
                 struct Dim3
@@ -38,7 +36,7 @@ namespace hpx
                         ar &x;
                         ar &y;
                         ar &z;
-                    } 
+                    }
                 };
 
                 kernel();
@@ -46,7 +44,7 @@ namespace hpx
                 kernel(std::string kernel_name);
 
                 ~kernel();
-                
+
                 void set_stream();
 
                 void set_grid_dim(unsigned int grid_x, unsigned int grid_y, unsigned int grid_z);
@@ -117,7 +115,7 @@ HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::get_grid_action,
     cuda_kernel_get_grid_action);
 HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::kernel::set_arg_action, 
+    hpx::cuda::server::kernel::set_arg_action,
     cuda_kernel_set_arg_action);
 
 #endif
