@@ -15,25 +15,30 @@
 
 #include "cuda/cuda/kernel.cuh"
 #include "cuda/server/device.hpp"
+#include "cuda/cuda_error_handling.hpp"
 
 namespace hpx {
 namespace cuda {
 namespace server {
 
-device::device() {
+device::device()
+{
     cuInit(0);
     cuDeviceGet(&cu_device, 0);
     cuCtxCreate(&cu_context, 0, cu_device);
     device_name = props.name;
 }
 
-device::device(int device_id) {
+device::device(int device_id)
+{
     cuInit(0);
     cuDeviceGet(&cu_device, device_id);
     cuCtxCreate(&cu_context, 0, cu_device);
     this->set_device(device_id);
-    cudaError_t error;
-    error = cudaGetDeviceProperties(&props, device_id);
+
+    cudaGetDeviceProperties(&props, device_id);
+    checkCudaError("device::device");
+
     this->device_name = props.name;
 }
 

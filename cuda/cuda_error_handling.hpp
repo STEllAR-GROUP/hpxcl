@@ -20,7 +20,7 @@
 namespace hpx { namespace cuda
 {
 
-HPX_CUDA_EXPORT void checkCudaError();
+HPX_CUDA_EXPORT void checkCudaError(char const* function_name = "");
 
 }}
 

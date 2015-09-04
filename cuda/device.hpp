@@ -19,11 +19,18 @@
 
 namespace hpx {
 namespace cuda {
-class device: public hpx::components::client_base<device, cuda::server::device> {
+
+class device
+  : public hpx::components::client_base<device, cuda::server::device>
+{
     typedef hpx::components::client_base<device, cuda::server::device> base_type;
 
 public:
-    device() {
+    device() {}
+
+    device(hpx::naming::id_type const& there, int dev)
+      : base_type(hpx::new_<cuda::server::device>(there, dev))
+    {
     }
 
     device(hpx::future<hpx::naming::id_type> && gid) :

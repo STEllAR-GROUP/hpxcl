@@ -7,6 +7,7 @@
 #include <hpx/include/components.hpp>
 
 #include "cuda/server/get_devices.hpp"
+#include "cuda/cuda_error_handling.hpp"
 
 #include <vector>
 
@@ -16,23 +17,23 @@ namespace cuda {
 
 namespace server {
 
-std::vector<hpx::cuda::device> get_devices(int major, int minor) {
-
+std::vector<hpx::cuda::device> get_devices(int major, int minor)
+{
     std::vector<hpx::cuda::device> devices;
 
-    int count;
+    int count = 0;
 
     cudaGetDeviceCount(&count);
+    checkCudaError("get_devices");
 
-    for (int i = 0; i < count; i++) {
+    for (int device_id = 0; device_id < count; ++device_id)
+    {
         cudaDeviceProp prop;
-        cudaGetDeviceProperties(&prop, i);
-        checkCudaError();
-        if (prop.major >= major && prop.minor >= minor) {
-            hpx::cuda::device device = hpx::cuda::device();
-            device.set_device(i);
-            devices.push_back(device);
-        }
+        cudaGetDeviceProperties(&prop, device_id);
+        checkCudaError("device::device");
+
+        if (prop.major >= major && prop.minor >= minor)
+            devices.push_back(hpx::cuda::device(find_here(), device_id));
     }
 
     return devices;
