@@ -8,7 +8,7 @@
 namespace hpx { namespace cuda
 {
 
-void checkCudaError() {
+void checkCudaError(char const* function) {
 
     cudaError_t err = cudaGetLastError();
     if (cudaSuccess != err) {
@@ -16,7 +16,7 @@ void checkCudaError() {
         std::stringstream errorMessage;
         errorMessage << "CudaError: " << cudaGetErrorString(err) << std::endl;
 
-        HPX_THROW_EXCEPTION(hpx::no_success, "",
+        HPX_THROW_EXCEPTION(hpx::no_success, function,
                 errorMessage.str().c_str());
 
     }

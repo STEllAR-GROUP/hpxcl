@@ -105,13 +105,14 @@ public:
     HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
 
     template<typename T>
-    struct create_host_ptr_action: hpx::actions::make_action<
+    struct create_host_ptr_action
+      : hpx::actions::make_action<
             void (device::*)(T), &device::template create_host_ptr<T>,
-            create_host_ptr_action<T> > {
+                create_host_ptr_action<T> >
+    {
     };
 
 private:
-
     unsigned int device_id;
     unsigned int context_id;
     CUdevice cu_device;
