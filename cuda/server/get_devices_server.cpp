@@ -30,7 +30,7 @@ std::vector<hpx::cuda::device> get_devices(int major, int minor)
     {
         cudaDeviceProp prop;
         cudaGetDeviceProperties(&prop, device_id);
-        checkCudaError("device::device");
+        checkCudaError("get_devices");
 
         if (prop.major >= major && prop.minor >= minor)
             devices.push_back(hpx::cuda::device(find_here(), device_id));
