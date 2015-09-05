@@ -104,8 +104,20 @@ void device::get_cuda_info() {
         std::cout << "   Max grid dimensions:  [ " << props.maxGridSize[0]
                 << ", " << props.maxGridSize[1] << ", " << props.maxGridSize[2]
                 << " ]" << std::endl;
+	std::cout << "   Multiprocessor Count: " << props.multiProcessorCount << std::endl;
         std::cout << std::endl;
-    }
+	std::cout << "   Unified addressing: " << props.unifiedAddressing << std::endl;
+	std::cout << "   Concurrent kernels: " << props.concurrentKernels << std::endl;
+	std::cout << "   Memory Clock Rate: " << props.memoryClockRate << std::endl;
+	std::cout << "   Memory Bus Width: " << props.memoryBusWidth << std::endl;
+	std::cout << "   l2 Cache Size: " << props.l2CacheSize << std::endl;
+	std::cout << "   Clock Rate: " << props.clockRate << std::endl;
+	std::cout << "   Exec Time Out: " << props.kernelExecTimeoutEnabled << std::endl << std::endl;
+
+	std::cout << "   Compute Capability: " << props.major << "." << props.minor << std::endl;
+	std::cout << "   Compute Modes: " << props.computeMode << std::endl << std::endl;
+	
+	}
 }
 
 int device::get_device_id() {
