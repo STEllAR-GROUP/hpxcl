@@ -6,6 +6,7 @@
 set(example_programs
     #hello_world
     list_devices
+    list_extended_devices
 )
 
 foreach(example_program ${example_programs})
