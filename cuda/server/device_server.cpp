@@ -151,14 +151,14 @@ void device::get_extended_cuda_info() {
 
 void device::print2D(std::string name, int * array) {
 
-	std::cout << "  " << name << ": [" << array[0] << ", " << array[1] << "]"
+	std::cout << "   " << name << ": [ " << array[0] << ", " << array[1] << " ]"
 			<< std::endl;
 }
 
 void device::print3D(std::string name, int * array) {
 
-	std::cout << "  " << name << ": [" << array[0] << ", " << array[1] << ", "
-			<< array[2] << "]" << std::endl;
+	std::cout << "   " << name << ": [ " << array[0] << ", " << array[1] << ", "
+			<< array[2] << " ]" << std::endl;
 }
 
 int device::get_device_id() {
