@@ -59,6 +59,8 @@ public:
 
     void get_cuda_info();
 
+    void get_extended_cuda_info();
+
     int get_device_id();
 
     int get_context();
@@ -91,6 +93,7 @@ public:
     hpx::cuda::buffer create_buffer(size_t size);
 
     HPX_DEFINE_COMPONENT_ACTION(device, get_cuda_info);
+    HPX_DEFINE_COMPONENT_ACTION(device, get_extended_cuda_info);
     HPX_DEFINE_COMPONENT_ACTION(device, set_device);
     HPX_DEFINE_COMPONENT_ACTION(device, get_all_devices);
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_id);
@@ -130,6 +133,9 @@ private:
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::get_cuda_info_action,
     device_get_cuda_info_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::get_extended_cuda_info_action,
+    device_get_extended_cuda_info_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::set_device_action,
     device_set_device_action);

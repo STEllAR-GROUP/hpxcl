@@ -74,19 +74,19 @@ void device::get_cuda_info() {
 
     if (dev_count <= 0) {
         std::cout << "No CUDA devices on the current locality" << std::endl;
-    } else if (dev_count > 0) {
-        std::cout << "CUDA Devices: " << std::endl << std::endl;
     }
-    for (int i = 0; i < dev_count; ++i) {
+    //else if (dev_count > 0) {
+      //  std::cout << "CUDA Devices: " << std::endl << std::endl;
+    //}
+    //for (int i = 0; i < dev_count; ++i) {
         cudaDeviceProp props;
         cudaError_t error;
-        error = cudaGetDeviceProperties(&props, i);
+        error = cudaGetDeviceProperties(&props, this->device_id);
         if (error == cudaErrorInvalidDevice) {
             std::cout << "Device does not exist" << std::endl;
         }
 
-        std::cout << i << ": " << props.name << ": " << props.major << "."
-                << props.minor << std::endl;
+        std::cout << props.name  << std::endl;
         std::cout << "   Global memory:   " << props.totalGlobalMem / mb << "mb"
                 << std::endl;
         std::cout << "   Shared memory:   " << props.sharedMemPerBlock / kb
@@ -117,7 +117,12 @@ void device::get_cuda_info() {
 	std::cout << "   Compute Capability: " << props.major << "." << props.minor << std::endl;
 	std::cout << "   Compute Modes: " << props.computeMode << std::endl << std::endl;
 	
-	}
+	//}
+}
+
+void device::get_extended_cuda_info(){
+
+	this->get_cuda_info();
 }
 
 int device::get_device_id() {

@@ -43,6 +43,12 @@ public:
         hpx::apply < action_type > (this->get_gid());
     }
 
+    void get_extended_cuda_info() {
+          HPX_ASSERT(this->get_gid());
+          typedef server::device::get_extended_cuda_info_action action_type;
+          hpx::apply < action_type > (this->get_gid());
+      }
+
     static std::vector<int> get_all_devices(
             std::vector<hpx::naming::id_type> localities) {
         int num = 0;
