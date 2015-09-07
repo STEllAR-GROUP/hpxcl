@@ -125,6 +125,10 @@ private:
     std::vector<device_ptr> device_ptrs;
     std::vector<host_ptr<int>> host_ptrs;
     int num_args;
+
+    void print2D(std::string name, int * array);
+    void print3D(std::string name, int * array);
+
 };
 }
 }
