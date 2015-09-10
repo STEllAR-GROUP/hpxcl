@@ -9,6 +9,11 @@
 #include <hpx/hpx.hpp>
 
 #include <cuda.h>
+#include <nvrtc.h>
+
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include "cuda/fwd_declarations.hpp"
 #include "cuda/kernel.hpp"
@@ -31,7 +36,7 @@ namespace hpx
                 hpx::naming::id_type parent_device_id;
                 std::string kernel_source;
                 std::string kernel_name;
-                CUlinkState cu_link_state;
+                nvrtcProgram prog;
 
                 public:
                 program();
@@ -44,7 +49,7 @@ namespace hpx
 
                 hpx::cuda::kernel create_kernel(std::string module_name, std::string kernel_name);
 
-                void build(std::string NVCC_FLAGS);
+                void build(std::vector<std::string> compilerFlags);
 
                 void set_source(std::string source);
 

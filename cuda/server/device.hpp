@@ -65,6 +65,10 @@ public:
 
     int get_context();
 
+    int get_device_architecture_major();
+
+    int get_device_architecture_minor();
+
     int get_all_devices();
 
     static void do_wait(boost::shared_ptr<hpx::lcos::local::promise<int> > p);
@@ -94,6 +98,8 @@ public:
 
     HPX_DEFINE_COMPONENT_ACTION(device, get_cuda_info);
     HPX_DEFINE_COMPONENT_ACTION(device, get_extended_cuda_info);
+    HPX_DEFINE_COMPONENT_ACTION(device, get_device_architecture_major);
+    HPX_DEFINE_COMPONENT_ACTION(device, get_device_architecture_minor);
     HPX_DEFINE_COMPONENT_ACTION(device, set_device);
     HPX_DEFINE_COMPONENT_ACTION(device, get_all_devices);
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_id);
@@ -134,9 +140,17 @@ private:
 }
 }
 
+
+
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::get_cuda_info_action,
     device_get_cuda_info_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::get_device_architecture_major_action,
+	get_device_architecture_major_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::get_device_architecture_minor_action,
+	get_device_architecture_minor_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::get_extended_cuda_info_action,
     device_get_extended_cuda_info_action);

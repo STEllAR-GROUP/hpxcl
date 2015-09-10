@@ -20,6 +20,12 @@ HPX_REGISTER_ACTION(
     cuda_device_type::wrapped_type::get_extended_cuda_info_action,
     cuda_device_get_extended_cuda_info_action);
 HPX_REGISTER_ACTION(
+    cuda_device_type::wrapped_type::get_device_architecture_major_action,
+    cuda_device_get_device_architecture_major_action);
+HPX_REGISTER_ACTION(
+    cuda_device_type::wrapped_type::get_device_architecture_minor_action,
+    cuda_device_get_device_architecture_minor_action);
+HPX_REGISTER_ACTION(
     cuda_device_type::wrapped_type::set_device_action,
     cuda_device_set_device_action);
 HPX_REGISTER_ACTION(

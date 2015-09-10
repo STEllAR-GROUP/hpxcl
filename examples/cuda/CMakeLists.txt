@@ -7,6 +7,7 @@ set(example_programs
     #hello_world
     list_devices
     list_extended_devices
+    build_kernel
 )
 
 foreach(example_program ${example_programs})
