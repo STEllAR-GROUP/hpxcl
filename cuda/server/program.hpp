@@ -18,6 +18,7 @@
 #include "cuda/fwd_declarations.hpp"
 #include "cuda/kernel.hpp"
 #include "cuda/export_definitions.hpp"
+#include "cuda/cuda_error_handling.hpp"
 
 namespace hpx
 {

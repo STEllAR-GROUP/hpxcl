@@ -58,6 +58,7 @@ endif()
 
 if(HPXCL_WITH_CUDA)
     find_package(CUDA 7.0 REQUIRED)
+    find_package(NVRTC 7.0 REQUIRED)
     include_directories(${CUDA_INCLUDE_DIRS})
 endif()
 

@@ -18,4 +18,4 @@ add_hpx_component(cuda
     COMPONENT_DEPENDENCIES iostreams)
 
 target_link_libraries(cuda_component
-    ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY})
+    ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} ${CUDA_NVRTC_LIB})

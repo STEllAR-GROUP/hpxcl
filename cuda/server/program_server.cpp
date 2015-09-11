@@ -39,13 +39,13 @@ hpx::cuda::kernel program::create_kernel(std::string module_name,
 	typedef hpx::cuda::server::kernel kernel_type;
 
 	hpx::cuda::kernel cu_kernel(
-			hpx::components::new_ < kernel_type > (hpx::find_here()));
+			hpx::components::new_<kernel_type>(hpx::find_here()));
 	cu_kernel.load_module_sync(module_name);
 	cu_kernel.load_kernel_sync(kernel_name);
 	return cu_kernel;
 }
 
-
+//ToDo: Add debug flag
 void program::build(std::vector<std::string> compilerFlags) {
 
 	boost::uuids::uuid uuid = boost::uuids::random_generator()();
@@ -54,10 +54,30 @@ void program::build(std::vector<std::string> compilerFlags) {
 
 	nvrtcCreateProgram(&(this->prog), this->kernel_source.c_str(),
 			filename.c_str(), 0, NULL, NULL);
+	checkCudaError("Create Program");
+	const char * opts[compilerFlags.size()];
+	unsigned int i = 0;
+	for (auto opt : compilerFlags) {
+		opts[i] = compilerFlags[i].c_str();
+		i++;
+	}
 
+	size_t logSize;
+	nvrtcResult compileResult = nvrtcCompileProgram(this->prog,
+			compilerFlags.size(), opts);
 
+	if (compileResult != NVRTC_SUCCESS) {
+		nvrtcGetProgramLogSize(prog, &logSize);
+		checkCudaError("Create Log");
+		char *log = new char[logSize];
+		nvrtcGetProgramLog(prog, log);
+		checkCudaError("get Log");
 
-	//nvrtcResult compileResult = nvrtcCompileProgram(prog,1,opts);
+		HPX::cout << log;
+		delete[] log;
+
+	}
+
 }
 
 }
