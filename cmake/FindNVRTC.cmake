@@ -10,7 +10,7 @@
 ##############################################################################
 find_package(PkgConfig)
 
-find_library(CUDA_NVRTC_LIB libnvrtc.so HINTS LIBNVRTC_LIBRARY_DIRi /usrlocal64)
+find_library(CUDA_NVRTC_LIB libnvrtc.so HINTS LIBNVRTC_LIBRARY_DIR /usr/local/lib64)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LibNVRTC DEFAULT_MSG CUDA_NVRTC_LIB)
