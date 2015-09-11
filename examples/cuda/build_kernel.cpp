@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
     flags.push_back(mode);
 
     // Compile the program
-    prog.build();
+    prog.build(flags);
 
     // Create hello_world kernel
     //kernel hello_world_kernel = prog.create_kernel("hello_world");

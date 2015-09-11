@@ -73,9 +73,9 @@ void program::build(std::vector<std::string> compilerFlags) {
 		nvrtcGetProgramLog(prog, log);
 		checkCudaError("get Log");
 
-		HPX::cout << log;
+		std::cout << log << std::endl;
 		delete[] log;
-
+		exit(1);
 	}
 
 }
