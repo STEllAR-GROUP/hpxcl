@@ -50,7 +50,7 @@ namespace hpx
 
                 hpx::cuda::kernel create_kernel(std::string module_name, std::string kernel_name);
 
-                void build(std::vector<std::string> compilerFlags);
+                void build(std::vector<std::string> compilerFlags,unsigned int debug=0);
 
                 void set_source(std::string source);
 

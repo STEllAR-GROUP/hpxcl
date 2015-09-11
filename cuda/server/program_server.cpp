@@ -46,11 +46,17 @@ hpx::cuda::kernel program::create_kernel(std::string module_name,
 }
 
 //ToDo: Add debug flag
-void program::build(std::vector<std::string> compilerFlags) {
+void program::build(std::vector<std::string> compilerFlags, unsigned int debug) {
 
 	boost::uuids::uuid uuid = boost::uuids::random_generator()();
 	std::string filename = to_string(uuid);
 	filename.append(".cu");
+
+	if(debug == 1)
+	{
+		compilerFlags.push_back("-G");
+		compilerFlags.push_back("-lineinfo");
+	}
 
 	nvrtcCreateProgram(&(this->prog), this->kernel_source.c_str(),
 			filename.c_str(), 0, NULL, NULL);

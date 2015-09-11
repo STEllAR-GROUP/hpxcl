@@ -23,10 +23,10 @@ public:
 			base_type(std::move(gid)) {
 	}
 
-	hpx::lcos::future<void> build(std::vector<std::string> compilerFlags) {
+	hpx::lcos::future<void> build(std::vector<std::string> compilerFlags, unsigned int debug=0) {
 		HPX_ASSERT(this->get_gid());
 		typedef server::program::build_action action_type;
-		return hpx::async < action_type > (this->get_gid(), compilerFlags);
+		return hpx::async < action_type > (this->get_gid(), compilerFlags,debug);
 	}
 
 	void build_sync(std::vector<std::string> compilerFlags) {

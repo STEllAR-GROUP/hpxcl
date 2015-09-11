@@ -9,6 +9,8 @@
 
 #include "../../cuda.hpp"
 
+#define DEBUG 
+
 using namespace hpx::cuda;
 
 static const char kernel_src[] =
@@ -58,11 +60,17 @@ int main(int argc, char* argv[])
     std::string mode = "--gpu-architecture=compute_";
     mode.append(std::to_string(cudaDevice.get_device_architecture_major().get()));
 
+    mode.append(std::to_string(cudaDevice.get_device_architecture_minor().get()));
+
     flags.push_back(mode);
 
     // Compile the program
-    prog.build(flags);
 
+#ifdef DEBUG
+    prog.build(flags,1);
+#else
+    prog.build(flags);
+#endif
     // Create hello_world kernel
     //kernel hello_world_kernel = prog.create_kernel("hello_world");
 

@@ -5,12 +5,12 @@
 # - Try to find the Cuda NVRTC library
 # Once done this will define
 # LIBNVRTC_FOUND - System has LibNVRTC
-# LIBNVRTC_LIBRARY_DIR - The NVRTC libraries dir
+# LIBNVRTC_LIBRARY_DIR - The NVRTC library dir
 # CUDA_NVRTC_LIB - The NVRTC lib
 ##############################################################################
 find_package(PkgConfig)
 
-find_library(CUDA_NVRTC_LIB libnvrtc.so HINTS LIBNVRTC_LIBRARY_DIR /usr/local/lib64)
+find_library(CUDA_NVRTC_LIB libnvrtc.so HINTS ${LIBNVRTC_LIBRARY_DIR} /usr/lib64 /usr/local/cuda/lib64)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LibNVRTC DEFAULT_MSG CUDA_NVRTC_LIB)
