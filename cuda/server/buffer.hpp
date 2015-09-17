@@ -12,7 +12,7 @@
 
 #include "cuda/fwd_declarations.hpp"
 #include "cuda/export_definitions.hpp"
-
+#include "cuda/cuda_error_handling.hpp"
 namespace hpx
 {
     namespace cuda
@@ -31,12 +31,16 @@ namespace hpx
                 private:
                 size_t arg_buffer_size;
                 int parent_device_num;
+                CUdeviceptr data;
+
                 public:
                 buffer();
 
-                buffer(size_t size);
+                buffer(size_t size, int parent_device_num);
 
                 size_t size();
+
+
 
                 void set_size(size_t size);
 
@@ -45,6 +49,8 @@ namespace hpx
                 void enqueue_read(size_t offset, size_t size) const;
 
                 void enqueue_write(size_t offset, hpx::serialization::serialize_buffer<char> data);
+
+                CUdeviceptr get_raw_pointer();
 
                 HPX_DEFINE_COMPONENT_ACTION(buffer, size);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, set_size);

@@ -10,37 +10,53 @@
 
 #include "cuda/buffer.hpp"
 
-namespace hpx { namespace cuda { namespace server
-{
+namespace hpx {
+namespace cuda {
+namespace server {
 
-buffer::buffer(){}
-
-buffer::buffer(size_t size)
-{
-    this->arg_buffer_size = size;
+buffer::buffer() {
 }
 
-buffer::~buffer(){}
+buffer::buffer(size_t size, int parent_device_num) {
+	this->parent_device_num = parent_device_num;
+	this->arg_buffer_size = size;
 
-size_t buffer::size()
-{
-    return this->arg_buffer_size;
+	cudaSetDevice(this->parent_device_num);
+	cuMemAlloc(&data, size);
+	checkCudaError(
+			"device::create_buffer Error during allocation of the device pointer");
 }
 
-void buffer::set_size(size_t size)
-{
-    this->arg_buffer_size = size;
+buffer::~buffer() {
+
+	cudaSetDevice(this->parent_device_num);
+	cuMemFree(this->data);
+	checkCudaError("buffer::~buffer Error during free of the device pointer");
+
 }
 
-void buffer::enqueue_read(size_t offset, size_t size) const
-{
-    //read a buffer
+size_t buffer::size() {
+	return this->arg_buffer_size;
 }
 
-void buffer::enqueue_write(size_t offset, hpx::serialization::serialize_buffer<char> data)
-{
-    //write to buffer
+void buffer::set_size(size_t size) {
+	this->arg_buffer_size = size;
 }
 
-}}}
+void buffer::enqueue_read(size_t offset, size_t size) const {
+	//read a buffer
+}
+
+void buffer::enqueue_write(size_t offset,
+		hpx::serialization::serialize_buffer<char> data) {
+	//write to buffer
+}
+
+CUdeviceptr buffer::get_raw_pointer() {
+	return this->data;
+}
+
+}
+}
+}
 

@@ -10,6 +10,7 @@
 #include "../../cuda.hpp"
 
 #define DEBUG 
+#define SIZE 100
 
 using namespace hpx::cuda;
 
@@ -49,7 +50,7 @@ int main(int argc, char* argv[])
     device cudaDevice = devices[0];
 
     // Create a buffer
-    //buffer outbuffer = cldevice.create_buffer(CL_MEM_WRITE_ONLY, 13);
+    buffer outbuffer = cudaDevice.create_buffer_sync(SIZE);
 
     // Create the hello_world device program
     program prog = cudaDevice.create_program_with_source(kernel_src).get();

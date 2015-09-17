@@ -16,6 +16,7 @@
 #include "cuda/cuda/kernel.cuh"
 #include "cuda/server/device.hpp"
 #include "cuda/cuda_error_handling.hpp"
+#include "cuda/server/buffer.hpp"
 
 namespace hpx {
 namespace cuda {
@@ -107,6 +108,7 @@ void device::get_cuda_info() {
 			<< std::endl;
 	std::cout << "   Concurrent kernels: " << props.concurrentKernels
 			<< std::endl;
+	std::cout << "   Diver Overlap: " << props.deviceOverlap << std::endl;
 	std::cout << "   Memory Clock Rate: " << props.memoryClockRate << std::endl;
 	std::cout << "   Memory Bus Width: " << props.memoryBusWidth << std::endl;
 	std::cout << "   l2 Cache Size: " << props.l2CacheSize << std::endl;
@@ -133,22 +135,22 @@ void device::get_extended_cuda_info() {
 	this->print3D("Max Texture 2D Linear", props.maxTexture2DLinear);
 	this->print2D("Max Texture 2D Gather", props.maxTexture2DGather);
 	this->print3D("Max Texture 3D", props.maxTexture3D);
-	std::cout << "    Max Texture Cubmap: " << props.maxTextureCubemap
+	std::cout << "  Max Texture Cubmap: " << props.maxTextureCubemap
 			<< std::endl;
 	this->print2D("Max Texture 1D Layered", props.maxTexture1DLayered);
 	this->print3D("Max Texture 2D Layered", props.maxTexture2DLayered);
 	this->print2D("Max Texture Cubemap Layered",
 			props.maxTextureCubemapLayered);
-	std::cout << "   Max Surface 1D: " << props.maxSurface1D << std::endl;
+	std::cout << "  Max Surface 1D: " << props.maxSurface1D << std::endl;
 	this->print2D("Max Surface 2D", props.maxSurface2D);
 	this->print3D("Max Surface 3D", props.maxSurface3D);
 	this->print2D("Max Surface 1D Layered", props.maxSurface1DLayered);
 	this->print3D("Max Surface 2D layered", props.maxSurface2DLayered);
-	std::cout << "   Max Surface Cubemap: " << props.maxSurfaceCubemap
+	std::cout << "  Max Surface Cubemap: " << props.maxSurfaceCubemap
 			<< std::endl;
 	this->print2D("Max Surface Cubemap Layered",
 			props.maxSurfaceCubemapLayered);
-	std::cout << "   Surface Alignment: " << props.surfaceAlignment
+	std::cout << "  Surface Alignment: " << props.surfaceAlignment
 			<< std::endl;
 
 }
@@ -253,9 +255,7 @@ hpx::cuda::buffer device::create_buffer(size_t size) {
 	typedef hpx::cuda::server::buffer buffer_type;
 
 	hpx::cuda::buffer cu_buffer(
-			hpx::components::new_ < buffer_type > (hpx::find_here()));
-
-	cu_buffer.set_size_sync(size);
+			hpx::components::new_ < buffer_type > (hpx::find_here(),size,this->device_id));
 
 	return cu_buffer;
 }
