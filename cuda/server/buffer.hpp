@@ -32,6 +32,7 @@ namespace hpx
                 size_t arg_buffer_size;
                 int parent_device_num;
                 CUdeviceptr data;
+                void* data_host;
 
                 public:
                 buffer();
@@ -46,7 +47,8 @@ namespace hpx
 
                 ~buffer();
 
-                void enqueue_read(size_t offset, size_t size) const;
+                hpx::serialization::serialize_buffer<char>
+                enqueue_read(size_t offset, size_t size);
 
                 void enqueue_write(size_t offset, hpx::serialization::serialize_buffer<char> data);
 
