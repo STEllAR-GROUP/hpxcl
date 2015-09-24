@@ -246,7 +246,7 @@ hpx::cuda::program device::create_program_with_source(std::string source) {
 	typedef hpx::cuda::server::program program_type;
 
 	hpx::cuda::program cu_program(
-			hpx::components::new_ < program_type > (hpx::find_here()));
+			hpx::components::new_ < program_type > (hpx::find_here(),this->device_id));
 	cu_program.set_source_sync(source);
 	return cu_program;
 }

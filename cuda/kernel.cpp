@@ -17,6 +17,8 @@ HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(cuda_kernel_type, cuda_kernel);
 
 HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::set_stream_action,
     cuda_kernel_set_stream_action);
+HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::run_action,
+    cuda_kernel_run_action);
 HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::load_module_action,
     cuda_kernel_load_module_action);
 HPX_REGISTER_ACTION(cuda_kernel_type::wrapped_type::load_kernel_action,

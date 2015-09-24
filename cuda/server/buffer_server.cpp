@@ -22,7 +22,7 @@ buffer::buffer(size_t size, int parent_device_num) {
 	this->arg_buffer_size = size;
 
 	cudaSetDevice(this->parent_device_num);
-	checkCudaError("buffer:enqueue_read Set divice");
+	checkCudaError("buffer:enqueue_read Set device");
 	cudaMalloc((void**)&data, size);
 	checkCudaError(
 			"device::create_buffer Error during allocation of the device pointer");
@@ -34,7 +34,7 @@ buffer::buffer(size_t size, int parent_device_num) {
 buffer::~buffer() {
 
 	cudaSetDevice(this->parent_device_num);
-	checkCudaError("buffer:enqueue_read Set divice");
+	checkCudaError("buffer:enqueue_read Set device");
 	cuMemFree(this->data);
 	checkCudaError("buffer::~buffer Error during free of the device pointer");
 	cudaFreeHost(this->data_host);

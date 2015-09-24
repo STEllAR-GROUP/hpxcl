@@ -9,6 +9,9 @@
 #include <hpx/hpx.hpp>
 
 #include <cuda.h>
+#include <nvrtc.h>
+
+#include <vector>
 
 #include "cuda/fwd_declarations.hpp"
 #include "cuda/export_definitions.hpp"
@@ -43,6 +46,8 @@ namespace hpx
 
                 kernel(std::string kernel_name);
 
+                kernel(intptr_t prog);
+
                 ~kernel();
 
                 void set_stream();
@@ -54,6 +59,8 @@ namespace hpx
                 void load_module(std::string file_name);
 
                 void load_kernel(std::string kernel_name);
+
+                void run(std::vector<intptr_t>args);
 
                 std::string get_function();
 
@@ -75,12 +82,14 @@ namespace hpx
                 HPX_DEFINE_COMPONENT_ACTION(kernel, get_grid);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, get_block);
                 HPX_DEFINE_COMPONENT_ACTION(kernel, set_arg);
+                HPX_DEFINE_COMPONENT_ACTION(kernel, run);
 
                 private:
                 CUstream cu_stream;
                 Dim3 grid,block;
                 std::string kernel_name;
                 std::string module_name;
+                CUfunction function;
 
             };
         }
@@ -117,5 +126,8 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::kernel::set_arg_action,
     cuda_kernel_set_arg_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::kernel::run_action,
+    cuda_kernel_run_action);
 
 #endif

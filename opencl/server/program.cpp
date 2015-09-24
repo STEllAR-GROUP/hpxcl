@@ -302,7 +302,7 @@ program::create_kernel(std::string kernel_name)
                                                      ( hpx::find_here() ).get();
 
     // Initialize kernel locally
-    auto kernel_server = hpx::get_ptr<hpx::opencl::server::kernel>(kernel).get();
+    auto kernel_server = hpx::get_ptr<hpx::opencl::server::kernel>(this->prog).get();
 
     kernel_server->init(parent_device_id, program_id, kernel_name);
 

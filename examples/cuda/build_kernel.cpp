@@ -9,33 +9,30 @@
 
 #include "../../cuda.hpp"
 
+#include <unistd.h>
+
 #define DEBUG 
 #define SIZE 100
-#define TYPE double
 
 using namespace hpx::cuda;
 
 static const char kernel_src[] =
-		"                                                                           "
-				"  __global__ void sum(int* array , int n, int* count){ 				  \n"
+		        "                                                                           "
+				"extern \"C\"  __global__ void sum(){ 			                          \n"
 				" for (int i = blockDim.x * blockIdx.x + threadIdx.x;					  \n"
-				"         i < n;														  \n"
+				"         i < 1000;														  \n"
 				"         i += gridDim.x * blockDim.x)									  \n"
 				"    {																	  \n"
-				"        atomicAdd(&(count[0]), array[i]);								  \n"
-				"    }																	  \n"
+				"        //atomicAdd(&(count[0]), array[i]);							  \n"
+				"    }	 //count[0] = 42;												  \n"
 				"}                                             							  \n";
 
-//typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
-//static buffer_type kernel_src( kernel_str,
-//                                  sizeof(kernel_str),
-//                                buffer_type::init_mode::reference );
 
 // hpx_main, is the actual main called by hpx
 int main(int argc, char* argv[]) {
 
-	// Get list of available OpenCL Devices.
+	// Get list of available Cuda Devices.
 	std::vector<device> devices = get_all_devices(2, 0).get();
 
 	// Check whether there are any devices
@@ -45,7 +42,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Generate Input data
-	TYPE inputData[SIZE];
+	int inputData[SIZE];
 
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
@@ -54,10 +51,10 @@ int main(int argc, char* argv[]) {
 		inputData[i] = 1;
 
 	// Create a buffer
-	buffer outbuffer = cudaDevice.create_buffer_sync(SIZE * sizeof(TYPE));
+	buffer outbuffer = cudaDevice.create_buffer_sync(SIZE * sizeof(int));
 
 	// Copy input data to the buffer
-	outbuffer.enqueue_write(0, SIZE * sizeof(TYPE), &inputData);
+	outbuffer.enqueue_write(0, SIZE * sizeof(int), &inputData);
 
 	// Create the hello_world device program
 	program prog = cudaDevice.create_program_with_source(kernel_src).get();
@@ -82,31 +79,40 @@ int main(int argc, char* argv[]) {
 	prog.build(flags);
 #endif
 	// Create hello_world kernel
-	//kernel hello_world_kernel = prog.create_kernel("hello_world");
+	auto hello_world_kernel = prog.create_kernel("hello_world","remove_me").get();
 
-	// Set our buffer as argument
-	//hello_world_kernel.set_arg(0, outbuffer);
+	// Create the buffer for the result
+	int result[1];
+	result[0] = 50;
+	buffer resbuffer = cudaDevice.create_buffer_sync(sizeof(int));
+	resbuffer.enqueue_write(0,sizeof(int), &result);
 
-	// Run the kernel
-	//hpx::opencl::work_size<1> dim;
-	// dim[0].offset = 0;
-	// dim[0].size = 13;
-	//  hpx::future<void> kernel_future = hello_world_kernel.enqueue(dim);
+	//Generate the grid and block dim
+    hpx::cuda::server::program::Dim3 grid;
+    hpx::cuda::server::program::Dim3 block;
 
-	// Start reading the buffer ( With kernel_future as dependency.
-	//                            All hpxcl enqueue calls are nonblocking. )
-	//  auto read_future = outbuffer.enqueue_read(0, 13, kernel_future);
+    //Set the values for the grid dimension
+    grid.x = 1;
+    grid.y = 1;
+    grid.z = 1;
 
-	auto result = outbuffer.enqueue_read_sync<TYPE>(0,SIZE*sizeof(TYPE));
+    //Set the values for the block dimension
+    block.x = 32 ;
+    block.y = 1;
+    block.z = 1;
 
-	for (unsigned int i = 0; i < SIZE; i++)
-			hpx::cout << result[i] << hpx::endl;
+	//Set the parameter for the kernel, have to be the same order as in the definiton
+	std::vector<hpx::cuda::buffer>args;
+		args.push_back(outbuffer);
+		args.push_back(resbuffer);
 
-	// Wait for the data to arrive
-	//   auto data = read_future.get();
+	//Run the kernel at the default stream
+	auto kernel_future = prog.run(args,"sum",grid,block);
 
-	// Write the data to hpx::cout
-	//   hpx::cout << data.data() << hpx::endl;
+	//Copy the result back
+	int* res = resbuffer.enqueue_read_sync<int>(0,sizeof(int));
+
+	hpx::cout << res[0] << hpx::endl;
 
 	return EXIT_SUCCESS;
 }
