@@ -1,9 +1,7 @@
-/*
- * CudaErrorhandling.hpp
- *
- *  Created on: Aug 25, 2015
- *      Author: diehl
- */
+// Copyright (c)        2015 Patrick Diehl
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef CUDA_CUDA_CUDAERRORHANDLING_HPP_
 #define CUDA_CUDA_CUDAERRORHANDLING_HPP_
@@ -20,6 +18,18 @@
 namespace hpx { namespace cuda
 {
 
+/** \brief Handles the error checking for CUDA functions calls and kernel executions
+ *
+ * This method checks if there is a cudaGetLastError and passes the error found inside CUDA
+ * to and raises a hpx exception with the cudaError code and the cudaErrorMessage.
+ *
+ * Inside of the hpx CUDA component this method is called after each CUDA related function.
+ * In the raised error the class and the function where the CUDA error was raised is given
+ * as an additional information.
+ *
+ * \@param function_name name of the related cuda function or kernel execution
+ *
+ */
 HPX_CUDA_EXPORT void checkCudaError(char const* function_name = "");
 
 }}
