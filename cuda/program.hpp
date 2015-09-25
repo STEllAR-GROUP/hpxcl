@@ -36,19 +36,6 @@ public:
 		build(compilerFlags).get();
 	}
 
-	hpx::lcos::future<hpx::cuda::kernel> create_kernel(std::string module_name,
-			std::string kernel_name) {
-		HPX_ASSERT(this->get_gid());
-		typedef server::program::create_kernel_action action_type;
-		return hpx::async < action_type
-				> (this->get_gid(), module_name, kernel_name);
-	}
-
-	hpx::cuda::kernel create_kernel_sync(std::string module_name,
-			std::string kernel_name) {
-
-		return create_kernel(module_name, kernel_name).get();
-	}
 
 	void set_source_sync(std::string source) {
 		HPX_ASSERT(this->get_gid());

@@ -9,10 +9,8 @@
 #include <hpx/hpx.hpp>
 
 #include "cuda/fwd_declarations.hpp"
-#include "cuda/kernel.hpp"
 #include "cuda/buffer.hpp"
 #include "cuda/program.hpp"
-#include "cuda/server/kernel.hpp"
 #include "cuda/server/buffer.hpp"
 #include "cuda/server/program.hpp"
 #include "cuda/server/device.hpp"
@@ -103,80 +101,6 @@ public:
 
 	hpx::lcos::future<int> wait() {
 		return server::device::wait();
-	}
-
-	hpx::lcos::future<void> create_device_ptr(size_t const byte_count) {
-		HPX_ASSERT(this->get_gid());
-		typedef server::device::create_device_ptr_action action_type;
-		return hpx::async < action_type > (this->get_gid(), byte_count);
-	}
-
-	void create_device_ptr_sync(size_t const byte_count) {
-		create_device_ptr(byte_count).get();
-	}
-
-	template<typename T>
-	void create_host_ptr(T value, size_t const byte_count) {
-		HPX_ASSERT(this->get_gid());
-		typedef typename server::device::create_host_ptr_action<T> action_type;
-		std::cout << "hello from create_host_ptr stubs" << std::endl;
-		hpx::async < action_type > (this->get_gid()).get();
-	}
-
-	template<typename T>
-	void create_host_ptr_non_blocking(T value, size_t const byte_count) {
-		HPX_ASSERT(this->get_gid());
-		typedef typename server::device::create_host_ptr_action<T> action_type;
-		hpx::apply < action_type > (this->get_gid()).get();
-	}
-
-	hpx::lcos::future<void> mem_cpy_h_to_d(unsigned int variable_id) {
-		HPX_ASSERT(this->get_gid());
-		typedef server::device::mem_cpy_h_to_d_action action_type;
-		return hpx::async < action_type > (this->get_gid(), variable_id);
-	}
-
-	void mem_cpy_h_to_d_sync(unsigned int variable_id) {
-		HPX_ASSERT(this->get_gid());
-		mem_cpy_h_to_d(variable_id).get();
-	}
-
-	hpx::lcos::future<void> mem_cpy_d_to_h(unsigned int variable_id) {
-		HPX_ASSERT(this->get_gid());
-		typedef server::device::mem_cpy_d_to_h_action action_type;
-		return hpx::async < action_type > (this->get_gid(), variable_id);
-	}
-
-	void mem_cpy_d_to_h_sync(unsigned int variable_id) {
-		mem_cpy_d_to_h(variable_id).get();
-	}
-
-	hpx::lcos::future<void> launch_kernel(hpx::cuda::kernel cu_kernel) {
-		HPX_ASSERT(this->get_gid());
-		typedef server::device::launch_kernel_action action_type;
-		return hpx::async < action_type > (this->get_gid(), cu_kernel);
-	}
-
-	void launch_kernel_sync(hpx::cuda::kernel cu_kernel) {
-		launch_kernel(cu_kernel).get();
-	}
-
-	/*
-	 hpx::lcos::future<void> free()
-	 {
-	 BOOST_ASSERT(this->get_gid());
-	 return this->base_type::free(this->get_gid());
-	 }
-	 */
-
-	hpx::lcos::future<void> free(hpx::naming::id_type const &gid) {
-		typedef server::device::free_action action_type;
-		return hpx::async < action_type > (gid);
-	}
-
-	void free_sync() {
-		HPX_ASSERT(this->get_gid());
-		free(this->get_gid());
 	}
 
 	hpx::cuda::program create_program_with_source_sync(std::string source) {

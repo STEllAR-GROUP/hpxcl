@@ -12,14 +12,12 @@ namespace hpx
     {
         class device;
         class buffer;
-        class kernel;
         class program;
         class event;
         namespace server
         {
             class device;
             class buffer;
-            class kernel;
             class program;
             class event;
         }

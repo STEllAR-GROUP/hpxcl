@@ -78,8 +78,6 @@ int main(int argc, char* argv[]) {
 #else
 	prog.build(flags);
 #endif
-	// Create hello_world kernel
-	auto hello_world_kernel = prog.create_kernel("hello_world","remove_me").get();
 
 	// Create the buffer for the result
 	int result[1];

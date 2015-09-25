@@ -7,7 +7,6 @@
 #define HPX_CUDA_HPP_
     #include "cuda/device.hpp"
     #include "cuda/buffer.hpp"
-    #include "cuda/kernel.hpp"
     #include "cuda/program.hpp"
     //#include "cuda/std.hpp"
     #include "cuda/get_devices.hpp"

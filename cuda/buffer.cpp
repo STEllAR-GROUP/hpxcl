@@ -11,6 +11,8 @@ typedef hpx::components::managed_component<
     hpx::cuda::server::buffer>
     cuda_buffer_type;
 
+HPX_REGISTER_COMPONENT_MODULE();
+
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(cuda_buffer_type, cuda_buffer);
 
 HPX_REGISTER_ACTION(

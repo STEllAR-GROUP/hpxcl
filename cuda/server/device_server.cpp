@@ -13,7 +13,6 @@
 
 #include <boost/make_shared.hpp>
 
-#include "cuda/cuda/kernel.cuh"
 #include "cuda/server/device.hpp"
 #include "cuda/cuda_error_handling.hpp"
 #include "cuda/server/buffer.hpp"
@@ -44,12 +43,6 @@ device::device(int device_id) {
 device::~device() {
 }
 
-void device::free() {
-	for (uint64_t i = 0; i < device_ptrs.size(); i++) {
-		cuMemFree(device_ptrs[i].ptr);
-	}
-	cuCtxDetach (cu_context);
-}
 
 int device::get_device_count() {
 	int device_count = 0;
@@ -67,15 +60,6 @@ void device::get_cuda_info() {
 	const int kb = 1024;
 	const int mb = kb * kb;
 
-	//int dev_count = this->get_device_count();
-
-	//if (dev_count <= 0) {
-	//   std::cout << "No CUDA devices on the current locality" << std::endl;
-	//}
-	//else if (dev_count > 0) {
-	//  std::cout << "CUDA Devices: " << std::endl << std::endl;
-	//}
-	//for (int i = 0; i < dev_count; ++i) {
 	cudaDeviceProp props;
 	cudaError_t error;
 	error = cudaGetDeviceProperties(&props, this->device_id);
@@ -195,52 +179,6 @@ hpx::lcos::future<int> device::wait() {
 	return p->get_future();
 }
 
-void device::create_device_ptr(size_t const byte_count) {
-	device_ptr temp;
-	cuMemAlloc(&temp.ptr, byte_count);
-	temp.byte_count = byte_count;
-	device_ptrs.push_back(temp);
-
-	host_ptr<int> temp2;
-	temp2.ptr = (int*) malloc(byte_count);
-	host_ptrs.push_back(temp2);
-}
-
-void device::mem_cpy_h_to_d(unsigned int variable_id) {
-	cuMemcpyHtoD(device_ptrs[variable_id].ptr, host_ptrs[variable_id].ptr,
-			device_ptrs[variable_id].byte_count);
-}
-
-void device::mem_cpy_d_to_h(unsigned int variable_id) {
-	cuMemcpyDtoH(host_ptrs[variable_id].ptr, device_ptrs[variable_id].ptr,
-			device_ptrs[variable_id].byte_count);
-}
-
-void device::launch_kernel(hpx::cuda::kernel cu_kernel) {
-	hpx::cuda::server::kernel::Dim3 block = cu_kernel.get_block_sync();
-	hpx::cuda::server::kernel::Dim3 grid = cu_kernel.get_grid_sync();
-
-	void *args[1] = { &(device_ptrs[0].ptr) };
-
-	CUfunction cu_function;
-	CUmodule cu_module;
-	CUresult cu_error;
-
-	cu_error = cuModuleLoad(&cu_module,
-			(char*) cu_kernel.get_module_sync().c_str());
-	std::cout << "loading module returns " << (unsigned int) cu_error
-			<< std::endl;
-
-	cu_error = cuModuleGetFunction(&cu_function, cu_module,
-			(char*) cu_kernel.get_function_sync().c_str());
-	std::cout << "loading function returns " << (unsigned int) cu_error
-			<< std::endl;
-
-	cu_error = cuLaunchKernel(cu_function, grid.x, grid.y, grid.z, block.x,
-			block.y, block.z, 0, 0, args, 0);
-	std::cout << "launching kernel returns " << (unsigned int) cu_error
-			<< std::endl;
-}
 
 hpx::cuda::program device::create_program_with_source(std::string source) {
 	typedef hpx::cuda::server::program program_type;
@@ -250,6 +188,8 @@ hpx::cuda::program device::create_program_with_source(std::string source) {
 	cu_program.set_source_sync(source);
 	return cu_program;
 }
+
+
 
 hpx::cuda::buffer device::create_buffer(size_t size) {
 	typedef hpx::cuda::server::buffer buffer_type;

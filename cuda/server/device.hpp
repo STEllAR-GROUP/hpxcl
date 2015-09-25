@@ -10,7 +10,6 @@
 
 #include "cuda/fwd_declarations.hpp"
 #include "cuda/export_definitions.hpp"
-#include "cuda/kernel.hpp"
 #include "cuda/buffer.hpp"
 #include "cuda/program.hpp"
 
@@ -90,8 +89,6 @@ public:
 
     void mem_cpy_d_to_h(unsigned int variable_id);
 
-    void launch_kernel(hpx::cuda::kernel cu_kernel);
-
     hpx::cuda::program create_program_with_source(std::string source);
 
     hpx::cuda::buffer create_buffer(size_t size);
@@ -105,11 +102,6 @@ public:
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_id);
     HPX_DEFINE_COMPONENT_ACTION(device, get_context);
     HPX_DEFINE_COMPONENT_ACTION(device, wait);
-    HPX_DEFINE_COMPONENT_ACTION(device, create_device_ptr);
-    HPX_DEFINE_COMPONENT_ACTION(device, mem_cpy_h_to_d);
-    HPX_DEFINE_COMPONENT_ACTION(device, mem_cpy_d_to_h);
-    HPX_DEFINE_COMPONENT_ACTION(device, launch_kernel);
-    HPX_DEFINE_COMPONENT_ACTION(device, free);
     HPX_DEFINE_COMPONENT_ACTION(device, create_program_with_source);
     HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
 
@@ -169,21 +161,6 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::wait_action,
     device_wait_action);
-HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::device::create_device_ptr_action,
-    device_create_device_ptr_action);
-HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::device::mem_cpy_d_to_h_action,
-    device_mem_cpy_h_to_d_action);
-HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::device::mem_cpy_h_to_d_action,
-    device_mem_cpy_d_to_h_action);
-HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::device::launch_kernel_action,
-    device_launch_kernel_action);
-HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::device::free_action,
-    dvice_free_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::create_program_with_source_action,
     device_create_program_with_source_action);

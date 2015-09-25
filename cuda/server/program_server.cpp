@@ -9,7 +9,7 @@
 #include <cuda_runtime.h>
 
 #include "cuda/server/program.hpp"
-#include "cuda/kernel.hpp"
+#include "cuda/server/buffer.hpp"
 
 #include <sstream>
 #include <string>
@@ -50,17 +50,6 @@ program::~program() {
 
 void program::set_source(std::string source) {
 	this->kernel_source = source;
-}
-hpx::cuda::kernel program::create_kernel(std::string module_name,
-		std::string kernel_name) {
-	typedef hpx::cuda::server::kernel kernel_type;
-
-	hpx::cuda::kernel cu_kernel(
-			hpx::components::new_ < kernel_type
-					> (hpx::find_here(), reinterpret_cast<intptr_t>(&this->kernel)));
-	//cu_kernel.load_module_sync(module_name);
-	//cu_kernel.load_kernel_sync(kernel_name);
-	return cu_kernel;
 }
 
 //ToDo: Add debug flag
