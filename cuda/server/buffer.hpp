@@ -2,7 +2,7 @@
 //						2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-
+#pragma once
 #ifndef HPX_CUDA_SERVER_BUFFER_HPP_
 #define HPX_CUDA_SERVER_BUFFER_HPP_
 
@@ -31,8 +31,8 @@ namespace hpx
                 private:
                 size_t arg_buffer_size;
                 int parent_device_num;
-                CUdeviceptr data;
-                void* data_host;
+                void* data_device;
+                int* data_host;
 
                 public:
                 buffer();
@@ -47,12 +47,12 @@ namespace hpx
 
                 ~buffer();
 
-                hpx::serialization::serialize_buffer<char>
+                hpx::serialization::serialize_buffer<int>
                 enqueue_read(size_t offset, size_t size);
 
-                void enqueue_write(size_t offset, hpx::serialization::serialize_buffer<char> data);
+                void enqueue_write(size_t offset, hpx::serialization::serialize_buffer<int> data);
 
-                CUdeviceptr get_raw_pointer();
+                void* get_raw_pointer();
 
                 HPX_DEFINE_COMPONENT_ACTION(buffer, size);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, set_size);

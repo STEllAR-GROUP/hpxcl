@@ -14,8 +14,7 @@
 #include <boost/make_shared.hpp>
 
 #include "cuda/server/device.hpp"
-#include "cuda/cuda_error_handling.hpp"
-#include "cuda/server/buffer.hpp"
+
 
 namespace hpx {
 namespace cuda {

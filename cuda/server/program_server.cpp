@@ -38,14 +38,16 @@ program::program(hpx::naming::id_type device_id,
 
 program::~program() {
 
-	nvrtcDestroyProgram (&prog);
+	nvrtcDestroyProgram(&prog);
 	checkCudaError("Destroy Program");
 
-	for (auto stream : streams)
-	{
+	for (auto stream : streams) {
 		cudaStreamDestroy(stream);
 		checkCudaError("Destroy stream");
 	}
+
+	cuModuleUnload(module);
+	checkCudaError("Destroy module");
 }
 
 void program::set_source(std::string source) {
@@ -75,7 +77,6 @@ void program::build(std::vector<std::string> compilerFlags,
 		i++;
 	}
 
-
 	nvrtcResult compileResult = nvrtcCompileProgram(this->prog,
 			compilerFlags.size(), opts);
 
@@ -95,51 +96,74 @@ void program::build(std::vector<std::string> compilerFlags,
 	size_t ptxSize;
 
 	nvrtcGetPTXSize(prog, &ptxSize);
-	std::cout << ptxSize << std::endl;
 	checkCudaError("Get ptx size");
 
 	char *ptx = new char[ptxSize];
 	nvrtcGetPTX(prog, ptx);
 	checkCudaError("Get ptx of Program");
 
-	//CUdevice cuDevice;
-	//CUcontext context;
-	CUmodule module;
-
-	//cuDeviceGet(&cuDevice, this->parent_device_id);
-	////checkCudaError("Get Device");
-	//cuCtxCreate(&context, 0, cuDevice);
-	//checkCudaError("Create Context");
 	cuModuleLoadDataEx(&module, ptx, 0, 0, 0);
 	checkCudaError("Load Module");
 	cuModuleGetFunction(&(this->kernel), module, "sum");
 	checkCudaError("Get Function");
-	std::cout << kernel << std::endl;
-	checkCudaError("Get Function");
 }
 
-void program::run(std::vector<intptr_t> args, std::string modulename, Dim3 grid, Dim3 block, unsigned int stream) {
+void program::run(std::vector<hpx::naming::id_type> args,
+		std::string modulename, Dim3 grid, Dim3 block, unsigned int stream) {
 
 	void *args_pointer[args.size()];
 
+
 	unsigned int i = 0;
 	for (auto arg : args) {
-
-		hpx::cuda::server::buffer* buffer_tmp =
-				reinterpret_cast<hpx::cuda::server::buffer*>(&arg);
-		CUdeviceptr dev_pointer = buffer_tmp->get_raw_pointer();
-		args_pointer[i] = (void*)&dev_pointer;
+		auto buffer = hpx::get_ptr<hpx::cuda::server::buffer>(arg).get();
+		void* tmp = buffer->get_raw_pointer();
+		std::cout << "Pointer in Run: " << tmp << std::endl;
+		args_pointer[i] = tmp;
+		i++;
 	}
-	//cudaSetDevice(0);
-	//std::cout << kernel << std::endl;
+
+
+//	void* pt1;
+//	int* pt1_host;
+
+//	cudaMalloc((void**)&pt1,4*sizeof(int));
+//	cudaMallocHost((void**)&pt1_host,4*sizeof(int));
+
+//	for (unsigned int i = 0; i<  4 ; i++){
+/////			pt1_host[i] = 1;
+
+//		}
+
+//	int* pt2;
+//	int* pt2_host;
+
+	//cudaMalloc((void**)&pt2,1*sizeof(int));
+	//cudaMallocHost((void**)&pt2_host,1*sizeof(int));
+
+	//pt2_host[0] = 42;
+
+	//cudaMemcpy((void*)pt1,(void*)pt1_host,4*sizeof(int),cudaMemcpyHostToDevice);
+	//cudaMemcpy((void*)pt2,(void*)pt2_host,1*sizeof(int),cudaMemcpyHostToDevice);
+
+	//args_pointer[0] = &pt1;
+	//args_pointer[1] = &pt2;
+
+	cudaSetDevice(this->parent_device_id);
 	cuLaunchKernel(this->kernel, grid.x, grid.y, grid.y, // grid dim
 			block.x, block.y, block.z,    // block dim
 			0, this->streams[stream],             // shared mem and stream
-			NULL, 0);   // arguments
+			args_pointer, 0);   // arguments
 	checkCudaError("Run kernel");
 	cudaDeviceSynchronize();
 	checkCudaError("Synchronize");
-	//std::cout << "execute kernel " << function << std::endl ;
+	std::cout << "Run" << std::endl;
+
+	//cudaFree(pt1);
+	//cudaFree(pt2);
+	//cudaFreeHost(pt1_host);
+	//cudaFreeHost(pt2_host);
+
 }
 
 }

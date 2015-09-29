@@ -2,7 +2,7 @@
 //                  2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-
+#pragma once
 #ifndef HPX_CUDA_SERVER_PROGRAM_HPP_
 #define HPX_CUDA_SERVER_PROGRAM_HPP_
 
@@ -30,13 +30,14 @@ hpx::components::managed_component_base<program>
 {
 private:
 
-	boost::shared_ptr<device> parent_device;
+	//boost::shared_ptr<device> parent_device;
 	int parent_device_id;
 	std::string kernel_source;
 	std::string kernel_name;
 	nvrtcProgram prog;
 	CUfunction kernel;
 	std::vector<cudaStream_t> streams;
+	CUmodule module;
 
 public:
 
@@ -67,7 +68,7 @@ public:
 
 	void set_source(std::string source);
 
-	void run(std::vector<intptr_t> args, std::string modulename, Dim3 grid, Dim3 block, unsigned int stream=0);
+	void run(std::vector<hpx::naming::id_type> args, std::string modulename, Dim3 grid, Dim3 block, unsigned int stream=0);
 
 	HPX_DEFINE_COMPONENT_ACTION(program, build);
 	HPX_DEFINE_COMPONENT_ACTION(program, set_source);

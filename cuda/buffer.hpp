@@ -2,7 +2,7 @@
 //                  2015 patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-
+#pragma once
 #ifndef HPX_CUDA_BUFFER_HPP_
 #define HPX_CUDA_BUFFER_HPP_
 
@@ -25,7 +25,7 @@ public:
 	}
 
 	hpx::lcos::future<size_t> size() {
-		BOOST_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_gid());
 		typedef server::buffer::size_action action_type;
 		return hpx::async < action_type > (this->get_gid());
 
@@ -51,10 +51,11 @@ public:
 	template<typename T>
 	T* enqueue_read_sync(size_t offset, size_t size)
 	{
-		return (T*)enqueue_read(offset,size).get().data();
+		int * tmp = enqueue_read(offset,size).get().data();
+		return tmp;
 	}
 
-	hpx::future<hpx::serialization::serialize_buffer<char>> enqueue_read(
+	hpx::future<hpx::serialization::serialize_buffer<int>> enqueue_read(
 			size_t offset, size_t size) {
 		HPX_ASSERT(this->get_gid());
 
@@ -63,17 +64,22 @@ public:
 
 	}
 
-	void enqueue_write(size_t offset, size_t size, const void* data) const {
+	hpx::future<void> enqueue_write(size_t offset, size_t size, const int* data) const {
 		HPX_ASSERT(this->get_gid());
 
-		hpx::serialization::serialize_buffer<char> serializable_data(
-				(char*) const_cast<void*>(data), size,
-				hpx::serialization::serialize_buffer<char>::init_mode::reference);
+		hpx::serialization::serialize_buffer<int> serializable_data(
+				data, size,
+				hpx::serialization::serialize_buffer<int>::init_mode::reference);
 
 		typedef server::buffer::enqueue_write_action action_type;
-		hpx::async < action_type > (this->get_gid(), offset, serializable_data);
+		return hpx::async < action_type > (this->get_gid(), offset, serializable_data);
 
 	}
+
+private:
+            hpx::naming::id_type device_gid;
+            bool is_local;
+
 };
 }
 }

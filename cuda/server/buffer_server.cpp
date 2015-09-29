@@ -23,7 +23,9 @@ buffer::buffer(size_t size, int parent_device_num) {
 
 	cudaSetDevice(this->parent_device_num);
 	checkCudaError("buffer:enqueue_read Set device");
-	cudaMalloc((void**)&data, size);
+	cudaMalloc((void**)&data_device, size);
+
+	std::cout << "Pointer in Buffer: " << data_device << std::endl;
 	checkCudaError(
 			"device::create_buffer Error during allocation of the device pointer");
 	cudaMallocHost((void**)&data_host, size);
@@ -35,7 +37,7 @@ buffer::~buffer() {
 
 	cudaSetDevice(this->parent_device_num);
 	checkCudaError("buffer:enqueue_read Set device");
-	cuMemFree(this->data);
+	cudaFree(this->data_device);
 	checkCudaError("buffer::~buffer Error during free of the device pointer");
 	cudaFreeHost(this->data_host);
 
@@ -49,37 +51,54 @@ void buffer::set_size(size_t size) {
 	this->arg_buffer_size = size;
 }
 
-hpx::serialization::serialize_buffer<char> buffer::enqueue_read(size_t offset,
+hpx::serialization::serialize_buffer<int> buffer::enqueue_read(size_t offset,
 		size_t size) {
 
 	cudaSetDevice(this->parent_device_num);
-	checkCudaError("buffer:enqueue_read Set divice");
-	cudaMemcpy(this->data_host, (void*) this->data, this->arg_buffer_size,
-			cudaMemcpyDeviceToHost);
+	checkCudaError("buffer:enqueue_read Set device");
+
+	cudaMemcpy(this->data_host,this->data_device,this->arg_buffer_size,cudaMemcpyDeviceToHost);
+
 	checkCudaError(
 			"buffer::enque_read Error during copy data from the device to the host");
-	hpx::serialization::serialize_buffer<char> serializable_data(
-			(char*) const_cast<void*>(this->data_host), size,
-			hpx::serialization::serialize_buffer<char>::init_mode::reference);
+	std::cout << "Result in enqueue read " << ((int*)this->data_host)[0] << std::endl;
+	hpx::serialization::serialize_buffer<int> serializable_data(
+			(int*) const_cast<int*>(this->data_host), size,
+			hpx::serialization::serialize_buffer<int>::init_mode::reference);
 
 	return serializable_data;
 
 }
 
 void buffer::enqueue_write(size_t offset,
-		hpx::serialization::serialize_buffer<char> data) {
+		hpx::serialization::serialize_buffer<int> data) {
 
 	cudaSetDevice(this->parent_device_num);
-	checkCudaError("buffer:enqueue_read Set divce");
-	cudaMemcpy((void*) this->data, (void*)data.data(), this->arg_buffer_size,
-			cudaMemcpyHostToDevice);
+	checkCudaError("buffer:enqueue_read Set device");
+
+
+
+	std::cout << "Data Server: " << data.data()[0] << " " << data.data() << " " << this->arg_buffer_size << std::endl;
+
+  //  int* testData;
+//	cudaMallocHost((void**)&testData,this->arg_buffer_size);
+
+//	for (unsigned int i = 0; i< this->arg_buffer_size / 4 ; i++){
+//		testData[i] = 1;
+		//std::cout << i << " " <<  data.data()[i] << std::endl;
+//	}
+
+
+
+	cudaMemcpy(data_device,(void*)data.data(),this->arg_buffer_size,cudaMemcpyHostToDevice);
 	checkCudaError(
 			"buffer::enque_write Error during copy data from the host to the device");
+	//cudaFreeHost(testData);
 
 }
 
-CUdeviceptr buffer::get_raw_pointer() {
-	return this->data;
+void* buffer::get_raw_pointer() {
+	return &this->data_device;
 }
 
 }

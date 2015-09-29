@@ -2,12 +2,13 @@
 //						2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
-
+#pragma once
 #ifndef HPX_CUDA_PROGRAM_HPP_
 #define HPX_CUDA_PROGRAM_HPP_
 
 #include <hpx/include/components.hpp>
-#include "server/program.hpp"
+#include "cuda/server/program.hpp"
+#include "cuda/buffer.hpp"
 
 namespace hpx {
 namespace cuda {
@@ -94,12 +95,22 @@ public:
 	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
 			std::string modulename, hpx::cuda::server::program::Dim3 grid,
 			hpx::cuda::server::program::Dim3 block, unsigned int stream = 0) {
+
 		HPX_ASSERT(this->get_gid());
-		std::vector<intptr_t> args_pointer;
+
+		std::vector<hpx::naming::id_type> args_id;
+
+
+		for (unsigned int i = 0; i < args.size(); i++) {
+
+			//const hpx::cuda::buffer& tmp = args[i];
+
+			args_id.push_back(args[i].get_id());
+		}
 
 		typedef server::program::run_action action_type;
-		return hpx::async<action_type>(this->get_gid(), args_pointer,
-				modulename, grid, block, stream);
+		return hpx::async<action_type>(this->get_gid(), args_id, modulename,
+				grid, block, stream);
 
 	}
 };
