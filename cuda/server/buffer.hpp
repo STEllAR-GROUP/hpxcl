@@ -33,6 +33,7 @@ namespace hpx
                 int parent_device_num;
                 void* data_device;
                 void* data_host;
+                cudaStream_t stream;
 
                 public:
                 buffer();
