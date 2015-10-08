@@ -127,7 +127,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 			0, this->streams[stream],                    // shared mem and stream
 			args_pointer, 0);                            // arguments
 	checkCudaError("Run kernel");
-	cudaDeviceSynchronize();
+	cudaStreamSynchronize( this->streams[stream] );
 	checkCudaError("Synchronize");
 
 }
