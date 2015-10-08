@@ -12,22 +12,20 @@
 #include <unistd.h>
 
 #define DEBUG 
-#define SIZE 100
+#define SIZE 10000
 
 using namespace hpx::cuda;
 
 static const char kernel_src[] =
-		        "                                                                           "
-				"extern \"C\"  __global__ void sum(int* array, int* count){ 			  \n"
-				" for (int i = blockDim.x * blockIdx.x + threadIdx.x;					  \n"
-				"         i < 100;														  \n"
-				"         i += gridDim.x * blockDim.x)									  \n"
-				"    {				printf(\"%d %d \" , i, array[i] );											  \n"
-				"        atomicAdd(&(count[0]), array[i]);							      \n"
-				"    }	 //	count[0] = 45;									  \n"
-				"}                                             							  \n";
-
-
+		"                                                                                                        "
+		"extern \"C\"  __global__ void sum(unsigned int* array, unsigned  int* count, unsigned int* n){ 	   \n"
+		" for (int i = blockDim.x * blockIdx.x + threadIdx.x;					                               \n"
+		"         i < n[0];														                               \n"
+		"         i += gridDim.x * blockDim.x)									                               \n"
+		"    {													                                               \n"
+		"        atomicAdd(&(count[0]), array[i]);							                                   \n"
+		"    }	 									                                                           \n"
+		"}                                             							                               \n";
 
 // hpx_main, is the actual main called by hpx
 int main(int argc, char* argv[]) {
@@ -45,20 +43,20 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Generate Input data
-	int* inputData;
-	cudaMallocHost((void**)&inputData, sizeof(int)*SIZE);
+	unsigned int* inputData;
+	cudaMallocHost((void**)&inputData, sizeof(unsigned int)*SIZE);
 
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
 
 	for (unsigned int i = 0; i < SIZE; i++)
-		inputData[i] = 100;
+	inputData[i] = 1;
 
 	// Create a buffer
-	buffer outbuffer = cudaDevice.create_buffer_sync(SIZE * sizeof(int));
+	buffer outbuffer = cudaDevice.create_buffer_sync(SIZE * sizeof(unsigned int));
 
 	// Copy input data to the buffer
-	data_futures.push_back(outbuffer.enqueue_write(0, SIZE * sizeof(int), inputData));
+	data_futures.push_back(outbuffer.enqueue_write(0, SIZE * sizeof(unsigned int), inputData));
 
 	// Create the hello_world device program
 	program prog = cudaDevice.create_program_with_source(kernel_src).get();
@@ -68,10 +66,10 @@ int main(int argc, char* argv[]) {
 	std::vector<std::string> flags;
 	std::string mode = "--gpu-architecture=compute_";
 	mode.append(
-			std::to_string(cudaDevice.get_device_architecture_major().get()));
+	std::to_string(cudaDevice.get_device_architecture_major().get()));
 
 	mode.append(
-			std::to_string(cudaDevice.get_device_architecture_minor().get()));
+	std::to_string(cudaDevice.get_device_architecture_minor().get()));
 
 	flags.push_back(mode);
 
@@ -84,30 +82,38 @@ int main(int argc, char* argv[]) {
 #endif
 
 	// Create the buffer for the result
-	int* result;
-	cudaMallocHost((void**)&result,sizeof(int));
+	unsigned int* result;
+	cudaMallocHost((void**)&result,sizeof(unsigned int));
 	result[0] = 0;
-	buffer resbuffer = cudaDevice.create_buffer_sync(sizeof(int));
-	data_futures.push_back(resbuffer.enqueue_write(0,sizeof(int), result));
+	buffer resbuffer = cudaDevice.create_buffer_sync(sizeof(unsigned int));
+	data_futures.push_back(resbuffer.enqueue_write(0,sizeof(unsigned int), result));
+
+	//Create the buffer for the length of the array
+	unsigned int* n;
+	cudaMallocHost((void**)&n,sizeof(unsigned int));
+	result[0] = SIZE;
+	buffer lengthbuffer = cudaDevice.create_buffer_sync(sizeof(unsigned int));
+	data_futures.push_back(lengthbuffer.enqueue_write(0,sizeof(unsigned int), n));
 
 	//Generate the grid and block dim
-    hpx::cuda::server::program::Dim3 grid;
-    hpx::cuda::server::program::Dim3 block;
+	hpx::cuda::server::program::Dim3 grid;
+	hpx::cuda::server::program::Dim3 block;
 
-    //Set the values for the grid dimension
-    grid.x = 1;
-    grid.y = 1;
-    grid.z = 1;
+	//Set the values for the grid dimension
+	grid.x = 1;
+	grid.y = 1;
+	grid.z = 1;
 
-    //Set the values for the block dimension
-    block.x = 32 ;
-    block.y = 1;
-    block.z = 1;
+	//Set the values for the block dimension
+	block.x = 32;
+	block.y = 1;
+	block.z = 1;
 
 	//Set the parameter for the kernel, have to be the same order as in the definition
 	std::vector<hpx::cuda::buffer>args;
-		args.push_back(outbuffer);
-		args.push_back(resbuffer);
+	args.push_back(outbuffer);
+	args.push_back(resbuffer);
+	args.push_back(lengthbuffer);
 
 	hpx::wait_all(data_futures);
 
@@ -117,11 +123,16 @@ int main(int argc, char* argv[]) {
 	hpx::wait_all(kernel_future);
 
 	//Copy the result back
-	int* res = resbuffer.enqueue_read_sync<int>(0,sizeof(int));
+	unsigned int* res = resbuffer.enqueue_read_sync<unsigned int>(0,sizeof(unsigned int));
 
+	hpx::cout << "Result is " << res[0] << " and is ";
 
+	//Check if result is correct
 
-	hpx::cout << res[0] << hpx::endl;
+	if (res[0] != SIZE)
+		hpx::cout << "wrong" << hpx::endl;
+	else
+		hpx::cout << "correct" << hpx::endl;
 
 	return EXIT_SUCCESS;
 }

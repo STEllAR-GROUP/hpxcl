@@ -24,8 +24,6 @@ buffer::buffer(size_t size, int parent_device_num) {
 	cudaSetDevice(this->parent_device_num);
 	checkCudaError("buffer:enqueue_read Set device");
 	cudaMalloc((void**)&data_device, size);
-
-	std::cout << "Pointer in Buffer: " << data_device << std::endl;
 	checkCudaError(
 			"device::create_buffer Error during allocation of the device pointer");
 	cudaMallocHost((void**)&data_host, size);
@@ -51,7 +49,7 @@ void buffer::set_size(size_t size) {
 	this->arg_buffer_size = size;
 }
 
-hpx::serialization::serialize_buffer<int> buffer::enqueue_read(size_t offset,
+hpx::serialization::serialize_buffer<char> buffer::enqueue_read(size_t offset,
 		size_t size) {
 
 	cudaSetDevice(this->parent_device_num);
@@ -61,24 +59,24 @@ hpx::serialization::serialize_buffer<int> buffer::enqueue_read(size_t offset,
 
 	checkCudaError(
 			"buffer::enque_read Error during copy data from the device to the host");
-	std::cout << "Result in enqueue read " << ((int*)this->data_host)[0] << std::endl;
-	hpx::serialization::serialize_buffer<int> serializable_data(
-			(int*) const_cast<int*>(this->data_host), size,
-			hpx::serialization::serialize_buffer<int>::init_mode::reference);
+	//std::cout << "Result in enqueue read " << ((int*)this->data_host)[0] << std::endl;
+	hpx::serialization::serialize_buffer<char> serializable_data(
+			(char*) reinterpret_cast<char*>(this->data_host), size,
+			hpx::serialization::serialize_buffer<char>::init_mode::reference);
 
 	return serializable_data;
 
 }
 
 void buffer::enqueue_write(size_t offset,
-		hpx::serialization::serialize_buffer<int> data) {
+		hpx::serialization::serialize_buffer<char> data) {
 
 	cudaSetDevice(this->parent_device_num);
 	checkCudaError("buffer:enqueue_read Set device");
 
 
 
-	std::cout << "Data Server: " << data.data()[0] << " " << data.data() << " " << this->arg_buffer_size << std::endl;
+	//std::cout << "Data Server: " << data.data()[0] << " " << data.data() << " " << this->arg_buffer_size << std::endl;
 
   //  int* testData;
 //	cudaMallocHost((void**)&testData,this->arg_buffer_size);

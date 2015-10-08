@@ -51,11 +51,11 @@ public:
 	template<typename T>
 	T* enqueue_read_sync(size_t offset, size_t size)
 	{
-		int * tmp = enqueue_read(offset,size).get().data();
+		T* tmp = (T*)enqueue_read(offset,size).get().data();
 		return tmp;
 	}
 
-	hpx::future<hpx::serialization::serialize_buffer<int>> enqueue_read(
+	hpx::future<hpx::serialization::serialize_buffer<char>> enqueue_read(
 			size_t offset, size_t size) {
 		HPX_ASSERT(this->get_gid());
 
@@ -64,12 +64,12 @@ public:
 
 	}
 
-	hpx::future<void> enqueue_write(size_t offset, size_t size, const int* data) const {
+	hpx::future<void> enqueue_write(size_t offset, size_t size, const void* data) const {
 		HPX_ASSERT(this->get_gid());
 
-		hpx::serialization::serialize_buffer<int> serializable_data(
-				data, size,
-				hpx::serialization::serialize_buffer<int>::init_mode::reference);
+		hpx::serialization::serialize_buffer<char> serializable_data(
+				(char*)data, size,
+				hpx::serialization::serialize_buffer<char>::init_mode::reference);
 
 		typedef server::buffer::enqueue_write_action action_type;
 		return hpx::async < action_type > (this->get_gid(), offset, serializable_data);

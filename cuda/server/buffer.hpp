@@ -32,7 +32,7 @@ namespace hpx
                 size_t arg_buffer_size;
                 int parent_device_num;
                 void* data_device;
-                int* data_host;
+                void* data_host;
 
                 public:
                 buffer();
@@ -47,10 +47,10 @@ namespace hpx
 
                 ~buffer();
 
-                hpx::serialization::serialize_buffer<int>
+                hpx::serialization::serialize_buffer<char>
                 enqueue_read(size_t offset, size_t size);
 
-                void enqueue_write(size_t offset, hpx::serialization::serialize_buffer<int> data);
+                void enqueue_write(size_t offset, hpx::serialization::serialize_buffer<char> data);
 
                 void* get_raw_pointer();
 
