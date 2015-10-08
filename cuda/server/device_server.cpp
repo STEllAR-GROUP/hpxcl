@@ -111,29 +111,29 @@ void device::get_extended_cuda_info() {
 
 	this->get_cuda_info();
 
-	std::cout << "  Max Texture 1D: " << props.maxTexture1D << std::endl;
-	std::cout << "  Max Texture 1D Linear: " << props.maxTexture1DLinear
+	std::cout << "   Max Texture 1D: " << props.maxTexture1D << std::endl;
+	std::cout << "   Max Texture 1D Linear: " << props.maxTexture1DLinear
 			<< std::endl;
 	this->print2D("Max Texture 2D", props.maxTexture2D);
 	this->print3D("Max Texture 2D Linear", props.maxTexture2DLinear);
 	this->print2D("Max Texture 2D Gather", props.maxTexture2DGather);
 	this->print3D("Max Texture 3D", props.maxTexture3D);
-	std::cout << "  Max Texture Cubmap: " << props.maxTextureCubemap
+	std::cout << "   Max Texture Cubemap: " << props.maxTextureCubemap
 			<< std::endl;
 	this->print2D("Max Texture 1D Layered", props.maxTexture1DLayered);
 	this->print3D("Max Texture 2D Layered", props.maxTexture2DLayered);
 	this->print2D("Max Texture Cubemap Layered",
 			props.maxTextureCubemapLayered);
-	std::cout << "  Max Surface 1D: " << props.maxSurface1D << std::endl;
+	std::cout << "   Max Surface 1D: " << props.maxSurface1D << std::endl;
 	this->print2D("Max Surface 2D", props.maxSurface2D);
 	this->print3D("Max Surface 3D", props.maxSurface3D);
 	this->print2D("Max Surface 1D Layered", props.maxSurface1DLayered);
 	this->print3D("Max Surface 2D layered", props.maxSurface2DLayered);
-	std::cout << "  Max Surface Cubemap: " << props.maxSurfaceCubemap
+	std::cout << "   Max Surface Cubemap: " << props.maxSurfaceCubemap
 			<< std::endl;
 	this->print2D("Max Surface Cubemap Layered",
 			props.maxSurfaceCubemapLayered);
-	std::cout << "  Surface Alignment: " << props.surfaceAlignment
+	std::cout << "   Surface Alignment: " << props.surfaceAlignment
 			<< std::endl;
 
 }
