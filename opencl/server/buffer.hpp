@@ -435,7 +435,6 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote(
     // wait for the event to finish
     parent_device->wait_for_cl_event(return_event);
 
-    // TODO run the zero-copy buffer thingy
     // send the zerocopy_buffer to the lcos::event
     typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
         set_data_func;
@@ -507,11 +506,18 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_local(
 template <typename T>
 void
 hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_remote(
+
+    // the general algorithm of the remote rect read is:
+    // - allocate a buffer that exactly fits the read data
+    // - read from gpu
+    // - send the data and extract it to the correct position in the
+    //   remote destination buffer via zero-copy send
+
     hpx::naming::id_type && event_gid,
     hpx::opencl::rect_props && rect_properties,
     std::uintptr_t remote_data_addr,
     std::vector<hpx::naming::id_type> && dependencies ){
-/* TODO
+
     HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
@@ -526,14 +532,32 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_remote(
     cl_command_queue command_queue = parent_device->get_read_command_queue();
 
     // create new target buffer
-    buffer_type data( new char[size], size, buffer_type::init_mode::take );
+    std::size_t dst_size = rect_properties.size_x * rect_properties.size_y
+                           * rect_properties.size_z * sizeof(T);
+    buffer_type data( new char[dst_size], dst_size,
+                      buffer_type::init_mode::take );
+
+    // prepare arguments for OpenCL call
+    std::size_t buffer_origin[] = { rect_properties.src_x * sizeof(T),
+                                    rect_properties.src_y,
+                                    rect_properties.src_z };
+    std::size_t host_origin[] = { 0, 0, 0 }; // don't waste space on the host buf
+    std::size_t region[] = { rect_properties.size_x * sizeof(T),
+                             rect_properties.size_y,
+                             rect_properties.size_z };
 
     // run the OpenCL-call
-    err = clEnqueueReadBuffer( command_queue, device_mem, CL_FALSE, offset,
-                                data.size(), data.data(),
-                                static_cast<cl_uint>(events.size()),
-                                events.get_cl_events(), &return_event );
-    cl_ensure(err, "clEnqueueReadBuffer()");
+    err = clEnqueueReadBufferRect(
+                command_queue, device_mem, CL_FALSE,
+                buffer_origin, host_origin, region,
+                rect_properties.src_stride_y * sizeof(T),
+                rect_properties.src_stride_z * sizeof(T),
+                rect_properties.size_x * sizeof(T),
+                rect_properties.size_x * sizeof(T) * rect_properties.size_y,
+                data.data(),
+                static_cast<cl_uint>(events.size()),
+                events.get_cl_events(), &return_event );
+    cl_ensure(err, "clEnqueueReadBufferRect()");
 
     // put_event_data not necessary as we locally keep the buffer alive until
     // the event triggered
@@ -546,19 +570,19 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_remote(
     parent_device->register_event(event_gid, return_event);
 
     // prepare a zero-copy buffer
+    // TODO replace dst_size with rect_properties
     hpx::opencl::lcos::zerocopy_buffer zerocopy_buffer( remote_data_addr,
-                                                        size,
+                                                        dst_size,
                                                         data );
 
     // wait for the event to finish
     parent_device->wait_for_cl_event(return_event);
 
-    // TODO run the zero-copy buffer thingy
     // send the zerocopy_buffer to the lcos::event
     typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
         set_data_func;
     hpx::apply_colocated<set_data_func>(event_gid, event_gid, zerocopy_buffer);
-*/
+
 }
 
 
