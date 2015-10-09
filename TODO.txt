@@ -1,16 +1,18 @@
-- investigate bottleneck
 - move deadlock.cpp to regression tests
 
-
 - Add serialization to all client classes
+
 - Add serializaton to hpxcl futures, via
     - hpx::opencl::get_event_id(future)
     - add event_id
     - or something like a send_buffer-recv_buffer pair
+  ( problem is, there is no easy way to send data from an opencl buffer to
+    a different locality and then synchronize )
 
 ! - Add write/read-rect functions!!
-    - read_rect
-        - implement server functions
-        - write unit test
-        - implement zero-copy with rect
     - send_rect
+        - unit tests
+        - local case
+        - remote case
+
+- prevent initialization of unneeded devices
