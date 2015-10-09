@@ -474,11 +474,11 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_local(
                              rect_properties.size_z };
 
     HPX_ASSERT(data.size() >
-        (rect_properties.size_x + rect_properties.src_x - 1)
-      + (rect_properties.size_y + rect_properties.src_y - 1)
-            * rect_properties.src_stride_y
-      + (rect_properties.size_z + rect_properties.src_z - 1)
-            * rect_properties.src_stride_z );
+        (rect_properties.size_x + rect_properties.dst_x - 1)
+      + (rect_properties.size_y + rect_properties.dst_y - 1)
+            * rect_properties.dst_stride_y
+      + (rect_properties.size_z + rect_properties.dst_z - 1)
+            * rect_properties.dst_stride_z );
 
     // run the OpenCL-call
     err = clEnqueueReadBufferRect(
