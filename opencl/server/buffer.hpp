@@ -506,17 +506,16 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_local(
 template <typename T>
 void
 hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_remote(
+    hpx::naming::id_type && event_gid,
+    hpx::opencl::rect_props && rect_properties,
+    std::uintptr_t remote_data_addr,
+    std::vector<hpx::naming::id_type> && dependencies ){
 
     // the general algorithm of the remote rect read is:
     // - allocate a buffer that exactly fits the read data
     // - read from gpu
     // - send the data and extract it to the correct position in the
     //   remote destination buffer via zero-copy send
-
-    hpx::naming::id_type && event_gid,
-    hpx::opencl::rect_props && rect_properties,
-    std::uintptr_t remote_data_addr,
-    std::vector<hpx::naming::id_type> && dependencies ){
 
     HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
 
@@ -572,7 +571,8 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_remote(
     // prepare a zero-copy buffer
     // TODO replace dst_size with rect_properties
     hpx::opencl::lcos::zerocopy_buffer zerocopy_buffer( remote_data_addr,
-                                                        dst_size,
+                                                        rect_properties,
+                                                        sizeof(T),
                                                         data );
 
     // wait for the event to finish
