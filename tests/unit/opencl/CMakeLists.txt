@@ -9,6 +9,7 @@ set(tests
     initialization
     buffer_read_write
     buffer_rect_write
+    buffer_rect_read
     event
     info
     event_map

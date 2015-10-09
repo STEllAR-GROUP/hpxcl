@@ -196,8 +196,8 @@ namespace hpx { namespace opencl{ namespace server{
                         hpx::opencl::rect_props &&,
                         std::uintptr_t,
                         std::vector<hpx::naming::id_type> &&),
-            &buffer::template enqueue_read_to_userbuffer_remote<T>,
-            enqueue_read_to_userbuffer_remote_action<T> >
+            &buffer::template enqueue_read_to_userbuffer_rect_remote<T>,
+            enqueue_read_to_userbuffer_rect_remote_action<T> >
     {};
     template <typename T>
     struct enqueue_read_to_userbuffer_rect_local_action
@@ -206,8 +206,8 @@ namespace hpx { namespace opencl{ namespace server{
                         hpx::opencl::rect_props &&,
                         hpx::serialization::serialize_buffer<T>,
                         std::vector<hpx::naming::id_type> &&),
-            &buffer::template enqueue_read_to_userbuffer_local<T>,
-            enqueue_read_to_userbuffer_local_action<T> >
+            &buffer::template enqueue_read_to_userbuffer_rect_local<T>,
+            enqueue_read_to_userbuffer_rect_local_action<T> >
     {};
 
 
