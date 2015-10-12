@@ -24,8 +24,11 @@ program::program() {
 
 program::program(int parent_device_id) {
 	this->parent_device_id = parent_device_id;
+	cudaSetDevice(parent_device_id);
+	checkCudaError("program::program Error setting the device");
 	cudaStream_t stream;
 	cudaStreamCreate(&stream);
+	checkCudaError("program::program Error in creating default stream");
 	this->streams.push_back(stream);
 }
 
@@ -113,7 +116,6 @@ void program::run(std::vector<hpx::naming::id_type> args,
 
 	void *args_pointer[args.size()];
 
-
 	unsigned int i = 0;
 	for (auto arg : args) {
 		auto buffer = hpx::get_ptr<hpx::cuda::server::buffer>(arg).get();
@@ -121,15 +123,30 @@ void program::run(std::vector<hpx::naming::id_type> args,
 		args_pointer[i] = tmp;
 		i++;
 	}
+
 	cudaSetDevice(this->parent_device_id);
 	cuLaunchKernel(this->kernel, grid.x, grid.y, grid.y, // grid dim
 			block.x, block.y, block.z,                   // block dim
-			0, this->streams[stream],                    // shared mem and stream
+			0, this->streams[stream],                   // shared mem and stream
 			args_pointer, 0);                            // arguments
 	checkCudaError("Run kernel");
-	cudaStreamSynchronize( this->streams[stream] );
+	cudaStreamSynchronize(this->streams[stream]);
 	checkCudaError("Synchronize");
 
+}
+
+unsigned int program::get_streams() {
+	return this->streams.size();
+}
+
+unsigned int program::create_stream() {
+	cudaSetDevice(parent_device_id);
+	checkCudaError("program::program Error setting the device");
+	cudaStream_t stream;
+	cudaStreamCreate(&stream);
+	checkCudaError("program::program Error in creating default stream");
+	this->streams.push_back(stream);
+	return this->streams.size() - 1;
 }
 
 }

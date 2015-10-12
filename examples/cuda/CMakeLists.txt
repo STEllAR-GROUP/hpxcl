@@ -8,6 +8,7 @@ set(example_programs
     list_devices
     list_extended_devices
     build_kernel
+    streams
 )
 
 foreach(example_program ${example_programs})

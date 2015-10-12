@@ -23,11 +23,8 @@ namespace hpx {
 namespace cuda {
 namespace server {
 
-class HPX_CUDA_EXPORT program
-: public hpx::components::locking_hook<
-hpx::components::managed_component_base<program>
->
-{
+class HPX_CUDA_EXPORT program: public hpx::components::locking_hook<
+		hpx::components::managed_component_base<program> > {
 private:
 
 	//boost::shared_ptr<device> parent_device;
@@ -42,15 +39,13 @@ private:
 public:
 
 public:
-	struct Dim3
-	{
+	struct Dim3 {
 		unsigned int x, y, z;
-		template <typename Archive>
-		void serialize(Archive &ar, unsigned int i)
-		{
-			ar &x;
-			ar &y;
-			ar &z;
+		template<typename Archive>
+		void serialize(Archive &ar, unsigned int i) {
+			ar & x;
+			ar & y;
+			ar & z;
 		}
 	};
 
@@ -60,34 +55,43 @@ public:
 
 	program(hpx::naming::id_type device_id, std::string code);
 
-	program(hpx::naming::id_type device_id, hpx::serialization::serialize_buffer<char> binary);
+	program(hpx::naming::id_type device_id,
+			hpx::serialization::serialize_buffer<char> binary);
 
 	~program();
 
-	void build(std::vector<std::string> compilerFlags,unsigned int debug=0);
+	void build(std::vector<std::string> compilerFlags, unsigned int debug = 0);
 
 	void set_source(std::string source);
 
-	void run(std::vector<hpx::naming::id_type> args, std::string modulename, Dim3 grid, Dim3 block, unsigned int stream=0);
+	void run(std::vector<hpx::naming::id_type> args, std::string modulename,
+			Dim3 grid, Dim3 block, unsigned int stream = 0);
+
+	unsigned int get_streams();
+
+	unsigned int create_stream();
 
 	HPX_DEFINE_COMPONENT_ACTION(program, build);
 	HPX_DEFINE_COMPONENT_ACTION(program, set_source);
 	HPX_DEFINE_COMPONENT_ACTION(program, run);
+	HPX_DEFINE_COMPONENT_ACTION(program, get_streams);
+	HPX_DEFINE_COMPONENT_ACTION(program, create_stream);
 
 };
 }
 }
 }
 
+HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::program::build_action,
+		cuda_program_build_action);
+HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::program::run_action,
+		cuda_program_run_action);
+HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::program::set_source_action,
+		cuda_program_set_source_action);
+HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::program::get_streams_action,
+		cuda_get_streams_action);
 HPX_REGISTER_ACTION_DECLARATION(
-	hpx::cuda::server::program::build_action,
-	cuda_program_build_action);
-HPX_REGISTER_ACTION_DECLARATION(
-	hpx::cuda::server::program::run_action,
-	cuda_program_run_action);
-HPX_REGISTER_ACTION_DECLARATION(
-	hpx::cuda::server::program::set_source_action,
-	cuda_program_set_source_action);
-
+		hpx::cuda::server::program::create_stream_action,
+		cuda_create_stream_action);
 
 #endif //PROGRAM_2_HPP

@@ -94,16 +94,14 @@ public:
 
 	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
 			std::string modulename, hpx::cuda::server::program::Dim3 grid,
-			hpx::cuda::server::program::Dim3 block, unsigned int stream = 0) {
+			hpx::cuda::server::program::Dim3 block,
+			unsigned int stream = 0) {
 
 		HPX_ASSERT(this->get_gid());
 
 		std::vector<hpx::naming::id_type> args_id;
 
-
 		for (unsigned int i = 0; i < args.size(); i++) {
-
-			//const hpx::cuda::buffer& tmp = args[i];
 
 			args_id.push_back(args[i].get_id());
 		}
@@ -113,6 +111,34 @@ public:
 				grid, block, stream);
 
 	}
+
+	/**
+	 * \brief This method returns the number of streams at this device
+	 *
+	 * \return Future containing the number of streams created on the device
+	 *
+	 */
+
+	hpx::lcos::future<unsigned int> get_streams() {
+		HPX_ASSERT(this->get_gid());
+		typedef server::program::get_streams_action action_type;
+		return hpx::async<action_type>(this->get_gid());
+
+	}
+
+	/**
+	 * \brief This method returns the id of this created stream at the device
+	 *
+	 * \return Future containing the streams id
+	 *
+	 */
+
+	hpx::lcos::future<unsigned int> create_stream() {
+		HPX_ASSERT(this->get_gid());
+		typedef server::program::create_stream_action action_type;
+		return hpx::async<action_type>(this->get_gid());
+	}
+
 };
 }
 }
