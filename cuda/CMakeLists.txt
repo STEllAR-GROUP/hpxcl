@@ -12,10 +12,10 @@ cuda_add_library(cuda_kernels cuda/kernel.cu)
 add_definitions(-DHPX_CUDA_MODULE_EXPORTS)
 include_directories(${PROJECT_SOURCE_DIR})
 
-add_hpx_component(cuda
+add_hpx_component(libhpx_cuda
     AUTOGLOB
     ESSENTIAL
     COMPONENT_DEPENDENCIES iostreams)
 
-target_link_libraries(cuda_component
+target_link_libraries(libhpx_cuda_component
     ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} ${CUDA_NVRTC_LIB})

@@ -11,7 +11,7 @@
 //#include "cuda/fwd_declarations.hpp"
 #include "cuda/export_definitions.hpp"
 #include "cuda/server/get_devices.hpp"
-#include "cuda.hpp"
+#include "hpx_cuda.hpp"
 
 #include <cuda.h>
 

@@ -9,7 +9,7 @@
 #include <hpx/include/components.hpp>
 
 #include "cuda/fwd_declarations.hpp"
-#include "cuda.hpp"
+#include "hpx_cuda.hpp"
 #include "cuda/cuda_error_handling.hpp"
 #include "cuda/export_definitions.hpp"
 

@@ -8,7 +8,7 @@
 #include <hpx/lcos/future.hpp>
 #include <hpx/lcos/wait_each.hpp>
 
-#include "../../cuda.hpp"
+#include "../../hpx_cuda.hpp"
 
 #include <unistd.h>
 
