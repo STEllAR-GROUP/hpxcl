@@ -6,7 +6,7 @@
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
-#include "server/get_devices.hpp"
+#include "server/create_devices.hpp"
 #include "server/device.hpp"
 #include "server/buffer.hpp"
 #include "server/program.hpp"
@@ -60,8 +60,8 @@ HPX_REGISTER_ACTION(kernel_type::enqueue_action);
 
 
 // GLOBAL ACTIONS
-HPX_REGISTER_ACTION(hpx::opencl::server::get_devices_action,
-                    hpx_opencl_server_get_devices_action);
+HPX_REGISTER_ACTION(hpx::opencl::server::create_devices_action,
+                    hpx_opencl_server_create_devices_action);
 
 
 

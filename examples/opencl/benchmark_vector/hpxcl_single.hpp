@@ -34,9 +34,9 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
 {
 
     // Query all devices on local node
-    std::vector<device> devices = get_devices( node_id, 
-                                               CL_DEVICE_TYPE_GPU,
-                                               "OpenCL 1.1" ).get();
+    std::vector<device> devices = create_devices( node_id, 
+                                                  CL_DEVICE_TYPE_GPU,
+                                                  "OpenCL 1.1" ).get();
 
 /*
     // print devices

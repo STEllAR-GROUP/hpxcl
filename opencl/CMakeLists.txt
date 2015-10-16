@@ -35,7 +35,7 @@ add_hpx_component(opencl
    ESSENTIAL
    SOURCES  component_definitions.cpp
             device.cpp
-            get_devices.cpp
+            create_devices.cpp
             tools.cpp
             buffer.cpp
             program.cpp
@@ -47,13 +47,13 @@ add_hpx_component(opencl
             server/buffer.cpp
             server/program.cpp
             server/kernel.cpp
-            server/get_devices.cpp
+            server/create_devices.cpp
             server/util/event_map.cpp
             server/util/data_map.cpp
             server/util/event_dependencies.cpp
             server/util/hpx_cl_interop.cpp
    HEADERS  device.hpp
-            get_devices.hpp
+            create_devices.hpp
             export_definitions.hpp
             fwd_declarations.hpp
             tools.hpp
@@ -71,7 +71,7 @@ add_hpx_component(opencl
             server/buffer.hpp
             server/program.hpp
             server/kernel.hpp
-            server/get_devices.hpp
+            server/create_devices.hpp
             server/util/event_map.hpp
             server/util/data_map.hpp
             server/util/event_dependencies.hpp

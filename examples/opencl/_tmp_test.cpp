@@ -30,13 +30,13 @@ int hpx_main(int argc, char* argv[])
 
 
 	std::vector<device> devices
-            = get_devices(hpx::find_here(),
-             //           CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_ACCELERATOR);
-                        CL_DEVICE_TYPE_ALL, "OpenCL 1.1").get();
+            = create_devices(hpx::find_here(),
+             //              CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_ACCELERATOR);
+                             CL_DEVICE_TYPE_ALL, "OpenCL 1.1").get();
 
     if(devices.size() < 1)
     {
-        devices = hpx::opencl::get_devices(hpx::find_here(),
+        devices = hpx::opencl::create_devices(hpx::find_here(),
                         CL_DEVICE_TYPE_CPU, "OpenCL 1.1").get();
     }
 

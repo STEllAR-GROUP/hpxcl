@@ -42,8 +42,8 @@ int main()
             event_type;
 
         auto devices =
-            hpx::opencl::get_all_devices( CL_DEVICE_TYPE_ALL,
-                                          "OpenCL 1.1" ).get();
+            hpx::opencl::create_all_devices( CL_DEVICE_TYPE_ALL,
+                                             "OpenCL 1.1" ).get();
         HPX_ASSERT(!devices.empty());
         hpx::opencl::device device = devices[0];
 
