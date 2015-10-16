@@ -121,6 +121,7 @@ hpx::opencl::server::create_devices(cl_device_type device_type,
             std::size_t version_string_length;
             err = clGetDeviceInfo(device, CL_DEVICE_VERSION, 0, NULL,
                                                        &version_string_length);
+            cl_ensure(err, "clGetDeviceInfo()");
 
             // Get OpenCL Version string
             std::vector<char> version_string_arr(version_string_length);
@@ -128,6 +129,7 @@ hpx::opencl::server::create_devices(cl_device_type device_type,
                                     version_string_length,
                                     version_string_arr.data(),
                                     NULL);
+            cl_ensure(err, "clGetDeviceInfo()");
 
             // Convert to std::string
             std::size_t length = 0;
