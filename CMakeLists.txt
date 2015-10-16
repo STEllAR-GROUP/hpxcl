@@ -110,9 +110,6 @@ if(HPX_BUILD_TESTS)
   enable_testing()
   include(CTest)
 
-  add_custom_command(TARGET tests POST_BUILD
-    COMMAND ctest --output-on-failure)
-
   include_directories(tests)
   add_subdirectory(tests)
 else()
