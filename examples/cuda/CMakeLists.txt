@@ -21,8 +21,7 @@ foreach(example_program ${example_programs})
  # add example executable
   add_hpx_executable(${example_program}
                      SOURCES ${sources}
-                     DEPENDENCIES libhpx_cuda_component
-                     COMPONENT_DEPENDENCIES iostreams
+                     COMPONENT_DEPENDENCIES iostreams cuda
                      FOLDER "Examples/CUDA/${example_program}")
 
  # add a custom target for this example
