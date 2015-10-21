@@ -12,19 +12,16 @@ cuda_add_library(cuda_kernels cuda/kernel.cu)
 add_definitions(-DHPX_CUDA_MODULE_EXPORTS)
 include_directories(${PROJECT_SOURCE_DIR})
 
-add_hpx_component(libhpx_cuda
+add_hpx_component(cuda
     AUTOGLOB
     ESSENTIAL
-    COMPONENT_DEPENDENCIES iostreams)
+    COMPONENT_DEPENDENCIES iostreams
+    DEPENDENCIES ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} ${CUDA_NVRTC_LIB})
 
-target_link_libraries(libhpx_cuda_component
-    ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} ${CUDA_NVRTC_LIB})
-    
 #Add installation of the header files
 install(FILES ${CMAKE_SOURCE_DIR}/hpx_cuda.hpp DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/cuda/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/cuda 
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/cuda/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/cuda
     FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "server" EXCLUDE 
-    PATTERN "CMakeFiles" EXCLUDE 
+    PATTERN "CMakeFiles" EXCLUDE
    )
 
