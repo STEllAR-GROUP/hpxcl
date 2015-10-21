@@ -16,12 +16,15 @@ add_hpx_component(cuda
     AUTOGLOB
     ESSENTIAL
     COMPONENT_DEPENDENCIES iostreams
-    DEPENDENCIES ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} ${CUDA_NVRTC_LIB})
+    DEPENDENCIES ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} ${CUDA_NVRTC_LIB}
+    FOLDER "Components/CUDA")
 
-#Add installation of the header files
-install(FILES ${CMAKE_SOURCE_DIR}/hpx_cuda.hpp DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/cuda/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/cuda
+# Add installation of the header files
+install(FILES
+    ${CMAKE_SOURCE_DIR}/hpx_cuda.hpp
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/cuda/
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/cuda
     FILES_MATCHING PATTERN "*.hpp"
-    PATTERN "CMakeFiles" EXCLUDE
-   )
+    PATTERN "CMakeFiles" EXCLUDE)
 

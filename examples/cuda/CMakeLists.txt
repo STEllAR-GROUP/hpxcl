@@ -17,14 +17,15 @@ foreach(example_program ${example_programs})
 
   source_group("Source Files" FILES ${sources})
 
- include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../..)   
- # add example executable
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../..)
+  # add example executable
   add_hpx_executable(${example_program}
                      SOURCES ${sources}
-                     COMPONENT_DEPENDENCIES iostreams cuda
+                     COMPONENT_DEPENDENCIES iostreams cuda'
+                     DEPENDENCIES ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY}
                      FOLDER "Examples/CUDA/${example_program}")
 
- # add a custom target for this example
+  # add a custom target for this example
   add_hpx_pseudo_target(examples.cuda.${example_program})
 
   # make pseudo-targets depend on master pseudo-target
@@ -34,8 +35,5 @@ foreach(example_program ${example_programs})
   # add dependencies to pseudo-target
   add_hpx_pseudo_dependencies(examples.cuda.${example_program}
                               ${example_program}_exe)
-
-  target_link_libraries(${example_program}_exe
-      ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY})
 
 endforeach()

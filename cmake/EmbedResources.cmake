@@ -6,7 +6,7 @@ add_executable(embed_resources ${CMAKE_CURRENT_LIST_DIR}/EmbedResources.cpp)
 function(embed_resources)
     set(SOLO_VARS OUTPUT NAMESPACE)
     cmake_parse_arguments(EMBED_RESOURCES "" "${SOLO_VARS}" "SOURCES" ${ARGN})
-    
+
     if("${EMBED_RESOURCES_OUTPUT}" STREQUAL "")
         message(WARNING "embed_resources needs an OUTPUT parameter!")
         return()
@@ -14,7 +14,7 @@ function(embed_resources)
 
     set(OUTPUT_FILES "")
     foreach(RESOURCE_FILE ${EMBED_RESOURCES_SOURCES})
-        
+
         # set up input and output variables
         get_filename_component(RESOURCE_PATH "${RESOURCE_FILE}" PATH)
         get_filename_component(RESOURCE_NAME "${RESOURCE_FILE}" NAME)
@@ -30,7 +30,7 @@ function(embed_resources)
             DEPENDS embed_resources
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${RESOURCE_PATH}"
         )
-        
+
         list(APPEND OUTPUT_FILES "${OUTPUT_FILE}")
     endforeach()
 
