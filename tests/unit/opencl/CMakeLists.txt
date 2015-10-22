@@ -16,6 +16,7 @@ set(tests
     data_map
     dynamic_overloads
     kernel
+    serialize
    )
 
 

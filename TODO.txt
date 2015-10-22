@@ -14,5 +14,3 @@
         - unit tests
         - local case
         - remote case
-
-- prevent initialization of unneeded devices
