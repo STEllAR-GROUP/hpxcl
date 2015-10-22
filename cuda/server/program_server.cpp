@@ -70,7 +70,7 @@ void program::build(std::vector<std::string> compilerFlags,
 		compilerFlags.push_back("-lineinfo");
 	}
 
-	nvrtcCreateProgram(&(this->prog), this->kernel_source.c_str(),
+	nvrtcCreateProgram(&prog, this->kernel_source.c_str(),
 			filename.c_str(), 0, NULL, NULL);
 	checkCudaError("Create Program");
 	const char * opts[compilerFlags.size()];
@@ -80,7 +80,8 @@ void program::build(std::vector<std::string> compilerFlags,
 		i++;
 	}
 
-	nvrtcResult compileResult = nvrtcCompileProgram(this->prog,
+
+	nvrtcResult compileResult = nvrtcCompileProgram(prog,
 			compilerFlags.size(), opts);
 
 	if (compileResult != NVRTC_SUCCESS) {

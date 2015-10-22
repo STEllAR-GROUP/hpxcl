@@ -84,6 +84,7 @@ public:
 
 HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::program::build_action,
 		cuda_program_build_action);
+HPX_ACTION_USES_MEDIUM_STACK(hpx::cuda::server::program::build_action);
 HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::program::run_action,
 		cuda_program_run_action);
 HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::program::set_source_action,
