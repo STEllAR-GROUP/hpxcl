@@ -204,6 +204,28 @@ namespace opencl {
             hpx::naming::id_type device_gid;
             bool is_local;
 
+        private:
+            // serialization support
+            friend class hpx::serialization::access;
+
+            template <typename Archive>
+            void load(Archive & ar, unsigned)
+            {
+                ar >> hpx::serialization::base_object<base_type>(*this);
+                ar >> device_gid;
+                is_local =
+                    (hpx::get_colocation_id_sync(get_id()) == hpx::find_here());
+            }
+
+            template <typename Archive>
+            void save(Archive & ar, unsigned) const
+            {
+                ar << hpx::serialization::base_object<base_type>(*this);
+                ar << device_gid;
+            }
+
+            HPX_SERIALIZATION_SPLIT_MEMBER()
+
     };
 
 }}

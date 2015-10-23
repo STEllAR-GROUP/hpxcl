@@ -147,6 +147,17 @@ namespace opencl {
         private:
             hpx::naming::id_type device_gid;
 
+        private:
+            // serialization support
+            friend class hpx::serialization::access;
+
+            template <typename Archive>
+            void serialize(Archive & ar, unsigned)
+            {
+                ar & hpx::serialization::base_object<base_type>(*this);
+                ar & device_gid;
+            }
+
     };
 
 }}
