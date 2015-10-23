@@ -1,7 +1,5 @@
 - move deadlock.cpp to regression tests
 
-- Add serialization to all client classes
-
 - Add serializaton to hpxcl futures, via
     - hpx::opencl::get_event_id(future)
     - add event_id
