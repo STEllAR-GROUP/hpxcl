@@ -5,18 +5,6 @@ cmake_minimum_required(VERSION 2.8.4 FATAL_ERROR)
 #This project is C++ based.
 project(hpxcl CXX)
 
-# Find and include HPX settings
-if(NOT HPX_ROOT)
-    #  message("HPX_DIR not set, checking environment variables...")
-    #  set(HPX_DIR $ENV{HPX_ROOT}/lib/cmake/hpx)
-    #  if(NOT DEFINED HPX_DIR)
-    #message(FATAL_ERROR "HPX_ROOT not set, unable to find HPX!")
-    #  endif()
-    set(HPX_ROOT /usr/local)
-endif()
-
-set(HPX_DIR "${HPX_ROOT}/lib/cmake/hpx")
-
 # add our cmake path
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH} )
 
@@ -24,12 +12,21 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH} )
 # Include hpx
 #
 
+if(HPX_ROOT)
+    set(HPX_DIR "${HPX_ROOT}/lib/cmake/HPX")
+endif()
+
 #Instruct cmake to find the HPX settings
+if(HPX_DIR)
+    message(STATUS "Searching for HPX in \"${HPX_DIR}\" ...")
+endif()
+
 find_package(HPX REQUIRED)
 set(HPX_RPATH "${CMAKE_BINARY_DIR}/lib/hpx:${HPX_RPATH}:${CMAKE_INSTALL_PREFIX}/lib/hpx")
 include_directories(${HPX_INCLUDE_DIR})
 link_directories(${HPX_LIBRARY_DIR})
 
+message(STATUS "Found HPX: ${HPX_PREFIX}")
 
 ########################################################################
 # enable resource precompiler
@@ -99,7 +96,7 @@ endif()
 
 if(HPX_BUILD_TESTS)
 
-  file(COPY ${HPX_ROOT}/bin/hpxrun.py DESTINATION ${CMAKE_BINARY_DIR}/bin)
+  file(COPY ${HPX_PREFIX}/bin/hpxrun.py DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
   hpx_option(HPX_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
   hpx_option(HPX_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
