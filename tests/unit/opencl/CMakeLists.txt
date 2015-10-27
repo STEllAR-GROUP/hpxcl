@@ -43,7 +43,7 @@ foreach(test ${tests})
 
   add_hpx_unit_test("opencl" ${test})
   if(DEFINED ENV{CIRCLECI})
-    message(WARNING "CircleCI detected. Disabling distributed tests ...")
+    message(STATUS "WARNING: CircleCI detected. Disabling test ${test}_remote ...")
   else()
     add_hpx_unit_test("opencl" ${test}_remote EXECUTABLE ${test}
                                               LOCALITIES 2
