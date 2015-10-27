@@ -5,7 +5,7 @@
 
 set(subdirs
     mandelbrot
-#    benchmark_vector
+    benchmark_vector
     )
 
 foreach(subdir ${subdirs})

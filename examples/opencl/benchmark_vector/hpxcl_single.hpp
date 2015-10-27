@@ -47,10 +47,10 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
         device cldevice = devices[i];
 
         // Query name
-        std::string device_name = device::device_info_to_string(
-                                    cldevice.get_device_info(CL_DEVICE_NAME));
-        std::string device_vendor = device::device_info_to_string(
-                                    cldevice.get_device_info(CL_DEVICE_VENDOR));
+        std::string device_name =
+            cldevice.get_device_info<CL_DEVICE_NAME>().get();
+        std::string device_vendor =
+            cldevice.get_device_info<CL_DEVICE_VENDOR>().get();
 
         hpx::cout << i << ": " << device_name << " (" << device_vendor << ")"
                   << hpx::endl;
@@ -61,7 +61,7 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
     size_t device_num;
     hpx::cout << "Choose device: " << hpx::endl;
     std::cin >> device_num;
-    if(device_num < 0 || device_num >= devices.size())
+    if(device_num >= devices.size())
         exit(0);
 
     // Select a device
@@ -76,10 +76,10 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
         device cldevice = devices[device_id];
 
         // Query name
-        std::string device_name = device::device_info_to_string(
-                                    cldevice.get_device_info(CL_DEVICE_NAME));
-        std::string device_vendor = device::device_info_to_string(
-                                    cldevice.get_device_info(CL_DEVICE_VENDOR));
+        std::string device_name =
+            cldevice.get_device_info<CL_DEVICE_NAME>().get();
+        std::string device_vendor =
+            cldevice.get_device_info<CL_DEVICE_VENDOR>().get();
 
         hpx::cout << "    " << device_name << " (" << device_vendor << ")"
                   << hpx::endl;
@@ -90,8 +90,11 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
     hpxcl_single_device = devices[device_id];
 
     // Create program
-    hpxcl_single_program = hpxcl_single_device.create_program_with_source(
-                                                                    gpu_code);
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+    buffer_type gpu_code_buffer( gpu_code, sizeof(gpu_code),
+                                 buffer_type::init_mode::reference );
+    hpxcl_single_program =
+        hpxcl_single_device.create_program_with_source( gpu_code_buffer );
 
     // Build program
     hpxcl_single_program.build();
@@ -167,42 +170,35 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
         hpxcl_single_log_kernel.set_arg_async(1, hpxcl_single_buffer_p));
     
     // wait for function calls to trigger
-    BOOST_FOREACH(shared_future<void> & future, set_arg_futures)
-    {
-        future.wait();
-    }
+    hpx::wait_all( set_arg_futures );
     
 
 }
 
-static boost::shared_ptr<std::vector<char>>
-hpxcl_single_calculate(std::vector<float> &a,
-                       std::vector<float> &b,
-                       std::vector<float> &c,
+static hpx::serialization::serialize_buffer<float>
+hpxcl_single_calculate(hpx::serialization::serialize_buffer<float> a,
+                       hpx::serialization::serialize_buffer<float> b,
+                       hpx::serialization::serialize_buffer<float> c,
                        double* t_nonblock,
-                       double* t_sync,
                        double* t_finish)
 {
     // do nothing if matrices are wrong
     if(a.size() != b.size() || b.size() != c.size())
     {
-        return boost::shared_ptr<std::vector<char>>();
+        return hpx::serialization::serialize_buffer<float>();
     }
 
     size_t size = a.size();
 
     // copy data to gpu
-    shared_future<event> write_a_event = 
-           hpxcl_single_buffer_a.enqueue_write(0, size*sizeof(float), a.data());
-    shared_future<event> write_b_event =
-           hpxcl_single_buffer_b.enqueue_write(0, size*sizeof(float), b.data());
-    shared_future<event> write_c_event =
-           hpxcl_single_buffer_c.enqueue_write(0, size*sizeof(float), c.data());
+    auto write_a_event = hpxcl_single_buffer_a.enqueue_write( 0, a );
+    auto write_b_event = hpxcl_single_buffer_b.enqueue_write( 0, b );
+    auto write_c_event = hpxcl_single_buffer_c.enqueue_write( 0, c );
 
     // wait for write to finish
-    write_a_event.get().await();
-    write_b_event.get().await();
-    write_c_event.get().await();
+    write_a_event.wait();
+    write_b_event.wait();
+    write_c_event.wait();
 
     // start time measurement
     timer_start();
@@ -213,63 +209,48 @@ hpxcl_single_calculate(std::vector<float> &a,
     dim[0].size = size;
 
     // run exp kernel
-    shared_future<event> kernel_exp_event =
-                             hpxcl_single_exp_kernel.enqueue(dim, write_b_event);
+    auto kernel_exp_event = hpxcl_single_exp_kernel.enqueue(dim, write_b_event);
 
     // run add kernel
-    std::vector<shared_future<event>> add_dependencies;
-    add_dependencies.push_back(kernel_exp_event);
-    add_dependencies.push_back(write_a_event);
-    shared_future<event> kernel_add_event = 
-                          hpxcl_single_add_kernel.enqueue(dim, add_dependencies);
+    auto kernel_add_event = hpxcl_single_add_kernel.enqueue( dim,
+                                                             kernel_exp_event,
+                                                             write_a_event );
 
     // run dbl kernel
-    shared_future<event> kernel_dbl_event =
-                             hpxcl_single_dbl_kernel.enqueue(dim, write_c_event);
+    auto kernel_dbl_event = hpxcl_single_dbl_kernel.enqueue( dim,
+                                                             write_c_event );
 
     // run mul kernel
-    std::vector<shared_future<event>> mul_dependencies;
-    mul_dependencies.push_back(kernel_add_event);
-    mul_dependencies.push_back(kernel_dbl_event);
-    shared_future<event> kernel_mul_event = 
-                          hpxcl_single_mul_kernel.enqueue(dim, mul_dependencies);
+    auto kernel_mul_event = hpxcl_single_mul_kernel.enqueue( dim,
+                                                             kernel_add_event,
+                                                             kernel_dbl_event );
 
     // run log kernel
-    shared_future<event> kernel_log_event_future = 
-                          hpxcl_single_log_kernel.enqueue(dim, kernel_mul_event);
+    auto kernel_log_event = hpxcl_single_log_kernel.enqueue( dim,
+                                                             kernel_mul_event);
 
     ////////// UNTIL HERE ALL CALLS WERE NON-BLOCKING /////////////////////////
 
     // get time of non-blocking calls
     *t_nonblock = timer_stop();
 
-    // wait for all nonblocking calls to finish
-    event kernel_log_event = kernel_log_event_future.get();
-
-    // get time of synchronization
-    *t_sync = timer_stop();
-
     // wait for the end of the execution
-    kernel_log_event.await();
+    kernel_log_event.wait();
 
     // get total time of execution
     *t_finish = timer_stop();
  
     // enqueue result read
-    shared_future<event> read_event_future = 
-                       hpxcl_single_buffer_z.enqueue_read(0, size*sizeof(float),
-                                                          kernel_log_event);
+    typedef hpx::serialization::serialize_buffer<float> buffer_type;
+    buffer_type result_buffer ( new float[size], size,
+                                buffer_type::init_mode::take );
+    auto read_event =
+        hpxcl_single_buffer_z.enqueue_read( 0, result_buffer,
+                                            kernel_log_event );
 
-    // wait for enqueue_read to return the event
-    event read_event = read_event_future.get();
-
-   // wait for calculation to complete and return data
-    boost::shared_ptr<std::vector<char>> data_ptr = read_event.get_data().get();
+    // wait for calculation to complete and return data
+    return read_event.get();
    
-    // return the computed data
-    return data_ptr;
-
-
 }
 
 static void hpxcl_single_shutdown()

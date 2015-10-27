@@ -13,21 +13,15 @@ static hpx::naming::id_type hpx_get_remote_node()
 
     // Get all HPX localities
     std::vector<hpx::naming::id_type> localities =
-                    hpx::find_all_localities();
+                    hpx::find_remote_localities();
 
-    // Get local HPX id
-    hpx::naming::id_type local_id = hpx::find_here();
-
-    // Find the node that is NOT the local id
-    BOOST_FOREACH(hpx::naming::id_type const& node_id, localities)
-    {
-        if(node_id != local_id)
-            return node_id;
+    if(localities.empty()){
+        hpx::cout << "ERROR: No remote node found!" << hpx::endl;
+        return hpx::naming::id_type();
     }
 
-    hpx::cout << "ERROR: No remote node found!" << hpx::endl;
+    return localities[0];
 
-    return hpx::naming::id_type();
 }
 
 

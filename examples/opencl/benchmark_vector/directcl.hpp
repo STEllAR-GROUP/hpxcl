@@ -97,39 +97,39 @@ static cl_device_id directcl_choose_device()
         exit(1);
     }
 
-    // Print platform name
-    size_t platform_id = 0;
-    hpx::cout << "Platform:" << hpx::endl;
-    {
-        char platformName[100];
-        char platformVendor[100];
-
-        ret = clGetPlatformInfo(platforms[platform_id], CL_PLATFORM_NAME, 100,
-                                platformName, NULL);
-        directcl_check(ret);
-        ret = clGetPlatformInfo(platforms[platform_id], CL_PLATFORM_VENDOR, 100,
-                                platformVendor, NULL);
-        directcl_check(ret);
-
-        hpx::cout << "    " << platformName << " (" << platformVendor << ")"
-                  << hpx::endl;
-    }
-    
     // Select the platform
-    cl_platform_id platform = platforms[platform_id];
+    cl_uint num_devices = 0;
+    cl_platform_id platform = 0;
+    for(auto & current_platform : platforms){
+
+        // get number of device ids
+        ret = clGetDeviceIDs( current_platform, CL_DEVICE_TYPE_GPU, 0, NULL,
+                              &num_devices);
+        if(ret == CL_DEVICE_NOT_FOUND) continue;
+        directcl_check(ret);
 
 
+        // Print platform name
+        hpx::cout << "Platform:" << hpx::endl;
+        {
+            char platformName[100];
+            char platformVendor[100];
 
-    // get number of device ids
-    cl_uint num_devices;
-    ret = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, NULL, &num_devices);
-    directcl_check(ret);
+            ret = clGetPlatformInfo( current_platform, CL_PLATFORM_NAME, 100,
+                                     platformName, NULL );
+            directcl_check(ret);
+            ret = clGetPlatformInfo( current_platform, CL_PLATFORM_VENDOR, 100,
+                                     platformVendor, NULL );
+            directcl_check(ret);
 
-    // get device ids
-    std::vector<cl_device_id> devices(num_devices);
-    ret = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, num_devices, devices.data(),
-                         NULL);
+            hpx::cout << "    " << platformName << " (" << platformVendor << ")"
+                      << hpx::endl;
+        }
+    
+        platform = current_platform;
+        break;
 
+    }
 
     // Ensure that we found a platforms
     if(num_devices < 1)
@@ -137,6 +137,11 @@ static cl_device_id directcl_choose_device()
         hpx::cout << "No OpenCL devices found!" << hpx::endl;
         exit(1);
     }
+
+    // get device ids
+    std::vector<cl_device_id> devices(num_devices);
+    ret = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, num_devices, devices.data(),
+                         NULL);
 
     // Print devices
     hpx::cout << "Device:" << hpx::endl;
@@ -171,8 +176,10 @@ static void directcl_initialize(size_t vector_size)
     directcl_check(err);
 
     // Create program
-    directcl_program = clCreateProgramWithSource(directcl_context, 1, &gpu_code,
-                                                 NULL, &err);
+    const char* gpu_code_ptr = gpu_code;
+    directcl_program = clCreateProgramWithSource( directcl_context, 1,
+                                                  &gpu_code_ptr,
+                                                  NULL, &err);
     directcl_check(err);
 
     // Build program
@@ -274,9 +281,9 @@ static void directcl_initialize(size_t vector_size)
 
 
 static boost::shared_ptr<std::vector<float>>
-directcl_calculate(std::vector<float> a,
-                   std::vector<float> b,
-                   std::vector<float> c,
+directcl_calculate(hpx::serialization::serialize_buffer<float> a,
+                   hpx::serialization::serialize_buffer<float> b,
+                   hpx::serialization::serialize_buffer<float> c,
                    double* t_nonblock,
                    double* t_total)
 {

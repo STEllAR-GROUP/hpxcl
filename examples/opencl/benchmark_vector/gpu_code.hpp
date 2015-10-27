@@ -7,7 +7,7 @@
 #define BENCHMARK_GPU_CODE_H_
 
 
-static const char* gpu_code =
+static const char gpu_code[] =
 "                                                                   \n"
 "   __kernel void logn(__global float* out,__global float* in)      \n"
 "   {                                                               \n"

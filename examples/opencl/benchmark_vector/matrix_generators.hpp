@@ -17,7 +17,9 @@ static bool random_initialized = false;
 
 // generates a random float array of given size.
 // generated values will be >= 0.5f and <= 1.5f
-static std::vector<float> generate_input_matrix(size_t size)
+static
+hpx::serialization::serialize_buffer<float>
+generate_input_matrix(size_t size)
 {
 
     // initialize random generator if necessary
@@ -28,7 +30,8 @@ static std::vector<float> generate_input_matrix(size_t size)
     }
 
     // allocate output matrix
-    std::vector<float> ret(size);
+    typedef hpx::serialization::serialize_buffer<float> buffer_type;
+    buffer_type ret( new float[size], size, buffer_type::init_mode::take );
 
     // fill output matrix
     for(size_t i = 0; i < size; i++)
@@ -42,10 +45,12 @@ static std::vector<float> generate_input_matrix(size_t size)
 }
 
 // calculates the result for verification
-static std::vector<float> calculate_result(std::vector<float> a,
-                                           std::vector<float> b,
-                                           std::vector<float> c,
-                                           double* time)
+static
+hpx::serialization::serialize_buffer<float>
+calculate_result( hpx::serialization::serialize_buffer<float> a,
+                  hpx::serialization::serialize_buffer<float> b,
+                  hpx::serialization::serialize_buffer<float> c,
+                  double* time)
 {
 
 
@@ -57,7 +62,8 @@ static std::vector<float> calculate_result(std::vector<float> a,
     size_t size = a.size();
 
     // allocate output matrix
-    std::vector<float> res(size);
+    typedef hpx::serialization::serialize_buffer<float> buffer_type;
+    buffer_type res( new float[size], size, buffer_type::init_mode::take );
     for(size_t i = 0; i < size; i++)
     {
         res[i] = 0.0f;
@@ -82,8 +88,8 @@ static std::vector<float> calculate_result(std::vector<float> a,
 }
 
 // verifies the result
-static bool check_for_correct_result(float* res, size_t res_size,
-                                     float* comp, size_t comp_size)
+static bool check_for_correct_result( float* res, size_t res_size,
+                                      float* comp, size_t comp_size)
 {
 
     hpx::cout << "Verifying result ... " << hpx::endl;
