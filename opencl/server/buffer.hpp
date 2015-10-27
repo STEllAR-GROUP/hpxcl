@@ -119,6 +119,16 @@ namespace hpx { namespace opencl{ namespace server{
                            std::vector<hpx::naming::gid_type> &&
                                 dependency_devices );
 
+        // Copies data from this buffer to a remote buffer
+        void enqueue_send_rect(
+                           hpx::naming::id_type dst,
+                           hpx::naming::id_type && src_event,
+                           hpx::naming::id_type && dst_event,
+                           rect_props rect_properties,
+                           std::vector<hpx::naming::id_type> && dependencies,
+                           std::vector<hpx::naming::gid_type> &&
+                                dependency_devices );
+
         // Different versions of enqueue_send, optimized for different
         // runtime scenarios
         void send_bruteforce(
@@ -140,12 +150,28 @@ namespace hpx { namespace opencl{ namespace server{
                     std::size_t size,
                     std::vector<hpx::naming::id_type> && src_dependencies,
                     std::vector<hpx::naming::id_type> && dst_dependencies );
+        void send_rect_bruteforce(
+                    hpx::naming::id_type && dst,
+                    hpx::naming::id_type && src_event,
+                    hpx::naming::id_type && dst_event,
+                    rect_props && rect_properties,
+                    std::vector<hpx::naming::id_type> && src_dependencies,
+                    std::vector<hpx::naming::id_type> && dst_dependencies );
+        void send_rect_direct(
+                    hpx::naming::id_type && dst,
+                    boost::shared_ptr<hpx::opencl::server::buffer> && dst_buffer,
+                    hpx::naming::id_type && src_event,
+                    hpx::naming::id_type && dst_event,
+                    rect_props && rect_properties,
+                    std::vector<hpx::naming::id_type> && src_dependencies,
+                    std::vector<hpx::naming::id_type> && dst_dependencies );
 
 
     HPX_DEFINE_COMPONENT_ACTION(buffer, size);
     HPX_DEFINE_COMPONENT_ACTION(buffer, get_parent_device_id);
     HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read);
     HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_send);
+    HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_send_rect);
 
     // Actions with template arguments (see enqueue_write<>() above) require
     // special type definitions. The simplest way to define such an action type
@@ -230,6 +256,7 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, size);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_read);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_send);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_send_rect);
 HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer, enqueue_write);
 HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer, enqueue_write_rect);
 HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,

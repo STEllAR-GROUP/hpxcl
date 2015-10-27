@@ -202,6 +202,8 @@ buffer::send_bruteforce( hpx::naming::id_type && dst,
                       std::move(dst_dependencies) );
 }
 
+
+
 void
 buffer::send_direct( hpx::naming::id_type && dst,
                      boost::shared_ptr<hpx::opencl::server::buffer> && dst_buffer,
@@ -252,6 +254,69 @@ buffer::send_direct( hpx::naming::id_type && dst,
     // register the cl_event to both client events
     this->parent_device->register_event(src_event_gid, return_event);
     dst_buffer->parent_device->register_event(dst_event_gid, return_event);
+
+}
+
+void
+buffer::enqueue_send_rect( hpx::naming::id_type dst,
+                           hpx::naming::id_type && src_event,
+                           hpx::naming::id_type && dst_event,
+                           rect_props rect_properties,
+                           std::vector<hpx::naming::id_type> && dependencies,
+                           std::vector<hpx::naming::gid_type> &&
+                                dependency_devices )
+{
+
+    HPX_ASSERT(dependencies.size() == dependency_devices.size());
+
+    // query the location of the destination
+    auto dst_location_future = hpx::get_colocation_id(dst);
+
+    // split between src_dependencies and dst_dependencies
+    std::vector<hpx::naming::id_type> src_dependencies;
+    std::vector<hpx::naming::id_type> dst_dependencies;
+    hpx::naming::gid_type src_device = parent_device_id.get_gid();
+    std::vector<hpx::naming::id_type>::iterator it = dependencies.begin();
+    for(const auto& device : dependency_devices){
+        if(device == src_device){
+            std::move(it, it+1, std::back_inserter(src_dependencies));
+        } else {
+            std::move(it, it+1, std::back_inserter(dst_dependencies));
+        }
+        it++;
+    }
+
+    // get the location of the destination
+    hpx::naming::id_type dst_location = dst_location_future.get();
+    hpx::naming::id_type src_location = hpx::find_here();
+
+    // choose which function to run
+    // optimization for context internal copies
+    if(dst_location == src_location){
+        auto dst_buffer = hpx::get_ptr<hpx::opencl::server::buffer>(dst).get();
+
+        cl_context src_context = this->parent_device->get_context();
+        cl_context dst_context = dst_buffer->parent_device->get_context();
+
+        if(src_context == dst_context){
+            send_rect_direct( std::move(dst),
+                              std::move(dst_buffer),
+                              std::move(src_event),
+                              std::move(dst_event),
+                              std::move(rect_properties),
+                              std::move(src_dependencies),
+                              std::move(dst_dependencies) );
+            return;
+        }
+    }
+
+    // Always works: the bruteforce method
+    send_rect_bruteforce( std::move(dst),
+                          std::move(src_event),
+                          std::move(dst_event),
+                          std::move(rect_properties),
+                          std::move(src_dependencies),
+                          std::move(dst_dependencies) );
 
 }
 

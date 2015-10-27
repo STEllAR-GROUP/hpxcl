@@ -37,6 +37,7 @@ HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(buffer_component_type, hpx_opencl_buffer)
 HPX_REGISTER_ACTION(buffer_type::size_action);
 HPX_REGISTER_ACTION(buffer_type::enqueue_read_action);
 HPX_REGISTER_ACTION(buffer_type::enqueue_send_action);
+HPX_REGISTER_ACTION(buffer_type::enqueue_send_rect_action);
 HPX_REGISTER_ACTION(buffer_type::get_parent_device_id_action);
 
 
