@@ -149,6 +149,29 @@ public:
 	}
 
 	/**
+		 * \brief Creates a program from the given source file
+		 *
+		 * This Method creates a program containing the source code. This program is attached to
+		 * this device and all streams are executed there.
+		 *
+		 * \param source The path to the source file
+		 *
+		 * \see Program
+		 */
+		hpx::lcos::future<hpx::cuda::program> create_program_with_file(
+				std::string file) {
+			HPX_ASSERT(this->get_gid());
+
+			std::ifstream stream(file);
+			std::stringstream buffer;
+			buffer << stream.rdbuf();
+
+			typedef server::device::create_program_with_source_action action_type;
+			return hpx::async<action_type>(this->get_gid(), buffer.str());
+		}
+
+
+	/**
 	 * \brief Creates a buffer attached to this device
 	 *
 	 * The methods creates a buffer with the size specified here and allocates this

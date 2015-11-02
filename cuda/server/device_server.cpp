@@ -188,8 +188,6 @@ hpx::cuda::program device::create_program_with_source(std::string source) {
 	return cu_program;
 }
 
-
-
 hpx::cuda::buffer device::create_buffer(size_t size) {
 	typedef hpx::cuda::server::buffer buffer_type;
 

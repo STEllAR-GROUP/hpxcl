@@ -91,6 +91,8 @@ public:
 
     hpx::cuda::program create_program_with_source(std::string source);
 
+    hpx::cuda::program create_program_with_file(std::string file);
+
     hpx::cuda::buffer create_buffer(size_t size);
 
     HPX_DEFINE_COMPONENT_ACTION(device, get_cuda_info);
