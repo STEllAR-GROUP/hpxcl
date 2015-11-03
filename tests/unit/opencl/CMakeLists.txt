@@ -9,12 +9,15 @@ set(tests
     initialization
     buffer_read_write
     buffer_rect_write
+    buffer_rect_read
+    buffer_rect_send
     event
     info
     event_map
     data_map
     dynamic_overloads
     kernel
+    serialize
    )
 
 
@@ -40,9 +43,13 @@ foreach(test ${tests})
                      FOLDER "Tests/Unit/OpenCL")
 
   add_hpx_unit_test("opencl" ${test})
-  add_hpx_unit_test("opencl" ${test}_remote EXECUTABLE ${test}
-                                            LOCALITIES 2
-                                            THREADS_PER_LOCALITY 2)
+  if(DEFINED ENV{CIRCLECI})
+    message(STATUS "WARNING: CircleCI detected. Disabling test ${test}_remote ...")
+  else()
+    add_hpx_unit_test("opencl" ${test}_remote EXECUTABLE ${test}
+                                              LOCALITIES 2
+                                              THREADS_PER_LOCALITY 2)
+  endif()
 
   # add a custom target for this example
   add_hpx_pseudo_target(tests.unit.opencl.${test})

@@ -6,7 +6,7 @@
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
-#include "server/get_devices.hpp"
+#include "server/create_devices.hpp"
 #include "server/device.hpp"
 #include "server/buffer.hpp"
 #include "server/program.hpp"
@@ -37,6 +37,7 @@ HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(buffer_component_type, hpx_opencl_buffer)
 HPX_REGISTER_ACTION(buffer_type::size_action);
 HPX_REGISTER_ACTION(buffer_type::enqueue_read_action);
 HPX_REGISTER_ACTION(buffer_type::enqueue_send_action);
+HPX_REGISTER_ACTION(buffer_type::enqueue_send_rect_action);
 HPX_REGISTER_ACTION(buffer_type::get_parent_device_id_action);
 
 
@@ -60,8 +61,8 @@ HPX_REGISTER_ACTION(kernel_type::enqueue_action);
 
 
 // GLOBAL ACTIONS
-HPX_REGISTER_ACTION(hpx::opencl::server::get_devices_action,
-                    hpx_opencl_server_get_devices_action);
+HPX_REGISTER_ACTION(hpx::opencl::server::create_devices_action,
+                    hpx_opencl_server_create_devices_action);
 
 
 

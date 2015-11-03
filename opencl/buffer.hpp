@@ -184,6 +184,24 @@ namespace opencl {
                                       std::size_t         size,
                                       Deps &&... dependencies );
 
+            /*
+             *  @name Copies data to another buffer.
+             *
+             *  The buffers do NOT need to be from the same device,
+             *  neither do they have to be on the same node.
+             *
+             *  @param dst          The source buffer.
+             *  @param rect_properties      Parameters of the rectangle to send.
+             *  @return             A future that can be used for synchronization
+             *                      or dependency for other calls.
+             *                  
+             *  @see event
+             */ 
+            template<typename ...Deps>
+            send_result enqueue_send_rect( const hpx::opencl::buffer& dst,
+                                           rect_props rect_properties,
+                                           Deps &&... dependencies );
+
 
             ////////////////////////////////////////////////////////////////////
             // Proxied functions
@@ -200,9 +218,36 @@ namespace opencl {
                                std::size_t && dst_offset,
                                std::size_t && size,
                                hpx::opencl::util::resolved_events && deps );
+
+            send_result
+            enqueue_send_rect_impl( const hpx::opencl::buffer& dst,
+                                    rect_props && rect_properties,
+                                    hpx::opencl::util::resolved_events && deps );
         private:
             hpx::naming::id_type device_gid;
             bool is_local;
+
+        private:
+            // serialization support
+            friend class hpx::serialization::access;
+
+            template <typename Archive>
+            void load(Archive & ar, unsigned)
+            {
+                ar >> hpx::serialization::base_object<base_type>(*this);
+                ar >> device_gid;
+                is_local =
+                    (hpx::get_colocation_id_sync(get_id()) == hpx::find_here());
+            }
+
+            template <typename Archive>
+            void save(Archive & ar, unsigned) const
+            {
+                ar << hpx::serialization::base_object<base_type>(*this);
+                ar << device_gid;
+            }
+
+            HPX_SERIALIZATION_SPLIT_MEMBER()
 
     };
 
@@ -394,6 +439,21 @@ hpx::opencl::buffer::enqueue_send( const hpx::opencl::buffer& dst,
                               std::move(dst_offset),
                               std::move(size),
                               std::move(deps) );
+}
+
+template<typename ...Deps>
+hpx::opencl::buffer::send_result
+hpx::opencl::buffer::enqueue_send_rect( const hpx::opencl::buffer& dst,
+                                        rect_props rect_properties, 
+                                        Deps &&... dependencies )
+{
+    // combine dependency futures in one std::vector
+    using hpx::opencl::util::enqueue_overloads::resolver;
+    auto deps = resolver(std::forward<Deps>(dependencies)...);
+
+    return enqueue_send_rect_impl( dst,
+                                   std::move(rect_properties),
+                                   std::move(deps) );
 }
 
 #endif

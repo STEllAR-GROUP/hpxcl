@@ -33,8 +33,8 @@ int main(int argc, char* argv[])
 {
 
     // Get list of available OpenCL Devices.
-    std::vector<device> devices = get_all_devices(CL_DEVICE_TYPE_ALL,
-                                                  "OpenCL 1.1" ).get();
+    std::vector<device> devices = create_all_devices(CL_DEVICE_TYPE_ALL,
+                                                     "OpenCL 1.1" ).get();
 
     // Check whether there are any devices
     if(devices.size() < 1)

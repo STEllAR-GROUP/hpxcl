@@ -5,7 +5,7 @@
 
 set(subdirs
     mandelbrot
-#    benchmark_vector
+    benchmark_vector
     )
 
 foreach(subdir ${subdirs})
@@ -14,8 +14,6 @@ endforeach()
 
 set(example_programs
     hello_world
-#    _tmp_test
-#    events_and_futures
     list_devices
 )
 

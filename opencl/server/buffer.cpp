@@ -146,7 +146,6 @@ buffer::enqueue_read( hpx::naming::id_type && event_gid,
 
 }
 
-
 void
 buffer::send_bruteforce( hpx::naming::id_type && dst,
                          hpx::naming::id_type && src_event_gid,
@@ -252,6 +251,224 @@ buffer::send_direct( hpx::naming::id_type && dst,
     // register the cl_event to both client events
     this->parent_device->register_event(src_event_gid, return_event);
     dst_buffer->parent_device->register_event(dst_event_gid, return_event);
+
+}
+
+void
+buffer::send_rect_bruteforce( hpx::naming::id_type && dst,
+                              hpx::naming::id_type && src_event_gid,
+                              hpx::naming::id_type && dst_event_gid,
+                              rect_props && rect_properties,
+                              std::vector<hpx::naming::id_type> && src_dependencies,
+                              std::vector<hpx::naming::id_type> && dst_dependencies)
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Read
+    //
+
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+
+    cl_int err;
+    cl_event src_event;
+
+    // retrieve the dependency cl_events
+    util::event_dependencies events( src_dependencies, parent_device.get() );
+
+    // retrieve the command queue
+    cl_command_queue command_queue = parent_device->get_read_command_queue();
+
+    // create new target buffer
+    std::size_t dst_size = rect_properties.size_x * rect_properties.size_y
+                           * rect_properties.size_z;
+    buffer_type data( new char[dst_size], dst_size,
+                      buffer_type::init_mode::take );
+
+    // prepare arguments for OpenCL call
+    std::size_t buffer_origin[] = { rect_properties.src_x,
+                                    rect_properties.src_y,
+                                    rect_properties.src_z };
+    std::size_t host_origin[] = { 0, 0, 0 }; // don't waste space on the host buf
+    std::size_t region[] = { rect_properties.size_x,
+                             rect_properties.size_y,
+                             rect_properties.size_z };
+
+    // run the OpenCL-call
+    err = clEnqueueReadBufferRect(
+                command_queue, device_mem, CL_FALSE,
+                buffer_origin, host_origin, region,
+                rect_properties.src_stride_y,
+                rect_properties.src_stride_z,
+                rect_properties.size_x,
+                rect_properties.size_x * rect_properties.size_y,
+                data.data(),
+                static_cast<cl_uint>(events.size()),
+                events.get_cl_events(), &src_event );
+    cl_ensure(err, "clEnqueueReadBufferRect()");
+
+    // register the cl_event to the client event
+    parent_device->register_event(src_event_gid, src_event);
+
+    // wait for clEnqueueReadBuffer to finish
+    parent_device->wait_for_cl_event(src_event);
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Write
+    //
+
+    rect_props dst_rect_properties (
+        0, 0, 0,
+        rect_properties.dst_x,
+        rect_properties.dst_y,
+        rect_properties.dst_z,
+        rect_properties.size_x,
+        rect_properties.size_y,
+        rect_properties.size_z,
+        rect_properties.size_x,
+        rect_properties.size_x * rect_properties.size_y,
+        rect_properties.dst_stride_y,
+        rect_properties.dst_stride_z );
+
+    typedef hpx::opencl::server::buffer::enqueue_write_rect_action<char> func;
+    hpx::apply<func>( std::move(dst),
+                      std::move(dst_event_gid),
+                      std::move(dst_rect_properties),
+                      data,
+                      std::move(dst_dependencies) );
+}
+
+void
+buffer::send_rect_direct( hpx::naming::id_type && dst,
+                          boost::shared_ptr<hpx::opencl::server::buffer> &&
+                              dst_buffer,
+                          hpx::naming::id_type && src_event_gid,
+                          hpx::naming::id_type && dst_event_gid,
+                          rect_props && rect_properties,
+                          std::vector<hpx::naming::id_type> && src_dependencies,
+                          std::vector<hpx::naming::id_type> && dst_dependencies)
+{
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+
+    cl_int err;
+    cl_event return_event;
+
+    // gather all dependencies from both devices
+    std::vector<cl_event> events;
+    events.reserve(src_dependencies.size() + dst_dependencies.size());
+    for(const auto& id : src_dependencies){
+        events.push_back( parent_device->retrieve_event(id) );
+    }
+    for(const auto& id : dst_dependencies){
+        events.push_back( dst_buffer->parent_device->retrieve_event(id) );
+    }
+
+    // Create a pointer that is either a pointer to the data or NULL
+    cl_event* events_ptr = NULL;
+    if(!events.empty()){
+        events_ptr = events.data();
+    }
+
+    // retrieve the command queue
+    cl_command_queue command_queue = parent_device->get_write_command_queue();
+
+    // prepare arguments for OpenCL call
+    std::size_t src_origin[] = { rect_properties.src_x,
+                                 rect_properties.src_y,
+                                 rect_properties.src_z };
+    std::size_t dst_origin[] = { rect_properties.dst_x,
+                                 rect_properties.dst_y,
+                                 rect_properties.dst_z };
+    std::size_t region[] = { rect_properties.size_x,
+                             rect_properties.size_y,
+                             rect_properties.size_z };
+
+    // run the OpenCL-call
+    err = clEnqueueCopyBufferRect( command_queue, device_mem,
+                                   dst_buffer->device_mem,
+                                   src_origin,
+                                   dst_origin,
+                                   region,
+                                   rect_properties.src_stride_y,
+                                   rect_properties.src_stride_z,
+                                   rect_properties.dst_stride_y,
+                                   rect_properties.dst_stride_z,
+                                   static_cast<cl_uint>(events.size()),
+                                   events_ptr, &return_event );
+    cl_ensure(err, "clEnqueueCopyBufferRect()");
+
+    // retain event to enable double-registration
+    err = clRetainEvent( return_event );
+    cl_ensure(err, "clRetainEvent()");
+
+    // register the cl_event to both client events
+    this->parent_device->register_event(src_event_gid, return_event);
+    dst_buffer->parent_device->register_event(dst_event_gid, return_event);
+
+}
+
+void
+buffer::enqueue_send_rect( hpx::naming::id_type dst,
+                           hpx::naming::id_type && src_event,
+                           hpx::naming::id_type && dst_event,
+                           rect_props rect_properties,
+                           std::vector<hpx::naming::id_type> && dependencies,
+                           std::vector<hpx::naming::gid_type> &&
+                                dependency_devices )
+{
+
+    HPX_ASSERT(dependencies.size() == dependency_devices.size());
+
+    // query the location of the destination
+    auto dst_location_future = hpx::get_colocation_id(dst);
+
+    // split between src_dependencies and dst_dependencies
+    std::vector<hpx::naming::id_type> src_dependencies;
+    std::vector<hpx::naming::id_type> dst_dependencies;
+    hpx::naming::gid_type src_device = parent_device_id.get_gid();
+    std::vector<hpx::naming::id_type>::iterator it = dependencies.begin();
+    for(const auto& device : dependency_devices){
+        if(device == src_device){
+            std::move(it, it+1, std::back_inserter(src_dependencies));
+        } else {
+            std::move(it, it+1, std::back_inserter(dst_dependencies));
+        }
+        it++;
+    }
+
+    // get the location of the destination
+    hpx::naming::id_type dst_location = dst_location_future.get();
+    hpx::naming::id_type src_location = hpx::find_here();
+
+    // choose which function to run
+    // optimization for context internal copies
+    if(dst_location == src_location){
+        auto dst_buffer = hpx::get_ptr<hpx::opencl::server::buffer>(dst).get();
+
+        cl_context src_context = this->parent_device->get_context();
+        cl_context dst_context = dst_buffer->parent_device->get_context();
+
+        if(src_context == dst_context){
+            send_rect_direct( std::move(dst),
+                              std::move(dst_buffer),
+                              std::move(src_event),
+                              std::move(dst_event),
+                              std::move(rect_properties),
+                              std::move(src_dependencies),
+                              std::move(dst_dependencies) );
+            return;
+        }
+    }
+
+    // Always works: the bruteforce method
+    send_rect_bruteforce( std::move(dst),
+                          std::move(src_event),
+                          std::move(dst_event),
+                          std::move(rect_properties),
+                          std::move(src_dependencies),
+                          std::move(dst_dependencies) );
 
 }
 

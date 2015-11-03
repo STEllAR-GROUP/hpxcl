@@ -6,5 +6,4 @@
 FROM stellargroup/hpx:dev
 
 RUN apt-get update && apt-get install -y amd-opencl-dev                         \
-                                         zlib1g-dev                             \
                                          libpng-dev

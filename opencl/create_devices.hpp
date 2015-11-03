@@ -4,8 +4,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #pragma once
-#ifndef HPX_OPENCL_GET_DEVICES_HPP_
-#define HPX_OPENCL_GET_DEVICES_HPP_
+#ifndef HPX_OPENCL_CREATE_DEVICES_HPP_
+#define HPX_OPENCL_CREATE_DEVICES_HPP_
 
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
@@ -42,8 +42,8 @@ namespace hpx { namespace opencl{
      */
     HPX_OPENCL_EXPORT
     hpx::lcos::future<std::vector<device>>
-    get_devices( hpx::naming::id_type node_id, cl_device_type device_type,
-                 std::string required_cl_version );
+    create_devices( hpx::naming::id_type node_id, cl_device_type device_type,
+                    std::string required_cl_version );
 
     /**
      * @brief Fetches a list of all accelerator devices present in the current 
@@ -68,8 +68,8 @@ namespace hpx { namespace opencl{
      */
     HPX_OPENCL_EXPORT
     hpx::lcos::future<std::vector<device>>
-    get_all_devices( cl_device_type device_type,
-                     std::string required_cl_version );
+    create_all_devices( cl_device_type device_type,
+                        std::string required_cl_version );
 
     /**
      * @brief Fetches a list of local accelerator devices present in the current 
@@ -94,8 +94,8 @@ namespace hpx { namespace opencl{
      */
     HPX_OPENCL_EXPORT
     hpx::lcos::future<std::vector<device>>
-    get_local_devices( cl_device_type device_type,
-                       std::string required_cl_version );
+    create_local_devices( cl_device_type device_type,
+                          std::string required_cl_version );
 
     /**
      * @brief Fetches a list of remote accelerator devices present in the current 
@@ -120,8 +120,8 @@ namespace hpx { namespace opencl{
      */
     HPX_OPENCL_EXPORT
     hpx::lcos::future<std::vector<device>>
-    get_remote_devices( cl_device_type device_type,
-                        std::string required_cl_version );
+    create_remote_devices( cl_device_type device_type,
+                           std::string required_cl_version );
 
 
 }}

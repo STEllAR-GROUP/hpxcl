@@ -119,6 +119,16 @@ namespace hpx { namespace opencl{ namespace server{
                            std::vector<hpx::naming::gid_type> &&
                                 dependency_devices );
 
+        // Copies data from this buffer to a remote buffer
+        void enqueue_send_rect(
+                           hpx::naming::id_type dst,
+                           hpx::naming::id_type && src_event,
+                           hpx::naming::id_type && dst_event,
+                           rect_props rect_properties,
+                           std::vector<hpx::naming::id_type> && dependencies,
+                           std::vector<hpx::naming::gid_type> &&
+                                dependency_devices );
+
         // Different versions of enqueue_send, optimized for different
         // runtime scenarios
         void send_bruteforce(
@@ -140,12 +150,28 @@ namespace hpx { namespace opencl{ namespace server{
                     std::size_t size,
                     std::vector<hpx::naming::id_type> && src_dependencies,
                     std::vector<hpx::naming::id_type> && dst_dependencies );
+        void send_rect_bruteforce(
+                    hpx::naming::id_type && dst,
+                    hpx::naming::id_type && src_event,
+                    hpx::naming::id_type && dst_event,
+                    rect_props && rect_properties,
+                    std::vector<hpx::naming::id_type> && src_dependencies,
+                    std::vector<hpx::naming::id_type> && dst_dependencies );
+        void send_rect_direct(
+                    hpx::naming::id_type && dst,
+                    boost::shared_ptr<hpx::opencl::server::buffer> && dst_buffer,
+                    hpx::naming::id_type && src_event,
+                    hpx::naming::id_type && dst_event,
+                    rect_props && rect_properties,
+                    std::vector<hpx::naming::id_type> && src_dependencies,
+                    std::vector<hpx::naming::id_type> && dst_dependencies );
 
 
     HPX_DEFINE_COMPONENT_ACTION(buffer, size);
     HPX_DEFINE_COMPONENT_ACTION(buffer, get_parent_device_id);
     HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read);
     HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_send);
+    HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_send_rect);
 
     // Actions with template arguments (see enqueue_write<>() above) require
     // special type definitions. The simplest way to define such an action type
@@ -196,8 +222,8 @@ namespace hpx { namespace opencl{ namespace server{
                         hpx::opencl::rect_props &&,
                         std::uintptr_t,
                         std::vector<hpx::naming::id_type> &&),
-            &buffer::template enqueue_read_to_userbuffer_remote<T>,
-            enqueue_read_to_userbuffer_remote_action<T> >
+            &buffer::template enqueue_read_to_userbuffer_rect_remote<T>,
+            enqueue_read_to_userbuffer_rect_remote_action<T> >
     {};
     template <typename T>
     struct enqueue_read_to_userbuffer_rect_local_action
@@ -206,8 +232,8 @@ namespace hpx { namespace opencl{ namespace server{
                         hpx::opencl::rect_props &&,
                         hpx::serialization::serialize_buffer<T>,
                         std::vector<hpx::naming::id_type> &&),
-            &buffer::template enqueue_read_to_userbuffer_local<T>,
-            enqueue_read_to_userbuffer_local_action<T> >
+            &buffer::template enqueue_read_to_userbuffer_rect_local<T>,
+            enqueue_read_to_userbuffer_rect_local_action<T> >
     {};
 
 
@@ -230,6 +256,7 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, size);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_read);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_send);
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_send_rect);
 HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer, enqueue_write);
 HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer, enqueue_write_rect);
 HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
@@ -435,12 +462,156 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote(
     // wait for the event to finish
     parent_device->wait_for_cl_event(return_event);
 
-    // TODO run the zero-copy buffer thingy
     // send the zerocopy_buffer to the lcos::event
     typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
         set_data_func;
     hpx::apply_colocated<set_data_func>(event_gid, event_gid, zerocopy_buffer);
 
 }
+
+template <typename T>
+void
+hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_local(
+                       hpx::naming::id_type && event_gid,
+                       hpx::opencl::rect_props && rect_properties,
+                       hpx::serialization::serialize_buffer<T> data,
+                       std::vector<hpx::naming::id_type> && dependencies ){
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+
+    cl_int err;
+    cl_event return_event;
+
+    // retrieve the dependency cl_events
+    util::event_dependencies events( dependencies, parent_device.get() );
+
+    // retrieve the command queue
+    cl_command_queue command_queue = parent_device->get_read_command_queue();
+
+    // prepare arguments for OpenCL call
+    std::size_t buffer_origin[] = { rect_properties.src_x * sizeof(T),
+                                    rect_properties.src_y,
+                                    rect_properties.src_z };
+    std::size_t host_origin[] = { rect_properties.dst_x * sizeof(T),
+                                  rect_properties.dst_y,
+                                  rect_properties.dst_z };
+    std::size_t region[] = { rect_properties.size_x * sizeof(T),
+                             rect_properties.size_y,
+                             rect_properties.size_z };
+
+    HPX_ASSERT(data.size() >
+        (rect_properties.size_x + rect_properties.dst_x - 1)
+      + (rect_properties.size_y + rect_properties.dst_y - 1)
+            * rect_properties.dst_stride_y
+      + (rect_properties.size_z + rect_properties.dst_z - 1)
+            * rect_properties.dst_stride_z );
+
+    // run the OpenCL-call
+    err = clEnqueueReadBufferRect(
+                command_queue, device_mem, CL_FALSE,
+                buffer_origin, host_origin, region,
+                rect_properties.src_stride_y * sizeof(T),
+                rect_properties.src_stride_z * sizeof(T),
+                rect_properties.dst_stride_y * sizeof(T),
+                rect_properties.dst_stride_z * sizeof(T),
+                data.data(),
+                static_cast<cl_uint>(events.size()),
+                events.get_cl_events(), &return_event );
+    cl_ensure(err, "clEnqueueReadBufferRect()");
+
+    // register the data to prevent deallocation
+    parent_device->put_event_data(return_event, data);
+
+    // register the cl_event to the client event
+    parent_device->register_event(event_gid, return_event);
+
+    // arm the future. ! this blocks.
+    parent_device->activate_deferred_event_with_data(event_gid);
+
+}
+
+template <typename T>
+void
+hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_remote(
+    hpx::naming::id_type && event_gid,
+    hpx::opencl::rect_props && rect_properties,
+    std::uintptr_t remote_data_addr,
+    std::vector<hpx::naming::id_type> && dependencies ){
+
+    // the general algorithm of the remote rect read is:
+    // - allocate a buffer that exactly fits the read data
+    // - read from gpu
+    // - send the data and extract it to the correct position in the
+    //   remote destination buffer via zero-copy send
+
+    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+
+    cl_int err;
+    cl_event return_event;
+
+    // retrieve the dependency cl_events
+    util::event_dependencies events( dependencies, parent_device.get() );
+
+    // retrieve the command queue
+    cl_command_queue command_queue = parent_device->get_read_command_queue();
+
+    // create new target buffer
+    std::size_t dst_size = rect_properties.size_x * rect_properties.size_y
+                           * rect_properties.size_z * sizeof(T);
+    buffer_type data( new char[dst_size], dst_size,
+                      buffer_type::init_mode::take );
+
+    // prepare arguments for OpenCL call
+    std::size_t buffer_origin[] = { rect_properties.src_x * sizeof(T),
+                                    rect_properties.src_y,
+                                    rect_properties.src_z };
+    std::size_t host_origin[] = { 0, 0, 0 }; // don't waste space on the host buf
+    std::size_t region[] = { rect_properties.size_x * sizeof(T),
+                             rect_properties.size_y,
+                             rect_properties.size_z };
+
+    // run the OpenCL-call
+    err = clEnqueueReadBufferRect(
+                command_queue, device_mem, CL_FALSE,
+                buffer_origin, host_origin, region,
+                rect_properties.src_stride_y * sizeof(T),
+                rect_properties.src_stride_z * sizeof(T),
+                rect_properties.size_x * sizeof(T),
+                rect_properties.size_x * sizeof(T) * rect_properties.size_y,
+                data.data(),
+                static_cast<cl_uint>(events.size()),
+                events.get_cl_events(), &return_event );
+    cl_ensure(err, "clEnqueueReadBufferRect()");
+
+    // put_event_data not necessary as we locally keep the buffer alive until
+    // the event triggered
+
+    // also important: the cl_event does not get destroyed inside of
+    // the event map of parent_device, because we keep the lcos::event
+    // alive as we have an event_id
+
+    // register the cl_event to the client event
+    parent_device->register_event(event_gid, return_event);
+
+    // prepare a zero-copy buffer
+    // TODO replace dst_size with rect_properties
+    hpx::opencl::lcos::zerocopy_buffer zerocopy_buffer( remote_data_addr,
+                                                        rect_properties,
+                                                        sizeof(T),
+                                                        data );
+
+    // wait for the event to finish
+    parent_device->wait_for_cl_event(return_event);
+
+    // send the zerocopy_buffer to the lcos::event
+    typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
+        set_data_func;
+    hpx::apply_colocated<set_data_func>(event_gid, event_gid, zerocopy_buffer);
+
+}
+
+
 
 #endif
