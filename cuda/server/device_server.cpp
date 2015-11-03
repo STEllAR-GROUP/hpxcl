@@ -197,6 +197,34 @@ hpx::cuda::buffer device::create_buffer(size_t size) {
 	return cu_buffer;
 }
 
+void
+device::release_event(hpx::naming::gid_type gid)
+{
+    //HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+
+    // release data registered on event
+    //delete_event_data(event_map.get(gid));
+
+    // delete event from map
+    //event_map.remove(gid);
+
+}
+
+void
+device::activate_deferred_event(hpx::naming::id_type event_id)
+{
+    // get the cl_event
+    //cl_event event = event_map.get(event_id);
+
+    // wait for the cl_event to complete
+    //wait_for_cl_event(event);
+
+    // trigger the client event
+    //hpx::trigger_lco_event(event_id, false);
+
+}
+
+
 int device::get_device_architecture_major() {
 
 	return this->props.major;

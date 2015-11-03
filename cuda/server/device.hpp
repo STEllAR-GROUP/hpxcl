@@ -8,6 +8,8 @@
 
 #include <hpx/hpx.hpp>
 
+#include "cuda/lcos/event.hpp"
+
 #include "cuda/fwd_declarations.hpp"
 #include "cuda/export_definitions.hpp"
 #include "cuda/buffer.hpp"
@@ -76,6 +78,10 @@ public:
 
     void create_device_ptr(size_t const byte_count);
 
+    void release_event(hpx::naming::gid_type gid);
+
+    void activate_deferred_event(hpx::naming::id_type);
+
     template<typename T>
     void create_host_ptr(T value, size_t const byte_count) {
         host_ptr<T> temp;
@@ -95,6 +101,7 @@ public:
 
     hpx::cuda::buffer create_buffer(size_t size);
 
+
     HPX_DEFINE_COMPONENT_ACTION(device, get_cuda_info);
     HPX_DEFINE_COMPONENT_ACTION(device, get_extended_cuda_info);
     HPX_DEFINE_COMPONENT_ACTION(device, get_device_architecture_major);
@@ -106,6 +113,9 @@ public:
     HPX_DEFINE_COMPONENT_ACTION(device, wait);
     HPX_DEFINE_COMPONENT_ACTION(device, create_program_with_source);
     HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
+    HPX_DEFINE_COMPONENT_ACTION(device, release_event);
+    HPX_DEFINE_COMPONENT_ACTION(device, activate_deferred_event);
+
 
     template<typename T>
     struct create_host_ptr_action
@@ -133,8 +143,6 @@ private:
 }
 }
 }
-
-
 
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::get_cuda_info_action,
@@ -169,5 +177,11 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::create_buffer_action,
     device_create_buffer_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::release_event_action,
+   device_release_event_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::device::activate_deferred_event_action,
+    activate_deferred_event_action);
 
 #endif //cuda_device_2_HPP

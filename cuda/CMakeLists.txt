@@ -7,8 +7,6 @@
 
 set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
-#cuda_add_library(cuda_kernels cuda/kernel.cu)
-
 add_definitions(-DHPX_CUDA_MODULE_EXPORTS)
 include_directories(${PROJECT_SOURCE_DIR})
 
