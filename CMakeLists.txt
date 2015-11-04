@@ -16,9 +16,9 @@ endif()
 project(hpxcl CXX)
 
 # Find and include HPX settings
-if(NOT HPX_ROOT)
-    message(FATAL_ERROR "HPX_ROOT not set, unable to find HPX!")
-endif()
+#if(NOT HPX_ROOT)
+#    message(FATAL_ERROR "HPX_ROOT not set, unable to find HPX!")
+#endif()
 
 # add our cmake path
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/"
