@@ -43,3 +43,9 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
     cuda_device_type::wrapped_type::create_buffer_action,
     create_buffer_action);
+HPX_REGISTER_ACTION(
+		cuda_device_type::wrapped_type::release_event_action,
+   device_release_event_action);
+HPX_REGISTER_ACTION(
+		cuda_device_type::wrapped_type::activate_deferred_event_action,
+    activate_deferred_event_action);
