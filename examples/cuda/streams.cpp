@@ -12,13 +12,13 @@
 
 #include <unistd.h>
 
-#define SIZE 10000
+#define SIZE 1000000
 #define PARTIONS 2
 
 using namespace hpx::cuda;
 
 static const char kernel_src[] =
-		        "                                                                                                        "
+		"                                                                                                        "
 				"extern \"C\"  __global__ void sum(unsigned int* n, unsigned  int* count,unsigned int* array){ 	       \n"
 				" for (int i = blockDim.x * blockIdx.x + threadIdx.x;					                               \n"
 				"         i < n[0];														                               \n"
@@ -54,10 +54,10 @@ int main(int argc, char* argv[]) {
 	std::vector<std::string> flags;
 	std::string mode = "--gpu-architecture=compute_";
 	mode.append(
-	std::to_string(cudaDevice.get_device_architecture_major().get()));
+			std::to_string(cudaDevice.get_device_architecture_major().get()));
 
 	mode.append(
-	std::to_string(cudaDevice.get_device_architecture_minor().get()));
+			std::to_string(cudaDevice.get_device_architecture_minor().get()));
 
 	flags.push_back(mode);
 
@@ -80,61 +80,110 @@ int main(int argc, char* argv[]) {
 
 	// Generate Input data
 	unsigned int* inputData;
-	cudaMallocHost((void**)&inputData, sizeof(unsigned int)*SIZE);
+	cudaMallocHost((void**) &inputData, sizeof(unsigned int) * SIZE);
 
 	for (unsigned int i = 0; i < SIZE; i++)
-	inputData[i] = 1;
+		inputData[i] = 1;
 
 	//Create buffer for the result
 	unsigned int result = 0;
 	std::vector<buffer> resultBuffer;
 	std::vector<hpx::future<void>> syncFutures;
-	for (unsigned int i = 0; i < PARTIONS; i++ )
-	{
-		resultBuffer.push_back(cudaDevice.create_buffer_sync(sizeof(unsigned int)));
-		syncFutures.push_back(resultBuffer[i].enqueue_write(0,sizeof(unsigned int), &result));
+	for (unsigned int i = 0; i < PARTIONS; i++) {
+		resultBuffer.push_back(
+				cudaDevice.create_buffer_sync(sizeof(unsigned int)));
+		syncFutures.push_back(
+				resultBuffer[i].enqueue_write(0, sizeof(unsigned int),
+						&result));
 	}
 
 	//Create a buffer for the sliced size of the data
 	unsigned int slicedSize = SIZE / PARTIONS;
 	buffer sizeBuffer = cudaDevice.create_buffer_sync(sizeof(unsigned int));
-	syncFutures.push_back(sizeBuffer.enqueue_write(0,sizeof(unsigned int), &slicedSize));
+	syncFutures.push_back(
+			sizeBuffer.enqueue_write(0, sizeof(unsigned int), &slicedSize));
 
 	//Sync all meta data for the launch of the kernels
 	hpx::wait_all(syncFutures);
 
-	hpx::cout << "Running: " << SIZE << " elements sliced on " << PARTIONS << " cudaStreams with " << slicedSize << " elements" << hpx::endl;
+	hpx::cout << "Running: " << SIZE << " elements sliced on " << PARTIONS
+			<< " cudaStreams with " << slicedSize << " elements" << hpx::endl;
 
 	//Set the parameter for the kernel, have to be the same order as in the definition
-	std::vector<hpx::cuda::buffer>args;
+	std::vector<hpx::cuda::buffer> args;
 	args.push_back(sizeBuffer);
 
 	//Distribute the sliced data on the different kernel streams
-	std::vector<buffer>slicedResults;
-	std::vector<hpx::lcos::future<unsigned int>> results;
+	std::vector<buffer> slicedResults;
+	std::vector<hpx::lcos::future<void>> data;
 
-	for (unsigned int i=0; i < PARTIONS; i++ )
-	{
+	//
+	//Batch similar operation together
+	//
+
+	//Batch all data transfers to the device
+	for (unsigned int i = 0; i < PARTIONS; i++) {
+
+		slicedResults.push_back(
+				cudaDevice.create_buffer_sync(
+						slicedSize * sizeof(unsigned int)));
+		data.push_back(
+				slicedResults[i].enqueue_write(0,
+						slicedSize * sizeof(unsigned int),
+						&inputData[slicedSize]));
+	}
+
+	hpx::wait_all(data);
+
+	std::vector<hpx::lcos::future<void>> launches;
+
+	//Batch all kernel launches
+	for (unsigned int i = 0; i < PARTIONS; i++) {
+
 		unsigned int stream_id = prog.create_stream().get();
-		slicedResults.push_back(cudaDevice.create_buffer_sync(slicedSize *sizeof(unsigned int)));
-
-		auto f = slicedResults[i].enqueue_write(0,slicedSize *sizeof(unsigned int),&inputData[slicedSize]);
 
 		args.push_back(resultBuffer[i]);
-        args.push_back(slicedResults[i]);
+		args.push_back(slicedResults[i]);
 
-		prog.run(args,"sum",grid,block);
-
-		//results.push_back(f2.then(resultBuffer[i].enqueue_read(0,sizeof(unsigned int))));
+		launches.push_back(prog.run(args, "sum", grid, block, stream_id));
 
 		args.pop_back();
 		args.pop_back();
+	}
 
+	hpx::wait_all(launches);
+
+	std::vector<hpx::lcos::future<hpx::serialization::serialize_buffer<char>>>results;
+
+	for (unsigned int i = 0; i < PARTIONS; i++) {
+
+		results.push_back(
+				resultBuffer[i].enqueue_read(0, sizeof(unsigned int)));
 
 	}
 
-
 	hpx::wait_all(results);
+
+	unsigned int res;
+
+	for (unsigned int i = 0; i < PARTIONS; i++) {
+
+		res += ((unsigned int*) results[i].get().data())[0];
+
+	}
+
+	data.clear();
+	launches.clear();
+	results.clear();
+
+	hpx::cout << "Result is " << res << " and is ";
+
+	//Check if result is correct
+
+	if (res != SIZE)
+		hpx::cout << "wrong" << hpx::endl;
+	else
+		hpx::cout << "correct" << hpx::endl;
 
 	return EXIT_SUCCESS;
 }
