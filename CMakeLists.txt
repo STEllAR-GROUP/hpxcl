@@ -15,13 +15,11 @@ endif()
 # This project is C++ based.
 project(hpxcl CXX)
 
+# add our cmake path
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH} )
+
 if(HPX_ROOT)
     set(HPX_DIR "${HPX_ROOT}/lib/cmake/HPX")
-endif()
-
-#Instruct cmake to find the HPX settings
-if(HPX_DIR)
-    message(STATUS "Searching for HPX in \"${HPX_DIR}\" ...")
 endif()
 
 ########################################################################
