@@ -1,21 +1,21 @@
 hpxcl
-=====
+====
 
 This repository contains components that will support percolation via OpenCL and CUDA
 
 Build
-====
+===
 
 The [CircleCI](https://circleci.com/gh/STEllAR-GROUP/hpxcl)_ contiguous
 integration service tracks the current build status for the master branch:
 ![HPXCL master branch build status](https://circleci.com/gh/STEllAR-GROUP/hpxcl/tree/master.svg?style=svg "")
 
 CUDA
-===
+==
 
 Prerequisites:
 
-- CUDA SDK > 7.5
+- CUDA SDK >= 7.0
 
 Building:
 ```
