@@ -1,74 +1,80 @@
 // Copyright (c)		2013 Damond Howard
-// 
+//						2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#pragma once
+#ifndef HPX_CUDA_SERVER_BUFFER_HPP_
+#define HPX_CUDA_SERVER_BUFFER_HPP_
 
-#if !defined(BUFFER_2_HPP)
-#define BUFFER_2_HPP
-
-#include <hpx/hpx_fwd.hpp>
-#include <hpx/runtime/components/server/managed_component_base.hpp>
-#include <hpx/runtime/components/server/locking_hook.hpp>
-#include <hpx/runtime/actions/component_action.hpp>
-#include <hpx/runtime/get_ptr.hpp>
-#include <hpx/util/serialize_buffer.hpp>
+#include <hpx/hpx.hpp>
 
 #include <cuda.h>
 
-#include  "../fwd_declarations.hpp"
+#include "cuda/fwd_declarations.hpp"
+#include "cuda/export_definitions.hpp"
+#include "cuda/cuda_error_handling.hpp"
+namespace hpx
+{
+    namespace cuda
+    {
+        namespace server
+        {
+            //////////////////////////////////////////////////////////
+            ///This class represents a buffer of cuda kernel arguments
 
- namespace hpx
- {
- 	namespace cuda
- 	{
- 		namespace server
- 		{
- 			//////////////////////////////////////////////////////////
- 			///This class represents a buffer of cuda kernel arguments
+            class HPX_CUDA_EXPORT buffer
+                : public hpx::components::locking_hook<
+                    hpx::components::managed_component_base<buffer>
+                    >
+            {
 
- 			class buffer
- 				: public hpx::components::locking_hook<
- 					hpx::components::managed_component_base<buffer>
- 					>
- 			{
- 			 	private:
- 			 	size_t arg_buffer_size; 
+                private:
+                size_t arg_buffer_size;
                 int parent_device_num;
- 			 	public:
- 			 	buffer(); 
+                void* data_device;
+                void* data_host;
+                cudaStream_t stream;
 
- 			 	buffer(size_t size);
- 			
- 			 	size_t size();
+                public:
+                buffer();
 
- 			 	void set_size(size_t size);
- 			 
- 			 	~buffer();
- 			 	
- 			 	void enqueue_read(size_t offset, size_t size) const;
-				
- 			 	void enqueue_write(size_t offset, hpx::util::serialize_buffer<char> data);
- 			 	
- 			 	HPX_DEFINE_COMPONENT_ACTION(buffer, size);
- 			 	HPX_DEFINE_COMPONENT_ACTION(buffer, set_size);
- 			 	HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read);
- 			 	HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write);
- 			};
- 		}
- 	}
- }
+                buffer(size_t size, int parent_device_num);
+
+                size_t size();
+
+
+
+                void set_size(size_t size);
+
+                ~buffer();
+
+                hpx::serialization::serialize_buffer<char>
+                enqueue_read(size_t offset, size_t size);
+
+                void enqueue_write(size_t offset, hpx::serialization::serialize_buffer<char> data);
+
+                void* get_raw_pointer();
+
+                HPX_DEFINE_COMPONENT_ACTION(buffer, size);
+                HPX_DEFINE_COMPONENT_ACTION(buffer, set_size);
+                HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read);
+                HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write);
+            };
+        }
+    }
+}
 
  HPX_REGISTER_ACTION_DECLARATION(
- 	hpx::cuda::server::buffer::size_action,
- 	buffer_size_action);
+    hpx::cuda::server::buffer::size_action,
+    buffer_size_action);
  HPX_REGISTER_ACTION_DECLARATION(
- 	hpx::cuda::server::buffer::set_size_action,
- 	buffer_set_size_action);
+    hpx::cuda::server::buffer::set_size_action,
+    buffer_set_size_action);
  HPX_REGISTER_ACTION_DECLARATION(
- 	hpx::cuda::server::buffer::enqueue_read_action, 
- 	buffer_enqueue_read_action);
+    hpx::cuda::server::buffer::enqueue_read_action,
+    buffer_enqueue_read_action);
  HPX_REGISTER_ACTION_DECLARATION(
- 	hpx::cuda::server::buffer::enqueue_write_action,
- 	buffer_enqueue_write_action);
+    hpx::cuda::server::buffer::enqueue_write_action,
+    buffer_enqueue_write_action);
 
  #endif //BUFFER_2_HPP

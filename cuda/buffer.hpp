@@ -1,77 +1,86 @@
-// Copyright (c)		2013 Damond Howard
-//
+// Copyright (c)    2013 Damond Howard
+//                  2015 patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
+#pragma once
+#ifndef HPX_CUDA_BUFFER_HPP_
+#define HPX_CUDA_BUFFER_HPP_
 
-#if !defined(BUFFER_1_HPP)
-#define BUFFER_1_HPP
+#include <hpx/hpx.hpp>
 
-#include <hpx/include/components.hpp>
-#include <hpx/util/serialize_buffer.hpp>
-#include "stubs/buffer.hpp"
+#include "cuda/server/buffer.hpp"
 
-namespace hpx
-{
-    namespace cuda
-    {
-        class buffer
-            : public hpx::components::client_base<
-                buffer, stubs::buffer >
-        {
-            typedef hpx::components::client_base<
-                buffer, stubs::buffer>
-                base_type;
+namespace hpx {
+namespace cuda {
 
-            public:
-                buffer()
-                {}
+class buffer: public hpx::components::client_base<buffer, cuda::server::buffer> {
+	typedef hpx::components::client_base<buffer, cuda::server::buffer> base_type;
 
-                buffer(hpx::future<hpx::naming::id_type> && gid)
-                : base_type(std::move(gid))
-                {}
+public:
+	buffer() {
+	}
 
-                hpx::lcos::future<size_t> size()
-                {
-                    BOOST_ASSERT(this->get_gid());
-                    return this->base_type::size(this->get_gid());
-                }
+	buffer(hpx::future<hpx::naming::id_type> && gid) :
+			base_type(std::move(gid)) {
+	}
 
-                size_t size_sync()
-                {
-                    BOOST_ASSERT(this->get_gid());
-                    return this->base_type::size_sync(this->get_gid());
-                }
+	hpx::lcos::future<size_t> size() {
+		HPX_ASSERT(this->get_gid());
+		typedef server::buffer::size_action action_type;
+		return hpx::async < action_type > (this->get_gid());
 
-                hpx::lcos::future<void> set_size(size_t size)
-                {
-                    BOOST_ASSERT(this->get_gid());
-                    return this->base_type::set_size(this->get_gid(), size);
-                }
+	}
 
-                void set_size_sync(size_t size)
-                {
-                    BOOST_ASSERT(this->get_gid());
-                    this->base_type::set_size_sync(this->get_gid(), size);
-                }
+	size_t size_sync() {
+		return size().get();
 
-                void enqueue_read(size_t offset, size_t size) const
-                {
-                    BOOST_ASSERT(this->get_gid());
+	}
 
-                    this->base_type::enqueue_read(this->get_gid(), offset, size);
-                }
-                
-                void enqueue_write(size_t offset, size_t size, const void* data) const
-                {
-                    BOOST_ASSERT(this->get_gid());
+	hpx::lcos::future<void> set_size(size_t size) {
+		HPX_ASSERT(this->get_gid());
+		typedef server::buffer::set_size_action action_type;
+		return hpx::async < action_type > (this->get_gid(), size);
 
-                     hpx::util::serialize_buffer<char>
-                        serializable_data((char*)const_cast<void*>(data), size,
-                             hpx::util::serialize_buffer<char>::init_mode::reference);
+	}
 
-                    this->base_type::enqueue_write(this->get_gid(), offset, serializable_data);
-                }
-        };
-    }
+	void set_size_sync(size_t size) {
+		set_size(size).get();
+
+	}
+
+	template<typename T>
+	T* enqueue_read_sync(size_t offset, size_t size)
+	{
+		T* tmp = (T*)enqueue_read(offset,size).get().data();
+		return tmp;
+	}
+
+	hpx::future<hpx::serialization::serialize_buffer<char>> enqueue_read(
+			size_t offset, size_t size) {
+		HPX_ASSERT(this->get_gid());
+
+		typedef server::buffer::enqueue_read_action action_type;
+		return hpx::async < action_type > (this->get_gid(), offset, size);
+
+	}
+
+	hpx::future<void> enqueue_write(size_t offset, size_t size, const void* data) const {
+		HPX_ASSERT(this->get_gid());
+
+		hpx::serialization::serialize_buffer<char> serializable_data(
+				(char*)data, size,
+				hpx::serialization::serialize_buffer<char>::init_mode::reference);
+
+		typedef server::buffer::enqueue_write_action action_type;
+		return hpx::async < action_type > (this->get_gid(), offset, serializable_data);
+
+	}
+
+private:
+            hpx::naming::id_type device_gid;
+            bool is_local;
+
+};
+}
 }
 #endif //BUFFER_1_HPP

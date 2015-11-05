@@ -1,185 +1,200 @@
-// Copyright (c)		2013 Damond Howard
-//
+// Copyright (c)    2013 Damond Howard
+//                  2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
+#pragma once
+#ifndef HPX_CUDA_DEVICE_HPP_
+#define HPX_CUDA_DEVICE_HPP_
 
-#if !defined(DEVICE_1_HPP)
-#define DEVICE_1_HPP
+#include <hpx/hpx.hpp>
 
-#include <hpx/include/components.hpp>
-#include "stubs/device.hpp"
-#include "kernel.hpp"
-#include "buffer.hpp"
-#include "program.hpp"
+//#include "cuda/buffer.hpp"
+//#include "cuda/program.hpp"
+//#include "cuda/device.hpp"
+#include "cuda/server/buffer.hpp"
+#include "cuda/server/program.hpp"
+#include "cuda/server/device.hpp"
 
-namespace hpx
-{
-    namespace cuda
-    {
-        class device
-            : public hpx::components::client_base<
-                device, stubs::device >
-        {
-            typedef hpx::components::client_base<
-                device, stubs::device
-                > base_type;
+namespace hpx {
+namespace cuda {
 
-        public:
-            device()
-            {}    
-            
-            device(hpx::future<hpx::naming::id_type> && gid)
-				: base_type(std::move(gid))
-            {}
-            
-            void get_cuda_info()
-            {
-                HPX_ASSERT(this->get_gid());
-                this->base_type::get_cuda_info(this->get_gid());
-            }
+class device: public hpx::components::client_base<device, cuda::server::device> {
+	typedef hpx::components::client_base<device, cuda::server::device> base_type;
 
-            static std::vector<int> get_all_devices(std::vector<hpx::naming::id_type> localities)
-            {
-                return base_type::get_all_devices(localities);
-            }
-
-            void set_device(int dev)
-            {
-                HPX_ASSERT(this->get_gid());
-                this->base_type::set_device(this->get_gid(),dev);
-            }
-
-            hpx::lcos::future<int>
-            get_device_id()
-            {
-                HPX_ASSERT(this->get_gid());
-                return this->base_type::get_device_id(this->get_gid());
-            }
-
-            int get_device_id_sync()
-            {
-                HPX_ASSERT(this->get_gid());
-                return this->base_type::get_device_id_sync(this->get_gid());
-            }
-
-            hpx::lcos::future<int> get_context()
-            {
-                HPX_ASSERT(this->get_gid());
-                return this->base_type::get_context(this->get_gid());
-            }
-
-            int get_context_sync()
-            {
-                HPX_ASSERT(this->get_gid());
-                return this->base_type::get_context_sync(this->get_gid());
-            }
-
-            hpx::lcos::future<int> wait()
-            {
-                HPX_ASSERT(this->get_gid());
-                return this->base_type::wait(this->get_gid());
-            }
-
-            hpx::lcos::future<void> create_device_ptr(size_t const byte_count)
-            {
-                HPX_ASSERT(this->get_gid());
-                return this->base_type::create_device_ptr(this->get_gid(), byte_count);
-            }
-
-            void create_device_ptr_sync(size_t const byte_count)
-            {
-                HPX_ASSERT(this->get_gid());
-                this->base_type::create_device_ptr_sync(this->get_gid(), byte_count);
-            }
-
-            template <typename T>
-            void create_host_ptr(T value, size_t const byte_count)
-            {
-                HPX_ASSERT(this->get_gid());
-                this->base_type::create_host_ptr(this->get_gid(), value, byte_count);
-            }
-
-            template <typename T>
-            void create_host_ptr_non_blocking(T value, size_t const byte_count)
-            {
-                HPX_ASSERT(this->get_gid());
-                this->base_type::create_host_ptr_non_blocking(this->get_gid(), value, byte_count);
-            }
-
-            hpx::lcos::future<void> mem_cpy_h_to_d(unsigned int variable_id)
-            {
-                HPX_ASSERT(this->get_gid());
-                return this->base_type::mem_cpy_h_to_d(this->get_gid(), variable_id);
-            }
-
-            void mem_cpy_h_to_d_sync(unsigned int variable_id)
-            {
-                HPX_ASSERT(this->get_gid());
-                this->base_type::mem_cpy_h_to_d_sync(this->get_gid(), variable_id);
-            }
-
-            hpx::lcos::future<void> mem_cpy_d_to_h(unsigned int variable_id)
-            {
-                HPX_ASSERT(this->get_gid());
-                return this->base_type::mem_cpy_d_to_h(this->get_gid(), variable_id);
-            }
-
-            void mem_cpy_d_to_h_sync(unsigned int variable_id)
-            {
-                HPX_ASSERT(this->get_gid());
-                this->base_type::mem_cpy_d_to_h_sync(this->get_gid(), variable_id);
-            }
-
-            hpx::lcos::future<void> launch_kernel(hpx::cuda::kernel cu_kernel)
-            {
-                BOOST_ASSERT(this->get_gid());
-                return this->base_type::launch_kernel(this->get_gid(), cu_kernel);
-            }
-
-            void launch_kernel_sync(hpx::cuda::kernel cu_kernel)
-            {
-                BOOST_ASSERT(this->get_gid());
-                this->base_type::launch_kernel_sync(this->get_gid(), cu_kernel);
-            }
-
-            /*
-            hpx::lcos::future<void> free()
-            {
-                BOOST_ASSERT(this->get_gid());
-                return this->base_type::free(this->get_gid());
-            }
-            */
-
-            void free_sync()
-            {
-                BOOST_ASSERT(this->get_gid());
-                this->base_type::free_sync(this->get_gid());
-            }
-
-            hpx::cuda::program create_program_with_source_sync(std::string source)
-            {
-                BOOST_ASSERT(this->get_gid());
-                return this->base_type::create_program_with_source_sync(this->get_gid(), source);
-            }
-
-            hpx::lcos::future<hpx::cuda::program> create_program_with_source(std::string source)
-            {
-                BOOST_ASSERT(this->get_gid());
-                return this->base_type::create_program_with_source(this->get_gid(), source);
-            }
-
-            hpx::lcos::future<hpx::cuda::buffer> create_buffer(size_t size)
-            {
-                BOOST_ASSERT(this->get_gid());
-                return this->base_type::create_buffer(this->get_gid(), size);
-            }
-
-            hpx::cuda::buffer create_buffer_sync(size_t size)
-            {
-                BOOST_ASSERT(this->get_gid());
-                return this->base_type::create_buffer_sync(this->get_gid(), size);
-            }
-        };
+public:
+	device() {
 	}
+
+	device(hpx::naming::id_type const& there, int dev) :
+			base_type(hpx::new_<cuda::server::device>(there, dev)) {
+	}
+
+	device(hpx::future<hpx::naming::id_type> && gid) :
+			base_type(std::move(gid)) {
+	}
+
+	/**
+	 * \brief Method prints the properties of this device
+	 */
+	void get_cuda_info() {
+		HPX_ASSERT(this->get_gid());
+		typedef server::device::get_cuda_info_action action_type;
+		hpx::apply<action_type>(this->get_gid());
+	}
+
+	/**
+	 * \brief Method prints the extended properties of this device
+	 *
+	 * \note All information of the cudaDeviceproperties are shown.
+	 */
+	void get_extended_cuda_info() {
+		HPX_ASSERT(this->get_gid());
+		typedef server::device::get_extended_cuda_info_action action_type;
+		hpx::apply<action_type>(this->get_gid());
+	}
+
+	/**
+	 * \brief methods return the major compute capability of this device
+	 * \return Major compute capability of this device
+	 */
+	hpx::lcos::future<int> get_device_architecture_major() {
+		HPX_ASSERT(this->get_gid());
+		typedef server::device::get_device_architecture_major_action action_type;
+		return hpx::async<action_type>(this->get_gid());
+	}
+
+	/**
+	 * \brief methods return the minor compute capability of this device
+	 * \return Minor compute capability of this device
+	 */
+	hpx::lcos::future<int> get_device_architecture_minor() {
+		HPX_ASSERT(this->get_gid());
+		typedef server::device::get_device_architecture_minor_action action_type;
+		return hpx::async<action_type>(this->get_gid());
+	}
+
+	/**
+	 * \brief Method returns all other devices on the locality of this device
+	 * \return A list of suitable CUDA devices on target node
+	 */
+
+	static std::vector<int> get_all_devices(
+			std::vector<hpx::naming::id_type> localities) {
+		int num = 0;
+		std::vector<int> devices;
+		typedef server::device::get_all_devices_action action_type;
+		for (size_t i = 0; i < localities.size(); i++) {
+			num += hpx::async<action_type>(localities[i]).get();
+			for (int i = 0; i < num; i++) {
+				devices.push_back(i);
+			}
+		}
+		return devices;
+	}
+
+	void set_device(int dev) {
+		HPX_ASSERT(this->get_gid());
+		typedef server::device::set_device_action action_type;
+		hpx::async<action_type>(this->get_gid(), dev);
+	}
+
+	hpx::lcos::future<int> get_device_id() {
+		HPX_ASSERT(this->get_gid());
+		typedef server::device::get_device_id_action action_type;
+		return hpx::async<action_type>(this->get_gid());
+	}
+
+	int get_device_id_sync() {
+		HPX_ASSERT(this->get_gid());
+		return get_device_id().get();
+	}
+
+	hpx::lcos::future<int> get_context() {
+		HPX_ASSERT(this->get_gid());
+		typedef server::device::get_context_action action_type;
+		return hpx::async<action_type>(this->get_gid());
+	}
+
+	int get_context_sync() {
+
+		return get_context().get();
+	}
+
+	hpx::lcos::future<int> wait() {
+		return server::device::wait();
+	}
+
+	/**
+	 * \brief Creates synchronous a program with the set source code
+	 */
+	hpx::cuda::program create_program_with_source_sync(std::string source) {
+		return create_program_with_source(source).get();
+	}
+
+	/**
+	 * \brief Creates a program with the set source code
+	 *
+	 * This Method creates a program containing the source code. This program is attached to
+	 * this device and all streams are executed there.
+	 *
+	 * \param source The source code of the Cuda kernel
+	 *
+	 * \see Program
+	 */
+	hpx::lcos::future<hpx::cuda::program> create_program_with_source(
+			std::string source) {
+		HPX_ASSERT(this->get_gid());
+		typedef server::device::create_program_with_source_action action_type;
+		return hpx::async<action_type>(this->get_gid(), source);
+	}
+
+	/**
+		 * \brief Creates a program from the given source file
+		 *
+		 * This Method creates a program containing the source code. This program is attached to
+		 * this device and all streams are executed there.
+		 *
+		 * \param source The path to the source file
+		 *
+		 * \see Program
+		 */
+		hpx::lcos::future<hpx::cuda::program> create_program_with_file(
+				std::string file) {
+			HPX_ASSERT(this->get_gid());
+
+			std::ifstream stream(file);
+			std::stringstream buffer;
+			buffer << stream.rdbuf();
+
+			typedef server::device::create_program_with_source_action action_type;
+			return hpx::async<action_type>(this->get_gid(), buffer.str());
+		}
+
+
+	/**
+	 * \brief Creates a buffer attached to this device
+	 *
+	 * The methods creates a buffer with the size specified here and allocates this
+	 * on this device
+	 *
+	 * \param size The size of the allocated buffer
+	 *
+	 * \return The buffer with the allocated memoery on this device
+	 */
+	hpx::lcos::future<hpx::cuda::buffer> create_buffer(size_t size) {
+		HPX_ASSERT(this->get_gid());
+		typedef server::device::create_buffer_action action_type;
+		return hpx::async<action_type>(this->get_gid(), size);
+	}
+
+	/**
+	 * \brief Synchronous creation of the buffer
+	 */
+	hpx::cuda::buffer create_buffer_sync(size_t size) {
+		HPX_ASSERT(this->get_gid());
+		return create_buffer(size).get();
+	}
+};
+}
 }
 #endif //MANAGED_CUDA_COMPONENT_1_HPP

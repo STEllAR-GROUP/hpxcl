@@ -1,16 +1,11 @@
-// Copyright (c)    2013 Martin Stumpf
-//
+// Copyright (c)   2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#pragma once
 #ifndef HPX_CUDA_HPP_
 #define HPX_CUDA_HPP_
-
     #include "cuda/device.hpp"
-    //#include "cuda/event.hpp"
     #include "cuda/buffer.hpp"
-    #include "cuda/kernel.hpp"
-	#include "cuda/program.hpp"
-    #include "cuda/std.hpp"
+    #include "cuda/program.hpp"
+    #include "cuda/get_devices.hpp"
 #endif

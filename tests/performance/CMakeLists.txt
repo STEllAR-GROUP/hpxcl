@@ -11,10 +11,10 @@ if(HPXCL_WITH_OPENCL)
     ${subdirs} opencl)
 endif()
 
-if(HPXCL_WITH_CUDA)
-  set(subdirs
-    ${subdirs} cuda)
-endif()
+#if(HPXCL_WITH_CUDA)
+#  set(subdirs
+#    ${subdirs} cuda)
+#endif()
 
 
 
