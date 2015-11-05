@@ -15,10 +15,14 @@ endif()
 # This project is C++ based.
 project(hpxcl CXX)
 
-# Find and include HPX settings
-#if(NOT HPX_ROOT)
-#    message(FATAL_ERROR "HPX_ROOT not set, unable to find HPX!")
-#endif()
+if(HPX_ROOT)
+    set(HPX_DIR "${HPX_ROOT}/lib/cmake/HPX")
+endif()
+
+#Instruct cmake to find the HPX settings
+if(HPX_DIR)
+    message(STATUS "Searching for HPX in \"${HPX_DIR}\" ...")
+endif()
 
 ########################################################################
 # Include hpx
