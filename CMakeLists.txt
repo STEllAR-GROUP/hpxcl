@@ -20,11 +20,6 @@ project(hpxcl CXX)
 #    message(FATAL_ERROR "HPX_ROOT not set, unable to find HPX!")
 #endif()
 
-# add our cmake path
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/"
-    "${HPX_ROOT}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules"
-    ${CMAKE_MODULE_PATH})
-
 ########################################################################
 # Include hpx
 # Instruct cmake to find the HPX settings
