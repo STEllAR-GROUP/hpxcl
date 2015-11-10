@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cmath>
 
+#include "examples/opencl/benchmark_vector/timer.hpp"
+
 #define SINGLE
 #define EPS 10e-5
 //###########################################################################
@@ -67,9 +69,21 @@ __global__ void mul(size_t count, T* in1, T* in2, T* out) {
 //Main
 //###########################################################################
 
-int main(void) {
+int main(int argc, char*argv[]) {
 
-	size_t count = 90;
+	if(argc != 2)
+	{
+		std::cout << "Usage: " << argv[0] << " #elements" << std::endl;
+		exit(1);
+	}
+
+	size_t count = atoi(argv[1]);
+
+	std::cout << count << " ";
+
+	//Timer
+	double data = 0.;
+
 
 	//Pointer
 	TYPE* out;
@@ -79,6 +93,7 @@ int main(void) {
 	TYPE* in2;
 	TYPE* in2_dev;
 
+	timer_start();
 	//Malloc Host
 	cudaMallocHost((void**) &out, count * sizeof(TYPE));
 	cudaMallocHost((void**) &in1, count * sizeof(TYPE));
@@ -97,6 +112,8 @@ int main(void) {
 	cudaMemcpy(in2_dev, in2, count * sizeof(TYPE), cudaMemcpyHostToDevice);
 	cudaMemcpy(out_dev, in1, count * sizeof(TYPE), cudaMemcpyHostToDevice);
 
+	data = timer_stop();
+
 	//######################################################################
 	//Launch kernels
 	//######################################################################
@@ -105,58 +122,76 @@ int main(void) {
 	int blocksize = 32;
 
 	// 1. logn kernel
-
+	timer_start();
 	logn<<<gridsize, blocksize>>>(count, in1_dev, out_dev);
 	cudaDeviceSynchronize();
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
-
+	std::cout << timer_stop() << " ";
 	for (size_t i = 0; i < count; i++) {
 		if (!(std::abs(std::log(in1[i]) - out[i]) < EPS))
 			std::cout << "Error for logn at " << i <<  std::endl;
 	}
 
 	// 2. expn kernel
-
+	timer_start();
 	expn<<<gridsize, blocksize>>>(count, in1_dev, out_dev);
 	cudaDeviceSynchronize();
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
-
+	std::cout << timer_stop() << " ";
 	for (size_t i = 0; i < count; i++) {
 		if (!(std::abs(std::exp(in1[i]) - out[i]) < EPS))
 			std::cout << "Error for expn at " << i << std::endl;
 	}
 
 	// 3. dbl kernel
+	timer_start();
 	dbl<<<gridsize, blocksize>>>(count, in1_dev, out_dev);
 	cudaDeviceSynchronize();
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
-
+	std::cout << timer_stop() << " ";
 	for (size_t i = 0; i < count; i++) {
 		if (!(std::abs(2.0 * in1[i] - out[i]) < EPS))
 			std::cout << "Error for dbl at " << i << std::endl;
 	}
 
 	// 4. add kernel
-
+	timer_start();
 	add<<<gridsize, blocksize>>>(count, in1_dev, in2_dev, out_dev);
 	cudaDeviceSynchronize();
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
-
+	std::cout << timer_stop() << " ";
 	for (size_t i = 0; i < count; i++) {
 		if (!(std::abs(in1[i] + in2[i] - out[i]) < EPS))
 			std::cout << "Error for add at " << i << std::endl;
 	}
 
 	// 5. mul kernel
-
+	timer_start();
     mul<<<gridsize, blocksize>>>(count, in1_dev, in2_dev, out_dev);
     cudaDeviceSynchronize();
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
-
+	std::cout << timer_stop() << " ";
 	for (size_t i = 0; i < count; i++) {
 		if (!(std::abs(in1[i] * in2[i] - out[i]) < EPS))
 			std::cout << "Error for mul at " << i << std::endl;
 	}
+
+	//######################################################################
+	//Clean
+	//######################################################################
+
+	timer_start();
+	cudaFreeHost(in1);
+	cudaFreeHost(in2);
+	cudaFreeHost(out);
+
+	cudaFree(in1_dev);
+	cudaFree(in2_dev);
+	cudaFree(out_dev);
+
+	data += timer_stop();
+
+	std::cout << data << std::endl;
 
 	return EXIT_SUCCESS;
 }
