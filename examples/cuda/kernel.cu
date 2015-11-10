@@ -6,4 +6,3 @@ extern "C" __global__ void sum(unsigned int* array, unsigned int* count,
 		atomicAdd(&(count[0]), array[i]);
 	}
 }
-;
