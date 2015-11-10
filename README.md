@@ -26,3 +26,6 @@ cmake \
 -DCUDA_TOOLKIT_ROOT_DIR=/opt/packages/cuda-7.0/ \
 -DLIBNVRTC_LIBRARY_DIR=/opt/packages/cuda-7.0/lib64/ .. 
 ```
+
+- Build benchmark: -DHPXCL_WITH_CUDA_BENCHMARK=ON
+- Build examples:  -DHPXCL_WITH_CUDA_EXAMPLES=ON

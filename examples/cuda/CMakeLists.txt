@@ -4,7 +4,6 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 set(example_programs
-    #hello_world
     list_devices
     list_extended_devices
     build_kernel
@@ -38,3 +37,8 @@ foreach(example_program ${example_programs})
                               ${example_program}_exe)
 
 endforeach()
+
+if(HPXCL_WITH_CUDA_BENCHMARK)
+	add_subdirectory(benchmark_vector)
+endif()
+
