@@ -10,21 +10,7 @@
 
 #include "examples/opencl/benchmark_vector/timer.hpp"
 
-//#define SINGLE
-#define EPS 10e-6
-//###########################################################################
-//Switching between single precision and double precision
-//###########################################################################
-
-#ifdef SINGLE
-#define TYPE float
-#define LOG logf
-#define EXP expf
-#else
-#define TYPE double
-#define LOG log
-#define EXP exp
-#endif
+#include "config.hpp"
 
 //###########################################################################
 //Kernels
@@ -128,7 +114,7 @@ int main(int argc, char*argv[]) {
 
 	// 1. logn kernel
 	timer_start();
-	logn<<<gridsize, blocksize>>>(count, in1_dev, out_dev);
+	logn<TYPE><<<gridsize, blocksize>>>(count, in1_dev, out_dev);
 	cudaDeviceSynchronize();
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
 	std::cout << timer_stop() << " ";
@@ -139,7 +125,7 @@ int main(int argc, char*argv[]) {
 
 	// 2. expn kernel
 	timer_start();
-	expn<<<gridsize, blocksize>>>(count, in1_dev, out_dev);
+	expn<TYPE><<<gridsize, blocksize>>>(count, in1_dev, out_dev);
 	cudaDeviceSynchronize();
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
 	std::cout << timer_stop() << " ";
@@ -150,7 +136,7 @@ int main(int argc, char*argv[]) {
 
 	// 3. dbl kernel
 	timer_start();
-	dbl<<<gridsize, blocksize>>>(count, in1_dev, out_dev);
+	dbl<TYPE><<<gridsize, blocksize>>>(count, in1_dev, out_dev);
 	cudaDeviceSynchronize();
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
 	std::cout << timer_stop() << " ";
@@ -161,7 +147,7 @@ int main(int argc, char*argv[]) {
 
 	// 4. add kernel
 	timer_start();
-	add<<<gridsize, blocksize>>>(count, in1_dev, in2_dev, out_dev);
+	add<TYPE><<<gridsize, blocksize>>>(count, in1_dev, in2_dev, out_dev);
 	cudaDeviceSynchronize();
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
 	std::cout << timer_stop() << " ";
@@ -172,7 +158,7 @@ int main(int argc, char*argv[]) {
 
 	// 5. mul kernel
 	timer_start();
-    mul<<<gridsize, blocksize>>>(count, in1_dev, in2_dev, out_dev);
+    mul<TYPE><<<gridsize, blocksize>>>(count, in1_dev, in2_dev, out_dev);
     cudaDeviceSynchronize();
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
 	std::cout << timer_stop() << " ";
