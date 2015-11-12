@@ -8,9 +8,6 @@
 
 #include <hpx/hpx.hpp>
 
-//#include "cuda/buffer.hpp"
-//#include "cuda/program.hpp"
-//#include "cuda/device.hpp"
 #include "cuda/server/buffer.hpp"
 #include "cuda/server/program.hpp"
 #include "cuda/server/device.hpp"
@@ -149,27 +146,40 @@ public:
 	}
 
 	/**
-		 * \brief Creates a program from the given source file
-		 *
-		 * This Method creates a program containing the source code. This program is attached to
-		 * this device and all streams are executed there.
-		 *
-		 * \param source The path to the source file
-		 *
-		 * \see Program
-		 */
-		hpx::lcos::future<hpx::cuda::program> create_program_with_file(
-				std::string file) {
-			HPX_ASSERT(this->get_gid());
+	 * \brief Creates a program from the given source file
+	 *
+	 * This Method creates a program containing the source code. This program is attached to
+	 * this device and all streams are executed there.
+	 *
+	 * \param source The path to the source file
+	 *
+	 * \see Program
+	 */
+	hpx::lcos::future<hpx::cuda::program> create_program_with_file(
+			std::string file) {
+		HPX_ASSERT(this->get_gid());
 
-			std::ifstream stream(file);
-			std::stringstream buffer;
-			buffer << stream.rdbuf();
+		std::string source;
+		std::string tmp;
+		std::ifstream in(file);
 
-			typedef server::device::create_program_with_source_action action_type;
-			return hpx::async<action_type>(this->get_gid(), buffer.str());
+		if (!in) {
+			std::string errorMessage = "File ";
+			errorMessage += file;
+			errorMessage += "not found!";
+			HPX_THROW_EXCEPTION(hpx::no_success, "create_program_with_file",
+					errorMessage);
 		}
 
+		while (in) {
+			getline(in, tmp);
+			source += tmp;
+			source += "\n";
+		}
+
+		typedef server::device::create_program_with_source_action action_type;
+		return hpx::async<action_type>(this->get_gid(), source);
+	}
 
 	/**
 	 * \brief Creates a buffer attached to this device
