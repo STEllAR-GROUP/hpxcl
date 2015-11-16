@@ -176,10 +176,6 @@ int main(int argc, char*argv[]) {
 	cudaFreeHost(in2);
 	cudaFreeHost(out);
 
-	cudaFree(in1_dev);
-	cudaFree(in2_dev);
-	cudaFree(out_dev);
-
 	data += timer_stop();
 
 	std::cout << data << std::endl;

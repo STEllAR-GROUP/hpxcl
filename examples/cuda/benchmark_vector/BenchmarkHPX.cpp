@@ -33,6 +33,8 @@ int main(int argc, char*argv[]) {
 	count[0]= atoi(argv[1]);
 	std::vector<double> timeKernel;
 
+	std::cout << count[0] << " ";
+
 	timer_start();
 
 	double timeData = 0;
@@ -83,10 +85,6 @@ int main(int argc, char*argv[]) {
 					in1));
 	data_futures.push_back(lengthbuffer.enqueue_write(0,sizeof(size_t), count));
 
-	timeData += timer_stop();
-
-	timer_start();
-
 	// Create the hello_world device program
 	program prog = cudaDevice.create_program_with_file("kernel.cu").get();
 
@@ -103,9 +101,7 @@ int main(int argc, char*argv[]) {
 	flags.push_back("-use_fast_math");
 
 	// Compile the program
-	prog.build(flags,"log_float");
-
-	timeCompile += timer_stop();
+	prog.build_sync(flags,"logn");
 
 
 
@@ -138,7 +134,7 @@ int main(int argc, char*argv[]) {
 
 	// 1. logn kernel
 	timer_start();
-	auto kernel_future = prog.run(args,"log_float",grid,block);
+	auto kernel_future = prog.run(args,"logn",grid,block);
 
 	hpx::wait_all(kernel_future);
 
@@ -149,12 +145,82 @@ int main(int argc, char*argv[]) {
 		std::cout << "Error for logn at " << i << std::endl;
 	}
 
-	std::cout << count[0] << " " << timeData << " " << timeCompile << std::endl;
+	prog.build_sync(flags,"expn");
 
+	// 2. expn kernel
+	timer_start();
+	kernel_future = prog.run(args,"expn",grid,block);
+
+	hpx::wait_all(kernel_future);
+
+	res = outBuffer.enqueue_read_sync<TYPE>(0,count[0] *sizeof(TYPE));
+	timeKernel.push_back(timer_stop());
+	for (size_t i = 0; i < count[0]; i++) {
+		if (!(std::abs(std::exp(in1[i]) - res[i]) < EPS))
+		std::cout << "Error for expn at " << i << std::endl;
+	}
+
+	prog.build_sync(flags,"dbl");
+
+	// 4. add kernel
+	timer_start();
+	kernel_future = prog.run(args,"dbl",grid,block);
+
+	hpx::wait_all(kernel_future);
+
+	res = outBuffer.enqueue_read_sync<TYPE>(0,count[0] *sizeof(TYPE));
+	timeKernel.push_back(timer_stop());
+	for (size_t i = 0; i < count[0]; i++) {
+		if (!(std::abs(in1[i] * 2.0 - res[i]) < EPS))
+		std::cout << "Error for dbl at " << i << std::endl;
+	}
+
+	args.push_back(in2Buffer);
+
+	prog.build_sync(flags,"add");
+
+	// 4. add kernel
+	timer_start();
+	kernel_future = prog.run(args,"add",grid,block);
+
+	hpx::wait_all(kernel_future);
+
+	res = outBuffer.enqueue_read_sync<TYPE>(0,count[0] *sizeof(TYPE));
+	timeKernel.push_back(timer_stop());
+	for (size_t i = 0; i < count[0]; i++) {
+		if (!(std::abs(in1[i] + in2[i] - res[i]) < EPS))
+		std::cout << "Error for add at " << i << std::endl;
+	}
+
+	prog.build_sync(flags,"mul");
+
+	// 5. mul kernel
+	timer_start();
+	kernel_future = prog.run(args,"mul",grid,block);
+
+	hpx::wait_all(kernel_future);
+
+	res = outBuffer.enqueue_read_sync<TYPE>(0,count[0] *sizeof(TYPE));
+	timeKernel.push_back(timer_stop());
+	for (size_t i = 0; i < count[0]; i++) {
+		if (!(std::abs(in1[i] * in2[i] - res[i]) < EPS))
+		std::cout << "Error for mul at " << i << std::endl;
+	}
+
+    //Cleanup
+	timer_start();
 	cudaFreeHost(in1);
 	cudaFreeHost(in2);
 	cudaFreeHost(out);
 	cudaFreeHost(count);
+	timeData += timer_stop();
+
+	//Output of the results
+
+	for ( auto time : timeKernel)
+	std::cout << time << " ";
+
+	std::cout << " " << timeData << " " <<  std::endl;
 
 	return EXIT_SUCCESS;
 }
