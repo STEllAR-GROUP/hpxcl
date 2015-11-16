@@ -166,7 +166,7 @@ public:
 		if (!in) {
 			std::string errorMessage = "File ";
 			errorMessage += file;
-			errorMessage += "not found!";
+			errorMessage += " not found!";
 			HPX_THROW_EXCEPTION(hpx::no_success, "create_program_with_file",
 					errorMessage);
 		}

@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
 	data_futures.push_back(outbuffer.enqueue_write(0, SIZE * sizeof(unsigned int), inputData));
 
 	// Create the hello_world device program
-	program prog = cudaDevice.create_program_with_file("./kernel.cu").get();
+	program prog = cudaDevice.create_program_with_file("kernel.cu").get();
 
 	// Add compiler flags for compiling the kernel
 
