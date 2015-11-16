@@ -28,9 +28,15 @@ int main(int argc, char*argv[]) {
 		exit(1);
 	}
 
-	size_t count = atoi(argv[1]);
+	size_t* count;
+	cudaMallocHost((void**)&count,sizeof(size_t));
+	count[0]= atoi(argv[1]);
+	std::vector<double> timeKernel;
+
+	timer_start();
 
 	double timeData = 0;
+	double timeCompile = 0;
 
 	//Vector for all futures for the data management
 	std::vector<hpx::lcos::future<void>> data_futures;
@@ -44,8 +50,6 @@ int main(int argc, char*argv[]) {
 		return hpx::finalize();
 	}
 
-	timer_start();
-
 	//Pointer
 	TYPE* out;
 	TYPE* in1;
@@ -53,57 +57,57 @@ int main(int argc, char*argv[]) {
 
 	timer_start();
 	//Malloc Host
-	cudaMallocHost((void**) &out, count * sizeof(TYPE));
-	cudaMallocHost((void**) &in1, count * sizeof(TYPE));
-	cudaMallocHost((void**) &in2, count * sizeof(TYPE));
+	cudaMallocHost((void**) &out, count[0] * sizeof(TYPE));
+	cudaMallocHost((void**) &in1, count[0] * sizeof(TYPE));
+	cudaMallocHost((void**) &in2, count[0] * sizeof(TYPE));
 
 	//Initialize the data
-	fillRandomVector(in1, count);
-	fillRandomVector(in2, count);
+	fillRandomVector(in1, count[0]);
+	fillRandomVector(in2, count[0]);
 
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
 
 	// Create a buffer
-	buffer in1Buffer = cudaDevice.create_buffer_sync(count * sizeof(TYPE));
-	buffer in2Buffer = cudaDevice.create_buffer_sync(count * sizeof(TYPE));
-	buffer outbuffer = cudaDevice.create_buffer_sync(count * sizeof(TYPE));
+	buffer in1Buffer = cudaDevice.create_buffer_sync(count[0] * sizeof(TYPE));
+	buffer in2Buffer = cudaDevice.create_buffer_sync(count[0] * sizeof(TYPE));
+	buffer outBuffer = cudaDevice.create_buffer_sync(count[0] * sizeof(TYPE));
+	buffer lengthbuffer = cudaDevice.create_buffer_sync(sizeof(size_t));
 
 	// Copy input data to the buffer
-	//data_futures.push_back(in1Buffer.enqueue_write(0, SIZE * sizeof(TYPE),
-		//			inputData));
+	data_futures.push_back(in1Buffer.enqueue_write(0, count[0] * sizeof(TYPE),
+					in1));
+	data_futures.push_back(in2Buffer.enqueue_write(0, count[0] * sizeof(TYPE),
+					in2));
+	data_futures.push_back(outBuffer.enqueue_write(0, count[0] * sizeof(TYPE),
+					in1));
+	data_futures.push_back(lengthbuffer.enqueue_write(0,sizeof(size_t), count));
+
+	timeData += timer_stop();
+
+	timer_start();
 
 	// Create the hello_world device program
-	//program prog = cudaDevice.create_program_with_file("./kernel.cu").get();
+	program prog = cudaDevice.create_program_with_file("kernel.cu").get();
 
-	// Add compiler flags for compiling the kernel
+	//Add compiler flags for compiling the kernel
+	std::vector<std::string> flags;
+	std::string mode = "--gpu-architecture=compute_";
+	mode.append(
+			std::to_string(cudaDevice.get_device_architecture_major().get()));
 
-	//std::vector<std::string> flags;
-	//std::string mode = "--gpu-architecture=compute_";
-	//mode.append(
-	//		std::to_string(cudaDevice.get_device_architecture_major().get()));
+	mode.append(
+			std::to_string(cudaDevice.get_device_architecture_minor().get()));
 
-	//mode.append(
-	//		std::to_string(cudaDevice.get_device_architecture_minor().get()));
-
-	//flags.push_back(mode);
+	flags.push_back(mode);
+	flags.push_back("-use_fast_math");
 
 	// Compile the program
-	//prog.build(flags);
+	prog.build(flags,"log_float");
 
-	// Create the buffer for the result
-	//unsigned int* result;
-	//cudaMallocHost((void**)&result,sizeof(unsigned int));
-	//result[0] = 0;
-	//buffer resbuffer = cudaDevice.create_buffer_sync(sizeof(unsigned int));
-	//data_futures.push_back(resbuffer.enqueue_write(0,sizeof(unsigned int), result));
+	timeCompile += timer_stop();
 
-	//Create the buffer for the length of the array
-	//unsigned int* n;
-	//cudaMallocHost((void**)&n,sizeof(unsigned int));
-	//result[0] = SIZE;
-	//buffer lengthbuffer = cudaDevice.create_buffer_sync(sizeof(unsigned int));
-	//data_futures.push_back(lengthbuffer.enqueue_write(0,sizeof(unsigned int), n));
+
 
 	//Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;
@@ -119,6 +123,38 @@ int main(int argc, char*argv[]) {
 	block.y = 1;
 	block.z = 1;
 
-	std::cout << count << " ";
+	timeData = timer_stop();
+
+	//######################################################################
+	//Launch kernels
+	//######################################################################
+
+	std::vector<hpx::cuda::buffer>args;
+	args.push_back(lengthbuffer);
+	args.push_back(in1Buffer);
+	args.push_back(outBuffer);
+
+	hpx::wait_all(data_futures);
+
+	// 1. logn kernel
+	timer_start();
+	auto kernel_future = prog.run(args,"log_float",grid,block);
+
+	hpx::wait_all(kernel_future);
+
+	TYPE* res = outBuffer.enqueue_read_sync<TYPE>(0,count[0] *sizeof(TYPE));
+	timeKernel.push_back(timer_stop());
+	for (size_t i = 0; i < count[0]; i++) {
+		if (!(std::abs(std::log(in1[i]) - res[i]) < EPS))
+		std::cout << "Error for logn at " << i << std::endl;
+	}
+
+	std::cout << count[0] << " " << timeData << " " << timeCompile << std::endl;
+
+	cudaFreeHost(in1);
+	cudaFreeHost(in2);
+	cudaFreeHost(out);
+	cudaFreeHost(count);
+
 	return EXIT_SUCCESS;
 }

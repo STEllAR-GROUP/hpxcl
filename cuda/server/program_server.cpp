@@ -58,7 +58,7 @@ void program::set_source(std::string source) {
 }
 
 //ToDo: Add debug flag
-void program::build(std::vector<std::string> compilerFlags,
+void program::build(std::vector<std::string> compilerFlags, std::string modulename,
 		unsigned int debug) {
 
 	boost::uuids::uuid uuid = boost::uuids::random_generator()();
@@ -108,7 +108,7 @@ void program::build(std::vector<std::string> compilerFlags,
 
 	cuModuleLoadDataEx(&module, ptx, 0, 0, 0);
 	checkCudaError("Load Module");
-	cuModuleGetFunction(&(this->kernel), module, "sum");
+	cuModuleGetFunction(&(this->kernel), module, modulename.c_str());
 	checkCudaError("Get Function");
 }
 

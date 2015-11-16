@@ -48,5 +48,7 @@ foreach(example_program ${example_programs})
   # add dependencies to pseudo-target
   add_hpx_pseudo_dependencies(examples.cuda.${example_program}
                               ${example_program}_exe)
+                              
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernel.cu DESTINATION ../../../examples/cuda/benchmark_vector)
 
 endforeach()

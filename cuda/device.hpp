@@ -184,7 +184,7 @@ public:
 	/**
 	 * \brief Creates a buffer attached to this device
 	 *
-	 * The methods creates a buffer with the size specified here and allocates this
+	 * The method creates a buffer with the size specified here and allocates this
 	 * on this device
 	 *
 	 * \param size The size of the allocated buffer

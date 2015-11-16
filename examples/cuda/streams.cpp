@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 	flags.push_back(mode);
 
 	// Compile the program
-	prog.build(flags);
+	prog.build(flags,"sum");
 
 	//Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;

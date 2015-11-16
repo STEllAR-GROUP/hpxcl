@@ -60,7 +60,7 @@ public:
 
 	~program();
 
-	void build(std::vector<std::string> compilerFlags, unsigned int debug = 0);
+	void build(std::vector<std::string> compilerFlags, std::string modulename, unsigned int debug = 0);
 
 	void set_source(std::string source);
 
