@@ -22,12 +22,14 @@ public:
 
 	buffer(hpx::future<hpx::naming::id_type> && gid) :
 			base_type(std::move(gid)) {
+
+		is_local = (hpx::get_colocation_id_sync(get_id()) == hpx::find_here());
 	}
 
 	hpx::lcos::future<size_t> size() {
 		HPX_ASSERT(this->get_gid());
 		typedef server::buffer::size_action action_type;
-		return hpx::async < action_type > (this->get_gid());
+		return hpx::async<action_type>(this->get_gid());
 
 	}
 
@@ -39,7 +41,7 @@ public:
 	hpx::lcos::future<void> set_size(size_t size) {
 		HPX_ASSERT(this->get_gid());
 		typedef server::buffer::set_size_action action_type;
-		return hpx::async < action_type > (this->get_gid(), size);
+		return hpx::async<action_type>(this->get_gid(), size);
 
 	}
 
@@ -49,9 +51,8 @@ public:
 	}
 
 	template<typename T>
-	T* enqueue_read_sync(size_t offset, size_t size)
-	{
-		T* tmp = (T*)enqueue_read(offset,size).get().data();
+	T* enqueue_read_sync(size_t offset, size_t size) {
+		T* tmp = (T*) enqueue_read(offset, size).get().data();
 		return tmp;
 	}
 
@@ -60,25 +61,36 @@ public:
 		HPX_ASSERT(this->get_gid());
 
 		typedef server::buffer::enqueue_read_action action_type;
-		return hpx::async < action_type > (this->get_gid(), offset, size);
+		return hpx::async<action_type>(this->get_gid(), offset, size);
 
 	}
 
-	hpx::future<void> enqueue_write(size_t offset, size_t size, const void* data) const {
+	hpx::future<void> enqueue_write(size_t offset, size_t size,
+			const void* data) const {
 		HPX_ASSERT(this->get_gid());
 
-		hpx::serialization::serialize_buffer<char> serializable_data(
-				(char*)data, size,
-				hpx::serialization::serialize_buffer<char>::init_mode::reference);
+		if (is_local) {
 
-		typedef server::buffer::enqueue_write_action action_type;
-		return hpx::async < action_type > (this->get_gid(), offset, serializable_data);
+			typedef server::buffer::enqueue_write_local_action action_type;
+			return hpx::async<action_type>(this->get_id(), offset,
+					reinterpret_cast<uintptr_t>(data));
+
+		} else {
+
+			hpx::serialization::serialize_buffer<char> serializable_data(
+					(char*) data, size,
+					hpx::serialization::serialize_buffer<char>::init_mode::reference);
+
+			typedef server::buffer::enqueue_write_action action_type;
+			return hpx::async<action_type>(this->get_gid(), offset,
+					serializable_data);
+		}
 
 	}
 
 private:
-            hpx::naming::id_type device_gid;
-            bool is_local;
+	hpx::naming::id_type device_gid;
+	bool is_local;
 
 };
 }

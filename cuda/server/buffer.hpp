@@ -9,6 +9,7 @@
 #include <hpx/hpx.hpp>
 
 #include <cuda.h>
+#include <cstdint>
 
 #include "cuda/fwd_declarations.hpp"
 #include "cuda/export_definitions.hpp"
@@ -42,8 +43,6 @@ namespace hpx
 
                 size_t size();
 
-
-
                 void set_size(size_t size);
 
                 ~buffer();
@@ -53,12 +52,15 @@ namespace hpx
 
                 void enqueue_write(size_t offset, hpx::serialization::serialize_buffer<char> data);
 
+                void enqueue_write_local(size_t offset, uintptr_t data);
+
                 void* get_raw_pointer();
 
                 HPX_DEFINE_COMPONENT_ACTION(buffer, size);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, set_size);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write);
+                HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write_local);
             };
         }
     }
@@ -76,5 +78,8 @@ namespace hpx
  HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::buffer::enqueue_write_action,
     buffer_enqueue_write_action);
+ HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::buffer::enqueue_write_local_action,
+    buffer_enqueue_write_local_action);
 
  #endif //BUFFER_2_HPP

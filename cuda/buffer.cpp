@@ -27,3 +27,6 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
     cuda_buffer_type::wrapped_type::enqueue_write_action,
     cuda_buffer_enqueue_write_action);
+HPX_REGISTER_ACTION(
+    cuda_buffer_type::wrapped_type::enqueue_write_local_action,
+    cuda_buffer_enqueue_write_local_action);
