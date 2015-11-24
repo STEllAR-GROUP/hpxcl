@@ -50,6 +50,8 @@ namespace hpx
                 hpx::serialization::serialize_buffer<char>
                 enqueue_read(size_t offset, size_t size);
 
+                uintptr_t enqueue_read_local(size_t offset, size_t size);
+
                 void enqueue_write(size_t offset, hpx::serialization::serialize_buffer<char> data);
 
                 void enqueue_write_local(size_t offset, uintptr_t data);
@@ -59,6 +61,7 @@ namespace hpx
                 HPX_DEFINE_COMPONENT_ACTION(buffer, size);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, set_size);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read);
+                HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read_local);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write_local);
             };
@@ -81,5 +84,8 @@ namespace hpx
  HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::buffer::enqueue_write_local_action,
     buffer_enqueue_write_local_action);
+ HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::buffer::enqueue_read_local_action,
+    buffer_enqueue_read_local_action);
 
  #endif //BUFFER_2_HPP

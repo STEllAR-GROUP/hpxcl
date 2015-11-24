@@ -107,6 +107,22 @@ void buffer::enqueue_write_local(size_t offset, uintptr_t data) {
 
 }
 
+uintptr_t buffer::enqueue_read_local(size_t offset, size_t size){
+
+	cudaSetDevice(this->parent_device_num);
+		checkCudaError("buffer:enqueue_read Set device");
+
+		cudaMemcpyAsync(this->data_host, this->data_device, this->arg_buffer_size,
+				cudaMemcpyDeviceToHost, this->stream);
+		checkCudaError(
+				"buffer::enque_read Error during copy data from the device to the host");
+		cudaStreamSynchronize(this->stream);
+		checkCudaError("buffer::enque_read Error during synchronization of stream");
+
+		return reinterpret_cast<uintptr_t>(this->data_host);
+
+}
+
 }
 }
 }
