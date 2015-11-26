@@ -4,7 +4,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #define SINGLE
-#define EPS 10e-6
+#define EPS 10e-5
 
 //###########################################################################
 //Switching between single precision and double precision

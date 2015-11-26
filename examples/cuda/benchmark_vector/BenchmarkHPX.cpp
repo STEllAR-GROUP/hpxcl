@@ -44,7 +44,7 @@ int main(int argc, char*argv[]) {
 	std::vector<hpx::lcos::future<void>> data_futures;
 
 	// Get list of available Cuda Devices.
-	std::vector<device> devices = get_all_devices(2, 0).get();
+	std::vector<device> devices = get_all_devices(1, 0).get();
 
 	// Check whether there are any devices
 	if (devices.size() < 1) {
@@ -226,7 +226,7 @@ int main(int argc, char*argv[]) {
 	for ( auto time : timeKernel)
 	std::cout << time << " ";
 
-	std::cout << " " << timeData << " " << timeCompile <<  std::endl;
+	std::cout << timeData << " " << timeCompile <<  std::endl;
 
 	return EXIT_SUCCESS;
 }
