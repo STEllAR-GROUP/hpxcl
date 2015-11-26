@@ -35,7 +35,7 @@ int main(int argc, char*argv[]) {
 
 	std::cout << count[0] << " ";
 
-	timer_start();
+
 
 	double timeData = 0;
 	double timeCompile = 0;
@@ -51,6 +51,8 @@ int main(int argc, char*argv[]) {
 		hpx::cerr << "No CUDA devices found!" << hpx::endl;
 		return hpx::finalize();
 	}
+
+	timer_start();
 
 	//Pointer
 	TYPE* out;
@@ -85,6 +87,12 @@ int main(int argc, char*argv[]) {
 					in1));
 	data_futures.push_back(lengthbuffer.enqueue_write(0,sizeof(size_t), count));
 
+	hpx::wait_all(data_futures);
+
+	timeData = timer_stop();
+
+	timer_start();
+
 	// Create the hello_world device program
 	program prog = cudaDevice.create_program_with_file("kernel.cu").get();
 
@@ -103,7 +111,7 @@ int main(int argc, char*argv[]) {
 	// Compile the program
 	prog.build_sync(flags,"logn");
 
-
+	timeCompile = timer_stop();
 
 	//Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;
@@ -119,7 +127,7 @@ int main(int argc, char*argv[]) {
 	block.y = 1;
 	block.z = 1;
 
-	timeData = timer_stop();
+
 
 	//######################################################################
 	//Launch kernels
@@ -129,8 +137,6 @@ int main(int argc, char*argv[]) {
 	args.push_back(lengthbuffer);
 	args.push_back(in1Buffer);
 	args.push_back(outBuffer);
-
-	hpx::wait_all(data_futures);
 
 	// 1. logn kernel
 	timer_start();
@@ -220,7 +226,7 @@ int main(int argc, char*argv[]) {
 	for ( auto time : timeKernel)
 	std::cout << time << " ";
 
-	std::cout << " " << timeData << " " <<  std::endl;
+	std::cout << " " << timeData << " " << timeCompile <<  std::endl;
 
 	return EXIT_SUCCESS;
 }
