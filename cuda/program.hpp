@@ -44,6 +44,7 @@ public:
 	 * CUDA application you should use the pre-complied method.
 	 *
 	 * \param compilerFlags A list with all compiler flags passed to the nvcc compiler
+	 * \param modulename Name of the kernel, which to be compiled
 	 * \param debug Compile with debug flags
 	 *
 	 * \note It is not possible to use include headers, compiling the kernel with nvrtc
@@ -52,22 +53,34 @@ public:
 	 *
 	 */
 
-	hpx::lcos::future<void> build(std::vector<std::string> compilerFlags,
+	hpx::lcos::future<void> build(std::vector<std::string> compilerFlags,std::vector<std::string> modulenames,
 			unsigned int debug = 0) {
 		HPX_ASSERT(this->get_gid());
 		typedef server::program::build_action action_type;
-		return hpx::async<action_type>(this->get_gid(), compilerFlags, debug);
+		return hpx::async<action_type>(this->get_gid(), compilerFlags, modulenames, debug);
 	}
 
 	/**
 	 * \brief Synchronous compilation of the source code
 	 */
 
-	void build_sync(std::vector<std::string> compilerFlags, unsigned int debug =
+	void build_sync(std::vector<std::string> compilerFlags, std::string modulename, unsigned int debug =
 			0) {
-		// HPX_ASSERT(this->get_gid());
-		build(compilerFlags, debug).get();
+		std::vector<std::string> modulenames;
+		modulenames.push_back(modulename);
+		build(compilerFlags, modulenames, debug).get();
 	}
+
+
+	/**
+	 * \brief Synchronous compilation of the source code
+	 */
+
+	void build_sync(std::vector<std::string> compilerFlags, std::vector<std::string> modulenames, unsigned int debug =
+			0) {
+		build(compilerFlags, modulenames, debug).get();
+	}
+
 
 	/**
 	 * \brief Synchronous setting source code

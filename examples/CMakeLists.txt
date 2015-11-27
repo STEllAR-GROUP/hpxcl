@@ -10,7 +10,7 @@ if(HPXCL_WITH_OPENCL)
     ${subdirs} opencl)
 endif()
 
-if(HPXCL_WITH_CUDA)
+if(HPXCL_WITH_CUDA_EXAMPLES)
   set(subdirs
     ${subdirs} cuda)
 endif()

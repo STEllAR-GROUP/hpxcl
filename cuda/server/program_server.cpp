@@ -59,7 +59,7 @@ void program::set_source(std::string source) {
 
 //ToDo: Add debug flag
 void program::build(std::vector<std::string> compilerFlags,
-		unsigned int debug) {
+		std::vector<std::string> modulenames, unsigned int debug) {
 
 	boost::uuids::uuid uuid = boost::uuids::random_generator()();
 	std::string filename = to_string(uuid);
@@ -70,8 +70,8 @@ void program::build(std::vector<std::string> compilerFlags,
 		compilerFlags.push_back("-lineinfo");
 	}
 
-	nvrtcCreateProgram(&prog, this->kernel_source.c_str(),
-			filename.c_str(), 0, NULL, NULL);
+	nvrtcCreateProgram(&prog, this->kernel_source.c_str(), filename.c_str(), 0,
+			NULL, NULL);
 	checkCudaError("Create Program");
 	const char * opts[compilerFlags.size()];
 	unsigned int i = 0;
@@ -80,9 +80,8 @@ void program::build(std::vector<std::string> compilerFlags,
 		i++;
 	}
 
-
-	nvrtcResult compileResult = nvrtcCompileProgram(prog,
-			compilerFlags.size(), opts);
+	nvrtcResult compileResult = nvrtcCompileProgram(prog, compilerFlags.size(),
+			opts);
 
 	if (compileResult != NVRTC_SUCCESS) {
 		size_t logSize;
@@ -108,8 +107,15 @@ void program::build(std::vector<std::string> compilerFlags,
 
 	cuModuleLoadDataEx(&module, ptx, 0, 0, 0);
 	checkCudaError("Load Module");
-	cuModuleGetFunction(&(this->kernel), module, "sum");
-	checkCudaError("Get Function");
+
+	for (auto modulename : modulenames) {
+
+		CUfunction kernel;
+		cuModuleGetFunction(&kernel, module, modulename.c_str());
+		checkCudaError("Get Function");
+		kernels.insert(std::pair<std::string, CUfunction>(modulename, kernel));
+	}
+
 }
 
 void program::run(std::vector<hpx::naming::id_type> args,
@@ -126,7 +132,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 	}
 
 	cudaSetDevice(this->parent_device_id);
-	cuLaunchKernel(this->kernel, grid.x, grid.y, grid.y, // grid dim
+	cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y, // grid dim
 			block.x, block.y, block.z,                   // block dim
 			0, this->streams[stream],                   // shared mem and stream
 			args_pointer, 0);                            // arguments
