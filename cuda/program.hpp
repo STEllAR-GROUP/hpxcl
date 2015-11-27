@@ -53,11 +53,11 @@ public:
 	 *
 	 */
 
-	hpx::lcos::future<void> build(std::vector<std::string> compilerFlags,std::string modulename,
+	hpx::lcos::future<void> build(std::vector<std::string> compilerFlags,std::vector<std::string> modulenames,
 			unsigned int debug = 0) {
 		HPX_ASSERT(this->get_gid());
 		typedef server::program::build_action action_type;
-		return hpx::async<action_type>(this->get_gid(), compilerFlags, modulename, debug);
+		return hpx::async<action_type>(this->get_gid(), compilerFlags, modulenames, debug);
 	}
 
 	/**
@@ -66,9 +66,21 @@ public:
 
 	void build_sync(std::vector<std::string> compilerFlags, std::string modulename, unsigned int debug =
 			0) {
-		// HPX_ASSERT(this->get_gid());
-		build(compilerFlags, modulename, debug).get();
+		std::vector<std::string> modulenames;
+		modulenames.push_back(modulename);
+		build(compilerFlags, modulenames, debug).get();
 	}
+
+
+	/**
+	 * \brief Synchronous compilation of the source code
+	 */
+
+	void build_sync(std::vector<std::string> compilerFlags, std::vector<std::string> modulenames, unsigned int debug =
+			0) {
+		build(compilerFlags, modulenames, debug).get();
+	}
+
 
 	/**
 	 * \brief Synchronous setting source code

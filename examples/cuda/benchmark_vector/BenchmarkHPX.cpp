@@ -108,8 +108,15 @@ int main(int argc, char*argv[]) {
 	flags.push_back(mode);
 	flags.push_back("-use_fast_math");
 
+	std::vector<std::string> kernels;
+	kernels.push_back("logn");
+	kernels.push_back("expn");
+	kernels.push_back("dbl");
+	kernels.push_back("add");
+	kernels.push_back("mul");
+
 	// Compile the program
-	prog.build_sync(flags,"logn");
+	prog.build_sync(flags,kernels);
 
 	timeCompile = timer_stop();
 
@@ -126,8 +133,6 @@ int main(int argc, char*argv[]) {
 	block.x = 32;
 	block.y = 1;
 	block.z = 1;
-
-
 
 	//######################################################################
 	//Launch kernels
@@ -151,8 +156,6 @@ int main(int argc, char*argv[]) {
 		std::cout << "Error for logn at " << i << std::endl;
 	}
 
-	prog.build_sync(flags,"expn");
-
 	// 2. expn kernel
 	timer_start();
 	kernel_future = prog.run(args,"expn",grid,block);
@@ -165,8 +168,6 @@ int main(int argc, char*argv[]) {
 		if (!(std::abs(std::exp(in1[i]) - res[i]) < EPS))
 		std::cout << "Error for expn at " << i << std::endl;
 	}
-
-	prog.build_sync(flags,"dbl");
 
 	// 4. add kernel
 	timer_start();
@@ -183,8 +184,6 @@ int main(int argc, char*argv[]) {
 
 	args.push_back(in2Buffer);
 
-	prog.build_sync(flags,"add");
-
 	// 4. add kernel
 	timer_start();
 	kernel_future = prog.run(args,"add",grid,block);
@@ -197,8 +196,6 @@ int main(int argc, char*argv[]) {
 		if (!(std::abs(in1[i] + in2[i] - res[i]) < EPS))
 		std::cout << "Error for add at " << i << std::endl;
 	}
-
-	prog.build_sync(flags,"mul");
 
 	// 5. mul kernel
 	timer_start();

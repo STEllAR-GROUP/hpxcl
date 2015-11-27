@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 	flags.push_back(mode);
 
 	// Compile the program
-	prog.build(flags,"sum");
+	prog.build_sync(flags,"sum");
 
 	// Create the buffer for the result
 	unsigned int* result;

@@ -8,6 +8,6 @@ do
 		amount=$(( amount + $slice ))
 		for j in {1..5}
 		do
-			./BenchmarkCuda $amount 
+			./BenchmarkHPX $amount -t 1
 		done
 done

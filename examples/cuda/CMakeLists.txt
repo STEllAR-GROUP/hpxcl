@@ -8,7 +8,7 @@ set(example_programs
     list_extended_devices
     build_kernel
     build_kernel_from_file
-    streams
+    #streams
 )
 
 foreach(example_program ${example_programs})

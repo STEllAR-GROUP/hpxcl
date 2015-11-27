@@ -76,9 +76,9 @@ int main(int argc, char* argv[]) {
 	// Compile the program
 
 #ifdef DEBUG
-	prog.build(flags, "sum", 1);
+	prog.build_sync(flags, "sum", 1);
 #else
-	prog.build(flags , "sum");
+	prog.build_sync(flags , "sum");
 #endif
 
 	// Create the buffer for the result

@@ -19,6 +19,8 @@
 #include "cuda/export_definitions.hpp"
 #include "cuda/cuda_error_handling.hpp"
 
+#include <map>
+
 namespace hpx {
 namespace cuda {
 namespace server {
@@ -32,7 +34,7 @@ private:
 	std::string kernel_source;
 	std::string kernel_name;
 	nvrtcProgram prog;
-	CUfunction kernel;
+	std::map<std::string,CUfunction> kernels;
 	std::vector<cudaStream_t> streams;
 	CUmodule module;
 
@@ -60,7 +62,7 @@ public:
 
 	~program();
 
-	void build(std::vector<std::string> compilerFlags, std::string modulename, unsigned int debug = 0);
+	void build(std::vector<std::string> compilerFlags, std::vector<std::string> modulenames, unsigned int debug = 0);
 
 	void set_source(std::string source);
 
