@@ -7,7 +7,7 @@
 #define HPX_CUDA_SERVER_PROGRAM_HPP_
 
 #include <hpx/hpx.hpp>
-
+#define CUDA_API_PER_THREAD_DEFAULT_STREAM
 #include <cuda.h>
 #include <nvrtc.h>
 

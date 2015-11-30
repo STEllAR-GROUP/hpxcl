@@ -8,6 +8,7 @@
 
 #include <hpx/hpx.hpp>
 
+#define CUDA_API_PER_THREAD_DEFAULT_STREAM
 #include <cuda.h>
 #include <cstdint>
 
