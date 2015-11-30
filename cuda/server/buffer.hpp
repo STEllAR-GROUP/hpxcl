@@ -34,7 +34,6 @@ namespace hpx
                 size_t arg_buffer_size;
                 int parent_device_num;
                 void* data_device;
-                void* data_host;
                 cudaStream_t stream;
 
                 public:
