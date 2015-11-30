@@ -76,8 +76,8 @@ void buffer::enqueue_write(size_t offset,
 
 	cudaSetDevice(this->parent_device_num);
 	checkCudaError("buffer:enqueue_read Set device");
-
-	cudaMemcpyAsync(data_device, (void*) data.data(), this->arg_buffer_size,
+	char * slicedPointer = (char*)(this->data_device) + offset;
+	cudaMemcpyAsync(slicedPointer, (void*) data.data(), this->arg_buffer_size,
 			cudaMemcpyHostToDevice);
 	checkCudaError(
 			"buffer::enque_write Error during copy data from the host to the device");
@@ -94,8 +94,8 @@ void buffer::enqueue_write_local(size_t offset, uintptr_t data) {
 
 	cudaSetDevice(this->parent_device_num);
 	checkCudaError("buffer:enqueue_read Set device");
-
-	cudaMemcpyAsync(data_device, reinterpret_cast<void*>(data),
+	char * slicedPointer = (char*)(this->data_device) + offset;
+	cudaMemcpyAsync(slicedPointer, reinterpret_cast<void*>(data),
 			this->arg_buffer_size, cudaMemcpyHostToDevice);
 	checkCudaError(
 			"buffer::enque_write Error during copy data from the host to the device");
