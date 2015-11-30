@@ -12,7 +12,7 @@
 #include <unistd.h>
 
 //#define DEBUG
-#define SIZE 100000
+#define SIZE 1000
 
 using namespace hpx::cuda;
 
