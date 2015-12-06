@@ -6,7 +6,7 @@ This repository contains components that will support percolation via OpenCL and
 Build
 ===
 
-The [CircleCI](https://circleci.com/gh/STEllAR-GROUP/hpxcl)_ contiguous
+The [CircleCI](https://circleci.com/gh/STEllAR-GROUP/hpxcl) contiguous
 integration service tracks the current build status for the master branch:
 ![HPXCL master branch build status](https://circleci.com/gh/STEllAR-GROUP/hpxcl/tree/master.svg?style=svg "")
 
