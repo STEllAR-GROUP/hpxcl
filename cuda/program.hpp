@@ -119,11 +119,58 @@ public:
 			args_id.push_back(args[i].get_id());
 		}
 
+		std::vector<hpx::naming::id_type> dependencies;
+
 		typedef server::program::run_action action_type;
 		return hpx::async<action_type>(this->get_gid(), args_id, modulename,
-				grid, block, stream);
+				grid, block,dependencies, stream);
 
 	}
+
+	/**
+	 * \brief This method executes the kernel, compiled or set to this program
+	 *
+	 * \param modulename The name of the kernel
+	 * \param args The function arguments passed to the kernel
+	 * \param grid The dimensions of the grid size
+	 * \param block The dimensions of the block size
+	 * \param dependencies The data, the kernel execution depends on
+	 * \param stream The stream at which the kernel is attached to
+	 *
+	 * \note Each program has a default stream, which is not the same as the default stream
+	 * 	of the CUDA API. Not setting the last parameter implies that the kernel is executed
+	 * 	on the default stream of this program.
+	 */
+
+	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
+			std::string modulename, hpx::cuda::server::program::Dim3 grid,
+			hpx::cuda::server::program::Dim3 block, std::vector<hpx::cuda::buffer> dependencies,
+			unsigned int stream = 0) {
+
+		HPX_ASSERT(this->get_gid());
+
+		std::vector<hpx::naming::id_type> args_id;
+
+		for (unsigned int i = 0; i < args.size(); i++) {
+
+			args_id.push_back(args[i].get_id());
+		}
+
+		std::vector<hpx::naming::id_type> dependencies_id;
+
+		for(unsigned int i = 0; i < dependencies.size();i++){
+
+			dependencies_id.push_back(dependencies[i].get_id());
+		}
+
+		typedef server::program::run_action action_type;
+		return hpx::async<action_type>(this->get_gid(), args_id, modulename,
+				grid, block, dependencies_id, stream);
+
+	}
+
+
+
 
 	/**
 	 * \brief This method returns the number of streams at this device

@@ -7,7 +7,7 @@
 #define HPX_CUDA_SERVER_PROGRAM_HPP_
 
 #include <hpx/hpx.hpp>
-
+#define CUDA_API_PER_THREAD_DEFAULT_STREAM
 #include <cuda.h>
 #include <nvrtc.h>
 
@@ -62,12 +62,14 @@ public:
 
 	~program();
 
-	void build(std::vector<std::string> compilerFlags, std::vector<std::string> modulenames, unsigned int debug = 0);
+	void build(std::vector<std::string> compilerFlags,
+			std::vector<std::string> modulenames, unsigned int debug = 0);
 
 	void set_source(std::string source);
 
 	void run(std::vector<hpx::naming::id_type> args, std::string modulename,
-			Dim3 grid, Dim3 block, unsigned int stream = 0);
+			Dim3 grid, Dim3 block, std::vector<hpx::naming::id_type> dependencies,
+			unsigned int stream = 0);
 
 	unsigned int get_streams();
 

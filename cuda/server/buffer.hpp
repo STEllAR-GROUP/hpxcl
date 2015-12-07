@@ -8,6 +8,7 @@
 
 #include <hpx/hpx.hpp>
 
+#define CUDA_API_PER_THREAD_DEFAULT_STREAM
 #include <cuda.h>
 #include <cstdint>
 
@@ -33,7 +34,6 @@ namespace hpx
                 size_t arg_buffer_size;
                 int parent_device_num;
                 void* data_device;
-                void* data_host;
                 cudaStream_t stream;
 
                 public:
@@ -52,11 +52,13 @@ namespace hpx
 
                 uintptr_t enqueue_read_local(size_t offset, size_t size);
 
-                void enqueue_write(size_t offset, hpx::serialization::serialize_buffer<char> data);
+                void enqueue_write(size_t offset, size_t size, hpx::serialization::serialize_buffer<char> data);
 
-                void enqueue_write_local(size_t offset, uintptr_t data);
+                void enqueue_write_local(size_t offset, size_t size, uintptr_t data);
 
                 void* get_raw_pointer();
+
+                cudaStream_t get_stream();
 
                 HPX_DEFINE_COMPONENT_ACTION(buffer, size);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, set_size);
