@@ -52,11 +52,13 @@ namespace hpx
 
                 uintptr_t enqueue_read_local(size_t offset, size_t size);
 
-                void enqueue_write(size_t offset, hpx::serialization::serialize_buffer<char> data);
+                void enqueue_write(size_t offset, size_t size, hpx::serialization::serialize_buffer<char> data);
 
-                void enqueue_write_local(size_t offset, uintptr_t data);
+                void enqueue_write_local(size_t offset, size_t size, uintptr_t data);
 
                 void* get_raw_pointer();
+
+                cudaStream_t get_stream();
 
                 HPX_DEFINE_COMPONENT_ACTION(buffer, size);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, set_size);

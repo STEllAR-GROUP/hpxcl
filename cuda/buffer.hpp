@@ -134,7 +134,7 @@ public:
 		if (is_local) {
 
 			typedef server::buffer::enqueue_write_local_action action_type;
-			return hpx::async<action_type>(this->get_id(), offset,
+			return hpx::async<action_type>(this->get_id(), offset, size,
 					reinterpret_cast<uintptr_t>(data));
 
 		} else {
@@ -144,7 +144,7 @@ public:
 					hpx::serialization::serialize_buffer<char>::init_mode::reference);
 
 			typedef server::buffer::enqueue_write_action action_type;
-			return hpx::async<action_type>(this->get_gid(), offset,
+			return hpx::async<action_type>(this->get_gid(), offset, size,
 					serializable_data);
 		}
 

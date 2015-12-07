@@ -78,10 +78,6 @@ public:
 
     void create_device_ptr(size_t const byte_count);
 
-    void release_event(hpx::naming::gid_type gid);
-
-    void activate_deferred_event(hpx::naming::id_type);
-
     template<typename T>
     void create_host_ptr(T value, size_t const byte_count) {
         host_ptr<T> temp;
@@ -90,10 +86,6 @@ public:
         temp.byte_count = byte_count;
         host_ptrs.push_back(temp);
     }
-
-    void mem_cpy_h_to_d(unsigned int variable_id);
-
-    void mem_cpy_d_to_h(unsigned int variable_id);
 
     hpx::cuda::program create_program_with_source(std::string source);
 
@@ -113,8 +105,6 @@ public:
     HPX_DEFINE_COMPONENT_ACTION(device, wait);
     HPX_DEFINE_COMPONENT_ACTION(device, create_program_with_source);
     HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
-    HPX_DEFINE_COMPONENT_ACTION(device, release_event);
-    HPX_DEFINE_COMPONENT_ACTION(device, activate_deferred_event);
 
 
     template<typename T>
@@ -177,11 +167,6 @@ HPX_REGISTER_ACTION_DECLARATION(
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::device::create_buffer_action,
     device_create_buffer_action);
-HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::device::release_event_action,
-   device_release_event_action);
-HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::device::activate_deferred_event_action,
-    activate_deferred_event_action);
+
 
 #endif //cuda_device_2_HPP

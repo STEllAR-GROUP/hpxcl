@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 #define SIZE 1000000
-#define PARTIONS 2
+#define PARTIONS 8
 
 using namespace hpx::cuda;
 
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 	flags.push_back(mode);
 
 	// Compile the program
-	prog.build(flags,"sum");
+	prog.build_sync(flags,"sum");
 
 	//Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;
@@ -83,10 +83,12 @@ int main(int argc, char* argv[]) {
 	cudaMallocHost((void**) &inputData, sizeof(unsigned int) * SIZE);
 
 	for (unsigned int i = 0; i < SIZE; i++)
-		inputData[i] = 1;
+	inputData[i] = 1;
 
 	//Create buffer for the result
-	unsigned int result = 0;
+	unsigned int* result;
+	cudaMallocHost((void**)&result,sizeof(unsigned int));
+	result[0] = 0;
 	std::vector<buffer> resultBuffer;
 	std::vector<hpx::future<void>> syncFutures;
 	for (unsigned int i = 0; i < PARTIONS; i++) {
@@ -94,61 +96,53 @@ int main(int argc, char* argv[]) {
 				cudaDevice.create_buffer_sync(sizeof(unsigned int)));
 		syncFutures.push_back(
 				resultBuffer[i].enqueue_write(0, sizeof(unsigned int),
-						&result));
+						result));
 	}
 
 	//Create a buffer for the sliced size of the data
-	unsigned int slicedSize = SIZE / PARTIONS;
+	unsigned int* slicedSize;
+	cudaMallocHost((void**)&slicedSize,sizeof(unsigned int));
+	slicedSize[0] = SIZE / PARTIONS;
 	buffer sizeBuffer = cudaDevice.create_buffer_sync(sizeof(unsigned int));
 	syncFutures.push_back(
-			sizeBuffer.enqueue_write(0, sizeof(unsigned int), &slicedSize));
-
+			sizeBuffer.enqueue_write(0, sizeof(unsigned int), slicedSize));
 	//Sync all meta data for the launch of the kernels
 	hpx::wait_all(syncFutures);
 
 	hpx::cout << "Running: " << SIZE << " elements sliced on " << PARTIONS
-			<< " cudaStreams with " << slicedSize << " elements" << hpx::endl;
+	<< " cudaStreams with " << slicedSize[0] << " elements" << hpx::endl;
 
-	//Set the parameter for the kernel, have to be the same order as in the definition
+	////////////////////////////////////////////////////////////////////////
+	// Example I: Domain composition with one loop over all operations for
+	//	each chunk
+	///////////////////////////////////////////////////////////////////////
+
+	std::vector<hpx::lcos::future<void>> launches;
 	std::vector<hpx::cuda::buffer> args;
 	args.push_back(sizeBuffer);
 
-	//Distribute the sliced data on the different kernel streams
-	std::vector<buffer> slicedResults;
-	std::vector<hpx::lcos::future<void>> data;
-
-	//
-	//Batch similar operation together
-	//
-
-	//Batch all data transfers to the device
 	for (unsigned int i = 0; i < PARTIONS; i++) {
 
-		slicedResults.push_back(
-				cudaDevice.create_buffer_sync(
-						slicedSize * sizeof(unsigned int)));
-		data.push_back(
-				slicedResults[i].enqueue_write(0,
-						slicedSize * sizeof(unsigned int),
-						&inputData[slicedSize]));
-	}
+		unsigned int offset = i * slicedSize[0];
 
-	hpx::wait_all(data);
+		//Copy the sliced data to the device
 
-	std::vector<hpx::lcos::future<void>> launches;
+		auto buf = cudaDevice.create_buffer_sync(
+				slicedSize[0] * sizeof(unsigned int));
+		buf.enqueue_write(offset,
+				slicedSize[0] * sizeof(unsigned int),
+				inputData);
 
-	//Batch all kernel launches
-	for (unsigned int i = 0; i < PARTIONS; i++) {
-
+		//Launch the kernel
 		unsigned int stream_id = prog.create_stream().get();
-
 		args.push_back(resultBuffer[i]);
-		args.push_back(slicedResults[i]);
+		args.push_back(buf);
 
 		launches.push_back(prog.run(args, "sum", grid, block, stream_id));
 
 		args.pop_back();
 		args.pop_back();
+
 	}
 
 	hpx::wait_all(launches);
@@ -164,15 +158,13 @@ int main(int argc, char* argv[]) {
 
 	hpx::wait_all(results);
 
-	unsigned int res;
+	unsigned int res = 0;
 
 	for (unsigned int i = 0; i < PARTIONS; i++) {
 
 		res += ((unsigned int*) results[i].get().data())[0];
-
 	}
 
-	data.clear();
 	launches.clear();
 	results.clear();
 
@@ -181,9 +173,9 @@ int main(int argc, char* argv[]) {
 	//Check if result is correct
 
 	if (res != SIZE)
-		hpx::cout << "wrong" << hpx::endl;
+	hpx::cout << "wrong" << hpx::endl;
 	else
-		hpx::cout << "correct" << hpx::endl;
+	hpx::cout << "correct" << hpx::endl;
 
 	return EXIT_SUCCESS;
 }

@@ -42,15 +42,15 @@ program::program(hpx::naming::id_type device_id,
 program::~program() {
 
 	nvrtcDestroyProgram(&prog);
-	checkCudaError("Destroy Program");
+	checkCudaError("program::~program Destroy Program");
 
 	for (auto stream : streams) {
 		cudaStreamDestroy(stream);
-		checkCudaError("Destroy stream");
+		checkCudaError("program::~program Destroy stream");
 	}
 
 	cuModuleUnload(module);
-	checkCudaError("Destroy module");
+	checkCudaError("program::~programDestroy module");
 }
 
 void program::set_source(std::string source) {
@@ -72,7 +72,7 @@ void program::build(std::vector<std::string> compilerFlags,
 
 	nvrtcCreateProgram(&prog, this->kernel_source.c_str(), filename.c_str(), 0,
 			NULL, NULL);
-	checkCudaError("Create Program");
+	checkCudaError("program::build Create Program");
 	const char * opts[compilerFlags.size()];
 	unsigned int i = 0;
 	for (auto opt : compilerFlags) {
@@ -86,10 +86,10 @@ void program::build(std::vector<std::string> compilerFlags,
 	if (compileResult != NVRTC_SUCCESS) {
 		size_t logSize;
 		nvrtcGetProgramLogSize(prog, &logSize);
-		checkCudaError("Create Log");
+		checkCudaError("program::build Create Log");
 		char *log = new char[logSize];
 		nvrtcGetProgramLog(prog, log);
-		checkCudaError("get Log");
+		checkCudaError("program::build Get Log");
 
 		std::cout << log << std::endl;
 		delete[] log;
@@ -99,27 +99,28 @@ void program::build(std::vector<std::string> compilerFlags,
 	size_t ptxSize;
 
 	nvrtcGetPTXSize(prog, &ptxSize);
-	checkCudaError("Get ptx size");
+	checkCudaError("program::build Get ptx size");
 
 	char *ptx = new char[ptxSize];
 	nvrtcGetPTX(prog, ptx);
-	checkCudaError("Get ptx of Program");
+	checkCudaError("program::build Get ptx of Program");
 
 	cuModuleLoadDataEx(&module, ptx, 0, 0, 0);
-	checkCudaError("Load Module");
+	checkCudaError("program::build Load Module");
 
 	for (auto modulename : modulenames) {
 
 		CUfunction kernel;
 		cuModuleGetFunction(&kernel, module, modulename.c_str());
-		checkCudaError("Get Function");
+		checkCudaError("program::build Get Function");
 		kernels.insert(std::pair<std::string, CUfunction>(modulename, kernel));
 	}
 
 }
 
 void program::run(std::vector<hpx::naming::id_type> args,
-		std::string modulename, Dim3 grid, Dim3 block, unsigned int stream) {
+		std::string modulename, Dim3 grid, Dim3 block,
+		std::vector<hpx::naming::id_type> dependencies, unsigned int stream) {
 
 	void *args_pointer[args.size()];
 
@@ -132,13 +133,22 @@ void program::run(std::vector<hpx::naming::id_type> args,
 	}
 
 	cudaSetDevice(this->parent_device_id);
+	checkCudaError("program::run Error setting the device");
+
+	for (auto dependency : dependencies)
+	{
+		auto buffer = hpx::get_ptr<hpx::cuda::server::buffer>(dependency).get();
+		cudaStreamSynchronize(buffer->get_stream());
+		checkCudaError("buffer::enque_read Error during synchronization of stream");
+	}
+
 	cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y, // grid dim
 			block.x, block.y, block.z,                   // block dim
 			0, this->streams[stream],                   // shared mem and stream
 			args_pointer, 0);                            // arguments
-	checkCudaError("Run kernel");
+	checkCudaError("program::run Run kernel");
 	cudaStreamSynchronize(this->streams[stream]);
-	checkCudaError("Synchronize");
+	checkCudaError("program::run Synchronize");
 
 }
 
