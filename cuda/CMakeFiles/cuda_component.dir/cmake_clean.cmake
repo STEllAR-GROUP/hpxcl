@@ -1,5 +1,4 @@
-file(REMOVE_RECURSE
-  "CMakeFiles/cuda_component.dir/lcos/event.cpp.o"
+FILE(REMOVE_RECURSE
   "CMakeFiles/cuda_component.dir/program.cpp.o"
   "CMakeFiles/cuda_component.dir/server/program_server.cpp.o"
   "CMakeFiles/cuda_component.dir/server/get_devices_server.cpp.o"
@@ -17,6 +16,6 @@ file(REMOVE_RECURSE
 )
 
 # Per-language clean rules from dependency scanning.
-foreach(lang CXX)
-  include(CMakeFiles/cuda_component.dir/cmake_clean_${lang}.cmake OPTIONAL)
-endforeach()
+FOREACH(lang CXX)
+  INCLUDE(CMakeFiles/cuda_component.dir/cmake_clean_${lang}.cmake OPTIONAL)
+ENDFOREACH(lang)
