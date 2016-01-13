@@ -39,8 +39,3 @@ foreach(example_program ${example_programs})
 endforeach()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernel.cu DESTINATION ../../examples/cuda)
-
-if(HPXCL_WITH_CUDA_BENCHMARK)
-	add_subdirectory(benchmark_vector)
-endif()
-

@@ -76,12 +76,22 @@ if(HPXCL_WITH_OPENCL)
     include_directories(${OPENCL_INCLUDE_DIRS})
     #get_filename_component(PARENT_DIR ${OPENCL_LIBRARIES} OPENCL_LIBRARY_DIR)
     #link_directories(${OPENCL_LIBRARY_DIR})
+    
+    if(HPXCL_WITH_OPENCL_BENCHMARK)
+		add_subdirectory(benchmark/opencl)
+	endif()
 endif()
 
 if(HPXCL_WITH_CUDA)
     find_package(CUDA 7.0 REQUIRED)
     find_package(NVRTC 7.0 REQUIRED)
     include_directories(${CUDA_INCLUDE_DIRS})
+    
+    if(HPXCL_WITH_CUDA_BENCHMARK)
+		add_subdirectory(benchmark/cuda)
+	endif()
+    
+    
 endif()
 
 #Only search for PNG lib, if HPXCL_WITH_OPENCL is build

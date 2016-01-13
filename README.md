@@ -27,5 +27,8 @@ cmake \
 -DLIBNVRTC_LIBRARY_DIR=/opt/packages/cuda-7.0/lib64/ .. 
 ```
 
-- Build benchmark: -DHPXCL_WITH_CUDA_BENCHMARK=ON
-- Build examples:  -DHPXCL_WITH_CUDA_EXAMPLES=ON
+- Build CUDA support: -HPXCL_WITH_CUDA=ON
+- Build OpenCL support: -HPCL_WITH_OPENCL=ON
+- Build examples for CUDA:  -DHPXCL_WITH_CUDA_EXAMPLES=ON
+- Build benchmark for CUDA: -DHPXCL_WITH_CUDA_BENCHMARK=ON
+- Build benchmark for OPENCL: -DHPXCL_WITH_OPENCL_BENCHMARK=ON
