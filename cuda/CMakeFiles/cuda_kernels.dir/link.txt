@@ -1,2 +1,0 @@
-/usr/bin/ar cr libcuda_kernels.a  CMakeFiles/cuda_kernels.dir/cuda/./cuda_kernels_generated_kernel.cu.o
-/usr/bin/ranlib libcuda_kernels.a
