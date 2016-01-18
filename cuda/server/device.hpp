@@ -8,8 +8,6 @@
 
 #include <hpx/hpx.hpp>
 
-#include "cuda/lcos/event.hpp"
-
 #include "cuda/fwd_declarations.hpp"
 #include "cuda/export_definitions.hpp"
 #include "cuda/buffer.hpp"

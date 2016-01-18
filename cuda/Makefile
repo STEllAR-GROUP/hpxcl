@@ -36,7 +36,7 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The program to use to edit the cache.
-CMAKE_EDIT_COMMAND = /mnt.auto/opt64/packages/cmake-3.2.2/bin/ccmake
+CMAKE_EDIT_COMMAND = /mnt.auto/opt64/packages/cmake-2.8.10.2/bin/ccmake
 
 # The top-level source directory on which CMake was run.
 CMAKE_SOURCE_DIR = /home/diehl/git/hpxcl
@@ -50,7 +50,7 @@ CMAKE_BINARY_DIR = /home/diehl/git/hpxcl
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/mnt.auto/opt64/packages/cmake-3.2.2/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/mnt.auto/opt64/packages/cmake-2.8.10.2/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
