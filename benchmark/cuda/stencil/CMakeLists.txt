@@ -13,8 +13,10 @@ SET(CUDA_NVCC_FLAGS "-use_fast_math; -gencode arch=compute_20,code=sm_20;
 -gencode arch=compute_52,code=sm_52; -gencode arch=compute_52,code=compute_52; -std=c++11" 
 CACHE "NVCC_FLAGS" STRING FORCE) 
 
-#Benchmark without streams
+#Benchmark for single stencil kernel
 CUDA_ADD_EXECUTABLE(StencilCuda StencilCUDA.cu)
+#Benchmark for partitions
+CUDA_ADD_EXECUTABLE(PartitionCuda PartitionCUDA.cu)
 
 ############################################################################
 # Configure HPXCP benchmarks

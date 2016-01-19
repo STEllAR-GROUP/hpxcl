@@ -3,7 +3,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "utils.hpp"
+
 #include <cuda.h>
 #include <iostream>
 #include <cmath>
@@ -11,6 +11,7 @@
 #include "opencl/benchmark_vector/timer.hpp"
 
 #include "config.hpp"
+#include "utils.hpp"
 
 //###########################################################################
 //Kernels
@@ -99,6 +100,8 @@ int main(int argc, char*argv[]) {
 	timer_start();
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
 	std::cout << timer_stop() << " ";
+
+	std::cout << checkStencil(in,out,s, count) << " ";
 
 	/*
 	 * Free
