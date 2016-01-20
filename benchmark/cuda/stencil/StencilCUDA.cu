@@ -101,6 +101,7 @@ int main(int argc, char*argv[]) {
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
 	std::cout << timer_stop() << " ";
 
+	//Check the result
 	std::cout << checkStencil(in,out,s, count) << " ";
 
 	/*

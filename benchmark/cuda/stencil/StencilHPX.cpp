@@ -149,6 +149,9 @@ int main(int argc, char*argv[]) {
 
 	std::cout << timer_stop() << " ";
 
+	//Check the result
+	std::cout << checkStencil(in,res,s, count[0]) << " ";
+
 	//Cleanup
 	timer_start();
 	cudaFreeHost(in);

@@ -28,8 +28,6 @@ bool checkStencil(T*in,T*out,T* s, size_t size)
 		T res = s[0] * in[i - 1] + s[1] * in[i] + s[2] * in[i + 1];
 
 		if(res-out[i] >= EPS) check = false;
-
-
 	}
 
 	return check;
