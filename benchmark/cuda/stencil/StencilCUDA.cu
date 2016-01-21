@@ -59,9 +59,9 @@ int main(int argc, char*argv[]) {
 	cudaMallocHost((void**) &in, count * sizeof(TYPE));
 	cudaMallocHost((void**) &s, 3 * sizeof(TYPE));
 	//Malloc Device
-	cudaMallocHost((void**) &out_dev, count * sizeof(TYPE));
-	cudaMallocHost((void**) &in_dev, count * sizeof(TYPE));
-	cudaMallocHost((void**) &s_dev, 3 * sizeof(TYPE));
+	cudaMalloc((void**) &out_dev, count * sizeof(TYPE));
+	cudaMalloc((void**) &in_dev, count * sizeof(TYPE));
+	cudaMalloc((void**) &s_dev, 3 * sizeof(TYPE));
 
 	std:: cout << timer_stop() << " ";
 
