@@ -3,7 +3,6 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-
 #include <cuda.h>
 #include <iostream>
 #include <cmath>
@@ -18,10 +17,13 @@
 //###########################################################################
 
 template<typename T>
-__global__ void stencil(size_t offset, T* in, T* out, T* s) {
+__global__ void kernel(size_t offset, T* in) {
 
-	int i = offset + threadIdx.x + (blockIdx.x * blockDim.x + 1);
-	out[i] = s[0] * in[i - 1] + s[1] * in[i] + s[2] * in[i + 1];
+	size_t i = offset + threadIdx.x + blockIdx.x * blockDim.x;
+	T x = (T) i;
+	T s = sinf(x);
+	T c = cosf(x);
+	in[i] = in[i] + sqrtf(s * s + c * c);
 
 }
 
@@ -36,38 +38,28 @@ int main(int argc, char*argv[]) {
 		exit(1);
 	}
 
+	timer_start();
+
 	size_t count = atoi(argv[1]);
 
 	const int blockSize = 256, nStreams = 4;
-	const int n = 4 * 1024 * blockSize * nStreams * count;
+	const int n = pow(2,count) * 1024 * blockSize * nStreams;
 	const int streamSize = n / nStreams;
 	const int streamBytes = streamSize * sizeof(TYPE);
 	const int bytes = n * sizeof(TYPE);
 
-	std::cout << bytes << " ";
+	std::cout << n << " ";
 
 	//Pointer
-	TYPE* out;
-	TYPE* out_dev;
 	TYPE* in;
 	TYPE* in_dev;
-	TYPE* s;
-	TYPE* s_dev;
 
 	//Malloc Host
-	cudaMallocHost((void**) &out, bytes * sizeof(TYPE));
-	cudaMallocHost((void**) &in, bytes * sizeof(TYPE));
-	cudaMallocHost((void**) &s, 3 * sizeof(TYPE));
-	//Malloc Device
-	cudaMallocHost((void**) &out_dev, bytes * sizeof(TYPE));
-	cudaMallocHost((void**) &in_dev, bytes * sizeof(TYPE));
-	cudaMallocHost((void**) &s_dev, 3 * sizeof(TYPE));
+	cudaMallocHost((void**) &in, bytes);
+	memset(in, 0, bytes);
 
-	//Initialize the data
-	fillRandomVector(in, n);
-	s[0] = 0.5;
-	s[1] = 1.;
-	s[2] = 0.5;
+	//Malloc Device
+	cudaMalloc((void**) &in_dev, bytes);
 
 	//Create streams
 	cudaStream_t stream[nStreams];
@@ -79,25 +71,37 @@ int main(int argc, char*argv[]) {
 		int offset = i * streamSize;
 
 		cudaMemcpyAsync(&in_dev[offset], &in[offset], streamBytes,
-				cudaMemcpyHostToDevice, stream[i]);
+				cudaMemcpyHostToDevice,stream[i]);
 	}
 
 	//Launch kernels
 	for (int i = 0; i < nStreams; ++i) {
 		int offset = i * streamSize;
-		stencil<<<streamSize / blockSize, blockSize, 0, stream[i]>>>(offset,
-				in_dev, out_dev, s_dev);
+		kernel<<<streamSize / blockSize, blockSize, 0, stream[i]>>>(offset,
+				in_dev);
 	}
+
+	//Copy the result back
+
+	for (int i = 0; i < nStreams; ++i) {
+		int offset = i * streamSize;
+		cudaMemcpyAsync(&in[offset], &in_dev[offset], streamBytes,
+				cudaMemcpyDeviceToHost, stream[i]);
+	}
+
+	cudaDeviceSynchronize();
+
+	//Check the result
+	std::cout << checkKernel(in, n) << " ";
 
 	//Clean
 	cudaFreeHost(in);
-	cudaFreeHost(s);
-	cudaFreeHost(out);
-	cudaFree(out_dev);
 	cudaFree(in_dev);
-	cudaFree(s_dev);
+
 	for (int i = 0; i < nStreams; ++i)
 		cudaStreamDestroy(stream[i]);
+
+	std:: cout << timer_stop() << std::endl;
 
 	return EXIT_SUCCESS;
 }
