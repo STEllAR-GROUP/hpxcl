@@ -16,6 +16,7 @@ CUDA
 Prerequisites:
 
 - CUDA SDK >= 7.0
+- HPX >= 0.9
 
 Building:
 ```
