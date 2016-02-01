@@ -22,6 +22,13 @@ if(HPX_ROOT)
     set(HPX_DIR "${HPX_ROOT}/lib/cmake/HPX")
 endif()
 
+#add -std=gnu++11 to the debug flags
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	if (CMAKE_COMPILER_IS_GNUCC)
+		 SET(CMAKE_CXX_FLAGS_DEBUG "-ggdb -D_DEBUG -O0 -std=gnu++11" CACHE STRING)
+	endif()
+endif() 
+
 ########################################################################
 # Include hpx
 # Instruct cmake to find the HPX settings
