@@ -12,7 +12,6 @@
 #include "cuda/export_definitions.hpp"
 #include "cuda/buffer.hpp"
 #include "cuda/program.hpp"
-#define CUDA_API_PER_THREAD_DEFAULT_STREAM
 #include <cuda.h>
 #include <cuda_runtime.h>
 
