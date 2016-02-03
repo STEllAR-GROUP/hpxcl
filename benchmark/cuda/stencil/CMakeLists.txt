@@ -24,6 +24,7 @@ CUDA_ADD_EXECUTABLE(PartitionCuda PartitionCUDA.cu)
 
 set(example_programs
     StencilHPX
+    PartitionHPX
 )
 
 foreach(example_program ${example_programs})

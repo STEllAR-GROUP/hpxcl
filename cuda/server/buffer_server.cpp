@@ -20,10 +20,10 @@ buffer::buffer() {
 buffer::buffer(size_t size, int parent_device_num) {
 	this->parent_device_num = parent_device_num;
 	this->arg_buffer_size = size;
-	cudaStreamCreate(&stream);
-	checkCudaError("buffer:buffer Create buffer's stream");
 	cudaSetDevice(this->parent_device_num);
 	checkCudaError("buffer:enqueue_read Set device");
+	cudaStreamCreate(&stream);
+	checkCudaError("buffer:buffer Create buffer's stream");
 	cudaMalloc((void**) &data_device, size);
 	checkCudaError(
 			"buffer::buffer Error during allocation of the device pointer");
@@ -32,7 +32,9 @@ buffer::buffer(size_t size, int parent_device_num) {
 buffer::~buffer() {
 
 	cudaSetDevice(this->parent_device_num);
-	checkCudaError("buffer:enqueue_read Set device");
+	checkCudaError("buffer::~buffer Set device");
+	cudaStreamSynchronize(this->stream);
+	checkCudaError("buffer::~buffer Error during synchronization of stream");
 	cudaFree(this->data_device);
 	checkCudaError("buffer::~buffer Error during free of the device pointer");
 	cudaStreamDestroy(stream);
@@ -57,12 +59,12 @@ hpx::serialization::serialize_buffer<char> buffer::enqueue_read(size_t offset,
 	cudaMallocHost((void**) &data_host, localSize);
 	checkCudaError("buffer:enqueue_read allocate host memory");
 	char * slicedPointer = (char*) (this->data_device) + offset;
-	cudaMemcpyAsync(data_host, (void*)slicedPointer, localSize, cudaMemcpyDeviceToHost,
-			this->stream);
+	cudaMemcpyAsync(data_host, (void*) slicedPointer, localSize,
+			cudaMemcpyDeviceToHost, this->stream);
 	checkCudaError(
 			"buffer::enque_read Error during copy data from the device to the host");
 	cudaStreamSynchronize(this->stream);
-	checkCudaError("buffer::enque_read Error during synchronization of stream");
+    checkCudaError("buffer::enque_read Error during synchronization of stream");
 	hpx::serialization::serialize_buffer<char> serializable_data(
 			(char*) reinterpret_cast<char*>(data_host), size,
 			hpx::serialization::serialize_buffer<char>::init_mode::reference);
@@ -74,17 +76,16 @@ hpx::serialization::serialize_buffer<char> buffer::enqueue_read(size_t offset,
 void buffer::enqueue_write(size_t offset, size_t size,
 		hpx::serialization::serialize_buffer<char> data) {
 
-
 	cudaSetDevice(this->parent_device_num);
 	checkCudaError("buffer:enqueue_read Set device");
 	char * slicedPointer = (char*) (data.data()) + offset;
-	cudaMemcpyAsync(this->data_device, (void*) slicedPointer,size,
-			cudaMemcpyHostToDevice);
+	cudaMemcpyAsync(this->data_device, (void*) slicedPointer, size,
+			cudaMemcpyHostToDevice, this->stream);
 	checkCudaError(
 			"buffer::enque_write Error during copy data from the host to the device");
 	cudaStreamSynchronize(this->stream);
-	checkCudaError(
-			"buffer::enque_write Error during synchronization of stream");
+	checkCudaError("buffer::enque_read Error during synchronization of stream");
+
 }
 
 void* buffer::get_raw_pointer() {
@@ -93,17 +94,15 @@ void* buffer::get_raw_pointer() {
 
 void buffer::enqueue_write_local(size_t offset, size_t size, uintptr_t data) {
 
-
 	cudaSetDevice(this->parent_device_num);
 	checkCudaError("buffer:enqueue_read Set device");
-	char * slicedPointer =  reinterpret_cast<char*>(data) + offset;
-	cudaMemcpyAsync(this->data_device,(void*)slicedPointer,
-			size, cudaMemcpyHostToDevice);
+	char * slicedPointer = reinterpret_cast<char*>(data) + offset;
+	cudaMemcpyAsync(this->data_device, (void*) slicedPointer, size,
+			cudaMemcpyHostToDevice, this->stream);
 	checkCudaError(
 			"buffer::enque_write Error during copy data from the host to the device");
 	cudaStreamSynchronize(this->stream);
-	checkCudaError(
-			"buffer::enque_write Error during synchronization of stream");
+	checkCudaError("buffer::enque_read Error during synchronization of stream");
 
 }
 

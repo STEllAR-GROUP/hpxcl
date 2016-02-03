@@ -121,16 +121,15 @@ int main(int argc, char*argv[]) {
 
 	//Set the values for the grid dimension
 	grid.x = 1;
-	grid.y = 1;
-	grid.z = 1;
+	grid.y = 0;
+	grid.z = 0;
 
 	//Set the values for the block dimension
 	block.x = 32;
-	block.y = 1;
-	block.z = 1;
+	block.y = 0;
+	block.z = 0;
 
 	//Launch kernels
-
 	std::vector<hpx::cuda::buffer>args;
 	args.push_back(lengthbuffer);
 	args.push_back(inBuffer);

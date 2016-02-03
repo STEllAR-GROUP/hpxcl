@@ -69,16 +69,16 @@ public:
 
 	void run(std::vector<hpx::naming::id_type> args, std::string modulename,
 			Dim3 grid, Dim3 block, std::vector<hpx::naming::id_type> dependencies,
-			unsigned int stream = 0);
+			int stream = -1);
 
-	unsigned int get_streams();
+	unsigned int get_streams_size();
 
 	unsigned int create_stream();
 
 	HPX_DEFINE_COMPONENT_ACTION(program, build);
 	HPX_DEFINE_COMPONENT_ACTION(program, set_source);
 	HPX_DEFINE_COMPONENT_ACTION(program, run);
-	HPX_DEFINE_COMPONENT_ACTION(program, get_streams);
+	HPX_DEFINE_COMPONENT_ACTION(program, get_streams_size);
 	HPX_DEFINE_COMPONENT_ACTION(program, create_stream);
 
 };
@@ -93,8 +93,8 @@ HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::program::run_action,
 		cuda_program_run_action);
 HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::program::set_source_action,
 		cuda_program_set_source_action);
-HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::program::get_streams_action,
-		cuda_get_streams_action);
+HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::program::get_streams_size_action,
+		cuda_get_streams_size_action);
 HPX_REGISTER_ACTION_DECLARATION(
 		hpx::cuda::server::program::create_stream_action,
 		cuda_create_stream_action);

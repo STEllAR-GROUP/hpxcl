@@ -71,6 +71,15 @@ public:
 		build(compilerFlags, modulenames, debug).get();
 	}
 
+	hpx::lcos::future<void> build(std::vector<std::string> compilerFlags, std::string modulename,
+			unsigned int debug = 0) {
+		HPX_ASSERT(this->get_gid());
+		std::vector<std::string> modulenames;
+		modulenames.push_back(modulename);
+		typedef server::program::build_action action_type;
+		return hpx::async<action_type>(this->get_gid(), compilerFlags, modulenames, debug);
+	}
+
 
 	/**
 	 * \brief Synchronous compilation of the source code
@@ -108,7 +117,7 @@ public:
 	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
 			std::string modulename, hpx::cuda::server::program::Dim3 grid,
 			hpx::cuda::server::program::Dim3 block,
-			unsigned int stream = 0) {
+			int stream = -1) {
 
 		HPX_ASSERT(this->get_gid());
 
@@ -145,7 +154,7 @@ public:
 	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
 			std::string modulename, hpx::cuda::server::program::Dim3 grid,
 			hpx::cuda::server::program::Dim3 block, std::vector<hpx::cuda::buffer> dependencies,
-			unsigned int stream = 0) {
+			int stream = -1) {
 
 		HPX_ASSERT(this->get_gid());
 
@@ -169,7 +178,29 @@ public:
 
 	}
 
+	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
+			std::string modulename, hpx::cuda::server::program::Dim3 grid,
+			hpx::cuda::server::program::Dim3 block, hpx::cuda::buffer dependency,
+			int stream = -1) {
 
+		HPX_ASSERT(this->get_gid());
+
+
+		std::vector<hpx::naming::id_type> args_id;
+
+		for (unsigned int i = 0; i < args.size(); i++) {
+
+			args_id.push_back(args[i].get_id());
+		}
+
+		std::vector<hpx::naming::id_type> dependencies_id;
+		dependencies_id.push_back(dependency.get_id());
+
+		typedef server::program::run_action action_type;
+		return hpx::async<action_type>(this->get_gid(), args_id, modulename,
+				grid, block, dependencies_id, stream);
+
+	}
 
 
 	/**
@@ -179,9 +210,9 @@ public:
 	 *
 	 */
 
-	hpx::lcos::future<unsigned int> get_streams() {
+	hpx::lcos::future<unsigned int> get_streams_size() {
 		HPX_ASSERT(this->get_gid());
-		typedef server::program::get_streams_action action_type;
+		typedef server::program::get_streams_size_action action_type;
 		return hpx::async<action_type>(this->get_gid());
 
 	}

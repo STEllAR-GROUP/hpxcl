@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 #define SIZE 1000000
-#define PARTIONS 8
+#define PARTIONS 2
 
 using namespace hpx::cuda;
 
@@ -82,8 +82,7 @@ int main(int argc, char* argv[]) {
 	unsigned int* inputData;
 	cudaMallocHost((void**) &inputData, sizeof(unsigned int) * SIZE);
 
-	for (unsigned int i = 0; i < SIZE; i++)
-	inputData[i] = 1;
+	memset(inputData, 1, SIZE);
 
 	//Create buffer for the result
 	unsigned int* result;
@@ -107,17 +106,22 @@ int main(int argc, char* argv[]) {
 	syncFutures.push_back(
 			sizeBuffer.enqueue_write(0, sizeof(unsigned int), slicedSize));
 	//Sync all meta data for the launch of the kernels
+
+	std::vector<buffer> buffers;
+	for (unsigned int i = 0; i < PARTIONS; i++) {
+
+		buffers.push_back(cudaDevice.create_buffer_sync(
+						slicedSize[0] * sizeof(unsigned int)));
+
+	}
+
 	hpx::wait_all(syncFutures);
 
 	hpx::cout << "Running: " << SIZE << " elements sliced on " << PARTIONS
 	<< " cudaStreams with " << slicedSize[0] << " elements" << hpx::endl;
 
-	////////////////////////////////////////////////////////////////////////
-	// Example I: Domain composition with one loop over all operations for
-	//	each chunk
-	///////////////////////////////////////////////////////////////////////
+	//Copy the partitions to the device
 
-	std::vector<hpx::lcos::future<void>> launches;
 	std::vector<hpx::cuda::buffer> args;
 	args.push_back(sizeBuffer);
 
@@ -125,57 +129,60 @@ int main(int argc, char* argv[]) {
 
 		unsigned int offset = i * slicedSize[0];
 
-		//Copy the sliced data to the device
-
-		auto buf = cudaDevice.create_buffer_sync(
-				slicedSize[0] * sizeof(unsigned int));
-		buf.enqueue_write(offset,
+		buffers[i].enqueue_write(offset,
 				slicedSize[0] * sizeof(unsigned int),
 				inputData);
 
 		//Launch the kernel
-		unsigned int stream_id = prog.create_stream().get();
 		args.push_back(resultBuffer[i]);
-		args.push_back(buf);
+		args.push_back(buffers[i]);
 
-		launches.push_back(prog.run(args, "sum", grid, block, stream_id));
+		prog.run(args, "sum", grid, block, buffers[i]);
 
 		args.pop_back();
 		args.pop_back();
 
 	}
 
-	hpx::wait_all(launches);
+	//Launch the kernels
 
-	std::vector<hpx::lcos::future<hpx::serialization::serialize_buffer<char>>>results;
+	//for (unsigned int i = 0; i < PARTIONS; i++) {
 
-	for (unsigned int i = 0; i < PARTIONS; i++) {
+	//unsigned int offset = i * slicedSize[0];
 
-		results.push_back(
-				resultBuffer[i].enqueue_read(0, sizeof(unsigned int)));
+	//}
 
-	}
+	//hpx::wait_all(launches);
 
-	hpx::wait_all(results);
+	//std::vector<hpx::lcos::future<hpx::serialization::serialize_buffer<char>>>results;
+
+	//for (unsigned int i = 0; i < PARTIONS; i++) {
+
+	//results.push_back(
+	//	resultBuffer[i].enqueue_read(0, sizeof(unsigned int)));
+
+	//}
+
+	//hpx::wait_all(results);
 
 	unsigned int res = 0;
 
-	for (unsigned int i = 0; i < PARTIONS; i++) {
+	//for (unsigned int i = 0; i < PARTIONS; i++) {
 
-		res += ((unsigned int*) results[i].get().data())[0];
-	}
+	//	res += ((unsigned int*) results[i].get().data())[0];
+//	}
 
-	launches.clear();
-	results.clear();
+	//launches.clear();
+	//results.clear();
 
-	hpx::cout << "Result is " << res << " and is ";
+	//hpx::cout << "Result is " << res << " and is ";
 
 	//Check if result is correct
 
-	if (res != SIZE)
-	hpx::cout << "wrong" << hpx::endl;
-	else
-	hpx::cout << "correct" << hpx::endl;
+	//if (res != SIZE)
+	//hpx::cout << "wrong" << hpx::endl;
+	//else
+	//hpx::cout << "correct" << hpx::endl;
 
 	return EXIT_SUCCESS;
 }
