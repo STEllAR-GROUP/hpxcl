@@ -53,7 +53,7 @@ int main(int argc, char*argv[]) {
 	}
 
 
-
+	double time = 0;
 	size_t count = atoi(argv[1]);
 
 	const int blockSize = 256, nStreams = 4;
@@ -64,10 +64,14 @@ int main(int argc, char*argv[]) {
 
 	std::cout << n << " ";
 
+	timer_start();
+
 	//Malloc Host
 	TYPE* in;
 	cudaMallocHost((void**) &in, bytes);
 	memset(in, 0, bytes);
+
+	time += timer_stop();
 
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
@@ -92,8 +96,6 @@ int main(int argc, char*argv[]) {
 	hpx::wait_all(f);
 
 	timer_start();
-
-	//dependencies.push_back(prog.build(flags, "kernel"));
 
 	std::vector<buffer> bufferIn;
 	for (size_t i = 0; i < nStreams; i++)
@@ -138,11 +140,12 @@ int main(int argc, char*argv[]) {
 	hpx::wait_all(kernelFutures);
 
 
-
+	bool check;
 	for (size_t i = 0; i < nStreams; i++)
 	{
 		TYPE* res = bufferIn[i].enqueue_read_sync<TYPE>(0,streamBytes);
-		//checkKernel(res,streamSize);
+		check = checkKernel(res,streamSize);
+		if(check==false) break;
 
 	}
 
@@ -150,7 +153,7 @@ int main(int argc, char*argv[]) {
 	cudaFreeHost(in);
 
 
-	std:: cout << timer_stop() << std::endl;
+	std:: cout << time + timer_stop() << " " << check << std::endl;
 
 	return EXIT_SUCCESS;
 }
