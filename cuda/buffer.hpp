@@ -75,14 +75,14 @@ public:
 
 		if (is_local) {
 
-			T* tmp =
-					reinterpret_cast<T*>(enqueue_read_local(offset, size).get());
+			return	reinterpret_cast<T*>(enqueue_read_local(offset, size).get());
 
 		} else {
 
-			T* tmp = (T*) enqueue_read(offset, size).get().data();
-			return tmp;
+			return (T*) enqueue_read(offset, size).get().data();
+
 		}
+
 	}
 
 	/**

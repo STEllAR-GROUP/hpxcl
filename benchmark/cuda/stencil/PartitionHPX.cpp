@@ -52,7 +52,7 @@ int main(int argc, char*argv[]) {
 		exit(1);
 	}
 
-	timer_start();
+
 
 	size_t count = atoi(argv[1]);
 
@@ -88,7 +88,12 @@ int main(int argc, char*argv[]) {
 
 	flags.push_back(mode);
 
-	dependencies.push_back(prog.build(flags, "kernel"));
+	auto f = prog.build(flags, "kernel");
+	hpx::wait_all(f);
+
+	timer_start();
+
+	//dependencies.push_back(prog.build(flags, "kernel"));
 
 	std::vector<buffer> bufferIn;
 	for (size_t i = 0; i < nStreams; i++)
@@ -121,15 +126,29 @@ int main(int argc, char*argv[]) {
 
 	hpx::wait_all(dependencies);
 
+
+	std::vector<hpx::future<void>> kernelFutures;
 	for (size_t i = 0; i < nStreams; i++)
 	{
 		args.push_back(bufferIn[i]);
-		prog.run(args, "kernel", grid, block,args);
+		kernelFutures.push_back(prog.run(args, "kernel", grid, block,args));
 		args.clear();
 	}
 
+	hpx::wait_all(kernelFutures);
+
+
+
+	for (size_t i = 0; i < nStreams; i++)
+	{
+		TYPE* res = bufferIn[i].enqueue_read_sync<TYPE>(0,streamBytes);
+		//checkKernel(res,streamSize);
+
+	}
+
 	//Clean
-	//cudaFreeHost(in);
+	cudaFreeHost(in);
+
 
 	std:: cout << timer_stop() << std::endl;
 

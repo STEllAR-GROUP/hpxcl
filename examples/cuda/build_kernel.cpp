@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
 	//Copy the result back
 	unsigned int* res = resbuffer.enqueue_read_sync<unsigned int>(0,sizeof(unsigned int));
 
-	hpx::cout << "Result is " << res[0] << " and is ";
+	std::cout << "Result is " << res[0] << " and is ";
 
 	//Check if result is correct
 
