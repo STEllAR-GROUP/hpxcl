@@ -47,16 +47,17 @@ int main(int argc, char*argv[]) {
 		return hpx::finalize();
 	}
 
+	const int blockSize = 256, nStreams = 4;
+
 	if (argc != 2) {
-		std::cout << "Usage: " << argv[0] << " #elements" << std::endl;
+		std::cout << "Usage: " << argv[0] << " n -> 2^n*1024*" << blockSize
+				<< "*" << nStreams << " elements" << std::endl;
 		exit(1);
 	}
 
-	timer_start();
-
+	double time = 0;
 	size_t count = atoi(argv[1]);
 
-	const int blockSize = 256, nStreams = 4;
 	const int n = pow(2,count) * 1024 * blockSize * nStreams;
 	const int streamSize = n / nStreams;
 	const int streamBytes = streamSize * sizeof(TYPE);
@@ -64,10 +65,14 @@ int main(int argc, char*argv[]) {
 
 	std::cout << n << " ";
 
+	timer_start();
+
 	//Malloc Host
 	TYPE* in;
 	cudaMallocHost((void**) &in, bytes);
 	memset(in, 0, bytes);
+
+	time += timer_stop();
 
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
@@ -88,7 +93,10 @@ int main(int argc, char*argv[]) {
 
 	flags.push_back(mode);
 
-	dependencies.push_back(prog.build(flags, "kernel"));
+	auto f = prog.build(flags, "kernel");
+	hpx::wait_all(f);
+
+	timer_start();
 
 	std::vector<buffer> bufferIn;
 	for (size_t i = 0; i < nStreams; i++)
@@ -97,11 +105,10 @@ int main(int argc, char*argv[]) {
 
 	}
 
-
-	for (size_t i = 0; i <  nStreams; i++)
+	for (size_t i = 0; i < nStreams; i++)
 	{
 
-	bufferIn[i].enqueue_write(i*streamSize,streamBytes,in);
+		bufferIn[i].enqueue_write(i*streamSize,streamBytes,in);
 	}
 
 	std::vector<hpx::cuda::buffer> args;
@@ -121,17 +128,33 @@ int main(int argc, char*argv[]) {
 
 	hpx::wait_all(dependencies);
 
+	std::vector<hpx::future<void>> kernelFutures;
 	for (size_t i = 0; i < nStreams; i++)
 	{
 		args.push_back(bufferIn[i]);
-		prog.run(args, "kernel", grid, block,args);
+		kernelFutures.push_back(prog.run(args, "kernel", grid, block,args));
 		args.clear();
 	}
 
-	//Clean
-	//cudaFreeHost(in);
+	hpx::wait_all(kernelFutures);
 
-	std:: cout << timer_stop() << std::endl;
+	time += timer_stop();
+
+	bool check;
+	for (size_t i = 0; i < nStreams; i++)
+	{
+		TYPE* res = bufferIn[i].enqueue_read_sync<TYPE>(0,streamBytes);
+		check = checkKernel(res,streamSize);
+		if(check==false) break;
+
+	}
+
+	timer_start();
+
+	//Clean
+	cudaFreeHost(in);
+
+	std:: cout << check << " " << time + timer_stop() << std::endl;
 
 	return EXIT_SUCCESS;
 }
