@@ -38,6 +38,7 @@ int main(int argc, char*argv[]) {
 		exit(1);
 	}
 
+	double data = 0;
 	size_t count = atoi(argv[1]);
 
 	std::cout << count << " ";
@@ -63,8 +64,6 @@ int main(int argc, char*argv[]) {
 	cudaMalloc((void**) &in_dev, count * sizeof(TYPE));
 	cudaMalloc((void**) &s_dev, 3 * sizeof(TYPE));
 
-	std:: cout << timer_stop() << " ";
-
 	//Initialize the data
 	fillRandomVector(in, count);
 	s[0] = 0.5;
@@ -74,14 +73,10 @@ int main(int argc, char*argv[]) {
 	/*
 	 * Copy data
 	 */
-	timer_start();
 
 	cudaMemcpy(in_dev, in, count * sizeof(TYPE), cudaMemcpyHostToDevice);
 	cudaMemcpy(s_dev, s, 3 * sizeof(TYPE), cudaMemcpyHostToDevice);
 	cudaMemcpy(out_dev, in, count * sizeof(TYPE), cudaMemcpyHostToDevice);
-
-	std:: cout << timer_stop() << " ";
-
 
 	int gridsize = 1;
 	int blocksize = 32;
@@ -89,32 +84,31 @@ int main(int argc, char*argv[]) {
 	/*
 	 * Kernel launch
 	 */
-	timer_start();
 	stencil<TYPE><<<gridsize, blocksize>>>(count, in_dev, out_dev, s_dev);
 	cudaDeviceSynchronize();
-	std:: cout << timer_stop() << " ";
 
 	/*
 	 * Copy result back
 	 */
-	timer_start();
 	cudaMemcpy(out, out_dev, count * sizeof(TYPE), cudaMemcpyDeviceToHost);
-	std::cout << timer_stop() << " ";
+
+	data += timer_stop();
 
 	//Check the result
 	std::cout << checkStencil(in,out,s, count) << " ";
 
+	timer_start();
 	/*
 	 * Free
 	 */
-	timer_start();
 	cudaFreeHost(in);
 	cudaFreeHost(s);
 	cudaFreeHost(out);
 	cudaFree(out_dev);
 	cudaFree(in_dev);
 	cudaFree(s_dev);
-	std:: cout << timer_stop() << std::endl;
+
+	std:: cout << data + timer_stop() << std::endl;
 
 	return EXIT_SUCCESS;
 }

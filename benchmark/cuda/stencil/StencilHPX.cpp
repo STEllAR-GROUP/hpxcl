@@ -3,8 +3,6 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-
-
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/iostreams.hpp>
 #include <hpx/lcos/future.hpp>
@@ -47,6 +45,7 @@ int main(int argc, char*argv[]) {
 		return hpx::finalize();
 	}
 
+	double data = 0.;
 	timer_start();
 
 	//Pointer
@@ -54,14 +53,10 @@ int main(int argc, char*argv[]) {
 	TYPE* in;
 	TYPE* s;
 
-	double data = 0.;
-	timer_start();
 	//Malloc Host
 	cudaMallocHost((void**) &out, count[0] * sizeof(TYPE));
 	cudaMallocHost((void**) &in, count[0] * sizeof(TYPE));
 	cudaMallocHost((void**) &s, 3 * sizeof(TYPE));
-
-	data += timer_stop();
 
 	//Initialize the data
 	fillRandomVector(in, count[0]);
@@ -72,29 +67,8 @@ int main(int argc, char*argv[]) {
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
 
-	// Create a buffer
-	timer_start();
-	buffer inBuffer = cudaDevice.create_buffer_sync(count[0] * sizeof(TYPE));
-	buffer sBuffer = cudaDevice.create_buffer_sync(3 * sizeof(TYPE));
-	buffer outBuffer = cudaDevice.create_buffer_sync(count[0] * sizeof(TYPE));
-	buffer lengthbuffer = cudaDevice.create_buffer_sync(sizeof(size_t));
-
-	// Copy input data to the buffer
-	data_futures.push_back(inBuffer.enqueue_write(0, count[0] * sizeof(TYPE),
-					in));
-	data_futures.push_back(sBuffer.enqueue_write(0, 3 * sizeof(TYPE),
-					s));
-	data_futures.push_back(outBuffer.enqueue_write(0, count[0] * sizeof(TYPE),
-					in));
-	data_futures.push_back(lengthbuffer.enqueue_write(0,sizeof(size_t), count));
-
-	hpx::wait_all(data_futures);
-
 	data += timer_stop();
 
-	std::cout << data << " ";
-
-	timer_start();
 	// Create the hello_world device program
 	program prog = cudaDevice.create_program_with_file("kernel.cu").get();
 
@@ -113,7 +87,23 @@ int main(int argc, char*argv[]) {
 	// Compile the program
 	prog.build_sync(flags,"stencil");
 
+	timer_start();
+	// Create a buffer
+	buffer inBuffer = cudaDevice.create_buffer_sync(count[0] * sizeof(TYPE));
+	buffer sBuffer = cudaDevice.create_buffer_sync(3 * sizeof(TYPE));
+	buffer outBuffer = cudaDevice.create_buffer_sync(count[0] * sizeof(TYPE));
+	buffer lengthbuffer = cudaDevice.create_buffer_sync(sizeof(size_t));
 
+	// Copy input data to the buffer
+	data_futures.push_back(inBuffer.enqueue_write(0, count[0] * sizeof(TYPE),
+					in));
+	data_futures.push_back(sBuffer.enqueue_write(0, 3 * sizeof(TYPE),
+					s));
+	data_futures.push_back(outBuffer.enqueue_write(0, count[0] * sizeof(TYPE),
+					in));
+	data_futures.push_back(lengthbuffer.enqueue_write(0,sizeof(size_t), count));
+
+	hpx::wait_all(data_futures);
 
 	//Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;
@@ -140,25 +130,22 @@ int main(int argc, char*argv[]) {
 
 	hpx::wait_all(kernel_future);
 
-	std::cout << timer_stop() << " ";
-
-	timer_start();
-
 	TYPE* res = outBuffer.enqueue_read_sync<TYPE>(0,sizeof(TYPE));
 
-	std::cout << timer_stop() << " ";
+	data += timer_stop();
 
 	//Check the result
 	std::cout << checkStencil(in,res,s, count[0]) << " ";
 
-	//Cleanup
 	timer_start();
+
+	//Cleanup
 	cudaFreeHost(in);
 	cudaFreeHost(s);
 	cudaFreeHost(out);
 	cudaFreeHost(count);
 
-	std::cout << timer_stop() << std::endl;
+	std::cout << data + timer_stop() << std::endl;
 
 	return EXIT_SUCCESS;
 }
