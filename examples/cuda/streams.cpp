@@ -6,33 +6,37 @@
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/iostreams.hpp>
 #include <hpx/lcos/future.hpp>
-#include <hpx/lcos/wait_each.hpp>
 
-#include "../../hpx_cuda.hpp"
+#include "examples/opencl/benchmark_vector/timer.hpp"
 
-#include <unistd.h>
+#include "hpx_cuda.hpp"
 
-#define SIZE 1000000
-#define PARTIONS 2
+#include "config.hpp"
+#include "utils.hpp"
 
 using namespace hpx::cuda;
 
+//###########################################################################
+//Kernels
+//###########################################################################
+
 static const char kernel_src[] =
-		"                                                                                                        "
-				"extern \"C\"  __global__ void sum(unsigned int* n, unsigned  int* count,unsigned int* array){ 	       \n"
-				" for (int i = blockDim.x * blockIdx.x + threadIdx.x;					                               \n"
-				"         i < n[0];														                               \n"
-				"         i += gridDim.x * blockDim.x)									                               \n"
-				"    {													                                               \n"
-				"        atomicAdd(&(count[0]), array[i]);							                                   \n"
-				"    }	 									                                                           \n"
-				"}                                             							                               \n";
 
-// hpx_main, is the actual main called by hpx
-int main(int argc, char* argv[]) {
+"extern \"C\" __global__ void kernel(float* in) { 		 				\n"
+		"																\n"
+		"	size_t i = threadIdx.x + blockIdx.x * blockDim.x;			\n"
+		"	float x = (float) i;										\n"
+		"	float s = sinf(x);											\n"
+		"	float c = cosf(x);											\n"
+		"	in[i] = in[i] + sqrtf(s * s + c * c);						\n"
+		"																\n"
+		"}																\n";
 
-	//Vector for all futures for the data management
-	std::vector<hpx::lcos::future<void>> data_futures;
+//###########################################################################
+//Main
+//###########################################################################
+
+int main(int argc, char*argv[]) {
 
 	// Get list of available Cuda Devices.
 	std::vector<device> devices = get_all_devices(2, 0).get();
@@ -43,8 +47,37 @@ int main(int argc, char* argv[]) {
 		return hpx::finalize();
 	}
 
+	const int blockSize = 256, nStreams = 4;
+
+	if (argc != 2) {
+		std::cout << "Usage: " << argv[0] << " n -> 2^n*1024*" << blockSize
+				<< "*" << nStreams << " elements" << std::endl;
+		exit(1);
+	}
+
+	double time = 0;
+	size_t count = atoi(argv[1]);
+
+	const int n = pow(2,count) * 1024 * blockSize * nStreams;
+	const int streamSize = n / nStreams;
+	const int streamBytes = streamSize * sizeof(TYPE);
+	const int bytes = n * sizeof(TYPE);
+
+	std::cout << n << " ";
+
+	timer_start();
+
+	//Malloc Host
+	TYPE* in;
+	cudaMallocHost((void**) &in, bytes);
+	memset(in, 0, bytes);
+
+	time += timer_stop();
+
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
+
+	std::vector<hpx::future<void>> dependencies;
 
 	// Create the hello_world device program
 	program prog = cudaDevice.create_program_with_source(kernel_src).get();
@@ -55,134 +88,73 @@ int main(int argc, char* argv[]) {
 	std::string mode = "--gpu-architecture=compute_";
 	mode.append(
 			std::to_string(cudaDevice.get_device_architecture_major().get()));
-
 	mode.append(
 			std::to_string(cudaDevice.get_device_architecture_minor().get()));
 
 	flags.push_back(mode);
 
-	// Compile the program
-	prog.build_sync(flags,"sum");
+	auto f = prog.build(flags, "kernel");
+	hpx::wait_all(f);
 
+	timer_start();
+
+	std::vector<buffer> bufferIn;
+	for (size_t i = 0; i < nStreams; i++)
+	{
+		bufferIn.push_back(cudaDevice.create_buffer_sync(streamBytes));
+
+	}
+
+	for (size_t i = 0; i < nStreams; i++)
+	{
+
+		bufferIn[i].enqueue_write(i*streamSize,streamBytes,in);
+	}
+
+	std::vector<hpx::cuda::buffer> args;
 	//Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;
 	hpx::cuda::server::program::Dim3 block;
 
 	//Set the values for the grid dimension
-	grid.x = 1;
+	grid.x = streamSize / blockSize;
 	grid.y = 1;
 	grid.z = 1;
 
 	//Set the values for the block dimension
-	block.x = 32;
+	block.x = blockSize;
 	block.y = 1;
 	block.z = 1;
 
-	// Generate Input data
-	unsigned int* inputData;
-	cudaMallocHost((void**) &inputData, sizeof(unsigned int) * SIZE);
+	hpx::wait_all(dependencies);
 
-	memset(inputData, 1, SIZE);
-
-	//Create buffer for the result
-	unsigned int* result;
-	cudaMallocHost((void**)&result,sizeof(unsigned int));
-	result[0] = 0;
-	std::vector<buffer> resultBuffer;
-	std::vector<hpx::future<void>> syncFutures;
-	for (unsigned int i = 0; i < PARTIONS; i++) {
-		resultBuffer.push_back(
-				cudaDevice.create_buffer_sync(sizeof(unsigned int)));
-		syncFutures.push_back(
-				resultBuffer[i].enqueue_write(0, sizeof(unsigned int),
-						result));
+	std::vector<hpx::future<void>> kernelFutures;
+	for (size_t i = 0; i < nStreams; i++)
+	{
+		args.push_back(bufferIn[i]);
+		kernelFutures.push_back(prog.run(args, "kernel", grid, block,args));
+		args.clear();
 	}
 
-	//Create a buffer for the sliced size of the data
-	unsigned int* slicedSize;
-	cudaMallocHost((void**)&slicedSize,sizeof(unsigned int));
-	slicedSize[0] = SIZE / PARTIONS;
-	buffer sizeBuffer = cudaDevice.create_buffer_sync(sizeof(unsigned int));
-	syncFutures.push_back(
-			sizeBuffer.enqueue_write(0, sizeof(unsigned int), slicedSize));
-	//Sync all meta data for the launch of the kernels
+	hpx::wait_all(kernelFutures);
 
-	std::vector<buffer> buffers;
-	for (unsigned int i = 0; i < PARTIONS; i++) {
+	time += timer_stop();
 
-		buffers.push_back(cudaDevice.create_buffer_sync(
-						slicedSize[0] * sizeof(unsigned int)));
+	bool check;
+	for (size_t i = 0; i < nStreams; i++)
+	{
+		TYPE* res = bufferIn[i].enqueue_read_sync<TYPE>(0,streamBytes);
+		check = checkKernel(res,streamSize);
+		if(check==false) break;
 
 	}
 
-	hpx::wait_all(syncFutures);
+	timer_start();
 
-	hpx::cout << "Running: " << SIZE << " elements sliced on " << PARTIONS
-	<< " cudaStreams with " << slicedSize[0] << " elements" << hpx::endl;
+	//Clean
+	cudaFreeHost(in);
 
-	//Copy the partitions to the device
-
-	std::vector<hpx::cuda::buffer> args;
-	args.push_back(sizeBuffer);
-
-	for (unsigned int i = 0; i < PARTIONS; i++) {
-
-		unsigned int offset = i * slicedSize[0];
-
-		buffers[i].enqueue_write(offset,
-				slicedSize[0] * sizeof(unsigned int),
-				inputData);
-
-		//Launch the kernel
-		args.push_back(resultBuffer[i]);
-		args.push_back(buffers[i]);
-
-		prog.run(args, "sum", grid, block, buffers[i]);
-
-		args.pop_back();
-		args.pop_back();
-
-	}
-
-	//Launch the kernels
-
-	//for (unsigned int i = 0; i < PARTIONS; i++) {
-
-	//unsigned int offset = i * slicedSize[0];
-
-	//}
-
-	//hpx::wait_all(launches);
-
-	//std::vector<hpx::lcos::future<hpx::serialization::serialize_buffer<char>>>results;
-
-	//for (unsigned int i = 0; i < PARTIONS; i++) {
-
-	//results.push_back(
-	//	resultBuffer[i].enqueue_read(0, sizeof(unsigned int)));
-
-	//}
-
-	//hpx::wait_all(results);
-
-	unsigned int res = 0;
-
-	//for (unsigned int i = 0; i < PARTIONS; i++) {
-
-	//	res += ((unsigned int*) results[i].get().data())[0];
-//	}
-
-	//launches.clear();
-	//results.clear();
-
-	//hpx::cout << "Result is " << res << " and is ";
-
-	//Check if result is correct
-
-	//if (res != SIZE)
-	//hpx::cout << "wrong" << hpx::endl;
-	//else
-	//hpx::cout << "correct" << hpx::endl;
+	std:: cout << check << " " << time + timer_stop() << std::endl;
 
 	return EXIT_SUCCESS;
 }
