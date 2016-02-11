@@ -41,6 +41,7 @@ int main(int argc, char*argv[]) {
 	timer_start();
 
 	size_t count = atoi(argv[1]);
+	double time = 0;
 
 	const int blockSize = 256, nStreams = 4;
 	const int n = pow(2,count) * 1024 * blockSize * nStreams;
@@ -91,8 +92,12 @@ int main(int argc, char*argv[]) {
 
 	cudaDeviceSynchronize();
 
+	time += timer_stop();
+
 	//Check the result
 	std::cout << checkKernel(in, n) << " ";
+
+	timer_start();
 
 	//Clean
 	cudaFreeHost(in);
@@ -101,7 +106,7 @@ int main(int argc, char*argv[]) {
 	for (int i = 0; i < nStreams; ++i)
 		cudaStreamDestroy(stream[i]);
 
-	std:: cout << timer_stop() << std::endl;
+	std:: cout << time + timer_stop() << std::endl;
 
 	return EXIT_SUCCESS;
 }

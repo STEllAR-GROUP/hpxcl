@@ -47,16 +47,17 @@ int main(int argc, char*argv[]) {
 		return hpx::finalize();
 	}
 
+	const int blockSize = 256, nStreams = 4;
+
 	if (argc != 2) {
-		std::cout << "Usage: " << argv[0] << " #elements" << std::endl;
+		std::cout << "Usage: " << argv[0] << " n -> 2^n*1024*" << blockSize
+				<< "*" << nStreams << " elements" << std::endl;
 		exit(1);
 	}
-
 
 	double time = 0;
 	size_t count = atoi(argv[1]);
 
-	const int blockSize = 256, nStreams = 4;
 	const int n = pow(2,count) * 1024 * blockSize * nStreams;
 	const int streamSize = n / nStreams;
 	const int streamBytes = streamSize * sizeof(TYPE);
@@ -104,11 +105,10 @@ int main(int argc, char*argv[]) {
 
 	}
 
-
-	for (size_t i = 0; i <  nStreams; i++)
+	for (size_t i = 0; i < nStreams; i++)
 	{
 
-	bufferIn[i].enqueue_write(i*streamSize,streamBytes,in);
+		bufferIn[i].enqueue_write(i*streamSize,streamBytes,in);
 	}
 
 	std::vector<hpx::cuda::buffer> args;
@@ -128,7 +128,6 @@ int main(int argc, char*argv[]) {
 
 	hpx::wait_all(dependencies);
 
-
 	std::vector<hpx::future<void>> kernelFutures;
 	for (size_t i = 0; i < nStreams; i++)
 	{
@@ -139,6 +138,7 @@ int main(int argc, char*argv[]) {
 
 	hpx::wait_all(kernelFutures);
 
+	time += timer_stop();
 
 	bool check;
 	for (size_t i = 0; i < nStreams; i++)
@@ -149,11 +149,12 @@ int main(int argc, char*argv[]) {
 
 	}
 
+	timer_start();
+
 	//Clean
 	cudaFreeHost(in);
 
-
-	std:: cout << time + timer_stop() << " " << check << std::endl;
+	std:: cout << check << " " << time + timer_stop() << std::endl;
 
 	return EXIT_SUCCESS;
 }
