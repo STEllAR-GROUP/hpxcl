@@ -21,12 +21,25 @@ set(all_documentation_dependencies
     ${documentation_dependencies})
 
 # Add all files here which should be passed to doxygen
-set(doxygen_dependencies
-    ${hpxcl_SOURCE_DIR}/opencl/buffer.hpp
+
+if(HPXCL_WITH_OPENCL)
+set(doxygen_opencl 
+	${hpxcl_SOURCE_DIR}/opencl/buffer.hpp
     ${hpxcl_SOURCE_DIR}/opencl/device.hpp
     ${hpxcl_SOURCE_DIR}/opencl/kernel.hpp
     ${hpxcl_SOURCE_DIR}/opencl/event.hpp
     ${hpxcl_SOURCE_DIR}/opencl/program.hpp)
+endif()
+
+if(HPXCL_WITH_CUDA)
+set(doxygen_cuda 
+	${hpxcl_SOURCE_DIR}/cuda/buffer.hpp
+    ${hpxcl_SOURCE_DIR}/cuda/device.hpp
+    ${hpxcl_SOURCE_DIR}/cuda/kernel.hpp
+    ${hpxcl_SOURCE_DIR}/cuda/program.hpp)
+endif()
+
+set(doxygen_dependencies doxygen_opencl doxygen_cuda)
 
 foreach(doxygen_input ${doxygen_dependencies})
   set(doxygen_inputs "${doxygen_inputs} ${doxygen_input}")
