@@ -23,7 +23,8 @@ namespace server {
 device::device() {
 	cuInit(0);
 	cuDeviceGet(&cu_device, 0);
-	cuCtxCreate(&cu_context, 0, cu_device);
+	//cuCtxCreate(&cu_context, 0, cu_device);
+	//checkCudaError("device::device Create context");
 	device_name = props.name;
 }
 
@@ -32,8 +33,8 @@ device::device(int device_id) {
 	checkCudaError("device::device Init");
 	cuDeviceGet(&cu_device, device_id);
 	checkCudaError("device::device Get device");
-	cuCtxCreate(&cu_context, 0, cu_device);
-	checkCudaError("device::device Create context");
+	//cuCtxCreate(&cu_context, 0, cu_device);
+	//checkCudaError("device::device Create context");
 	this->set_device(device_id);
 
 	cudaGetDeviceProperties(&props, device_id);
@@ -55,7 +56,7 @@ int device::get_device_count() {
 
 void device::set_device(int dev) {
 	this->device_id = dev;
-	cuCtxSetCurrent(cu_context);
+	//cuCtxSetCurrent(cu_context);
 	checkCudaError("device::device::set_device Set context ");
 }
 

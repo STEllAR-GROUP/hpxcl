@@ -57,7 +57,6 @@ void program::set_source(std::string source) {
 	this->kernel_source = source;
 }
 
-//ToDo: Add debug flag
 void program::build(std::vector<std::string> compilerFlags,
 		std::vector<std::string> modulenames, unsigned int debug) {
 
@@ -120,7 +119,7 @@ void program::build(std::vector<std::string> compilerFlags,
 
 void program::run(std::vector<hpx::naming::id_type> args,
 		std::string modulename, Dim3 grid, Dim3 block,
-		std::vector<hpx::naming::id_type> dependencies, unsigned int stream) {
+		std::vector<hpx::naming::id_type> dependencies, int stream) {
 
 	void *args_pointer[args.size()];
 
@@ -135,24 +134,72 @@ void program::run(std::vector<hpx::naming::id_type> args,
 	cudaSetDevice(this->parent_device_id);
 	checkCudaError("program::run Error setting the device");
 
-	for (auto dependency : dependencies)
-	{
-		auto buffer = hpx::get_ptr<hpx::cuda::server::buffer>(dependency).get();
-		cudaStreamSynchronize(buffer->get_stream());
-		checkCudaError("buffer::enque_read Error during synchronization of stream");
+	//Run on the default stream
+	if (dependencies.size() == 0 and stream == -1) {
+		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
+				block.x, block.y, block.z, 0, this->streams[0], args_pointer,
+				0);
+		checkCudaError("program::run Run kernel");
+		cudaStreamSynchronize(this->streams[0]);
+		checkCudaError("program::run Error during synchronization of stream");
 	}
+	//Run on the provided stream
+	else if (dependencies.size() == 0 and stream >= 0) {
+		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
+				block.x, block.y, block.z, 0, this->streams[stream], // shared mem and stream
+				args_pointer, 0);
+		checkCudaError("program::run Run kernel");
+		cudaStreamSynchronize(this->streams[stream]);
+		checkCudaError("program::run Error during synchronization of stream");
+	}
+	//Run on the one stream of the dependency
+	else if (dependencies.size() == 1 and stream == -1) {
+		auto buffer =
+				hpx::get_ptr<hpx::cuda::server::buffer>(dependencies[0]).get();
+		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
+				block.x, block.y, block.z, 0, buffer->get_stream(), // shared mem and stream
+				args_pointer, 0);
+		checkCudaError("program::run Run kernel");
+		cudaStreamSynchronize(buffer->get_stream());
+		checkCudaError("program::run Error during synchronization of stream");
 
-	cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y, // grid dim
-			block.x, block.y, block.z,                   // block dim
-			0, this->streams[stream],                   // shared mem and stream
-			args_pointer, 0);                            // arguments
-	checkCudaError("program::run Run kernel");
-	cudaStreamSynchronize(this->streams[stream]);
-	checkCudaError("program::run Synchronize");
+	}
+	//Run on the provided stream
+	else if (dependencies.size() > 1 and stream >= 0) {
+		for (auto dependency : dependencies) {
+			auto buffer = hpx::get_ptr<hpx::cuda::server::buffer>(
+					dependencies[0]).get();
+			cudaStreamSynchronize(buffer->get_stream());
+			checkCudaError(
+					"program::run Error during synchronization of stream");
+		}
+
+		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
+				block.x, block.y, block.z, 0, this->streams[stream], // shared mem and stream
+				args_pointer, 0);
+		checkCudaError("program::run Run kernel");
+		cudaStreamSynchronize(this->streams[stream]);
+		checkCudaError("program::run Error during synchronization of stream");
+	} else {
+		for (auto dependency : dependencies) {
+			auto buffer = hpx::get_ptr<hpx::cuda::server::buffer>(
+					dependencies[0]).get();
+			cudaStreamSynchronize(buffer->get_stream());
+			checkCudaError(
+					"program::run Error during synchronization of stream");
+		}
+
+		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
+				block.x, block.y, block.z, 0, this->streams[0], // shared mem and stream
+				args_pointer, 0);
+		checkCudaError("program::run Run kernel");
+		cudaStreamSynchronize(this->streams[0]);
+		checkCudaError("program::run Error during synchronization of stream");
+	}
 
 }
 
-unsigned int program::get_streams() {
+unsigned int program::get_streams_size() {
 	return this->streams.size();
 }
 

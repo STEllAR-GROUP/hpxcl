@@ -30,6 +30,6 @@ cmake \
 
 - Build CUDA support: -HPXCL_WITH_CUDA=ON
 - Build OpenCL support: -HPCL_WITH_OPENCL=ON
-- Build examples for CUDA:  -DHPXCL_WITH_CUDA_EXAMPLES=ON
-- Build benchmark for CUDA: -DHPXCL_WITH_CUDA_BENCHMARK=ON
-- Build benchmark for OPENCL: -DHPXCL_WITH_OPENCL_BENCHMARK=ON
+- Build examples: -DHPX_BUILD_EXAMPLES
+- Build benchmark: -DHPX_BUILD_BENCHMARK=ON  
+- Build documentation: -DHPX_BUILD_DOCUMENTATION=ON

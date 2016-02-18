@@ -76,9 +76,9 @@ int main(int argc, char* argv[]) {
 	// Compile the program
 
 #ifdef DEBUG
-	prog.build_sync(flags, "sum", 1);
+	data_futures.push_back(prog.build(flags, "sum", 1));
 #else
-	prog.build_sync(flags , "sum");
+	data_futures.push_back(prog.build(flags , "sum"));
 #endif
 
 	// Create the buffer for the result
@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
 	//Copy the result back
 	unsigned int* res = resbuffer.enqueue_read_sync<unsigned int>(0,sizeof(unsigned int));
 
-	hpx::cout << "Result is " << res[0] << " and is ";
+	std::cout << "Result is " << res[0] << " and is ";
 
 	//Check if result is correct
 

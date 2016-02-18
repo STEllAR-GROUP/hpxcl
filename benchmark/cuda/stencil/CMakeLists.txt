@@ -13,15 +13,18 @@ SET(CUDA_NVCC_FLAGS "-use_fast_math; -gencode arch=compute_20,code=sm_20;
 -gencode arch=compute_52,code=sm_52; -gencode arch=compute_52,code=compute_52; -std=c++11" 
 CACHE "NVCC_FLAGS" STRING FORCE) 
 
-#Benchmark without streams
-CUDA_ADD_EXECUTABLE(BenchmarkCuda BenchmarkCUDA.cu)
+#Benchmark for single stencil kernel
+CUDA_ADD_EXECUTABLE(StencilCuda StencilCUDA.cu)
+#Benchmark for partitions
+CUDA_ADD_EXECUTABLE(PartitionCuda PartitionCUDA.cu)
 
 ############################################################################
 # Configure HPXCP benchmarks
 ############################################################################
 
 set(example_programs
-    BenchmarkHPX
+    StencilHPX
+    PartitionHPX
 )
 
 foreach(example_program ${example_programs})
@@ -30,25 +33,25 @@ foreach(example_program ${example_programs})
 
   source_group("Source Files" FILES ${sources})
 
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../..)
+  include_directories(${CMAKE_SOURCE_DIR})
   # add example executable
   add_hpx_executable(${example_program}
                      SOURCES ${sources}
                      COMPONENT_DEPENDENCIES iostreams cuda
                      DEPENDENCIES ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY}
-                     FOLDER "Examples/CUDA/${example_program}")
+                     FOLDER "Benchmark/CUDA/${example_program}")
 
   # add a custom target for this example
-  add_hpx_pseudo_target(examples.cuda.${example_program})
+  add_hpx_pseudo_target(benchmark.cuda.${example_program})
 
   # make pseudo-targets depend on master pseudo-target
-  add_hpx_pseudo_dependencies(examples.cuda
-                              examples.cuda.${example_program})
+  add_hpx_pseudo_dependencies(benchmark.cuda
+                              benchmark.cuda.${example_program})
 
   # add dependencies to pseudo-target
-  add_hpx_pseudo_dependencies(examples.cuda.${example_program}
+  add_hpx_pseudo_dependencies(benchmark.cuda.${example_program}
                               ${example_program}_exe)
                               
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernel.cu DESTINATION ../../../examples/cuda/benchmark_vector)
-
 endforeach()
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernel.cu DESTINATION ../../benchmark/cuda/stencil)

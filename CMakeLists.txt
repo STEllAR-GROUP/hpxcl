@@ -16,11 +16,18 @@ endif()
 project(hpxcl CXX)
 
 # add our cmake path
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH} )
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
 if(HPX_ROOT)
     set(HPX_DIR "${HPX_ROOT}/lib/cmake/HPX")
 endif()
+
+#add -std=gnu++11 to the debug flags
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	if (CMAKE_COMPILER_IS_GNUCC)
+		 SET(CMAKE_CXX_FLAGS_DEBUG "-ggdb -D_DEBUG -O0 -std=gnu++11" CACHE STRING)
+	endif()
+endif() 
 
 ########################################################################
 # Include hpx
@@ -48,6 +55,8 @@ else()
     endif()
 endif()
 
+
+list(APPEND CMAKE_MODULE_PATH "${HPX_PREFIX}/../cmake/")
 include_directories(${HPX_INCLUDE_DIR})
 link_directories(${HPX_LIBRARY_DIR})
 
@@ -60,9 +69,10 @@ include(EmbedResources)
 # configurations
 hpx_option(HPX_BUILD_EXAMPLES BOOL "Build HPX examples (default: ON)" ON ADVANCED)
 hpx_option(HPX_BUILD_TESTS BOOL "Build HPX tests (default: ON)" ON ADVANCED)
-hpx_option(HPX_BUILD_DOCUMENTATION BOOL "The HPX documentation toolchain is available (default OFF)." OFF)
+hpx_option(HPXCL_WITH_DOCUMENTATION BOOL "The HPX documentation toolchain is available (default OFF)." OFF)
 hpx_option(HPXCL_WITH_OPENCL BOOL "Builds the OPENCL part of HPXCL (default ON)." OFF)
 hpx_option(HPXCL_WITH_CUDA BOOL "Builds the CUDA part of HPXCL (default OFF)." OFF)
+hpx_option(HPX_BUILD_BENCHMARK BOOL "Builds the benchmark (default OFF)." OFF)
 
 if(NOT HPXCL_WITH_OPENCL AND NOT HPXCL_WITH_CUDA)
     message(FATAL_ERROR "At least one of HPXCL_WITH_OPENCL or HPXCL_WITH_CUDA has to be set to ON")
@@ -77,21 +87,12 @@ if(HPXCL_WITH_OPENCL)
     #get_filename_component(PARENT_DIR ${OPENCL_LIBRARIES} OPENCL_LIBRARY_DIR)
     #link_directories(${OPENCL_LIBRARY_DIR})
     
-    if(HPXCL_WITH_OPENCL_BENCHMARK)
-		add_subdirectory(benchmark/opencl)
-	endif()
 endif()
 
 if(HPXCL_WITH_CUDA)
     find_package(CUDA 7.0 REQUIRED)
     find_package(NVRTC 7.0 REQUIRED)
     include_directories(${CUDA_INCLUDE_DIRS})
-    
-    if(HPXCL_WITH_CUDA_BENCHMARK)
-		add_subdirectory(benchmark/cuda)
-	endif()
-    
-    
 endif()
 
 #Only search for PNG lib, if HPXCL_WITH_OPENCL is build
@@ -146,11 +147,17 @@ if(HPX_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
-if(HPX_BUILD_DOCUMENTATION)
+if(HPXCL_WITH_DOCUMENTATION)
+  include(HPX_Documentation)
   hpx_option(HPX_BUILD_DOCUMENTATION_SINGLEPAGE BOOL "The HPX documentation should be build as a single page HTML (default OFF)." OFF)
   add_subdirectory(docs)
 endif()
 
+if(HPX_BUILD_BENCHMARK)
+	add_hpx_pseudo_target(benchmark)
+	include_directories(benchmark)
+    add_subdirectory(benchmark)
+endif()
 
 ###############################################################################
 

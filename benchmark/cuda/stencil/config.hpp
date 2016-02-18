@@ -12,10 +12,6 @@
 
 #ifdef SINGLE
 #define TYPE float
-#define LOG logf
-#define EXP expf
 #else
 #define TYPE double
-#define LOG log
-#define EXP exp
 #endif

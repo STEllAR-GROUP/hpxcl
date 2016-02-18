@@ -21,12 +21,24 @@ set(all_documentation_dependencies
     ${documentation_dependencies})
 
 # Add all files here which should be passed to doxygen
-set(doxygen_dependencies
-    ${hpxcl_SOURCE_DIR}/opencl/buffer.hpp
+if(HPXCL_WITH_OPENCL)
+set(doxygen_opencl 
+	${hpxcl_SOURCE_DIR}/opencl/buffer.hpp
     ${hpxcl_SOURCE_DIR}/opencl/device.hpp
     ${hpxcl_SOURCE_DIR}/opencl/kernel.hpp
     ${hpxcl_SOURCE_DIR}/opencl/event.hpp
     ${hpxcl_SOURCE_DIR}/opencl/program.hpp)
+endif()
+
+if(HPXCL_WITH_CUDA)
+set(doxygen_cuda 
+	${hpxcl_SOURCE_DIR}/cuda/buffer.hpp
+    ${hpxcl_SOURCE_DIR}/cuda/device.hpp
+    ${hpxcl_SOURCE_DIR}/cuda/kernel.hpp
+    ${hpxcl_SOURCE_DIR}/cuda/program.hpp)
+endif()
+
+set(doxygen_dependencies doxygen_opencl doxygen_cuda)
 
 foreach(doxygen_input ${doxygen_dependencies})
   set(doxygen_inputs "${doxygen_inputs} ${doxygen_input}")
@@ -46,7 +58,6 @@ set(doxygen_definition_list
     "HPX_STD_FUNCTION=std::function"
     "extern=")
 
-
 #############################################################################
 # Definitions for autodoc.doxy.in
 set(doxygen_output_file "${CMAKE_CURRENT_BINARY_DIR}/hpx_autodoc")
@@ -61,7 +72,8 @@ foreach(doxygen_input ${doxygen_dependencies})
 endforeach()
 
 hpx_info("doxygen" "Creating ${CMAKE_CURRENT_BINARY_DIR}/hpx_autodoc.doxy")
-configure_file(${hpx_SOURCE_DIR}/cmake/templates/autodoc.doxy.in
+
+configure_file(${HPX_PREFIX}/../cmake/templates/autodoc.doxy.in
                 ${CMAKE_CURRENT_BINARY_DIR}/hpx_autodoc.doxy
                 @ONLY)
 
@@ -84,5 +96,5 @@ if(BOOSTAUTOINDEX_FOUND)
   set(auto_index_xsl_param --stringparam index.on.type 1)
 endif()
 
-
-
+#############################################################################
+add_custom_target(documentation doxygen hpx_autodoc.doxy )

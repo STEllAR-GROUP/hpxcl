@@ -12,7 +12,6 @@
 #include "hpx_cuda.hpp"
 #include "cuda/cuda_error_handling.hpp"
 #include "cuda/export_definitions.hpp"
-#define CUDA_API_PER_THREAD_DEFAULT_STREAM
 #include <cuda.h>
 
 #include <vector>
