@@ -16,7 +16,7 @@ endif()
 project(hpxcl CXX)
 
 # add our cmake path
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" ${CMAKE_MODULE_PATH} )
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
 if(HPX_ROOT)
     set(HPX_DIR "${HPX_ROOT}/lib/cmake/HPX")
@@ -55,6 +55,8 @@ else()
     endif()
 endif()
 
+
+list(APPEND CMAKE_MODULE_PATH "${HPX_PREFIX}/../cmake/")
 include_directories(${HPX_INCLUDE_DIR})
 link_directories(${HPX_LIBRARY_DIR})
 
@@ -67,7 +69,7 @@ include(EmbedResources)
 # configurations
 hpx_option(HPX_BUILD_EXAMPLES BOOL "Build HPX examples (default: ON)" ON ADVANCED)
 hpx_option(HPX_BUILD_TESTS BOOL "Build HPX tests (default: ON)" ON ADVANCED)
-hpx_option(HPX_BUILD_DOCUMENTATION BOOL "The HPX documentation toolchain is available (default OFF)." OFF)
+hpx_option(HPX_WITH_DOCUMENTATION BOOL "The HPX documentation toolchain is available (default OFF)." OFF)
 hpx_option(HPXCL_WITH_OPENCL BOOL "Builds the OPENCL part of HPXCL (default ON)." OFF)
 hpx_option(HPXCL_WITH_CUDA BOOL "Builds the CUDA part of HPXCL (default OFF)." OFF)
 hpx_option(HPX_BUILD_BENCHMARK BOOL "Builds the benchmark (default OFF)." OFF)
@@ -145,7 +147,8 @@ if(HPX_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
-if(HPX_BUILD_DOCUMENTATION)
+if(HPX_WITH_DOCUMENTATION)
+  include(HPX_Documentation)
   hpx_option(HPX_BUILD_DOCUMENTATION_SINGLEPAGE BOOL "The HPX documentation should be build as a single page HTML (default OFF)." OFF)
   add_subdirectory(docs)
 endif()

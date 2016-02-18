@@ -61,7 +61,8 @@ foreach(doxygen_input ${doxygen_dependencies})
 endforeach()
 
 hpx_info("doxygen" "Creating ${CMAKE_CURRENT_BINARY_DIR}/hpx_autodoc.doxy")
-configure_file(${hpx_SOURCE_DIR}/cmake/templates/autodoc.doxy.in
+
+configure_file(${HPX_PREFIX}/../cmake/templates/autodoc.doxy.in
                 ${CMAKE_CURRENT_BINARY_DIR}/hpx_autodoc.doxy
                 @ONLY)
 
