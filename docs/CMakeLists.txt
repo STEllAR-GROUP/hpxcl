@@ -21,7 +21,6 @@ set(all_documentation_dependencies
     ${documentation_dependencies})
 
 # Add all files here which should be passed to doxygen
-
 if(HPXCL_WITH_OPENCL)
 set(doxygen_opencl 
 	${hpxcl_SOURCE_DIR}/opencl/buffer.hpp
@@ -58,7 +57,6 @@ set(doxygen_definition_list
     "HPX_API_EXPORT="
     "HPX_STD_FUNCTION=std::function"
     "extern=")
-
 
 #############################################################################
 # Definitions for autodoc.doxy.in
@@ -98,5 +96,5 @@ if(BOOSTAUTOINDEX_FOUND)
   set(auto_index_xsl_param --stringparam index.on.type 1)
 endif()
 
-
-
+#############################################################################
+add_custom_target(documentation doxygen hpx_autodoc.doxy )
