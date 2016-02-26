@@ -11,7 +11,6 @@ typedef hpx::components::managed_component<
     hpx::cuda::server::program>
     cuda_program_type;
 
-
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(cuda_program_type, cuda_program);
 
 HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::build_action,

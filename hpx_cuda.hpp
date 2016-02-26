@@ -4,9 +4,9 @@
 
 #ifndef HPX_CUDA_HPP_
 #define HPX_CUDA_HPP_
-    #define CUDA_API_PER_THREAD_DEFAULT_STREAM
-    #include "cuda/device.hpp"
-    #include "cuda/buffer.hpp"
-    #include "cuda/program.hpp"
-    #include "cuda/get_devices.hpp"
+#define CUDA_API_PER_THREAD_DEFAULT_STREAM
+#include "cuda/device.hpp"
+#include "cuda/buffer.hpp"
+#include "cuda/program.hpp"
+#include "cuda/get_devices.hpp"
 #endif
