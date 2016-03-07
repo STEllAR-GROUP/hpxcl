@@ -13,6 +13,8 @@
 #include "../export_definitions.hpp"
 #include "../cl_headers.hpp"
 
+#include "../fwd_declarations.hpp"
+
 #include "util/event_map.hpp"
 #include "util/data_map.hpp"
 
