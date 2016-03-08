@@ -154,7 +154,7 @@ if(HPXCL_WITH_DOCUMENTATION)
   add_subdirectory(docs)
 endif()
 
-if(HPXCL_BUILD_BENCHMARK)
+if(HPXCL_WITH_BENCHMARK)
 	add_hpx_pseudo_target(benchmark)
 	include_directories(benchmark)
     add_subdirectory(benchmark)

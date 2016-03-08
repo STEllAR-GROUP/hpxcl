@@ -10,7 +10,7 @@
 ##############################################################################
 find_package(PkgConfig)
 
-find_library(CUDA_NVRTC_LIB libnvrtc nvrtc HINTS "${CUDA_TOOLKIT_ROOT_DIR}/lib" "${LIBNVRTC_LIBRARY_DIR}" /usr/lib64 /usr/local/cuda/lib64)
+find_library(CUDA_NVRTC_LIB libnvrtc nvrtc HINTS "${CUDA_TOOLKIT_ROOT_DIR}/lib64" "${LIBNVRTC_LIBRARY_DIR}" /usr/lib64 /usr/local/cuda/lib64)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LibNVRTC DEFAULT_MSG CUDA_NVRTC_LIB)
