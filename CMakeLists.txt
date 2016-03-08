@@ -140,6 +140,8 @@ if(HPXCL_WITH_CUDA)
     add_subdirectory(cuda)
 endif()
 
+include_directories(${PROJECT_SOURCE_DIR})
+
 if(HPXCL_BUILD_EXAMPLES)
     add_hpx_pseudo_target(examples)
     include_directories(examples)
