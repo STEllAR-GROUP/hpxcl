@@ -16,7 +16,7 @@ endif()
 project(hpxcl CXX)
 
 # add our cmake path
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
 
 if(HPX_ROOT)
     set(HPX_DIR "${HPX_ROOT}/lib/cmake/HPX")
@@ -45,12 +45,12 @@ set(CMAKE_DEBUG_POSTFIX ${HPX_DEBUG_POSTFIX})
 # Adjust auxiliary build settings for HPX to work properly
 if(NOT MSVC)
     set(HPX_RPATH
-        "${CMAKE_BINARY_DIR}/lib/hpx:${HPX_RPATH}:${CMAKE_INSTALL_PREFIX}/lib/hpx")
+        "${PROJECT_BINARY_DIR}/lib/hpx:${HPX_RPATH}:${CMAKE_INSTALL_PREFIX}/lib/hpx")
 else()
     # enable solution folders for MSVC
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
     if(HPX_NO_INSTALL)
-      set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/$(Configuration)" CACHE PATH
+      set(CMAKE_INSTALL_PREFIX "${PROJECT_BINARY_DIR}/$(Configuration)" CACHE PATH
           "Prefix prepended to install directories." FORCE)
     endif()
 endif()
