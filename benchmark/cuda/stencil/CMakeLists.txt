@@ -19,7 +19,7 @@ CUDA_ADD_EXECUTABLE(StencilCuda StencilCUDA.cu)
 CUDA_ADD_EXECUTABLE(PartitionCuda PartitionCUDA.cu)
 
 ############################################################################
-# Configure HPXCP benchmarks
+# Configure HPXCL benchmarks
 ############################################################################
 
 set(example_programs
