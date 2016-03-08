@@ -11,9 +11,6 @@
 
 #include "hpx_cuda.hpp"
 
-#include "config.hpp"
-#include "utils.hpp"
-
 using namespace hpx::cuda;
 
 //###########################################################################
@@ -60,19 +57,13 @@ int main(int argc, char*argv[]) {
 
 	const int n = pow(2,count) * 1024 * blockSize * nStreams;
 	const int streamSize = n / nStreams;
-	const int streamBytes = streamSize * sizeof(TYPE);
-	const int bytes = n * sizeof(TYPE);
-
-	std::cout << n << " ";
-
-	timer_start();
+	const int streamBytes = streamSize * sizeof(float);
+	const int bytes = n * sizeof(float);
 
 	//Malloc Host
-	TYPE* in;
+	float* in;
 	cudaMallocHost((void**) &in, bytes);
 	memset(in, 0, bytes);
-
-	time += timer_stop();
 
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
@@ -95,8 +86,6 @@ int main(int argc, char*argv[]) {
 
 	auto f = prog.build(flags, "kernel");
 	hpx::wait_all(f);
-
-	timer_start();
 
 	std::vector<buffer> bufferIn;
 	for (size_t i = 0; i < nStreams; i++)
@@ -138,23 +127,9 @@ int main(int argc, char*argv[]) {
 
 	hpx::wait_all(kernelFutures);
 
-	time += timer_stop();
-
-	bool check;
-	for (size_t i = 0; i < nStreams; i++)
-	{
-		TYPE* res = bufferIn[i].enqueue_read_sync<TYPE>(0,streamBytes);
-		check = checkKernel(res,streamSize);
-		if(check==false) break;
-
-	}
-
-	timer_start();
 
 	//Clean
 	cudaFreeHost(in);
-
-	std:: cout << check << " " << time + timer_stop() << std::endl;
 
 	return EXIT_SUCCESS;
 }
