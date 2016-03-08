@@ -5,17 +5,17 @@
 
 set(subdirs "")
 
-if(HPX_BUILD_TESTS_BENCHMARKS)
+if(HPXCL_BUILD_BENCHMARK)
   set(subdirs
     ${subdirs} performance)
 endif()
 
-if(HPX_BUILD_TESTS_REGRESSIONS)
+if(HPXCL_BUILD_TESTS)
   set(subdirs
     ${subdirs} regressions)
 endif()
 
-if(HPX_BUILD_TESTS_UNIT)
+if(HPXCL_BUILD_TESTS)
   set(subdirs
     ${subdirs} unit)
 endif()

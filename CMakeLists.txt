@@ -67,12 +67,12 @@ include(EmbedResources)
 
 ########################################################################
 # configurations
-hpx_option(HPX_BUILD_EXAMPLES BOOL "Build HPX examples (default: ON)" ON ADVANCED)
-hpx_option(HPX_BUILD_TESTS BOOL "Build HPX tests (default: ON)" ON ADVANCED)
+hpx_option(HPXCL_BUILD_EXAMPLES BOOL "Build HPX examples (default: ON)" ON ADVANCED)
+hpx_option(HPXCL_BUILD_TESTS BOOL "Build HPX tests (default: ON)" ON ADVANCED)
 hpx_option(HPXCL_WITH_DOCUMENTATION BOOL "The HPX documentation toolchain is available (default OFF)." OFF)
 hpx_option(HPXCL_WITH_OPENCL BOOL "Builds the OPENCL part of HPXCL (default ON)." OFF)
 hpx_option(HPXCL_WITH_CUDA BOOL "Builds the CUDA part of HPXCL (default OFF)." OFF)
-hpx_option(HPX_BUILD_BENCHMARK BOOL "Builds the benchmark (default OFF)." OFF)
+hpx_option(HPXCL_BUILD_BENCHMARK BOOL "Builds the benchmark (default OFF)." OFF)
 
 if(NOT HPXCL_WITH_OPENCL AND NOT HPXCL_WITH_CUDA)
     message(FATAL_ERROR "At least one of HPXCL_WITH_OPENCL or HPXCL_WITH_CUDA has to be set to ON")
@@ -96,7 +96,7 @@ if(HPXCL_WITH_CUDA)
 endif()
 
 #Only search for PNG lib, if HPXCL_WITH_OPENCL is build
-if(HPX_BUILD_EXAMPLES AND HPXCL_WITH_OPENCL)
+if(HPXCL_BUILD_EXAMPLES AND HPXCL_WITH_OPENCL)
     find_package(PNG)
     if(PNG_FOUND)
         include_directories(${PNG_INCLUDE_DIRS})
@@ -140,8 +140,7 @@ if(HPXCL_WITH_CUDA)
     add_subdirectory(cuda)
 endif()
 
-
-if(HPX_BUILD_EXAMPLES)
+if(HPXCL_BUILD_EXAMPLES)
     add_hpx_pseudo_target(examples)
     include_directories(examples)
     add_subdirectory(examples)
@@ -153,7 +152,7 @@ if(HPXCL_WITH_DOCUMENTATION)
   add_subdirectory(docs)
 endif()
 
-if(HPX_BUILD_BENCHMARK)
+if(HPXCL_BUILD_BENCHMARK)
 	add_hpx_pseudo_target(benchmark)
 	include_directories(benchmark)
     add_subdirectory(benchmark)
@@ -161,13 +160,13 @@ endif()
 
 ###############################################################################
 
-#if(HPX_BUILD_TESTS)
+#if(HPXCL_BUILD_TESTS)
 #
-#  file(COPY ${HPX_ROOT}/bin/hpxrun.py DESTINATION ${CMAKE_BINARY_DIR}/bin)
+#  file(COPY ${HPX_ROOT}/bin/hpxrun.py DESTINATION ${PROJECT_BINARY_DIR}/bin)
 #
-#  hpx_option(HPX_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
-#  hpx_option(HPX_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
-#  hpx_option(HPX_BUILD_TESTS_UNIT BOOL "Build HPX unit tests (default: ON)" ON ADVANCED)
+#  hpx_option(HPXCL_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
+#  hpx_option(HPXCL_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
+#  hpx_option(HPXCL_BUILD_TESTS_UNIT BOOL "Build HPX unit tests (default: ON)" ON ADVANCED)
 #
 #  add_hpx_pseudo_target(tests)
 #
@@ -180,9 +179,9 @@ endif()
 #  include_directories(tests)
 #  add_subdirectory(tests)
 #else()
-  unset(HPX_BUILD_TESTS_BENCHMARKS CACHE)
-  unset(HPX_BUILD_TESTS_REGRESSIONS CACHE)
-  unset(HPX_BUILD_TESTS_UNIT CACHE)
+  unset(HPXCL_BUILD_TESTS_BENCHMARKS CACHE)
+  unset(HPXCL_BUILD_TESTS_REGRESSIONS CACHE)
+  unset(HPXCL_BUILD_TESTS_UNIT CACHE)
 #endif()
 
 
