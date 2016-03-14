@@ -6,7 +6,7 @@
 
 #include "image_generator.hpp"
 
-#include "../../../opencl.hpp"
+#include <hpxcl/opencl.hpp>
 
 #include <hpx/lcos/when_all.hpp>
 

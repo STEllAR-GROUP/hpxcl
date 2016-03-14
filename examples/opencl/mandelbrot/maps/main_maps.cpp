@@ -9,7 +9,7 @@
 #include <hpx/apply.hpp>
 #include <hpx/util/static.hpp>
 
-#include "../../../../opencl.hpp"
+#include <hpxcl/opencl.hpp>
 
 #include "maps_image_generator.hpp"
 

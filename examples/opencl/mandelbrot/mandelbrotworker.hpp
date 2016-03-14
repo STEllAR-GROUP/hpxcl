@@ -6,7 +6,7 @@
 #ifndef MANDELBROT_MANDELBROTWORKER_H_
 #define MANDELBROT_MANDELBROTWORKER_H_
 
-#include "../../../opencl.hpp"
+#include <hpxcl/opencl.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
