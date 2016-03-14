@@ -7,7 +7,7 @@
 #include <hpx/include/iostreams.hpp>
 #include <hpx/lcos/future.hpp>
 
-#include "../../opencl.hpp"
+#include <hpxcl/opencl.hpp>
 
 using namespace hpx::opencl;
 

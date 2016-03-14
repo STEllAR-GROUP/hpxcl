@@ -6,7 +6,7 @@
 #ifndef BENCHMARK_HPXCL_SINGLE_HPP_
 #define BENCHMARK_HPXCL_SINGLE_HPP_
 
-#include "../../../opencl.hpp"
+#include <hpxcl/opencl.hpp>
 #include "timer.hpp"
 
 using namespace hpx::opencl;

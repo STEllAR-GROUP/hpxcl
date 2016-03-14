@@ -11,7 +11,7 @@
 //#include <hpx/util/static.hpp>
 #include <hpx/include/iostreams.hpp>
 
-#include "../../../../opencl.hpp"
+#include <hpxcl/opencl.hpp>
 
 #include "testresults.hpp"
 
