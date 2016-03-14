@@ -75,7 +75,7 @@ endforeach()
 
 hpx_info("doxygen" "Creating ${CMAKE_CURRENT_BINARY_DIR}/hpx_autodoc.doxy")
 
-configure_file(${HPX_PREFIX}/../cmake/templates/autodoc.doxy.in
+configure_file(${PROJECT_SOURCE_DIR}/docs/autodoc.doxy.in
                 ${CMAKE_CURRENT_BINARY_DIR}/hpx_autodoc.doxy
                 @ONLY)
 
