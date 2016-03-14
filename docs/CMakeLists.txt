@@ -6,6 +6,7 @@
 #hpx_write_boostbook_catalog(${CMAKE_CURRENT_BINARY_DIR}/boostbook_catalog.xml)
 
 find_package(XSLTPROC)
+find_package(Doxygen)
 
 file(GLOB base_files ${hpxcl_SOURCE_DIR}/docs/*.qbk)
 file(GLOB_RECURSE manual_files ${hpxcl_SOURCE_DIR}/docs/manual/*.qbk)
