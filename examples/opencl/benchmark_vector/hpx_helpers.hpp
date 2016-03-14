@@ -6,7 +6,7 @@
 #ifndef BENCHMARK_HPX_HELPERS_HPP_
 #define BENCHMARK_HPX_HELPERS_HPP_
 
-#include "../../../opencl.hpp"
+#include <hpxcl/opencl.hpp>
 
 static hpx::naming::id_type hpx_get_remote_node()
 {

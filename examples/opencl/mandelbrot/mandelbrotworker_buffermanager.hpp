@@ -6,7 +6,7 @@
 #ifndef MANDELBROT_MANDELBROTWORKER_BUFFERMANAGER_H_
 #define MANDELBROT_MANDELBROTWORKER_BUFFERMANAGER_H_
 
-#include "../../../opencl.hpp"
+#include <hpxcl/opencl.hpp>
 
 #include <map>
 

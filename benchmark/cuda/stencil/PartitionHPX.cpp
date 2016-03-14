@@ -9,7 +9,7 @@
 
 #include "examples/opencl/benchmark_vector/timer.hpp"
 
-#include "hpx_cuda.hpp"
+#include <hpxcl/cuda.hpp>
 
 #include "config.hpp"
 #include "utils.hpp"
