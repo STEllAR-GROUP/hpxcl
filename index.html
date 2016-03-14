@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>HPXCL by STEllAR-GROUP</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>HPXCL</h1>
+        <p>This repository contains components that will support percolation via OpenCL and CUDA</p>
+
+        <p class="view"><a href="https://github.com/STEllAR-GROUP/hpxcl">View the Project on GitHub <small>STEllAR-GROUP/hpxcl</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/STEllAR-GROUP/hpxcl/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/STEllAR-GROUP/hpxcl/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/STEllAR-GROUP/hpxcl">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="hpxcl" class="anchor" href="#hpxcl" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>hpxcl</h1>
+
+<p>This repository contains components that will support percolation via OpenCL and CUDA</p>
+
+<p>In any case, if you happen to run into problems we very much encourage and appreciate
+any <a href="http://github.com/STEllAR-GROUP/hpxcl/issues">issue</a> reports through the issue tracker for this Github project.</p>
+
+<h1>
+<a id="build" class="anchor" href="#build" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Build</h1>
+
+<p>The <a href="https://circleci.com/gh/STEllAR-GROUP/hpxcl">CircleCI</a> contiguous
+integration service tracks the current build status for the master branch:
+<img src="https://circleci.com/gh/STEllAR-GROUP/hpxcl/tree/master.svg?style=svg" alt="HPXCL master branch build status"></p>
+
+<h1>
+<a id="cuda" class="anchor" href="#cuda" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>CUDA</h1>
+
+<p>Prerequisites:</p>
+
+<ul>
+<li>CUDA SDK &gt;= 7.0</li>
+</ul>
+
+<p>Building:</p>
+
+<pre><code>mkdir build &amp;&amp; cd build
+cmake \
+-DHPX_ROOT=/home/diehl/opt/hpx/ \
+-DHPXCL_WITH_CUDA=ON \
+-DCUDA_TOOLKIT_ROOT_DIR=/opt/packages/cuda-7.0/ \
+-DLIBNVRTC_LIBRARY_DIR=/opt/packages/cuda-7.0/lib64/ .. 
+</code></pre>
+
+<ul>
+<li>Build CUDA support: -HPXCL_WITH_CUDA=ON</li>
+<li>Build OpenCL support: -HPCL_WITH_OPENCL=ON</li>
+<li>Build examples: -DHPXCL_BUILD_EXAMPLES</li>
+<li>Build benchmark: -DHPXCL_BUILD_BENCHMARK=ON<br>
+</li>
+<li>Build documentation: -DHPX_BUILD_DOCUMENTATION=ON</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/STEllAR-GROUP">STEllAR-GROUP</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
