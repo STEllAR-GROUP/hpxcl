@@ -3,6 +3,12 @@ hpxcl
 
 This repository contains components that will support percolation via OpenCL and CUDA
 
+Also, if you have any questions feel free to ask it over at `stackoverflow <http://stackoverflow.com>`_
+
+In any case, if you happen to run into problems we very much encourage and appreciate
+any issue reports through the `issue tracker for this Github project
+<http://github.com/STEllAR-GROUP/hpxcl/issues>`_.
+
 Build
 ===
 
