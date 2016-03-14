@@ -7,7 +7,7 @@
 #include <hpx/include/iostreams.hpp>
 #include <hpx/lcos/future.hpp>
 
-#include "../../hpx_cuda.hpp"
+#include <hpxcl/cuda.hpp>
 #include <sstream>
 
 // hpx_main, is the actual main called by hpx
