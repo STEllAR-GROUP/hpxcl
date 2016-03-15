@@ -10,5 +10,3 @@
 #include "cuda/program.hpp"
 #include "cuda/get_devices.hpp"
 #endif
-
-
