@@ -36,7 +36,8 @@ set(doxygen_opencl
     ${hpxcl_SOURCE_DIR}/opencl/device.hpp
     ${hpxcl_SOURCE_DIR}/opencl/kernel.hpp
     ${hpxcl_SOURCE_DIR}/opencl/event.hpp
-    ${hpxcl_SOURCE_DIR}/opencl/program.hpp)
+    ${hpxcl_SOURCE_DIR}/opencl/program.hpp
+    ${hpxcl_SOURCE_DIR}/hpxcl/opencl.hpp)
 
 
 
@@ -44,7 +45,8 @@ set(doxygen_cuda
 	${hpxcl_SOURCE_DIR}/cuda/buffer.hpp
     ${hpxcl_SOURCE_DIR}/cuda/device.hpp
     ${hpxcl_SOURCE_DIR}/cuda/get_devices.hpp
-    ${hpxcl_SOURCE_DIR}/cuda/program.hpp)
+    ${hpxcl_SOURCE_DIR}/cuda/program.hpp
+    ${hpxcl_SOURCE_DIR}/hpxcl/cuda.hpp)
 
 set(doxygen_dependencies ${doxygen_opencl} ${doxygen_cuda})
 

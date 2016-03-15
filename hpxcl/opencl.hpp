@@ -14,3 +14,8 @@
     #include "opencl/kernel.hpp"
 
 #endif
+
+/**
+ * \example hello_world.cpp
+ * Hello world for HPXCL-Opencl
+ */
