@@ -11,4 +11,23 @@
 #include "cuda/get_devices.hpp"
 #endif
 
+/**
+ * \example streams.cpp
+ * Example for using multiple partitions
+ */
 
+/**
+ * \example build_kernel.cpp
+ * Example for building a kernel
+ */
+
+
+/**
+ * \example build_kernel_from_file.cpp
+ * Example for for building a kernel from a file
+ */
+
+/**
+ * \example cuda_list_devices.cpp
+ * Get all remote and local devices
+ */
