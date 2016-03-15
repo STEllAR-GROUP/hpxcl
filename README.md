@@ -3,6 +3,8 @@ hpxcl
 
 This repository contains components that will support percolation via OpenCL and CUDA
 
+The [documentation](http://stellar-group.github.io/hpxcl/docs/html/index.html) of the nightly build is available.
+
 In any case, if you happen to run into problems we very much encourage and appreciate
 any [issue](http://github.com/STEllAR-GROUP/hpxcl/issues) reports through the issue tracker for this Github project.
 
