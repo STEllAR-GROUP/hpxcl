@@ -13,7 +13,6 @@
 
 using namespace hpx::cuda;
 
-
 //###########################################################################
 //Kernels
 //###########################################################################
@@ -75,7 +74,6 @@ int main(int argc, char*argv[]) {
 	program prog = cudaDevice.create_program_with_source(kernel_src).get();
 
 	// Add compiler flags for compiling the kernel
-
 	std::vector<std::string> flags;
 	std::string mode = "--gpu-architecture=compute_";
 	mode.append(
@@ -128,10 +126,8 @@ int main(int argc, char*argv[]) {
 
 	hpx::wait_all(kernelFutures);
 
-
 	//Clean
 	cudaFreeHost(in);
 
 	return EXIT_SUCCESS;
 }
-

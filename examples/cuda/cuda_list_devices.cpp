@@ -39,14 +39,3 @@ int hpx_main(int argc, char* argv[]) {
 // End the program
 	return hpx::finalize();
 }
-
-// Main, initializes HPX
-//int main(int argc, char* argv[]) {
-
-// initialize HPX, run hpx_main
-//	hpx::start(argc, argv);
-
-// wait for hpx::finalize being called
-//	return hpx::stop();
-//}
-
