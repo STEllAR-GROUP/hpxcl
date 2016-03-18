@@ -8,12 +8,15 @@ The [documentation](http://stellar-group.github.io/hpxcl/docs/html/index.html) o
 In any case, if you happen to run into problems we very much encourage and appreciate
 any [issue](http://github.com/STEllAR-GROUP/hpxcl/issues) reports through the issue tracker for this Github project.
 
-Build
-===
-
 The [CircleCI](https://circleci.com/gh/STEllAR-GROUP/hpxcl) contiguous
 integration service tracks the current build status for the master branch:
 ![HPXCL master branch build status](https://circleci.com/gh/STEllAR-GROUP/hpxcl/tree/master.svg?style=svg "")
+
+Build
+===
+
+- CMake >= 3.0
+- GCC >= 4.9 
 
 CUDA
 ==
