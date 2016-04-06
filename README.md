@@ -17,6 +17,7 @@ Build
 
 - CMake >= 3.0
 - GCC >= 4.9 
+- HPX >= 0.9
 
 CUDA
 ==
@@ -24,7 +25,6 @@ CUDA
 Prerequisites:
 
 - CUDA SDK >= 7.0
-- HPX >= 0.9
 
 Building:
 ```
@@ -33,8 +33,24 @@ cmake \
 -DHPX_ROOT=/home/diehl/opt/hpx/ \
 -DHPXCL_WITH_CUDA=ON \
 -DCUDA_TOOLKIT_ROOT_DIR=/opt/packages/cuda-7.0/ \
--DLIBNVRTC_LIBRARY_DIR=/opt/packages/cuda-7.0/lib64/ .. 
 ```
+
+OpenCl
+==
+
+Prerequisites:
+
+- OpenCl >= 1.1
+
+Building:
+
+mkdir build && cd build
+cmake \
+-DHPX_ROOT=/home/diehl/opt/hpx/ \
+-DHPXCL_WITH_OPENCL=ON \
+
+Options
+==
 
 - Build CUDA support: -HPXCL_WITH_CUDA=ON
 - Build OpenCL support: -HPCL_WITH_OPENCL=ON
