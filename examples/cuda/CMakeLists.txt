@@ -4,8 +4,8 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 set(example_programs
-    list_devices
-    list_extended_devices
+    cuda_list_devices
+    cuda_list_extended_devices
     build_kernel
     build_kernel_from_file
     streams

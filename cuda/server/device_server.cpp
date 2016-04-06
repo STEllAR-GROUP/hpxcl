@@ -4,6 +4,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
 #include <hpx/hpx.hpp>
+#include <hpx/util/io_service_pool.hpp>
 
 #include <cuda.h>
 #include <cuda_runtime.h>

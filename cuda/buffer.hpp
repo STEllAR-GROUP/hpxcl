@@ -1,5 +1,5 @@
 // Copyright (c)    2013 Damond Howard
-//                  2015 patrick Diehl
+//                  2015 Patrick Diehl
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 #pragma once
@@ -48,7 +48,7 @@ public:
 	 * \param size The size of the buffer
 	 *
 	 * \note Use this methods carefully for extending a buffer. Adaptive buffer
-	 * on GPU are mostly perfoming bad.
+	 * on GPU are mostly performing bad.
 	 */
 
 	hpx::lcos::future<void> set_size(size_t size) {
@@ -64,7 +64,8 @@ public:
 	}
 
 	/**
-	 * \brief Method copy synchronized the data on the attached device to the host
+	 * \brief Method copy synchronized the data on the attached device to the
+	 *  host.
 	 * \param offset Offset, where to start copying data
 	 * \param size Size of the data on the device
 	 * \return Pointer to the data on the host

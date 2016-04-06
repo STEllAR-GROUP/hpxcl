@@ -6,7 +6,7 @@
 #ifndef MANDELBROT_IMAGE_GENERATOR_H_
 #define MANDELBROT_IMAGE_GENERATOR_H_
 
-#include "../../../../opencl.hpp"
+#include <hpxcl/opencl.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <vector>

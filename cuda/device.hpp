@@ -131,10 +131,11 @@ public:
 	/**
 	 * \brief Creates a program with the set source code
 	 *
-	 * This Method creates a program containing the source code. This program is attached to
-	 * this device and all streams are executed there.
+	 * This Method creates a program containing the source code.
+	 * This program is attached to this device and all streams are
+	 * executed there.
 	 *
-	 * \param source The source code of the Cuda kernel
+	 * \param source The source code of the CUDA kernel
 	 *
 	 * \see Program
 	 */
@@ -148,8 +149,9 @@ public:
 	/**
 	 * \brief Creates a program from the given source file
 	 *
-	 * This Method creates a program containing the source code. This program is attached to
-	 * this device and all streams are executed there.
+	 * This Method creates a program containing the source code.
+	 * This program is attached to this device and all streams are
+	 * executed there.
 	 *
 	 * \param source The path to the source file
 	 *
@@ -184,8 +186,8 @@ public:
 	/**
 	 * \brief Creates a buffer attached to this device
 	 *
-	 * The method creates a buffer with the size specified here and allocates this
-	 * on this device
+	 * The method creates a buffer with the size specified here and allocates
+	 * this on this device.
 	 *
 	 * \param size The size of the allocated buffer
 	 *

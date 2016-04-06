@@ -189,9 +189,12 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             // special case: counter == 1. (meaning: agas is the only one
             // still holding a reference to this object. especially,
             // all futures are out of scope.)
-            if (1 == counter)
+            if (1 == counter && naming::detail::has_credits(this->gid_))
             {
                 HPX_ASSERT(event_id.get_gid() != naming::invalid_gid);
+                naming::gid_type gid = this->gid_;
+                naming::detail::strip_credits_from_gid(this->gid_);
+                naming::id_type id(gid, id_type::managed);
 
                 l.unlock();
 
@@ -200,11 +203,8 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
 
                 return false;
             }
-            else if (0 == counter)
-            {
-                return true;
-            }
-            return false;
+
+            return 0 == counter;
         }
 
     };
@@ -329,9 +329,12 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             // special case: counter == 1. (meaning: agas is the only one
             // still holding a reference to this object. especially,
             // all futures are out of scope.)
-            if (1 == counter)
+            if (1 == counter && naming::detail::has_credits(this->gid_))
             {
                 HPX_ASSERT(event_id.get_gid() != naming::invalid_gid);
+                naming::gid_type gid = this->gid_;
+                naming::detail::strip_credits_from_gid(this->gid_);
+                naming::id_type id(gid, id_type::managed);
 
                 l.unlock();
 

@@ -13,14 +13,16 @@
 namespace hpx {
 namespace cuda {
 
-/** \brief This class represents a specific CUDA program containing the CUDA kernel.
+/** \brief This class represents a specific CUDA program containing the
+ * CUDA kernel.
  *
- * This class manage the execution of a specific CUDA kernel. It is possible to use
- * pre-compiled CUDA kernels or provide small CUDA kernels and compile them on run time.
+ * This class manage the execution of a specific CUDA kernel. The CUDA kernel
+ * is compiled on run time with the nvrtc library.
  *
- * A program contain one default cudaStream where the kernel are attached to, if there
- * is no stream defined. For multi streaming applications new streams can be created within
- * a program. The kernel related to this program are pinned to this streams.
+ * A program contain one default cudaStream where the kernel are attached to,
+ * if there is no stream defined. For multi-streaming applications new
+ * streams can be created within a program. The kernel related to
+ * this program are pinned to this streams.
  *
  */
 
@@ -40,56 +42,56 @@ public:
 	 *
 	 * This methods uses the nvrtc library to compile the CUDA source code. You
 	 * should use this method only for compiling small CUDA kernels for testing
-	 * or for only accelerating small parts of your existing code. For more sophisticated
-	 * CUDA application you should use the pre-complied method.
+	 * or for only accelerating small parts of your existing code.
 	 *
-	 * \param compilerFlags A list with all compiler flags passed to the nvcc compiler
+	 * \param compilerFlags A list with all compiler flags passed to
+	 *	the nvcc compiler
 	 * \param modulename Name of the kernel, which to be compiled
 	 * \param debug Compile with debug flags
 	 *
-	 * \note It is not possible to use include headers, compiling the kernel with nvrtc
-	 * \note Compiling a program in debug modus adds -G and -lineinfo to the nvcc compiler
-	 * 	flags
+	 * \note It is not possible to use included headers.
+	 * \note Compiling a program in debug modus adds -G and
+	 * 	-lineinfo to the nvcc compiler flags
 	 *
 	 */
 
-	hpx::lcos::future<void> build(std::vector<std::string> compilerFlags,std::vector<std::string> modulenames,
-			unsigned int debug = 0) {
+	hpx::lcos::future<void> build(std::vector<std::string> compilerFlags,
+			std::vector<std::string> modulenames, unsigned int debug = 0) {
 		HPX_ASSERT(this->get_gid());
 		typedef server::program::build_action action_type;
-		return hpx::async<action_type>(this->get_gid(), compilerFlags, modulenames, debug);
+		return hpx::async<action_type>(this->get_gid(), compilerFlags,
+				modulenames, debug);
 	}
 
 	/**
 	 * \brief Synchronous compilation of the source code
 	 */
 
-	void build_sync(std::vector<std::string> compilerFlags, std::string modulename, unsigned int debug =
-			0) {
+	void build_sync(std::vector<std::string> compilerFlags,
+			std::string modulename, unsigned int debug = 0) {
 		std::vector<std::string> modulenames;
 		modulenames.push_back(modulename);
 		build(compilerFlags, modulenames, debug).get();
 	}
 
-	hpx::lcos::future<void> build(std::vector<std::string> compilerFlags, std::string modulename,
-			unsigned int debug = 0) {
+	hpx::lcos::future<void> build(std::vector<std::string> compilerFlags,
+			std::string modulename, unsigned int debug = 0) {
 		HPX_ASSERT(this->get_gid());
 		std::vector<std::string> modulenames;
 		modulenames.push_back(modulename);
 		typedef server::program::build_action action_type;
-		return hpx::async<action_type>(this->get_gid(), compilerFlags, modulenames, debug);
+		return hpx::async<action_type>(this->get_gid(), compilerFlags,
+				modulenames, debug);
 	}
-
 
 	/**
 	 * \brief Synchronous compilation of the source code
 	 */
 
-	void build_sync(std::vector<std::string> compilerFlags, std::vector<std::string> modulenames, unsigned int debug =
-			0) {
+	void build_sync(std::vector<std::string> compilerFlags,
+			std::vector<std::string> modulenames, unsigned int debug = 0) {
 		build(compilerFlags, modulenames, debug).get();
 	}
-
 
 	/**
 	 * \brief Synchronous setting source code
@@ -109,15 +111,15 @@ public:
 	 * \param block The dimensions of the block size
 	 * \param stream The stream at which the kernel is attached to
 	 *
-	 * \note Each program has a default stream, which is not the same as the default stream
-	 * 	of the CUDA API. Not setting the last parameter implies that the kernel is executed
-	 * 	on the default stream of this program.
+	 * \note Each program has a default stream, which is not the same as the
+	 * 	default stream of the CUDA API. Not setting the last parameter
+	 * 	implies that the kernel is executed on the default stream
+	 * 	of this program.
 	 */
 
 	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
 			std::string modulename, hpx::cuda::server::program::Dim3 grid,
-			hpx::cuda::server::program::Dim3 block,
-			int stream = -1) {
+			hpx::cuda::server::program::Dim3 block, int stream = -1) {
 
 		HPX_ASSERT(this->get_gid());
 
@@ -132,7 +134,7 @@ public:
 
 		typedef server::program::run_action action_type;
 		return hpx::async<action_type>(this->get_gid(), args_id, modulename,
-				grid, block,dependencies, stream);
+				grid, block, dependencies, stream);
 
 	}
 
@@ -146,15 +148,15 @@ public:
 	 * \param dependencies The data, the kernel execution depends on
 	 * \param stream The stream at which the kernel is attached to
 	 *
-	 * \note Each program has a default stream, which is not the same as the default stream
-	 * 	of the CUDA API. Not setting the last parameter implies that the kernel is executed
-	 * 	on the default stream of this program.
+	 * \note Each program has a default stream, which is not the same
+	 * 	as the default stream of the CUDA API. Not setting the last parameter
+	 * 	implies that the kernel is executed on the default stream.
 	 */
 
 	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
 			std::string modulename, hpx::cuda::server::program::Dim3 grid,
-			hpx::cuda::server::program::Dim3 block, std::vector<hpx::cuda::buffer> dependencies,
-			int stream = -1) {
+			hpx::cuda::server::program::Dim3 block,
+			std::vector<hpx::cuda::buffer> dependencies, int stream = -1) {
 
 		HPX_ASSERT(this->get_gid());
 
@@ -167,7 +169,7 @@ public:
 
 		std::vector<hpx::naming::id_type> dependencies_id;
 
-		for(unsigned int i = 0; i < dependencies.size();i++){
+		for (unsigned int i = 0; i < dependencies.size(); i++) {
 
 			dependencies_id.push_back(dependencies[i].get_id());
 		}
@@ -180,11 +182,10 @@ public:
 
 	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
 			std::string modulename, hpx::cuda::server::program::Dim3 grid,
-			hpx::cuda::server::program::Dim3 block, hpx::cuda::buffer dependency,
-			int stream = -1) {
+			hpx::cuda::server::program::Dim3 block,
+			hpx::cuda::buffer dependency, int stream = -1) {
 
 		HPX_ASSERT(this->get_gid());
-
 
 		std::vector<hpx::naming::id_type> args_id;
 
@@ -201,7 +202,6 @@ public:
 				grid, block, dependencies_id, stream);
 
 	}
-
 
 	/**
 	 * \brief This method returns the number of streams at this device

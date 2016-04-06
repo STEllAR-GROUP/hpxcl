@@ -1,9 +1,12 @@
 # Copyright (c)       2014 Martin Stumpf
-#
+#					  2016 Patrick Diehl
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #hpx_write_boostbook_catalog(${CMAKE_CURRENT_BINARY_DIR}/boostbook_catalog.xml)
+
+find_package(XSLTPROC)
+find_package(Doxygen)
 
 file(GLOB base_files ${hpxcl_SOURCE_DIR}/docs/*.qbk)
 file(GLOB_RECURSE manual_files ${hpxcl_SOURCE_DIR}/docs/manual/*.qbk)
@@ -14,31 +17,38 @@ set(documentation_files
     ${manual_files} ${tutorial_files} ${base_files} ${index_files})
 
 set(documentation_dependencies
-    ${hpxcl_SOURCE_DIR}/examples/opencl/hello_world.cpp)
+    ${hpxcl_SOURCE_DIR}/examples/opencl/hello_world.cpp
+    ${hpxcl_SOURCE_DIR}/examples/cuda/streams.cpp
+    ${hpxcl_SOURCE_DIR}/examples/cuda/cuda_list_devices.cpp
+    ${hpxcl_SOURCE_DIR}/examples/cuda/cuda_list_extended_devices.cpp 
+    ${hpxcl_SOURCE_DIR}/examples/cuda/build_kernel.cpp
+    ${hpxcl_SOURCE_DIR}/examples/cuda/build_kernel_from_file.cpp
+    )
 
 set(all_documentation_dependencies
     ${documentation_files}
     ${documentation_dependencies})
 
 # Add all files here which should be passed to doxygen
-if(HPXCL_WITH_OPENCL)
+
 set(doxygen_opencl 
 	${hpxcl_SOURCE_DIR}/opencl/buffer.hpp
     ${hpxcl_SOURCE_DIR}/opencl/device.hpp
     ${hpxcl_SOURCE_DIR}/opencl/kernel.hpp
     ${hpxcl_SOURCE_DIR}/opencl/event.hpp
-    ${hpxcl_SOURCE_DIR}/opencl/program.hpp)
-endif()
+    ${hpxcl_SOURCE_DIR}/opencl/program.hpp
+    ${hpxcl_SOURCE_DIR}/hpxcl/opencl.hpp)
 
-if(HPXCL_WITH_CUDA)
+
+
 set(doxygen_cuda 
 	${hpxcl_SOURCE_DIR}/cuda/buffer.hpp
     ${hpxcl_SOURCE_DIR}/cuda/device.hpp
-    ${hpxcl_SOURCE_DIR}/cuda/kernel.hpp
-    ${hpxcl_SOURCE_DIR}/cuda/program.hpp)
-endif()
+    ${hpxcl_SOURCE_DIR}/cuda/get_devices.hpp
+    ${hpxcl_SOURCE_DIR}/cuda/program.hpp
+    ${hpxcl_SOURCE_DIR}/hpxcl/cuda.hpp)
 
-set(doxygen_dependencies doxygen_opencl doxygen_cuda)
+set(doxygen_dependencies ${doxygen_opencl} ${doxygen_cuda})
 
 foreach(doxygen_input ${doxygen_dependencies})
   set(doxygen_inputs "${doxygen_inputs} ${doxygen_input}")
@@ -73,7 +83,7 @@ endforeach()
 
 hpx_info("doxygen" "Creating ${CMAKE_CURRENT_BINARY_DIR}/hpx_autodoc.doxy")
 
-configure_file(${HPX_PREFIX}/../cmake/templates/autodoc.doxy.in
+configure_file(${PROJECT_SOURCE_DIR}/docs/autodoc.doxy.in
                 ${CMAKE_CURRENT_BINARY_DIR}/hpx_autodoc.doxy
                 @ONLY)
 

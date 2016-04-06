@@ -3,12 +3,20 @@ hpxcl
 
 This repository contains components that will support percolation via OpenCL and CUDA
 
-Build
-===
+The [documentation](http://stellar-group.github.io/hpxcl/docs/html/index.html) of the nightly build is available.
+
+In any case, if you happen to run into problems we very much encourage and appreciate
+any [issue](http://github.com/STEllAR-GROUP/hpxcl/issues) reports through the issue tracker for this Github project.
 
 The [CircleCI](https://circleci.com/gh/STEllAR-GROUP/hpxcl) contiguous
 integration service tracks the current build status for the master branch:
 ![HPXCL master branch build status](https://circleci.com/gh/STEllAR-GROUP/hpxcl/tree/master.svg?style=svg "")
+
+Build
+===
+
+- CMake >= 3.0
+- GCC >= 4.9 
 
 CUDA
 ==
@@ -30,6 +38,6 @@ cmake \
 
 - Build CUDA support: -HPXCL_WITH_CUDA=ON
 - Build OpenCL support: -HPCL_WITH_OPENCL=ON
-- Build examples: -DHPX_BUILD_EXAMPLES
-- Build benchmark: -DHPX_BUILD_BENCHMARK=ON  
+- Build examples: -DHPXCL_BUILD_EXAMPLES
+- Build benchmark: -DHPXCL_BUILD_BENCHMARK=ON  
 - Build documentation: -DHPX_BUILD_DOCUMENTATION=ON

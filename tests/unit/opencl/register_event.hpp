@@ -7,7 +7,7 @@
 #include <hpx/config.hpp>
 #include <hpx/hpx.hpp>
 
-#include "../../../opencl.hpp"
+#include <hpxcl/opencl.hpp>
 
 #include "../../../opencl/lcos/event.hpp"
 #include "../../../opencl/server/device.hpp"

@@ -18,14 +18,16 @@
 namespace hpx { namespace cuda
 {
 
-/** \brief Handles the error checking for CUDA functions calls and kernel executions
+/** \brief Handles the error checking for CUDA functions calls
+ *	and kernel executions
  *
- * This method checks if there is a cudaGetLastError and passes the error found inside CUDA
- * to and raises a hpx exception with the cudaError code and the cudaErrorMessage.
+ * This method checks if there is a cudaGetLastError and passes
+ * the error found inside CUDA to and raises a hpx exception with the
+ * cudaError code and the cudaErrorMessage.
  *
- * Inside of the hpx CUDA component this method is called after each CUDA related function.
- * In the raised error the class and the function where the CUDA error was raised is given
- * as an additional information.
+ * Inside of the hpx CUDA component this method is called after each CUDA
+ * related function. In the raised error the class and the function where
+ * the CUDA error was raised is givenas an additional information.
  *
  * \@param function_name name of the related cuda function or kernel execution
  *
