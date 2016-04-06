@@ -13,6 +13,11 @@
 namespace hpx {
 namespace cuda {
 
+/**
+* \brief Device memory.
+* 
+* Every buffer belongs to one \ref device.
+*/
 class buffer: public hpx::components::client_base<buffer, cuda::server::buffer> {
 	typedef hpx::components::client_base<buffer, cuda::server::buffer> base_type;
 

@@ -25,7 +25,6 @@ namespace cuda {
  * this program are pinned to this streams.
  *
  */
-
 class program: public hpx::components::client_base<program, server::program> {
 	typedef hpx::components::client_base<program, server::program> base_type;
 

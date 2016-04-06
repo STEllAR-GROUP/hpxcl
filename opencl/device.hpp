@@ -28,7 +28,7 @@ namespace hpx {
 namespace opencl {
 
     /////////////////////////////////////////
-    /// @brief An accelerator device.
+    /// @brief An OpenCL accelerator device.
     ///
     class HPX_OPENCL_EXPORT device
       : public hpx::components::client_base<device, server::device>

@@ -15,6 +15,9 @@
 namespace hpx {
 namespace cuda {
 
+/**
+* \brief An CUDA accelerator device.
+*/
 class device: public hpx::components::client_base<device, cuda::server::device> {
 	typedef hpx::components::client_base<device, cuda::server::device> base_type;
 
