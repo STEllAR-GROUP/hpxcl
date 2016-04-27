@@ -6,6 +6,7 @@
 //#include <hpx/hpx_start.hpp>
 #include <hpx/include/iostreams.hpp>
 #include <hpx/lcos/future.hpp>
+#include <hpx/hpx_main.hpp>
 
 #include <hpxcl/cuda.hpp>
 #include <sstream>
