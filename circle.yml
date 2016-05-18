@@ -1,0 +1,32 @@
+#  Copyright (c) 2015  Martin Stumpf
+#		 2016  Patrick Diehl
+#
+#  Distributed under the Boost Software License, Version 1.0. (See accompanying
+#  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+machine:
+    services:
+        - docker
+    environment:
+        IMAGE_NAME: stellargroup/hpxcl:build_env
+
+general:
+    branches:
+        ignore:
+            - gh-pages
+
+dependencies:
+    pre:
+        - docker build -t $IMAGE_NAME tools/docker:
+            timeout: 1200
+        - mkdir -p build
+
+    override:
+        - docker run -v $PWD:/hpx -w /hpx/build -e "CIRCLECI=true" ${IMAGE_NAME} cmake .. -DCMAKE_BUILD_TYPE=Debug -DHPX_WITH_MALLOC=system -DCMAKE_CXX_FLAGS="-fcolor-diagnostics" -DHPXCL_WITH_OPENCL=ON -DHPXCL_WITH_CUDA=ON -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-7.0 -DHPXCL_WITH_DOCUMENTATION=ON
+        - docker run -v $PWD:/hpx -w /hpx/build ${IMAGE_NAME} make -j2
+        - docker run -v $PWD:/hpx -w /hpx/build ${IMAGE_NAME} make documentation
+
+test:
+    override:
+        - docker run -v $PWD:/hpx -w /hpx/build ${IMAGE_NAME} ../tools/run_tests.sh
+

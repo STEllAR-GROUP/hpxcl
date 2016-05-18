@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Mandelbrot</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script>
+
+        var map;
+        var mandelbrotTypeOptions = {
+          getTileUrl: function(coord, zoom) {
+                return zoom + "/" + coord.x + "/" +
+                  coord.y + ".png";
+          },
+          tileSize: new google.maps.Size(256, 256),
+          maxZoom: 60,
+          minZoom: 0,
+          name: "Mandelbrot"
+        };
+
+        var mandelbrotMapType = new google.maps.ImageMapType(mandelbrotTypeOptions);
+
+        function initialize() {
+          var myLatlng = new google.maps.LatLng(0, 0);
+          var mapOptions = {
+            center: myLatlng,
+            zoom: 1,
+            streetViewControl: false,
+            mapTypeControlOptions: {
+              mapTypeIds: ["mandelbrot"]
+            }
+          };
+
+          map = new google.maps.Map(document.getElementById("map-canvas"),
+              mapOptions);
+          map.mapTypes.set('mandelbrot', mandelbrotMapType);
+          map.setMapTypeId('mandelbrot');
+        }
+        google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+  </head>
+  <body>
+    <div id="map-canvas"></div>
+  </body>
+</html>
+
