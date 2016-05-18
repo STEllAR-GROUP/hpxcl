@@ -26,7 +26,8 @@ event_map::add(const hpx::naming::id_type & gid, cl_event event){
 
     {
         // Lock
-        lock_type::scoped_lock l(lock);
+        //lock_type::scoped_lock l(lock);
+    	 boost::mutex::scoped_lock lock(this->m);
         
         // Insert
         events.insert(map_type::value_type(key, event));
@@ -59,7 +60,8 @@ event_map::get(const hpx::naming::gid_type& key){
         map_type::iterator it;
 
         // Lock
-        lock_type::scoped_lock l(lock);
+        //lock_type::scoped_lock l(lock);
+        boost::mutex::scoped_lock lock(this->m);
         
         // Try to retrieve
         it = events.find(key);
@@ -79,7 +81,8 @@ event_map::get(const hpx::naming::gid_type& key){
         map_type::iterator it;
 
         // Lock
-        lock_type::scoped_lock l(lock);
+        //lock_type::scoped_lock l(lock);
+        boost::mutex::scoped_lock lock(this->m);
         
         // Try to retrieve
         it = events.find(key);
@@ -97,7 +100,7 @@ event_map::get(const hpx::naming::gid_type& key){
             = inserted_condvar.first->second;
 
         // Wait for some other thread to add() the missing key
-        condition->wait(l);
+        //condition->wait(l);
 
         // This should now definitely return the requested item.
         it = events.find(key);
@@ -116,8 +119,9 @@ event_map::remove(const hpx::naming::gid_type &gid)
     cl_event event;
     {
         // Lock
-        lock_type::scoped_lock l(lock);
-    
+        //lock_type::scoped_lock l(lock);
+    	boost::mutex::scoped_lock lock(this->m);
+
         // Find Element
         auto it = events.find(gid);
         HPX_ASSERT(it != events.end());
@@ -131,7 +135,8 @@ event_map::remove(const hpx::naming::gid_type &gid)
 
     {
         // Lock
-        lock_type::scoped_lock l(lock);
+        //lock_type::scoped_lock l(lock);
+    	boost::mutex::scoped_lock lock(this->m);
     
         // Remove element
         events.erase(gid);

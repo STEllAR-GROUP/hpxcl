@@ -165,7 +165,7 @@ hpx::opencl::server::create_devices(cl_device_type device_type,
                             hpx::find_here()));
 
             // Initialize device server locally
-            boost::shared_ptr<hpx::opencl::server::device> device_server =
+            std::shared_ptr<hpx::opencl::server::device> device_server =
                                  hpx::get_ptr<hpx::opencl::server::device>
                                                 (device_client.get_id()).get();
             device_server->init(device);

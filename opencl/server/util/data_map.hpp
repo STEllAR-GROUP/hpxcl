@@ -76,7 +76,7 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
 
             {
                 // Lock the map
-            	std::unique_lock<std::mutex> l(lock);
+            	 boost::mutex::scoped_lock lock(this->m);
 
                 // Insert the data into the map
                 map.insert(std::move(
@@ -105,7 +105,8 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         map_type map;
 
         // Lock for synchronization
-        lock_type lock;
+        boost::mutex m;
+
 
     };
 }}}}

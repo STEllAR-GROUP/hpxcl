@@ -142,7 +142,7 @@ namespace hpx { namespace opencl{ namespace server{
                     std::vector<hpx::naming::id_type> && dst_dependencies );
         void send_direct(
                     hpx::naming::id_type && dst,
-                    boost::shared_ptr<hpx::opencl::server::buffer> && dst_buffer,
+                    std::shared_ptr<hpx::opencl::server::buffer> && dst_buffer,
                     hpx::naming::id_type && src_event,
                     hpx::naming::id_type && dst_event,
                     std::size_t src_offset,
@@ -159,7 +159,7 @@ namespace hpx { namespace opencl{ namespace server{
                     std::vector<hpx::naming::id_type> && dst_dependencies );
         void send_rect_direct(
                     hpx::naming::id_type && dst,
-                    boost::shared_ptr<hpx::opencl::server::buffer> && dst_buffer,
+                    std::shared_ptr<hpx::opencl::server::buffer> && dst_buffer,
                     hpx::naming::id_type && src_event,
                     hpx::naming::id_type && dst_event,
                     rect_props && rect_properties,
@@ -241,7 +241,7 @@ namespace hpx { namespace opencl{ namespace server{
         //  Private Member Variables
         //
     private:
-        boost::shared_ptr<device> parent_device;
+        std::shared_ptr<device> parent_device;
         cl_mem device_mem;
         hpx::naming::id_type parent_device_id;
 

@@ -72,7 +72,8 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         waitmap_type waits;
 
         // Lock for synchronization
-        lock_type lock;
+        //lock_type lock;
+        boost::mutex m;
 
         // Callback function for cl_event cleanup
         std::function<void(cl_event)> deletion_callback;

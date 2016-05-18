@@ -10,10 +10,12 @@
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
-#include <hpx/lcos/promise.hpp>
+//#include <hpx/lcos/promise.hpp>
 
 #include "../export_definitions.hpp"
 #include "zerocopy_buffer.hpp"
+
+#include <boost/detail/atomic_count.hpp>
 
 namespace hpx { namespace opencl { namespace lcos
 {
@@ -571,10 +573,10 @@ namespace hpx { namespace opencl { namespace lcos
 ///////////////////////////////////////////////////////////////////////////////
 namespace hpx { namespace traits
 {
-    namespace detail
-    {
-        HPX_EXPORT extern boost::detail::atomic_count unique_type;
-    }
+   // namespace detail
+    //{
+      //  HPX_EXPORT extern boost::detail::atomic_count unique_type;
+    //}
 
     template <typename Result, typename RemoteResult>
     struct component_type_database<

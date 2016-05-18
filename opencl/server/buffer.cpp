@@ -203,7 +203,7 @@ buffer::send_bruteforce( hpx::naming::id_type && dst,
 
 void
 buffer::send_direct( hpx::naming::id_type && dst,
-                     boost::shared_ptr<hpx::opencl::server::buffer> && dst_buffer,
+                     std::shared_ptr<hpx::opencl::server::buffer> && dst_buffer,
                      hpx::naming::id_type && src_event_gid,
                      hpx::naming::id_type && dst_event_gid,
                      std::size_t src_offset,
@@ -341,7 +341,7 @@ buffer::send_rect_bruteforce( hpx::naming::id_type && dst,
 
 void
 buffer::send_rect_direct( hpx::naming::id_type && dst,
-                          boost::shared_ptr<hpx::opencl::server::buffer> &&
+                          std::shared_ptr<hpx::opencl::server::buffer> &&
                               dst_buffer,
                           hpx::naming::id_type && src_event_gid,
                           hpx::naming::id_type && dst_event_gid,

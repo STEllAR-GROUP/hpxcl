@@ -75,7 +75,7 @@ namespace hpx { namespace opencl{ namespace server{
         //  Private Member Variables
         //
     private:
-        boost::shared_ptr<device> parent_device;
+        std::shared_ptr<device> parent_device;
         cl_program program_id;
         hpx::naming::id_type parent_device_id;
 
