@@ -9,7 +9,6 @@
 
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
-
 #include "../../cl_headers.hpp"
 
 ////////////////////////////////////////////////////////////////
@@ -77,7 +76,7 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
 
             {
                 // Lock the map
-                lock_type::scoped_lock l(lock);
+            	std::unique_lock<std::mutex> l(lock);
 
                 // Insert the data into the map
                 map.insert(std::move(
