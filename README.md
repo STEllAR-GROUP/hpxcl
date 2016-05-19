@@ -52,8 +52,8 @@ cmake \
 Options
 ==
 
-- Build CUDA support: -HPXCL_WITH_CUDA=ON
-- Build OpenCL support: -HPCL_WITH_OPENCL=ON
-- Build examples: -DHPXCL_BUILD_EXAMPLES
-- Build benchmark: -DHPXCL_BUILD_BENCHMARK=ON  
-- Build documentation: -DHPX_BUILD_DOCUMENTATION=ON
+- Build CUDA support: -HPXCL_WITH_CUDA (Default=Off)
+- Build OpenCL support: -HPCL_WITH_OPENCL (Default=Off)
+- Build examples: -DHPXCL_BUILD_EXAMPLES (Default=Off)
+- Build benchmark: -DHPXCL_BUILD_BENCHMARK (Default=Off)
+- Build documentation: -DHPX_BUILD_DOCUMENTATION (Defaut=Off)
