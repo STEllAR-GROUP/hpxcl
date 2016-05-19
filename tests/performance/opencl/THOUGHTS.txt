@@ -1,1 +1,0 @@
-- asyncs-per-second, clEnqueues-per-second and kernel::enqueue's-per-second
