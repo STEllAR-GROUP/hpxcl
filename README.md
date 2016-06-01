@@ -38,22 +38,12 @@ cmake \
 OpenCl
 ==
 
-Prerequisites:
+The OpenCL support will not be further maintaned, but the code will be available. 
 
-- OpenCl >= 1.1
-
-Building:
-```
-mkdir build && cd build
-cmake \
--DHPX_ROOT=/home/diehl/opt/hpx/ \
--DHPXCL_WITH_OPENCL=ON 
-```
 Options
 ==
 
 - Build CUDA support: -HPXCL_WITH_CUDA (Default=Off)
-- Build OpenCL support: -HPCL_WITH_OPENCL (Default=Off)
 - Build examples: -DHPXCL_BUILD_EXAMPLES (Default=Off)
 - Build benchmark: -DHPXCL_BUILD_BENCHMARK (Default=Off)
 - Build documentation: -DHPX_BUILD_DOCUMENTATION (Defaut=Off)
