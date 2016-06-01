@@ -70,7 +70,7 @@ include(EmbedResources)
 hpx_option(HPXCL_BUILD_EXAMPLES BOOL "Build HPX examples (default: ON)" ON ADVANCED)
 hpx_option(HPXCL_BUILD_TESTS BOOL "Build HPX tests (default: ON)" ON ADVANCED)
 hpx_option(HPXCL_WITH_DOCUMENTATION BOOL "The HPX documentation toolchain is available (default OFF)." OFF)
-hpx_option(HPXCL_WITH_OPENCL BOOL "Builds the OPENCL part of HPXCL (default ON)." OFF)
+#hpx_option(HPXCL_WITH_OPENCL BOOL "Builds the OPENCL part of HPXCL (default ON)." OFF)
 hpx_option(HPXCL_WITH_CUDA BOOL "Builds the CUDA part of HPXCL (default OFF)." OFF)
 hpx_option(HPXCL_BUILD_BENCHMARK BOOL "Builds the benchmark (default OFF)." OFF)
 
@@ -81,13 +81,13 @@ endif()
 ########################################################################
 # further includes, depending on config
 #
-if(HPXCL_WITH_OPENCL)
-    find_package(OpenCL REQUIRED)
-    include_directories(${OPENCL_INCLUDE_DIRS})
+#if(HPXCL_WITH_OPENCL)
+#    find_package(OpenCL REQUIRED)
+#    include_directories(${OPENCL_INCLUDE_DIRS})
     #get_filename_component(PARENT_DIR ${OPENCL_LIBRARIES} OPENCL_LIBRARY_DIR)
     #link_directories(${OPENCL_LIBRARY_DIR})
     
-endif()
+#endif()
 
 if(HPXCL_WITH_CUDA)
     find_package(CUDA 7.0 REQUIRED)
@@ -96,12 +96,12 @@ if(HPXCL_WITH_CUDA)
 endif()
 
 #Only search for PNG lib, if HPXCL_WITH_OPENCL is build
-if(HPXCL_BUILD_EXAMPLES AND HPXCL_WITH_OPENCL)
-    find_package(PNG)
-    if(PNG_FOUND)
-        include_directories(${PNG_INCLUDE_DIRS})
-    endif()
-endif()
+#if(HPXCL_BUILD_EXAMPLES AND HPXCL_WITH_OPENCL)
+#    find_package(PNG)
+#    if(PNG_FOUND)
+#        include_directories(${PNG_INCLUDE_DIRS})
+#    endif()
+#endif()
 
 if(MSVC)
   hpx_add_compile_flag(-Ox CONFIGURATIONS Release LANGUAGES CXX C)
@@ -131,9 +131,9 @@ endif()
 #
 
 # build opencl
-if(HPXCL_WITH_OPENCL)
-    add_subdirectory(opencl)
-endif()
+#if(HPXCL_WITH_OPENCL)
+#    add_subdirectory(opencl)
+#endif()
 
 # build cuda
 if(HPXCL_WITH_CUDA)
