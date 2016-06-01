@@ -6,7 +6,7 @@
 
 FROM stellargroup/hpx:dev
 
-RUN apt-get update && apt-get install -y xsltproc                               \
+RUN apt-get clean && apt-get update && apt-get install -y xsltproc                               \
                                          doxygen
 
 #Installation of CUDA 7.0
