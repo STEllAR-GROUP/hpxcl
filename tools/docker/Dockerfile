@@ -5,7 +5,7 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 FROM stellargroup/hpx:dev
-
+Run rm -rf /var/lib/apt/lists/*
 RUN apt-get clean && apt-get update && apt-get install -y xsltproc                               \
                                          doxygen
 
