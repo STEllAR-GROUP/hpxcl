@@ -13,7 +13,7 @@
 template <typename T>
 class fifo
 {
-    
+
     typedef hpx::lcos::local::spinlock lock_type;
     typedef hpx::lcos::local::condition_variable cond_type;
 
@@ -36,7 +36,7 @@ private:
     cond_type     cond_var;
 
     volatile bool finished;
-    
+
 
 };
 
@@ -65,13 +65,13 @@ void fifo<T>::push(const T &item)
         HPX_THROW_EXCEPTION(hpx::invalid_status, "fifo::push()",
                             "fifo::finish() already called!");
     }
-    
+
     // push item
     queue.push(item);
 
     // signal waiting threads that new item is available
     cond_var.notify_one();
-    
+
 }
 
 template<typename T>
@@ -84,7 +84,7 @@ bool fifo<T>::pop(T* item)
     // wait for queue to not be empty
     while(queue.empty())
     {
-        
+
         // check wether fifo is already in finished state
         if(finished)
             return false;
@@ -102,7 +102,7 @@ bool fifo<T>::pop(T* item)
 
     // Return success
     return true;
-    
+
 }
 
 template<typename T>
@@ -117,20 +117,6 @@ void fifo<T>::finish()
     cond_var.notify_all();
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif
 

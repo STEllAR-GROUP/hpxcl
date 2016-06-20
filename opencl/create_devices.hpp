@@ -29,10 +29,8 @@ namespace hpx { namespace opencl{
      * @param node_id             The ID of the target node
      * @param device_type         The device type, according to OpenCL standard.
      *                            <BR>
-     *                            For further information, look at the official 
-     *                            <A HREF="http://www.khronos.org/registry/cl/sd
-     * k/1.2/docs/man/xhtml/clGetDeviceIDs.html">
-     *                            OpenCL Reference</A>.
+     *                            For further information, look at the official
+     * <A HREF="http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetDeviceIDs.html">OpenCL Reference</A>.
      * @param required_cl_version All devices that don't support this OpenCL
      *                            version will be ignored.<BR>
      *                            Version number must have the following format:
@@ -46,7 +44,7 @@ namespace hpx { namespace opencl{
                     std::string required_cl_version );
 
     /**
-     * @brief Fetches a list of all accelerator devices present in the current 
+     * @brief Fetches a list of all accelerator devices present in the current
      *        hpx environment.
      *
      * It is recommended to only use OpenCL Version >= 1.1.
@@ -55,10 +53,8 @@ namespace hpx { namespace opencl{
      *
      * @param device_type         The device type, according to OpenCL standard.
      *                            <BR>
-     *                            For further information, look at the official 
-     *                            <A HREF="http://www.khronos.org/registry/cl/sd
-     * k/1.2/docs/man/xhtml/clGetDeviceIDs.html">
-     *                            OpenCL Reference</A>.
+     *                            For further information, look at the official
+     * <A HREF="http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetDeviceIDs.html">OpenCL Reference</A>.
      * @param required_cl_version All devices that don't support this OpenCL
      *                            version will be ignored.<BR>
      *                            Version number must have the following format:
@@ -72,7 +68,7 @@ namespace hpx { namespace opencl{
                         std::string required_cl_version );
 
     /**
-     * @brief Fetches a list of local accelerator devices present in the current 
+     * @brief Fetches a list of local accelerator devices present in the current
      *        hpx environment.
      *
      * It is recommended to only use OpenCL Version >= 1.1.
@@ -81,10 +77,8 @@ namespace hpx { namespace opencl{
      *
      * @param device_type         The device type, according to OpenCL standard.
      *                            <BR>
-     *                            For further information, look at the official 
-     *                            <A HREF="http://www.khronos.org/registry/cl/sd
-     * k/1.2/docs/man/xhtml/clGetDeviceIDs.html">
-     *                            OpenCL Reference</A>.
+     *                            For further information, look at the official
+     * <A HREF="http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetDeviceIDs.html">OpenCL Reference</A>.
      * @param required_cl_version All devices that don't support this OpenCL
      *                            version will be ignored.<BR>
      *                            Version number must have the following format:
@@ -98,7 +92,7 @@ namespace hpx { namespace opencl{
                           std::string required_cl_version );
 
     /**
-     * @brief Fetches a list of remote accelerator devices present in the current 
+     * @brief Fetches a list of remote accelerator devices present in the current
      *        hpx environment.
      *
      * It is recommended to only use OpenCL Version >= 1.1.
@@ -107,10 +101,8 @@ namespace hpx { namespace opencl{
      *
      * @param device_type         The device type, according to OpenCL standard.
      *                            <BR>
-     *                            For further information, look at the official 
-     *                            <A HREF="http://www.khronos.org/registry/cl/sd
-     * k/1.2/docs/man/xhtml/clGetDeviceIDs.html">
-     *                            OpenCL Reference</A>.
+     *                            For further information, look at the official
+     * <A HREF="http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetDeviceIDs.html">OpenCL Reference</A>.
      * @param required_cl_version All devices that don't support this OpenCL
      *                            version will be ignored.<BR>
      *                            Version number must have the following format:

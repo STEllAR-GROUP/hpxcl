@@ -13,14 +13,15 @@
 #include "../cl_headers.hpp"
 
 #include "../fwd_declarations.hpp"
+#include "../device.hpp"
 
 ////////////////////////////////////////////////////////////////
-namespace hpx { namespace opencl{ namespace server{
+namespace hpx { namespace opencl { namespace server {
 
 
     // /////////////////////////////////////////////////////
     //  Global opencl functions
-    //  
+    //
 
     // Returns the IDs of all devices on current host
     std::vector<hpx::opencl::device>

@@ -49,7 +49,7 @@ kernel::~kernel()
 
     hpx::threads::executors::default_executor exec(
                                           hpx::threads::thread_priority_normal,
-                                          hpx::threads::thread_stacksize_large);
+                                          hpx::threads::thread_stacksize_medium);
 
     // run dectructor in a thread, as we need it to run on a large stack size
     hpx::async( exec, &kernel_cleanup, reinterpret_cast<uintptr_t>(kernel_id))
@@ -58,6 +58,10 @@ kernel::~kernel()
 
 }
 
+hpx::naming::id_type kernel::get_parent_device_id()
+{
+    return parent_device_id;
+}
 
 void
 kernel::init( hpx::naming::id_type device_id, cl_program program,

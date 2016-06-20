@@ -24,7 +24,7 @@
 #include "server/buffer.hpp"
 
 namespace hpx {
-namespace opencl { 
+namespace opencl {
 
     //////////////////////////////////////
     /// @brief Device memory.
@@ -34,7 +34,7 @@ namespace opencl {
     class HPX_OPENCL_EXPORT buffer
       : public hpx::components::client_base<buffer, server::buffer>
     {
-    
+
         typedef hpx::components::client_base<buffer, server::buffer> base_type;
 
         public:
@@ -53,7 +53,7 @@ namespace opencl {
 
         public:
             // Empty constructor, necessary for hpx purposes
-            buffer(){}
+            buffer() {}
 
             // Constructor
             buffer(hpx::shared_future<hpx::naming::id_type> const& gid,
@@ -64,13 +64,20 @@ namespace opencl {
                     (hpx::get_colocation_id_sync(get_id()) == hpx::find_here());
             }
 
+            buffer(hpx::future<hpx::naming::id_type> && gid)
+              : base_type(std::move(gid)), device_gid()
+            {
+                is_local =
+                    (hpx::get_colocation_id_sync(get_id()) == hpx::find_here());
+            }
+
             // initialization
-            
+
 
             // ///////////////////////////////////////////////
             // Exposed Component functionality
-            // 
- 
+            //
+
             /**
              *  @brief Get the size of the buffer
              *
@@ -174,9 +181,9 @@ namespace opencl {
              *  @param size         The size of the area to copy.
              *  @return             A future that can be used for synchronization
              *                      or dependency for other calls.
-             *                  
+             *
              *  @see event
-             */ 
+             */
             template<typename ...Deps>
             send_result enqueue_send( const hpx::opencl::buffer& dst,
                                       std::size_t         src_offset,
@@ -194,9 +201,9 @@ namespace opencl {
              *  @param rect_properties      Parameters of the rectangle to send.
              *  @return             A future that can be used for synchronization
              *                      or dependency for other calls.
-             *                  
+             *
              *  @see event
-             */ 
+             */
             template<typename ...Deps>
             send_result enqueue_send_rect( const hpx::opencl::buffer& dst,
                                            rect_props rect_properties,
@@ -223,6 +230,9 @@ namespace opencl {
             enqueue_send_rect_impl( const hpx::opencl::buffer& dst,
                                     rect_props && rect_properties,
                                     hpx::opencl::util::resolved_events && deps );
+
+            void ensure_device_id();
+
         private:
             hpx::naming::id_type device_gid;
             bool is_local;
@@ -243,6 +253,7 @@ namespace opencl {
             template <typename Archive>
             void save(Archive & ar, unsigned) const
             {
+                HPX_ASSERT(device_gid);
                 ar << hpx::serialization::base_object<base_type>(*this);
                 ar << device_gid;
             }
@@ -269,7 +280,7 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
     using hpx::opencl::util::enqueue_overloads::resolver;
     auto deps = resolver(std::forward<Deps>(dependencies)...);
     HPX_ASSERT(deps.are_from_device(device_gid));
-    
+
     // create local event
     using hpx::opencl::lcos::event;
     event<buffer_type> ev( device_gid, data );
@@ -361,7 +372,7 @@ hpx::opencl::buffer::enqueue_write( std::size_t offset,
     using hpx::opencl::util::enqueue_overloads::resolver;
     auto deps = resolver(std::forward<Deps>(dependencies)...);
     HPX_ASSERT(deps.are_from_device(device_gid));
-    
+
     // create local event
     using hpx::opencl::lcos::event;
     event<void> ev( device_gid );
@@ -373,7 +384,7 @@ hpx::opencl::buffer::enqueue_write( std::size_t offset,
                       offset,
                       data,
                       std::move(deps.event_ids) );
-                     
+
 
     // return future connected to event
     return ev.get_future();
@@ -381,7 +392,7 @@ hpx::opencl::buffer::enqueue_write( std::size_t offset,
 
 template<typename T, typename ...Deps>
 hpx::future<void>
-hpx::opencl::buffer::enqueue_write_rect( rect_props rect_properties, 
+hpx::opencl::buffer::enqueue_write_rect( rect_props rect_properties,
                     const hpx::serialization::serialize_buffer<T> data,
                     Deps &&... dependencies )
 {
@@ -389,7 +400,7 @@ hpx::opencl::buffer::enqueue_write_rect( rect_props rect_properties,
     using hpx::opencl::util::enqueue_overloads::resolver;
     auto deps = resolver(std::forward<Deps>(dependencies)...);
     HPX_ASSERT(deps.are_from_device(device_gid));
-    
+
     // create local event
     using hpx::opencl::lcos::event;
     event<void> ev( device_gid );
@@ -444,7 +455,7 @@ hpx::opencl::buffer::enqueue_send( const hpx::opencl::buffer& dst,
 template<typename ...Deps>
 hpx::opencl::buffer::send_result
 hpx::opencl::buffer::enqueue_send_rect( const hpx::opencl::buffer& dst,
-                                        rect_props rect_properties, 
+                                        rect_props rect_properties,
                                         Deps &&... dependencies )
 {
     // combine dependency futures in one std::vector

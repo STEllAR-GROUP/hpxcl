@@ -14,7 +14,7 @@
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{ namespace util{
-    
+
 
     ////////////////////////////////////////////////////////
     // This class is used for the mapping between gid's and cl_events.
@@ -22,7 +22,7 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
     class event_map
     {
         typedef hpx::lcos::local::spinlock lock_type;
-        typedef hpx::lcos::local::condition_variable condition_type;
+        typedef hpx::lcos::local::condition_variable_any condition_type;
 
     public:
         // Constructor

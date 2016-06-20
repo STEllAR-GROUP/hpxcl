@@ -33,7 +33,7 @@ namespace opencl {
     class HPX_OPENCL_EXPORT device
       : public hpx::components::client_base<device, server::device>
     {
-    
+
         typedef hpx::components::client_base<device, server::device> base_type;
 
         public:
@@ -42,10 +42,14 @@ namespace opencl {
             device(hpx::shared_future<hpx::naming::id_type> const& gid)
               : base_type(gid)
             {}
-            
+
+            device(hpx::future<hpx::naming::id_type> && gid)
+              : base_type(std::move(gid))
+            {}
+
             //////////////////////////////////////////
             // Exposed Component functionality
-            // 
+            //
 
             /**
              *  @brief Creates an OpenCL buffer.
@@ -61,9 +65,7 @@ namespace opencl {
              *                      .
              *                  and combinations of them.<BR>
              *                  For further information, read the official
-             *                  <A HREF="http://www.khronos.org/registry/cl/sdk/
-             * 1.2/docs/man/xhtml/clCreateBuffer.html">
-             *                  OpenCL Reference</A>.
+             * <A HREF="http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clCreateBuffer.html">OpenCL Reference</A>.
              *  @param size     The size of the buffer, in bytes.
              *  @return         A new \ref buffer object.
              *  @see            buffer
@@ -73,7 +75,7 @@ namespace opencl {
 
             /**
              *  @brief Creates an OpenCL program object
-             *  
+             *
              *  After creating a program object, one usually compiles the
              *  program an creates kernels from it.
              *
@@ -82,11 +84,11 @@ namespace opencl {
              *  @param source   The source code string for the program.
              *  @return         A program object associated with the calling
              *                  device.
-             */             
+             */
             hpx::opencl::program
             create_program_with_source(
                 const hpx::serialization::serialize_buffer<char> source) const;
-            
+
             /**
              *  @brief Creates an OpenCL program object from a prebuilt binary
              *
@@ -103,19 +105,17 @@ namespace opencl {
 
             /**
              *  @brief Queries device infos.
-             *  
+             *
              *         The template argument defines the type of information.
              *         A complete list can be found on the official
-             *         <A HREF="http://www.khronos.org/registry/cl/
-             * sdk/1.2/docs/man/xhtml/clGetDeviceInfo.html">
-             *                      OpenCL Reference</A>.
+             * <A HREF="http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetDeviceInfo.html">OpenCL Reference</A>.
              *  @return The requested information.
              */
             template<cl_device_info Name>
             hpx::future<typename detail::device_info<Name>::type>
             get_device_info() const {
 
-                hpx::opencl::util::generic_buffer data = 
+                hpx::opencl::util::generic_buffer data =
                     get_device_info_raw(Name);
 
                 return data.get<typename detail::device_info<Name>::type>();
@@ -124,19 +124,17 @@ namespace opencl {
 
             /**
              *  @brief Queries platform infos.
-             *  
+             *
              *         The template argument defines the type of information.
              *         A complete list can be found on the official
-             *         <A HREF="http://www.khronos.org/registry/cl/
-             * sdk/1.2/docs/man/xhtml/clGetPlatformInfo.html">
-             *                      OpenCL Reference</A>.
+             * <A HREF="http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetPlatformInfo.html">OpenCL Reference</A>.
              *  @return The requested information.
              */
             template<cl_platform_info Name>
             hpx::future<typename detail::platform_info<Name>::type>
             get_platform_info() const {
 
-                hpx::opencl::util::generic_buffer data = 
+                hpx::opencl::util::generic_buffer data =
                     get_platform_info_raw(Name);
 
                 return data.get<typename detail::platform_info<Name>::type>();
@@ -144,19 +142,17 @@ namespace opencl {
             }
 
         private:
-            
+
             //////////////////////////////////////////
             // Internal Component functionality
-            // 
+            //
 
             /**
              *  @brief Queries device infos.
-             *  
+             *
              *  @param info_type    The type of information.<BR>
              *                      A complete list can be found on the official
-             *                      <A HREF="http://www.khronos.org/registry/cl/
-             * sdk/1.2/docs/man/xhtml/clGetDeviceInfo.html">
-             *                      OpenCL Reference</A>.
+             * <A HREF="http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetDeviceInfo.html">OpenCL Reference</A>.
              *  @return The info data as \ref hpx::opencl::info.<BR>
              *          It can be cast to several datatypes.
              */
@@ -165,12 +161,10 @@ namespace opencl {
 
             /**
              *  @brief Queries platform infos.
-             *  
+             *
              *  @param info_type    The type of information.<BR>
              *                      A complete list can be found on the official
-             *                      <A HREF="http://www.khronos.org/registry/cl/
-             * sdk/1.2/docs/man/xhtml/clGetPlatformInfo.html">
-             *                      OpenCL Reference</A>.
+             * <A HREF="http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clGetPlatformInfo.html">OpenCL Reference</A>.
              *  @return The info data as \ref hpx::opencl::info.<BR>
              *          It can be cast to several datatypes.
              */
@@ -185,4 +179,4 @@ namespace opencl {
 
 #endif// HPX_OPENCL_DEVICE_HPP_
 
-            
+

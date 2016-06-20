@@ -43,6 +43,9 @@ namespace hpx { namespace opencl{ namespace server{
         /// Exposed functionality of this component
         ///
 
+        // Returns the parent device
+        hpx::naming::id_type get_parent_device_id();
+
         // Sets an argument of the kernel
         void set_arg(cl_uint arg_index, hpx::naming::id_type buffer);
 
@@ -51,8 +54,9 @@ namespace hpx { namespace opencl{ namespace server{
                       std::vector<std::size_t> size,
                       std::vector<hpx::naming::id_type> && dependencies );
 
-    HPX_DEFINE_COMPONENT_ACTION(kernel, set_arg);
-    HPX_DEFINE_COMPONENT_ACTION(kernel, enqueue);
+        HPX_DEFINE_COMPONENT_ACTION(kernel, get_parent_device_id);
+        HPX_DEFINE_COMPONENT_ACTION(kernel, set_arg);
+        HPX_DEFINE_COMPONENT_ACTION(kernel, enqueue);
 
         //////////////////////////////////////////////////
         // Private Member Functions
@@ -73,6 +77,7 @@ namespace hpx { namespace opencl{ namespace server{
 }}}
 
 //[opencl_management_registration_declarations
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(kernel, get_parent_device_id);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(kernel, set_arg);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(kernel, enqueue);
 //]

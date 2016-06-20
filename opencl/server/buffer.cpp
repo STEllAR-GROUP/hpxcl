@@ -48,7 +48,7 @@ buffer::~buffer()
 
     hpx::threads::executors::default_executor exec(
                                           hpx::threads::thread_priority_normal,
-                                          hpx::threads::thread_stacksize_large);
+                                          hpx::threads::thread_stacksize_medium);
 
     // run dectructor in a thread, as we need it to run on a large stack size
     hpx::async( exec, &buffer_cleanup, reinterpret_cast<uintptr_t>(device_mem))
@@ -57,6 +57,11 @@ buffer::~buffer()
 
 }
 
+// Returns the parent device
+hpx::naming::id_type buffer::get_parent_device_id()
+{
+    return parent_device_id;
+}
 
 void
 buffer::init( hpx::naming::id_type device_id, cl_mem_flags flags,
@@ -258,7 +263,7 @@ void
 buffer::send_rect_bruteforce( hpx::naming::id_type && dst,
                               hpx::naming::id_type && src_event_gid,
                               hpx::naming::id_type && dst_event_gid,
-                              rect_props && rect_properties,
+                              hpx::opencl::rect_props && rect_properties,
                               std::vector<hpx::naming::id_type> && src_dependencies,
                               std::vector<hpx::naming::id_type> && dst_dependencies)
 {
@@ -318,7 +323,7 @@ buffer::send_rect_bruteforce( hpx::naming::id_type && dst,
     // Write
     //
 
-    rect_props dst_rect_properties (
+    hpx::opencl::rect_props dst_rect_properties (
         0, 0, 0,
         rect_properties.dst_x,
         rect_properties.dst_y,
@@ -345,7 +350,7 @@ buffer::send_rect_direct( hpx::naming::id_type && dst,
                               dst_buffer,
                           hpx::naming::id_type && src_event_gid,
                           hpx::naming::id_type && dst_event_gid,
-                          rect_props && rect_properties,
+                          hpx::opencl::rect_props && rect_properties,
                           std::vector<hpx::naming::id_type> && src_dependencies,
                           std::vector<hpx::naming::id_type> && dst_dependencies)
 {
@@ -413,7 +418,7 @@ void
 buffer::enqueue_send_rect( hpx::naming::id_type dst,
                            hpx::naming::id_type && src_event,
                            hpx::naming::id_type && dst_event,
-                           rect_props rect_properties,
+                           hpx::opencl::rect_props rect_properties,
                            std::vector<hpx::naming::id_type> && dependencies,
                            std::vector<hpx::naming::gid_type> &&
                                 dependency_devices )

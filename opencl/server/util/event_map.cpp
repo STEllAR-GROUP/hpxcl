@@ -9,8 +9,8 @@
 
 using hpx::opencl::server::util::event_map;
 
-event_map::event_map(){
-
+event_map::event_map()
+{
 }
 
 event_map::~event_map(){
@@ -27,8 +27,8 @@ event_map::add(const hpx::naming::id_type & gid, cl_event event){
     {
         // Lock
         //lock_type::scoped_lock l(lock);
-    	 boost::mutex::scoped_lock lock(this->m);
-        
+        boost::mutex::scoped_lock lock(this->m);
+
         // Insert
         events.insert(map_type::value_type(key, event));
         HPX_ASSERT(events.at(key) == event);
@@ -62,10 +62,10 @@ event_map::get(const hpx::naming::gid_type& key){
         // Lock
         //lock_type::scoped_lock l(lock);
         boost::mutex::scoped_lock lock(this->m);
-        
+
         // Try to retrieve
         it = events.find(key);
-    
+
         // On success, return
         if(it != events.end()){
             result = it->second;
@@ -83,10 +83,10 @@ event_map::get(const hpx::naming::gid_type& key){
         // Lock
         //lock_type::scoped_lock l(lock);
         boost::mutex::scoped_lock lock(this->m);
-        
+
         // Try to retrieve
         it = events.find(key);
-    
+
         // On success, return
         if(it != events.end()){
             return it->second;
@@ -94,13 +94,13 @@ event_map::get(const hpx::naming::gid_type& key){
 
         // On failure, register condition variable (or retrieve existing one)
         auto inserted_condvar = waits.insert(std::move(waits_entry));
-        
+
         // Unwrap the condition variable
         std::shared_ptr<condition_type> condition
             = inserted_condvar.first->second;
 
         // Wait for some other thread to add() the missing key
-        //condition->wait(l);
+        condition->wait(l);
 
         // This should now definitely return the requested item.
         it = events.find(key);
@@ -112,7 +112,7 @@ event_map::get(const hpx::naming::gid_type& key){
 
 }
 
-void 
+void
 event_map::remove(const hpx::naming::gid_type &gid)
 {
 
@@ -137,7 +137,7 @@ event_map::remove(const hpx::naming::gid_type &gid)
         // Lock
         //lock_type::scoped_lock l(lock);
     	boost::mutex::scoped_lock lock(this->m);
-    
+
         // Remove element
         events.erase(gid);
     }

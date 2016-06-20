@@ -18,7 +18,7 @@
 #include "../workload.hpp"
 #include "../mandelbrotworker.hpp"
 
-/* 
+/*
  * this class is the main observer of the image generation.
  * it gets image queries, which it then splits into subimages and sends it to
  * the calculation queue.
@@ -49,14 +49,14 @@ class maps_image_generator
 
         // waits for the worker to finish
         void shutdown();
-        
+
         // adds a worker
         void add_worker(hpx::opencl::device & device,
                         size_t num_parallel_kernels);
 
         // waits for the worker to finish initialization
         void wait_for_startup_finished();
-        
+
     private:
         // the main worker function, runs the main work loop
         static void retrieve_worker_main(
@@ -65,7 +65,7 @@ class maps_image_generator
 
         // callback for mandelbrotworkers
         bool worker_request_new_work(boost::shared_ptr<workload>* new_work);
-        
+
         // callback for mandelbrotworkers
         void worker_deliver(boost::shared_ptr<workload>& done_work);
 
@@ -86,7 +86,7 @@ class maps_image_generator
         std::vector<boost::shared_ptr<mandelbrotworker>> workers;
 
         // the actual image data
-        typedef std::map<size_t, boost::shared_ptr<request>> 
+        typedef std::map<size_t, boost::shared_ptr<request>>
                     image_request_map;
         image_request_map          images;
         hpx::lcos::local::spinlock images_lock;
@@ -100,7 +100,7 @@ class maps_image_generator
         size_t img_size_hint_y;
 
         fifo<boost::shared_ptr<workload>> done_work_queue;
-                        
+
         boost::function<boost::shared_ptr<request>(void)> acquire_new_request;
 
         hpx::lcos::local::spinlock current_request_lock;

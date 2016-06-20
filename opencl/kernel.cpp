@@ -12,6 +12,18 @@
 
 using hpx::opencl::kernel;
 
+void kernel::ensure_device_id() const
+{
+    if (!device_gid)
+    {
+        typedef
+            hpx::opencl::server::kernel::get_parent_device_id_action
+            action_type;
+        HPX_ASSERT(this->get_id());
+        device_gid = async<action_type>(this->get_id()).get();
+    }
+}
+
 void
 kernel::set_arg(cl_uint arg_index, const hpx::opencl::buffer &arg) const
 {

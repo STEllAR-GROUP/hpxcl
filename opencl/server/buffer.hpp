@@ -257,15 +257,15 @@ HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, size);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_read);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_send);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_send_rect);
-HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer, enqueue_write);
-HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer, enqueue_write_rect);
-HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
+HPX_OPENCL_TEMPLATE_ACTION_USES_MEDIUM_STACK(buffer, enqueue_write);
+HPX_OPENCL_TEMPLATE_ACTION_USES_MEDIUM_STACK(buffer, enqueue_write_rect);
+HPX_OPENCL_TEMPLATE_ACTION_USES_MEDIUM_STACK(buffer,
                                             enqueue_read_to_userbuffer_local);
-HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
+HPX_OPENCL_TEMPLATE_ACTION_USES_MEDIUM_STACK(buffer,
                                             enqueue_read_to_userbuffer_remote);
-HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
+HPX_OPENCL_TEMPLATE_ACTION_USES_MEDIUM_STACK(buffer,
                                             enqueue_read_to_userbuffer_rect_local);
-HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
+HPX_OPENCL_TEMPLATE_ACTION_USES_MEDIUM_STACK(buffer,
                                             enqueue_read_to_userbuffer_rect_remote);
 //]
 
@@ -335,7 +335,7 @@ hpx::opencl::server::buffer::enqueue_write_rect(
 
     // retrieve the command queue
     cl_command_queue command_queue = parent_device->get_write_command_queue();
-    
+
     // prepare arguments for OpenCL call
     std::size_t host_origin[] = { rect_properties.src_x * sizeof(T),
                                   rect_properties.src_y,

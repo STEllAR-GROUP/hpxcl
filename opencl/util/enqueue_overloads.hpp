@@ -173,36 +173,35 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 
 }}}}
 
-
-//#define HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(return_value, name, ...)          \
-                                                                                \
-    return_value                                                                \
-    name##_impl(__VA_ARGS__, hpx::opencl::util::resolved_events &&);            \
-                                                                                \
-    /*                                                                          \
-     * This class  splits the arguments from the dependencies.                  \
-     * It will then create the solution id_type vector via recursive            \
-     * templates and call the function name_impl(args, deps).                   \
-     */                                                                         \
-    template<typename ...Nondeps>                                               \
-    class name##_caller{                                                        \
-        public:                                                                 \
-        template<typename C, typename ...Deps>                                  \
-        return_value operator()(C && c, Nondeps &&... nondeps,                  \
-                                                     Deps &&... deps)           \
-        {                                                                       \
-            using hpx::opencl::util::enqueue_overloads::resolver;               \
-            return c->name##_impl ( std::forward<Nondeps>(nondeps)...,          \
-                    std::move(resolver(std::forward<Deps>(deps)...)) );         \
-        }                                                                       \
-    };                                                                          \
-                                                                                \
-    template<typename ...Params>                                                \
-    return_value                                                                \
-    name (Params &&... params)                                                  \
-    {                                                                           \
-        return name##_caller<__VA_ARGS__>()(this, std::forward<Params>(params)...); \
-    }
+// #define HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(return_value, name, ...)          \
+//                                                                                 \
+//     return_value                                                                \
+//     name##_impl(__VA_ARGS__, hpx::opencl::util::resolved_events &&);            \
+//                                                                                 \
+//     /*                                                                          \
+//      * This class  splits the arguments from the dependencies.                  \
+//      * It will then create the solution id_type vector via recursive            \
+//      * templates and call the function name_impl(args, deps).                   \
+//      */                                                                         \
+//     template<typename ...Nondeps>                                               \
+//     class name##_caller{                                                        \
+//         public:                                                                 \
+//         template<typename C, typename ...Deps>                                  \
+//         return_value operator()(C && c, Nondeps &&... nondeps,                  \
+//                                                      Deps &&... deps)           \
+//         {                                                                       \
+//             using hpx::opencl::util::enqueue_overloads::resolver;               \
+//             return c->name##_impl ( std::forward<Nondeps>(nondeps)...,          \
+//                     std::move(resolver(std::forward<Deps>(deps)...)) );         \
+//         }                                                                       \
+//     };                                                                          \
+//                                                                                 \
+//     template<typename ...Params>                                                \
+//     return_value                                                                \
+//     name (Params &&... params)                                                  \
+//     {                                                                           \
+//         return name##_caller<__VA_ARGS__>()(this, std::forward<Params>(params)...); \
+//     }
 
 
 

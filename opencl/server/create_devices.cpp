@@ -25,7 +25,7 @@ static std::vector<int>
 parse_version_string(std::string version_str)
 {
 
-    try{
+    try {
 
         // Make sure the version string starts with "OpenCL "
         HPX_ASSERT(version_str.compare(0, 7, "OpenCL ") == 0);
@@ -75,7 +75,7 @@ hpx::opencl::server::create_devices(cl_device_type device_type,
                                     std::string min_cl_version)
 {
     HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
-    
+
     // Parse required OpenCL version
     std::vector<int> required_version = parse_version_string(min_cl_version);
 

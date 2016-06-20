@@ -65,7 +65,7 @@ device::~device()
 
     hpx::threads::executors::default_executor exec(
                                           hpx::threads::thread_priority_normal,
-                                          hpx::threads::thread_stacksize_large);
+                                          hpx::threads::thread_stacksize_medium);
 
     // run dectructor in a thread, as we need it to run on a large stack size
     hpx::async( exec, &device_cleanup, (uintptr_t)command_queue,
@@ -369,8 +369,6 @@ device::delete_event_data(cl_event event)
 {
 
     HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
-
-    cl_int err;
 
     // return if no data is registered
     if(!event_data_map.has_data(event))

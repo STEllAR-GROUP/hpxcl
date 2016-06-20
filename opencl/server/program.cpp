@@ -49,7 +49,7 @@ program::~program()
 
     hpx::threads::executors::default_executor exec(
                                           hpx::threads::thread_priority_normal,
-                                          hpx::threads::thread_stacksize_large);
+                                          hpx::threads::thread_stacksize_medium);
 
     // run dectructor in a thread, as we need it to run on a large stack size
     hpx::async( exec, &program_cleanup, reinterpret_cast<uintptr_t>(program_id))
@@ -58,6 +58,10 @@ program::~program()
 
 }
 
+hpx::naming::id_type program::get_parent_device_id()
+{
+    return parent_device_id;
+}
 
 void
 program::init_with_source( hpx::naming::id_type device_id,
