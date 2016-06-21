@@ -10,6 +10,8 @@
 
 #include <vector>
 #include <cmath>
+#include <memory>
+
 #include <CL/cl.h>
 
 
@@ -81,7 +83,7 @@ static cl_device_id directcl_choose_device()
         hpx::cout << i << ": " << platformName << " (" << platformVendor << ")"
                   << hpx::endl;
     }
-    
+
     // Lets you choose a platform
     cl_uint platform_num;
     hpx::cout << "Choose platform: " << hpx::endl;
@@ -125,7 +127,7 @@ static cl_device_id directcl_choose_device()
             hpx::cout << "    " << platformName << " (" << platformVendor << ")"
                       << hpx::endl;
         }
-    
+
         platform = current_platform;
         break;
 
@@ -154,7 +156,7 @@ static cl_device_id directcl_choose_device()
 
         hpx::cout << "    " << deviceName << hpx::endl;
     }
-    
+
     return devices[0];
 
 }
@@ -162,7 +164,7 @@ static cl_device_id directcl_choose_device()
 static void directcl_initialize(size_t vector_size)
 {
 
-    cl_device_id device_id = directcl_choose_device();    
+    cl_device_id device_id = directcl_choose_device();
 
     cl_int err;
 
@@ -238,7 +240,7 @@ static void directcl_initialize(size_t vector_size)
     err = clSetKernelArg(directcl_exp_kernel, 1,
                          sizeof(cl_mem), &directcl_buffer_b);
     directcl_check(err);
-    
+
     // set kernel args for add
     err = clSetKernelArg(directcl_add_kernel, 0,
                          sizeof(cl_mem), &directcl_buffer_n);
@@ -249,7 +251,7 @@ static void directcl_initialize(size_t vector_size)
     err = clSetKernelArg(directcl_add_kernel, 2,
                          sizeof(cl_mem), &directcl_buffer_m);
     directcl_check(err);
-    
+
     // set kernel args for dbl
     err = clSetKernelArg(directcl_dbl_kernel, 0,
                          sizeof(cl_mem), &directcl_buffer_o);
@@ -257,7 +259,7 @@ static void directcl_initialize(size_t vector_size)
     err = clSetKernelArg(directcl_dbl_kernel, 1,
                          sizeof(cl_mem), &directcl_buffer_c);
     directcl_check(err);
-    
+
     // set kernel args for mul
     err = clSetKernelArg(directcl_mul_kernel, 0,
                          sizeof(cl_mem), &directcl_buffer_p);
@@ -276,11 +278,11 @@ static void directcl_initialize(size_t vector_size)
     err = clSetKernelArg(directcl_log_kernel, 1,
                          sizeof(cl_mem), &directcl_buffer_p);
     directcl_check(err);
-    
+
 }
 
 
-static boost::shared_ptr<std::vector<float>>
+static std::shared_ptr<std::vector<float>>
 directcl_calculate(hpx::serialization::serialize_buffer<float> a,
                    hpx::serialization::serialize_buffer<float> b,
                    hpx::serialization::serialize_buffer<float> c,
@@ -291,7 +293,7 @@ directcl_calculate(hpx::serialization::serialize_buffer<float> a,
     // do nothing if matrices are wrong
     if(a.size() != b.size() || b.size() != c.size())
     {
-        return boost::shared_ptr<std::vector<float>>();
+        return std::shared_ptr<std::vector<float>>();
     }
 
     // initialize error test
@@ -311,7 +313,7 @@ directcl_calculate(hpx::serialization::serialize_buffer<float> a,
                                c.data(), 0, NULL, NULL);
     directcl_check(err);
 
-    
+
     // wait for writes to finish
     err = clFinish(directcl_command_queue);
     directcl_check(err);
@@ -349,7 +351,7 @@ directcl_calculate(hpx::serialization::serialize_buffer<float> a,
     *t_total = timer_stop();
 
     // allocate the result buffer
-    boost::shared_ptr<std::vector<float>> res(new std::vector<float>(a.size()));
+    std::shared_ptr<std::vector<float>> res(new std::vector<float>(a.size()));
 
     // read into result buffer
     err = clEnqueueReadBuffer(directcl_command_queue, directcl_buffer_z,

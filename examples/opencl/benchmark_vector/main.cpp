@@ -26,28 +26,28 @@ int hpx_main(int argc, char* argv[])
 
 
     {
-    
+
         ////////////////////////////////////////////
         // Initializes all matrices
         //
         size_t vector_size = std::stoul(argv[1]);
         hpx::cout << "Vector size: " << vector_size << std::endl;
-    
+
         hpx::cout << "Generating matrix A ..." << hpx::endl;
         auto a = generate_input_matrix(vector_size);
         hpx::cout << "Generating matrix B ..." << hpx::endl;
         auto b = generate_input_matrix(vector_size);
         hpx::cout << "Generating matrix C ..." << hpx::endl;
         auto c = generate_input_matrix(vector_size);
-        
+
         hpx::cout << "Calculating reference result on CPU ..." << hpx::endl;
         double time_cpu;
         auto z = calculate_result(a,b,c,&time_cpu);
         hpx::cout << "        ... " << time_cpu << " ms" << hpx::endl;
 
-        
+
         ////////////////////////////////////////////
-        // Direct OpenCL calculation 
+        // Direct OpenCL calculation
         //
         hpx::cout << hpx::endl;
         hpx::cout << "///////////////////////////////////////" << hpx::endl;
@@ -62,7 +62,7 @@ int hpx_main(int argc, char* argv[])
         double time_directcl_nonblock;
         double time_directcl_total;
         hpx::cout << "Running calculation ..." << hpx::endl;
-        boost::shared_ptr<std::vector<float>> z_directcl = 
+        std::shared_ptr<std::vector<float>> z_directcl =
                                     directcl_calculate(a, b, c,
                                                        &time_directcl_nonblock,
                                                        &time_directcl_total);
@@ -74,7 +74,7 @@ int hpx_main(int argc, char* argv[])
         // checks for correct result
         check_for_correct_result(z_directcl->data(), (*z_directcl).size(),
                                  z.data(), z.size());
-        
+
         // Prints the benchmark statistics
         hpx::cout << hpx::endl;
         hpx::cout << "    Nonblocking calls:       " << time_directcl_nonblock
@@ -112,7 +112,7 @@ int hpx_main(int argc, char* argv[])
         check_for_correct_result( z_hpxcl_local.data(),
                                   z_hpxcl_local.size(),
                                   z.data(), z.size());
-        
+
         // Prints the benchmark statistics
         hpx::cout << hpx::endl;
         hpx::cout << "    Nonblocking calls:       " << time_hpxcl_local_nonblock
@@ -130,7 +130,7 @@ int hpx_main(int argc, char* argv[])
         hpx::cout << "///////////////////////////////////////" << hpx::endl;
         hpx::cout << "// HPXCL remote" << hpx::endl;
         hpx::cout << "//" << hpx::endl;
-        
+
         // initializes
         hpx::cout << "Initializing ..." << hpx::endl;
         hpx::id_type remote_node = hpx_get_remote_node();
@@ -153,7 +153,7 @@ int hpx_main(int argc, char* argv[])
             check_for_correct_result( z_hpxcl_remote.data(),
                                       z_hpxcl_remote.size(),
                                       z.data(), z.size());
-            
+
             // Prints the benchmark statistics
             hpx::cout << hpx::endl;
             hpx::cout << "    Nonblocking calls:       " << time_hpxcl_remote_nonblock
@@ -183,7 +183,7 @@ int hpx_main(int argc, char* argv[])
     }
 
     hpx::cout << "Program finished." << hpx::endl;
-   
+
     // End the program
     return hpx::finalize();
 

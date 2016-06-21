@@ -5,7 +5,6 @@
 
 if(PNG_FOUND)
 
-
 set(sources_common
     pngwriter.cpp
     workload.cpp
@@ -32,18 +31,12 @@ set(resources_maps
 
 set(resources
     mandelbrotkernel.cl
-)    
-
-
+)
 
 embed_resources(SOURCES ${resources_maps} OUTPUT resources_maps_precompiled)
 embed_resources(SOURCES ${resources} OUTPUT resources_precompiled)
 
 source_group("Source Files" FILES ${sources_common} ${sources_main} ${sources_maps})
-
-
-
-
 
 # add example executable
 add_hpx_executable(mandelbrot
@@ -84,10 +77,8 @@ add_hpx_pseudo_dependencies(examples.opencl
 # add dependencies to pseudo-target
 add_hpx_pseudo_dependencies(examples.opencl.mandelbrot_maps
                             mandelbrot_maps_exe)
-							
-							
+
 target_link_libraries(mandelbrot_exe ${PNG_LIBRARIES})
 target_link_libraries(mandelbrot_maps_exe ${PNG_LIBRARIES})
 
-
-endif()
+endif(PNG_FOUND)

@@ -6,16 +6,18 @@
 #ifndef HPX_UTILS_LOCAL_FIFO_
 #define HPX_UTILS_LOCAL_FIFO_
 
-#include <queue>
 #include <hpx/lcos/local/spinlock.hpp>
 #include <hpx/lcos/local/condition_variable.hpp>
+
+#include <mutex>
+#include <queue>
 
 template <typename T>
 class fifo
 {
 
     typedef hpx::lcos::local::spinlock lock_type;
-    typedef hpx::lcos::local::condition_variable cond_type;
+    typedef hpx::lcos::local::condition_variable_any cond_type;
 
 public:
     // push an item to the queue
@@ -57,9 +59,9 @@ void fifo<T>::push(const T &item)
 {
 
     // lock class
-    boost::lock_guard<lock_type> locallock(lock);
+    std::unique_lock<lock_type> l(lock);
 
-    // check wether fifo is already in finished state
+    // check whether fifo is already in finished state
     if(finished)
     {
         HPX_THROW_EXCEPTION(hpx::invalid_status, "fifo::push()",
@@ -79,18 +81,18 @@ bool fifo<T>::pop(T* item)
 {
 
     // lock class
-    boost::lock_guard<lock_type> locallock(lock);
+    std::unique_lock<lock_type> l(lock);
 
     // wait for queue to not be empty
     while(queue.empty())
     {
 
-        // check wether fifo is already in finished state
+        // check whether fifo is already in finished state
         if(finished)
             return false;
 
         // wait for something to change
-        cond_var.wait(lock);
+        cond_var.wait(l);
 
     }
 
@@ -110,7 +112,7 @@ void fifo<T>::finish()
 {
 
     // lock class
-    boost::lock_guard<lock_type> locallock(lock);
+    std::unique_lock<lock_type> l(lock);
 
     finished = true;
 

@@ -8,7 +8,7 @@
 
 #include <hpxcl/opencl.hpp>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 #include <hpx/lcos/local/spinlock.hpp>
@@ -39,7 +39,7 @@ class maps_image_generator
                         size_t img_size_hint_y,
                         size_t num_parallel_kernels,
                         bool verbose,
-                        boost::function<boost::shared_ptr<request>(void)>
+                        boost::function<std::shared_ptr<request>(void)>
                             acquire_new_request,
                         std::vector<hpx::opencl::device> devices
                                 = std::vector<hpx::opencl::device>());
@@ -64,10 +64,10 @@ class maps_image_generator
            bool verbose);
 
         // callback for mandelbrotworkers
-        bool worker_request_new_work(boost::shared_ptr<workload>* new_work);
+        bool worker_request_new_work(std::shared_ptr<workload>* new_work);
 
         // callback for mandelbrotworkers
-        void worker_deliver(boost::shared_ptr<workload>& done_work);
+        void worker_deliver(std::shared_ptr<workload>& done_work);
 
         // queries a new image. true on success, false on error.
         bool get_new_image();
@@ -83,10 +83,10 @@ class maps_image_generator
     private:
         // for synchronization of workers and retrievers
         hpx::lcos::shared_future<void> retrievers_finished;
-        std::vector<boost::shared_ptr<mandelbrotworker>> workers;
+        std::vector<std::shared_ptr<mandelbrotworker>> workers;
 
         // the actual image data
-        typedef std::map<size_t, boost::shared_ptr<request>>
+        typedef std::map<size_t, std::shared_ptr<request>>
                     image_request_map;
         image_request_map          images;
         hpx::lcos::local::spinlock images_lock;
@@ -99,13 +99,13 @@ class maps_image_generator
         size_t img_size_hint_x;
         size_t img_size_hint_y;
 
-        fifo<boost::shared_ptr<workload>> done_work_queue;
+        fifo<std::shared_ptr<workload>> done_work_queue;
 
-        boost::function<boost::shared_ptr<request>(void)> acquire_new_request;
+        boost::function<std::shared_ptr<request>(void)> acquire_new_request;
 
         hpx::lcos::local::spinlock current_request_lock;
-        boost::shared_ptr<request> current_request;
-        hpx::lcos::local::condition_variable new_request_available;
+        std::shared_ptr<request> current_request;
+        hpx::lcos::local::condition_variable_any new_request_available;
         size_t current_request_id;
         size_t current_img_pos;
         double current_topleft_x;

@@ -16,14 +16,14 @@ requesthandler::requesthandler(size_t tilesize_x_,
                                     tilesize_y(tilesize_y_),
                                     lines_per_gpu(lines_per_gpu_)
 {
-    
-    
+
+
 }
 
 void
-requesthandler::submit_request(boost::shared_ptr<request> request)
+requesthandler::submit_request(std::shared_ptr<request> request)
 {
- 
+
     // Check if still valid
     if(!request->stillValid())
     {
@@ -38,23 +38,23 @@ requesthandler::submit_request(boost::shared_ptr<request> request)
     request->img_countdown = tilesize_y/lines_per_gpu;
 
     hpx::cout << "Request submitted: " << request->zoom << hpx::endl;
-      
-    // hand the request to an hpx thread    
+
+    // hand the request to an hpx thread
     new_requests.push(request);
-    
+
 }
 
-boost::shared_ptr<request>
+std::shared_ptr<request>
 requesthandler::query_request()
 {
 
-    boost::shared_ptr<request> ret;
+    std::shared_ptr<request> ret;
 
     // take a new request out of the queue
     while(true)
     {
         if(!new_requests.pop(&ret))
-            return boost::shared_ptr<request>(); 
+            return std::shared_ptr<request>();
         if(ret->stillValid())
         {
             return ret;

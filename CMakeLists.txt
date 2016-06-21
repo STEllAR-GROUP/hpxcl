@@ -113,11 +113,22 @@ if(MSVC)
   # VS2013 and above know how to do link time constant data segment folding
   # VS2013 update 2 and above know how to remove debug information for
   #     non-referenced functions and data (-Zc:inline)
-  if(MSVC12 OR MSVC13)
+  if(MSVC12 OR MSVC14)
     hpx_add_compile_flag(-Zc:inline)
     hpx_add_compile_flag(-Gw CONFIGURATIONS Release RelWithDebInfo MinSizeRelease)
     hpx_add_compile_flag(-Zo CONFIGURATIONS RelWithDebInfo)
   endif()
+
+  if(MSVC14)
+    # assume conforming (throwing) operator new implementations
+    hpx_add_target_compile_option(-Zc:throwingNew)
+
+    # enable faster linking (requires VS2015 Update1)
+    # disabled for now as this flag crashes debugger
+    # hpx_remove_link_flag(/debug CONFIGURATIONS Debug)
+    # hpx_add_link_flag(/debug:fastlink CONFIGURATIONS Debug)
+  endif()
+
   hpx_add_compile_flag(-EHsc)       # Exceptions
   hpx_add_compile_flag(-GR)         # Runtime type information
   hpx_add_compile_flag(-MP)         # Multiprocessor build
@@ -149,7 +160,8 @@ endif()
 
 if(HPXCL_WITH_DOCUMENTATION)
   include(HPX_Documentation)
-  hpx_option(HPX_BUILD_DOCUMENTATION_SINGLEPAGE BOOL "The HPX documentation should be build as a single page HTML (default OFF)." OFF)
+  hpx_option(HPX_BUILD_DOCUMENTATION_SINGLEPAGE BOOL
+    "The HPX documentation should be build as a single page HTML (default OFF)." OFF)
   add_subdirectory(docs)
 endif()
 
@@ -161,28 +173,29 @@ endif()
 
 ###############################################################################
 
-#if(HPXCL_BUILD_TESTS)
-#
-#  file(COPY ${HPX_ROOT}/bin/hpxrun.py DESTINATION ${PROJECT_BINARY_DIR}/bin)
-#
-#  hpx_option(HPXCL_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
-#  hpx_option(HPXCL_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
-#  hpx_option(HPXCL_BUILD_TESTS_UNIT BOOL "Build HPX unit tests (default: ON)" ON ADVANCED)
-#
-#  add_hpx_pseudo_target(tests)
-#
-#  enable_testing()
-#  include(CTest)
-#
-#  add_custom_command(TARGET tests POST_BUILD
-#    COMMAND ctest --output-on-failure)
-#
-#  include_directories(tests)
-#  add_subdirectory(tests)
-#else()
+if(HPXCL_BUILD_TESTS)
+  file(COPY ${HPX_PREFIX}/bin/hpxrun.py DESTINATION ${PROJECT_BINARY_DIR}/bin)
+
+  hpx_option(HPXCL_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
+  hpx_option(HPXCL_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
+  hpx_option(HPXCL_BUILD_TESTS_UNIT BOOL "Build HPX unit tests (default: ON)" ON ADVANCED)
+
+  add_hpx_pseudo_target(tests)
+
+  enable_testing()
+  include(CTest)
+
+  if(HPX_WITH_PSEUDO_DEPENDENCIES)
+    add_custom_command(TARGET tests POST_BUILD
+      COMMAND ctest --output-on-failure)
+  endif()
+
+  include_directories(tests)
+  add_subdirectory(tests)
+else()
   unset(HPXCL_BUILD_TESTS_BENCHMARKS CACHE)
   unset(HPXCL_BUILD_TESTS_REGRESSIONS CACHE)
   unset(HPXCL_BUILD_TESTS_UNIT CACHE)
-#endif()
+endif()
 
 

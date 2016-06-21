@@ -8,7 +8,6 @@
 
 #include <hpxcl/opencl.hpp>
 
-#include <boost/shared_ptr.hpp>
 #include <vector>
 
 #include <hpx/lcos/local/spinlock.hpp>
@@ -17,9 +16,11 @@
 #include "work_queue.hpp"
 #include "workload.hpp"
 #include "mandelbrotworker.hpp"
-#include <atomic>
 
-/* 
+#include <atomic>
+#include <memory>
+
+/*
  * this class is the main observer of the image generation.
  * it gets image queries, which it then splits into subimages and sends it to
  * the calculation queue.
@@ -42,16 +43,16 @@ class image_generator
 
         // waits for the worker to finish
         void shutdown();
-        
+
         // adds a worker
         void add_worker(hpx::opencl::device & device,
                         size_t num_parallel_kernels);
 
         // waits for the worker to finish initialization
         void wait_for_startup_finished();
-        
+
         // computes an image
-        hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
+        hpx::lcos::future<std::shared_ptr<std::vector<char>>>
         compute_image(double pos_x,
                       double pos_y,
                       double zoom,
@@ -60,7 +61,7 @@ class image_generator
                       size_t img_height);
 
         // computes an image, enhanced version
-        hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
+        hpx::lcos::future<std::shared_ptr<std::vector<char>>>
         compute_image(double pos_x,
                       double pos_y,
                       double zoom,
@@ -81,15 +82,15 @@ class image_generator
     // private attributes
     private:
         hpx::lcos::shared_future<void> retrievers_finished;
-        boost::shared_ptr<work_queue<boost::shared_ptr<workload>>> workqueue;
-        boost::shared_ptr<std::vector<boost::shared_ptr<mandelbrotworker>>> workers;
+        std::shared_ptr<work_queue<std::shared_ptr<workload>>> workqueue;
+        std::shared_ptr<std::vector<std::shared_ptr<mandelbrotworker>>> workers;
         hpx::lcos::local::spinlock images_lock;
 
-        typedef std::map<size_t, boost::shared_ptr<std::vector<char>>> 
+        typedef std::map<size_t, std::shared_ptr<std::vector<char>>>
                     image_data_map;
-        typedef std::map<size_t, boost::shared_ptr<std::atomic<size_t>>>
+        typedef std::map<size_t, std::shared_ptr<std::atomic<size_t>>>
                     image_countdown_map;
-        typedef std::map<size_t, boost::shared_ptr<hpx::lcos::local::event>>
+        typedef std::map<size_t, std::shared_ptr<hpx::lcos::local::event>>
                     image_ready_map;
         image_data_map      images;
         image_countdown_map images_countdown;

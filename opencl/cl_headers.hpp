@@ -23,4 +23,4 @@
 
 #endif// HPX_OPENCL_CL_HEADERS_HPP_
 
-            
+

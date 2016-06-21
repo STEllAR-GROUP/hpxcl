@@ -10,6 +10,7 @@
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
+#include "../../export_definitions.hpp"
 #include "../../cl_headers.hpp"
 
 ////////////////////////////////////////////////////////////////
@@ -26,8 +27,8 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
 
     public:
         // Constructor
-        event_map();
-        ~event_map();
+        HPX_OPENCL_EXPORT event_map();
+        HPX_OPENCL_EXPORT ~event_map();
 
         //////////////////////////////////////////////////
         /// Local public functions
@@ -38,23 +39,23 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         // It might happen that get() gets called before the referencing GID
         // is registered with add().
         // (=> Fancy synchronization needed inside of event_map)
-        void add(const hpx::naming::id_type&, cl_event);
+        HPX_OPENCL_EXPORT void add(const hpx::naming::id_type&, cl_event);
 
         // Retrieves the cl_event associated with the gid.
         // !! BLOCKS if gid is not present until gid gets added
         // with 'add()'.
-        cl_event get(const hpx::naming::id_type&);
-        cl_event get(const hpx::naming::gid_type&);
+        HPX_OPENCL_EXPORT cl_event get(const hpx::naming::id_type&);
+        HPX_OPENCL_EXPORT cl_event get(const hpx::naming::gid_type&);
 
         // Registers a function that will get called upon gid removal
         // (Used to delete associated cl_event)
-        void register_deletion_callback(std::function<void(cl_event)> &&);
+        HPX_OPENCL_EXPORT void register_deletion_callback(std::function<void(cl_event)> &&);
 
         // Removes a GID.
         // !! This function is the only one of this class with a consistency
         // guarantee. remove() will ALWAYS be called AFTER all other calls
         // involving the given GID are finished. (i.e. add() and get())
-        void remove(const hpx::naming::gid_type&);
+        HPX_OPENCL_EXPORT void remove(const hpx::naming::gid_type&);
 
     private:
         ///////////////////////////////////////////////
@@ -72,8 +73,7 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         waitmap_type waits;
 
         // Lock for synchronization
-        //lock_type lock;
-        boost::mutex m;
+        lock_type lock;
 
         // Callback function for cl_event cleanup
         std::function<void(cl_event)> deletion_callback;

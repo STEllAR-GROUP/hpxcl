@@ -131,7 +131,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     // The resolver recursive template functions are here to convert
     // an arbitrary number of future and std::vector<future> to
     // one single std::vector<id_type>.
-    void
+    HPX_OPENCL_EXPORT void
     resolver_impl(std::vector<hpx::naming::id_type>&,
                   std::vector<hpx::naming::gid_type>&);
 

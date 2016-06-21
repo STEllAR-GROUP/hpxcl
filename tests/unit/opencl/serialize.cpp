@@ -33,33 +33,33 @@ CREATE_BUFFER(program_src,
 
 #define DATASIZE (sizeof("Hello, World!"))
 
-const char initdata_arr[] = { ('H'  - static_cast<char>( 0)), 
-                              ('e'  - static_cast<char>( 1)), 
-                              ('l'  - static_cast<char>( 2)), 
-                              ('l'  - static_cast<char>( 3)), 
-                              ('o'  - static_cast<char>( 4)), 
-                              (','  - static_cast<char>( 5)), 
-                              (' '  - static_cast<char>( 6)), 
-                              ('W'  - static_cast<char>( 7)), 
-                              ('o'  - static_cast<char>( 8)), 
-                              ('r'  - static_cast<char>( 9)), 
-                              ('l'  - static_cast<char>(10)), 
-                              ('d'  - static_cast<char>(11)), 
-                              ('!'  - static_cast<char>(12)), 
+const char initdata_arr[] = { ('H'  - static_cast<char>( 0)),
+                              ('e'  - static_cast<char>( 1)),
+                              ('l'  - static_cast<char>( 2)),
+                              ('l'  - static_cast<char>( 3)),
+                              ('o'  - static_cast<char>( 4)),
+                              (','  - static_cast<char>( 5)),
+                              (' '  - static_cast<char>( 6)),
+                              ('W'  - static_cast<char>( 7)),
+                              ('o'  - static_cast<char>( 8)),
+                              ('r'  - static_cast<char>( 9)),
+                              ('l'  - static_cast<char>(10)),
+                              ('d'  - static_cast<char>(11)),
+                              ('!'  - static_cast<char>(12)),
                               ('\0' - static_cast<char>(13)) };
 const char refdata2_arr[] = { ('H'  + static_cast<char>( 0)),
-                              ('e'  + static_cast<char>( 1)), 
-                              ('l'  + static_cast<char>( 2)), 
-                              ('l'  + static_cast<char>( 3)), 
-                              ('o'  + static_cast<char>( 4)), 
-                              (','  + static_cast<char>( 5)), 
-                              (' '  + static_cast<char>( 6)), 
-                              ('W'  + static_cast<char>( 7)), 
-                              ('o'  + static_cast<char>( 8)), 
-                              ('r'  + static_cast<char>( 9)), 
-                              ('l'  + static_cast<char>(10)), 
-                              ('d'  + static_cast<char>(11)), 
-                              ('!'  + static_cast<char>(12)), 
+                              ('e'  + static_cast<char>( 1)),
+                              ('l'  + static_cast<char>( 2)),
+                              ('l'  + static_cast<char>( 3)),
+                              ('o'  + static_cast<char>( 4)),
+                              (','  + static_cast<char>( 5)),
+                              (' '  + static_cast<char>( 6)),
+                              ('W'  + static_cast<char>( 7)),
+                              ('o'  + static_cast<char>( 8)),
+                              ('r'  + static_cast<char>( 9)),
+                              ('l'  + static_cast<char>(10)),
+                              ('d'  + static_cast<char>(11)),
+                              ('!'  + static_cast<char>(12)),
                               ('\0' + static_cast<char>(13)) };
 CREATE_BUFFER(initdata, initdata_arr);
 CREATE_BUFFER(refdata1, "Hello, World!");
@@ -67,19 +67,19 @@ CREATE_BUFFER(refdata2, refdata2_arr);
 
 
 
-static hpx::opencl::program
+hpx::opencl::program
 remotely_create_program ( hpx::opencl::device device )
 {
     return device.create_program_with_source(program_src);
 }
 
-static hpx::opencl::kernel
+hpx::opencl::kernel
 remotely_create_kernel ( hpx::opencl::program program )
 {
     return program.create_kernel("hello_world");
 }
 
-static hpx::opencl::buffer
+hpx::opencl::buffer
 remotely_create_buffer ( hpx::opencl::device device )
 {
     return device.create_buffer(CL_MEM_READ_WRITE, DATASIZE);
@@ -98,20 +98,20 @@ static void remote_test( hpx::opencl::device cldevice )
 
     // remotely create a program
     hpx::opencl::program program =
-        hpx::async<create_program_action>(locality, cldevice).get();
+        hpx::async<create_program_action>(locality, cldevice);
 
     // build program
     program.build();
 
     // remotely create a kernel
     hpx::opencl::kernel kernel =
-        hpx::async<create_kernel_action>(locality,program).get();
+        hpx::async<create_kernel_action>(locality, program);
 
     // remotely create buffers
     hpx::opencl::buffer buffer_src =
-        hpx::async<create_buffer_action>(locality,cldevice).get();
+        hpx::async<create_buffer_action>(locality, cldevice);
     hpx::opencl::buffer buffer_dst =
-        hpx::async<create_buffer_action>(locality,cldevice).get();
+        hpx::async<create_buffer_action>(locality, cldevice);
 
     // test if buffer initialization worked
     {
@@ -167,7 +167,7 @@ static void cl_test( hpx::opencl::device local_device,
 
     remote_test(cldevice);
     remote_test(local_device);
-    
+
 }
 
 

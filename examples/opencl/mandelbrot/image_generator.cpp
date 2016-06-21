@@ -11,6 +11,8 @@
 #include <hpx/lcos/when_all.hpp>
 
 #include <cmath>
+#include <memory>
+#include <mutex>
 
 image_generator::
 image_generator(size_t img_size_hint_x_,
@@ -25,14 +27,14 @@ image_generator(size_t img_size_hint_x_,
 
     // one retrieve worker for every os thread
     size_t num_retrieve_workers = hpx::get_os_thread_count();
-   
+
     // create workqueue
-    workqueue = boost::make_shared
-                       <work_queue <boost::shared_ptr <workload> > >();
-                                
+    workqueue = std::make_shared
+                       <work_queue <std::shared_ptr <workload> > >();
+
     // initialize worker list
-    workers = boost::make_shared 
-                       <std::vector <boost::shared_ptr <mandelbrotworker> > >();
+    workers = std::make_shared
+                       <std::vector <std::shared_ptr <mandelbrotworker> > >();
 
     // starting workers
     for( auto& device : devices)
@@ -42,13 +44,13 @@ image_generator(size_t img_size_hint_x_,
         add_worker(device, num_parallel_kernels);
 
     }
-         
+
     // starting retrievers
     std::vector<hpx::lcos::future<void>> retriever_futures;
     for(size_t i = 0; i < num_retrieve_workers; i++)
     {
 
-        hpx::lcos::future<void> retriever_future = 
+        hpx::lcos::future<void> retriever_future =
                     hpx::async(retrieve_worker_main,
                                (intptr_t) this,
                                verbose);
@@ -59,7 +61,7 @@ image_generator(size_t img_size_hint_x_,
 
     // combining all retrievers into one future
     retrievers_finished = hpx::when_all(retriever_futures).share();
-    
+
 }
 
 
@@ -78,21 +80,21 @@ add_worker(hpx::opencl::device & device, size_t num_parallel_kernels)
 {
 
         // create request callback function for worker
-        boost::function<bool(boost::shared_ptr<workload>*)> request_new_work = 
-               boost::bind(&work_queue<boost::shared_ptr<workload>>::request,
+        boost::function<bool(std::shared_ptr<workload>*)> request_new_work =
+               boost::bind(&work_queue<std::shared_ptr<workload>>::request,
                            &(*workqueue),
-                           _1); 
+                           _1);
 
         // create deliver callback function for worker
-        boost::function<void(boost::shared_ptr<workload>&)> deliver_done_work = 
-               boost::bind(&work_queue<boost::shared_ptr<workload>>::deliver,
+        boost::function<void(std::shared_ptr<workload>&)> deliver_done_work =
+               boost::bind(&work_queue<std::shared_ptr<workload>>::deliver,
                            &(*workqueue),
-                           _1); 
+                           _1);
 
 
         // create worker
-        boost::shared_ptr<mandelbrotworker> worker = 
-            boost::make_shared<mandelbrotworker>
+        std::shared_ptr<mandelbrotworker> worker =
+            std::make_shared<mandelbrotworker>
                                 (device,
                                  num_parallel_kernels,
                                  request_new_work,
@@ -122,7 +124,7 @@ wait_for_startup_finished()
 
 }
 
-void 
+void
 image_generator::
 shutdown()
 {
@@ -144,7 +146,7 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
     image_generator* parent = (image_generator*) parent_;
 
     // represents done workload
-    boost::shared_ptr<workload> done_workload;
+    std::shared_ptr<workload> done_workload;
 
     // main loop
     if(verbose) hpx::cout << "entering retrieve worker main loop ..." << hpx::endl;
@@ -155,20 +157,20 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
         size_t img_id = done_workload->img_id;
 
         // image data
-        boost::shared_ptr<std::vector<char>> img_data;
+        std::shared_ptr<std::vector<char>> img_data;
 
         // image countdown
-        boost::shared_ptr<std::atomic<size_t>> img_countdown;
+        std::shared_ptr<std::atomic<size_t>> img_countdown;
 
         // image event lock
-        boost::shared_ptr<hpx::lcos::local::event> img_ready;
+        std::shared_ptr<hpx::lcos::local::event> img_ready;
 
         // retrieve image pointers
         {
             // lock
-            boost::lock_guard<hpx::lcos::local::spinlock>
-            lock(parent->images_lock);
-            
+            std::unique_lock<hpx::lcos::local::spinlock>
+                lock(parent->images_lock);
+
             // retrieve image data
             image_data_map::iterator data_iterator = parent->images.find(img_id);
             // leave as null pointer if no data exists.
@@ -200,11 +202,11 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
                 for(size_t x = 0; x < size_x; x++)
                 {
                     (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 0] =
-                        done_workload->pixeldata[(y * size_x + x) * 3 + 0];  
+                        done_workload->pixeldata[(y * size_x + x) * 3 + 0];
                     (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 1] =
-                        done_workload->pixeldata[(y * size_x + x) * 3 + 1];  
+                        done_workload->pixeldata[(y * size_x + x) * 3 + 1];
                     (*img_data)[((y + start_y) * line_offset + (x + start_x)) * 3 + 2] =
-                        done_workload->pixeldata[(y * size_x + x) * 3 + 2];  
+                        done_workload->pixeldata[(y * size_x + x) * 3 + 2];
                 }
             }
         }
@@ -213,7 +215,7 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
         size_t current_img_countdown = --(*img_countdown);
         if(verbose) hpx::cout << "retrieved workload " << current_img_countdown << ": "
                               << done_workload->pos_in_img_x
-                              << ":" 
+                              << ":"
                               << done_workload->pos_in_img_y
                               << hpx::endl;
 
@@ -222,11 +224,11 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
         if(current_img_countdown == 0)
         {
             // set the image ready event lock
-            img_ready->set(); 
+            img_ready->set();
 
             // lock the data lists
-            boost::lock_guard<hpx::lcos::local::spinlock>
-            lock(parent->images_lock);
+            std::unique_lock<hpx::lcos::local::spinlock>
+                lock(parent->images_lock);
 
             // remove image data.
             // data will still be available for waiting image thread,
@@ -236,12 +238,12 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
                 parent->images.erase(data_it);
 
             // remove countdown variable
-            image_countdown_map::iterator countdown_it = 
-                                parent->images_countdown.find(img_id); 
+            image_countdown_map::iterator countdown_it =
+                                parent->images_countdown.find(img_id);
             parent->images_countdown.erase(countdown_it);
 
             // remove event lock
-            image_ready_map::iterator ready_it = 
+            image_ready_map::iterator ready_it =
                                 parent->images_ready.find(img_id);
             parent->images_ready.erase(ready_it);
         }
@@ -251,9 +253,9 @@ retrieve_worker_main(intptr_t parent_, bool verbose)
 }
 
 // waits until event lock triggered, then returns data
-boost::shared_ptr<std::vector<char>>
-wait_for_image_finished(boost::shared_ptr<hpx::lcos::local::event> img_ready,
-                        boost::shared_ptr<std::vector<char>> img_data)
+std::shared_ptr<std::vector<char>>
+wait_for_image_finished(std::shared_ptr<hpx::lcos::local::event> img_ready,
+                        std::shared_ptr<std::vector<char>> img_data)
 {
 
     // wait for the event lock to trigger
@@ -264,7 +266,7 @@ wait_for_image_finished(boost::shared_ptr<hpx::lcos::local::event> img_ready,
 
 }
 
-hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
+hpx::lcos::future<std::shared_ptr<std::vector<char>>>
 image_generator::
 compute_image(double posx,
               double posy,
@@ -280,7 +282,7 @@ compute_image(double posx,
 
 }
 
-hpx::lcos::future<boost::shared_ptr<std::vector<char>>>
+hpx::lcos::future<std::shared_ptr<std::vector<char>>>
 image_generator::
 compute_image(double posx,
               double posy,
@@ -302,7 +304,7 @@ compute_image(double posx,
     // calculate size of diagonale
     //double size_diag = exp2(-zoom) * 4.0;
     double size_diag = 4.0 / zoom;
-    
+
     // calculate width and height
     double size_y = size_diag / sqrt( 1 + aspect_ratio * aspect_ratio );
     double size_x = aspect_ratio * size_y;
@@ -319,9 +321,9 @@ compute_image(double posx,
 
 
     // calculate top left coords
-    double topleft_x = posx - hor_pixdist_x * ( img_width / 2.0 + 0.5 ) 
+    double topleft_x = posx - hor_pixdist_x * ( img_width / 2.0 + 0.5 )
                             - vert_pixdist_x * ( img_height / 2.0 + 0.5 );
-    double topleft_y = posy - hor_pixdist_y * ( img_width / 2.0 + 0.5 ) 
+    double topleft_y = posy - hor_pixdist_y * ( img_width / 2.0 + 0.5 )
                             - vert_pixdist_y * ( img_height / 2.0 + 0.5 );
 
     // calculate number of tiles
@@ -341,33 +343,33 @@ compute_image(double posx,
     }
 
     // create data array to hold finished image, if we are not in benchmark mode
-    boost::shared_ptr<std::vector<char>> img_data;
+    std::shared_ptr<std::vector<char>> img_data;
     if(!benchmark)
-    img_data = boost::make_shared <std::vector <char> >
+        img_data = std::make_shared <std::vector <char> >
                                     (img_width * img_height * 3 * sizeof(char));
 
     // create a new countdown variable
-    boost::shared_ptr<std::atomic<size_t>> img_countdown = 
-              boost::make_shared<std::atomic<size_t>>(num_tiles_x * num_tiles_y);
+    std::shared_ptr<std::atomic<size_t>> img_countdown =
+              std::make_shared<std::atomic<size_t>>(num_tiles_x * num_tiles_y);
 
     // create a new ready event lock
-    boost::shared_ptr<hpx::lcos::local::event> img_ready =
-              boost::make_shared<hpx::lcos::local::event>();
+    std::shared_ptr<hpx::lcos::local::event> img_ready =
+              std::make_shared<hpx::lcos::local::event>();
 
     // add the created variables to their lists
     {
-        boost::lock_guard<hpx::lcos::local::spinlock>
-        lock(images_lock);
+        std::unique_lock<hpx::lcos::local::spinlock>
+            lock(images_lock);
 
         // do not add data in benchmark mode
         if(!benchmark)
-        images.insert(std::pair<size_t, boost::shared_ptr<std::vector<char>>>
+            images.insert(std::pair<size_t, std::shared_ptr<std::vector<char>>>
                                                             (img_id, img_data));
         images_countdown.insert(std::pair<size_t,
-                                boost::shared_ptr<std::atomic<size_t>>>
+                                std::shared_ptr<std::atomic<size_t>>>
                                 (img_id, img_countdown));
         images_ready.insert(std::pair<size_t,
-                            boost::shared_ptr<hpx::lcos::local::event>>
+                            std::shared_ptr<hpx::lcos::local::event>>
                             (img_id, img_ready));
     }
 
@@ -379,17 +381,17 @@ compute_image(double posx,
         for(size_t x = 0; x < img_width; x += tile_width)
         {
             if (verbose) hpx::cout << "\tAdding workload " << x << ":" << y << " ..." << hpx::endl;
-            
+
             // calculate position of current work packet
             double workpacket_pos_x = topleft_x + vert_pixdist_x * y + hor_pixdist_x * x;
             double workpacket_pos_y = topleft_y + vert_pixdist_y * y + hor_pixdist_y * x;
             // add workload
-            boost::shared_ptr<workload> row =
-                       boost::make_shared<workload>(tile_width,
+            std::shared_ptr<workload> row =
+                       std::make_shared<workload>(tile_width,
                                                     tile_height,
                                                     workpacket_pos_x,
                                                     workpacket_pos_y,
-                                                    hor_pixdist_x, 
+                                                    hor_pixdist_x,
                                                     hor_pixdist_y,
                                                     vert_pixdist_x,
                                                     vert_pixdist_y,
@@ -400,7 +402,7 @@ compute_image(double posx,
             workqueue->add_work(row);
         }
     }
-        
+
     // return the future to the finished image
     return hpx::async(wait_for_image_finished, img_ready, img_data);
 

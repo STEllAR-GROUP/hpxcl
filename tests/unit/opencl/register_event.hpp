@@ -19,7 +19,7 @@ static void register_event(hpx::opencl::device cldevice,
                            const hpx::naming::id_type & event_id)
 {
 
-    boost::shared_ptr<hpx::opencl::server::device>
+    std::shared_ptr<hpx::opencl::server::device>
     parent_device = hpx::get_ptr<hpx::opencl::server::device>
                         (cldevice.get_id()).get();
 

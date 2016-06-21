@@ -12,9 +12,7 @@
 #include "maps_image_generator.hpp"
 #include "../fifo.hpp"
 #include <atomic>
-
-#include <boost/shared_ptr.hpp>
-
+#include <memory>
 
 namespace hpx { namespace opencl { namespace examples { namespace mandelbrot {
 
@@ -22,13 +20,13 @@ struct request
 {
 public:
     boost::function<bool(void)> stillValid;
-    boost::function<void(boost::shared_ptr<std::vector<char>>)> done;
+    boost::function<void(std::shared_ptr<std::vector<char>>)> done;
     boost::function<void(void)> abort;
     long zoom;
     long posx;
     long posy;
     std::string user_ip;
-    boost::shared_ptr<std::vector<char>> data;
+    std::shared_ptr<std::vector<char>> data;
     size_t tilesize_x;
     size_t tilesize_y;
     size_t lines_per_gpu;
@@ -45,17 +43,17 @@ public:
                    size_t tilesize_y_,
                    size_t lines_per_gpu);
 
-    void submit_request(boost::shared_ptr<request> request);
+    void submit_request(std::shared_ptr<request> request);
 
-    boost::shared_ptr<request> query_request();     
+    std::shared_ptr<request> query_request();
 
 
 private:
     size_t tilesize_x;
     size_t tilesize_y;
     size_t lines_per_gpu;
-    fifo<boost::shared_ptr<request>> new_requests;
-    
+    fifo<std::shared_ptr<request>> new_requests;
+
 
 };
 

@@ -19,7 +19,7 @@
 
 
 #include <string>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 int hpx_main(boost::program_options::variables_map & vm)
 {
@@ -37,7 +37,7 @@ int hpx_main(boost::program_options::variables_map & vm)
     {
 
         // get all devices
-        std::vector<hpx::opencl::device> devices = 
+        std::vector<hpx::opencl::device> devices =
             hpx::opencl::create_all_devices(
                         CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_ACCELERATOR,
                         "OpenCL 1.1").get();
@@ -64,7 +64,7 @@ int hpx_main(boost::program_options::variables_map & vm)
                                                             tilesize_y,
                                                             lines_per_gpu);
 
-   
+
         // create image_generator
         hpx::opencl::examples::mandelbrot::maps_image_generator
            img_gen(tilesize_x,
@@ -75,13 +75,13 @@ int hpx_main(boost::program_options::variables_map & vm)
                      &hpx::opencl::examples::mandelbrot::requesthandler::query_request,
                      &requesthandler),
                    devices);
-        
+
         // wait for workers to finish initialization
         if(verbose) hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
         img_gen.wait_for_startup_finished();
 
         hpx::cout << "Starting webservers ..." << hpx::endl;
-   
+
         // generate webserver
         hpx::opencl::examples::mandelbrot::webserver webserver(8080,
                                                                &requesthandler);
@@ -93,13 +93,13 @@ int hpx_main(boost::program_options::variables_map & vm)
         {
             hpx::this_thread::sleep_for(boost::posix_time::milliseconds(1000));
         }
-        
+
         webserver.stop();
-        
+
     }
 
     if(verbose) hpx::cout << "Program finished." << hpx::endl;
-   
+
     // End the program
     return hpx::finalize();
 

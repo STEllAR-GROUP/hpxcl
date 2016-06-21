@@ -23,10 +23,10 @@ static void cl_test(hpx::opencl::device, hpx::opencl::device);
 /*
 #define TEST_CL_BUFFER(buffer, value)                                          \
 {                                                                              \
-    boost::shared_ptr<std::vector<char>> out1 =                                \
+    std::shared_ptr<std::vector<char>> out1 =                                \
                        buffer.enqueue_read(0, DATASIZE).get().get_data().get();\
     HPX_TEST_EQ(std::string((const char*)(value)), std::string(out1->data()));  \
-}                                                           
+}
 */
 
 #define CREATE_BUFFER(name, data)                                               \
@@ -49,7 +49,7 @@ typedef hpx::serialization::serialize_buffer<uint32_t> intbuffer_type;
 typedef hpx::serialization::serialize_buffer<uint16_t> int16buffer_type;
 
 std::string to_string(buffer_type buf){
-    std::size_t length = 0; 
+    std::size_t length = 0;
     while(length < buf.size())
     {
         if(buf[length] == '\0') break;
@@ -144,11 +144,11 @@ static std::vector<hpx::opencl::device> init(variables_map & vm)
 int hpx_main(variables_map & vm)
 {
     {
-        auto devices = init(vm);   
+        auto devices = init(vm);
         hpx::cout << hpx::endl;
         cl_test(devices[0], devices[1]);
     }
-    
+
     hpx::finalize();
     return hpx::util::report_errors();
 }

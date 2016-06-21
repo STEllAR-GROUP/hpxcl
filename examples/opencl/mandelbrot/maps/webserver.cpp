@@ -3,9 +3,11 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#include <hpx/config.hpp>
+#include <hpx/include/runtime.hpp>
+
 #include "webserver.hpp"
 
-#include <hpx/include/runtime.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -27,33 +29,33 @@ webserver::webserver(unsigned short port, requesthandler * req_handler_) :
           strand(io_service)
 {
 
-     
+
 
 }
 
 
-// This struct is used for automatic registration and unregistration of 
+// This struct is used for automatic registration and unregistration of
 // non-hpx threads
-struct registration_wrapper                                                      
-{                                                                                
-    registration_wrapper(hpx::runtime* rt, char const* name)                     
-      : rt_(rt)                                                                  
-    {                                                                            
-        // Register this thread with HPX, this should be done once for           
-        // each external OS-thread intended to invoke HPX functionality.         
-        // Calling this function more than once will silently fail (will         
-        // return false).                                                        
-        rt_->register_thread(name);                                              
-    }                                                                            
-    ~registration_wrapper()                                                      
-    {                                                                            
-        // Unregister the thread from HPX, this should be done once in the       
-        // end before the external thread exists.                                
-        rt_->unregister_thread();                                                
-    }                                                                            
-                                                                                 
-    hpx::runtime* rt_;                                                           
-}; 
+struct registration_wrapper
+{
+    registration_wrapper(hpx::runtime* rt, char const* name)
+      : rt_(rt)
+    {
+        // Register this thread with HPX, this should be done once for
+        // each external OS-thread intended to invoke HPX functionality.
+        // Calling this function more than once will silently fail (will
+        // return false).
+        rt_->register_thread(name);
+    }
+    ~registration_wrapper()
+    {
+        // Unregister the thread from HPX, this should be done once in the
+        // end before the external thread exists.
+        rt_->unregister_thread();
+    }
+
+    hpx::runtime* rt_;
+};
 
 void
 webserver::dont_close_socket(boost::any keepalive_data)
@@ -65,7 +67,7 @@ webserver::dont_close_socket(boost::any keepalive_data)
 }
 
 void
-webserver::close_socket(boost::shared_ptr<tcp::socket> socket,
+webserver::close_socket(std::shared_ptr<tcp::socket> socket,
                         boost::any keepalive_data)
 {
 
@@ -74,13 +76,13 @@ webserver::close_socket(boost::shared_ptr<tcp::socket> socket,
 }
 
 void
-webserver::send_server_error_and_close(boost::shared_ptr<tcp::socket> socket)
+webserver::send_server_error_and_close(std::shared_ptr<tcp::socket> socket)
 {
 
     //std::cout << "aborted" << std::endl;
     num_aborted ++;
 
-    boost::shared_ptr<std::string> response = boost::make_shared<std::string>(
+    std::shared_ptr<std::string> response = std::make_shared<std::string>(
         "HTTP/1.0 500 Server Error\r\n"
         "Connection: Close\r\n"
         "\r\n");
@@ -95,10 +97,10 @@ webserver::send_server_error_and_close(boost::shared_ptr<tcp::socket> socket)
 }
 
 void
-webserver::send_not_found_and_close(boost::shared_ptr<tcp::socket> socket)
+webserver::send_not_found_and_close(std::shared_ptr<tcp::socket> socket)
 {
 
-    boost::shared_ptr<std::string> response = boost::make_shared<std::string>(
+    std::shared_ptr<std::string> response = std::make_shared<std::string>(
         "HTTP/1.0 404 Not Found\r\n"
         "Connection: Close\r\n"
         "\r\n");
@@ -113,10 +115,10 @@ webserver::send_not_found_and_close(boost::shared_ptr<tcp::socket> socket)
 }
 
 void
-webserver::send_bad_request_and_close(boost::shared_ptr<tcp::socket> socket)
+webserver::send_bad_request_and_close(std::shared_ptr<tcp::socket> socket)
 {
 
-    boost::shared_ptr<std::string> response = boost::make_shared<std::string>(
+    std::shared_ptr<std::string> response = std::make_shared<std::string>(
         "HTTP/1.0 400 Bad Request\r\n"
         "Connection: Close\r\n"
         "\r\n");
@@ -137,17 +139,17 @@ webserver::read_filename_from_request(std::string line)
         // vars
         const std::string string_GET("GET ");
         const std::string string_HTTP("HTTP/");
-        size_t pos; 
+        size_t pos;
 
         // if request doesn't start with "GET ", send error
         if(line.compare(0, string_GET.length(), string_GET) != 0)
         {
             // send error
             return "";
-        } 
+        }
 
         // cut away "GET "
-        line = line.substr(string_GET.length()); 
+        line = line.substr(string_GET.length());
 
         // find the next space
         pos = line.find(' ');
@@ -163,7 +165,7 @@ webserver::read_filename_from_request(std::string line)
         // cut away filename
         line = line.substr(pos + 1);
 
-        // ensure it's a http request 
+        // ensure it's a http request
         if(line.compare(0, string_HTTP.length(), string_HTTP) != 0)
         {
             // send error
@@ -177,37 +179,37 @@ struct send_data_data
 {
     std::string header;
     std::string footer;
-    boost::shared_ptr<std::vector<char>> data;
+    std::shared_ptr<std::vector<char>> data;
     std::vector<boost::asio::const_buffer> buffers;
 };
 
 void
-webserver::send_data(boost::shared_ptr<tcp::socket> socket,
+webserver::send_data(std::shared_ptr<tcp::socket> socket,
                      const char* content_type,
-                     boost::shared_ptr<std::vector<char>> data)
+                     std::shared_ptr<std::vector<char>> data)
 {
-    
+
     num_answers ++;
 
     // store all the data that we need to keep alive
-    boost::shared_ptr<send_data_data> keep_alive_data = boost::make_shared<send_data_data>();
-    
+    std::shared_ptr<send_data_data> keep_alive_data = std::make_shared<send_data_data>();
+
     // keep data ptr alive
     keep_alive_data->data = data;
 
     // vector to keep data alive
-    boost::shared_ptr<std::vector<boost::any>> keep_= boost::make_shared<std::vector<boost::any>>();
+    std::shared_ptr<std::vector<boost::any>> keep_= std::make_shared<std::vector<boost::any>>();
 
     // generate header
     std::stringstream ss;
-    ss << "HTTP/1.0 200 OK\r\n"                                        
-       << "Content-Type: " << content_type << "\r\n"                 
-       << "Content-Length: " << data->size() << "\r\n"                                      
-       << "Connection: Keep-Alive\r\n" 
-       //<< "Connection: Close\r\n" 
+    ss << "HTTP/1.0 200 OK\r\n"
+       << "Content-Type: " << content_type << "\r\n"
+       << "Content-Length: " << data->size() << "\r\n"
+       << "Connection: Keep-Alive\r\n"
+       //<< "Connection: Close\r\n"
        << "\r\n";
     keep_alive_data->header = ss.str();
-    
+
     // generate footer
     keep_alive_data->footer = "\r\n\r\n";
 
@@ -226,28 +228,28 @@ webserver::send_data(boost::shared_ptr<tcp::socket> socket,
 }
 
 void
-webserver::send_data(boost::shared_ptr<tcp::socket> socket,
+webserver::send_data(std::shared_ptr<tcp::socket> socket,
                      const char* content_type,
                      const char* data,
                      size_t data_size)
 {
-   
+
     // store all the data that we need to keep alive
-    boost::shared_ptr<send_data_data> keep_alive_data = boost::make_shared<send_data_data>();
+    std::shared_ptr<send_data_data> keep_alive_data = std::make_shared<send_data_data>();
 
     // generate header
     std::stringstream ss;
-    ss << "HTTP/1.0 200 OK\r\n"                                        
-       << "Content-Type: " << content_type << "\r\n"                 
-       << "Content-Length: " << data_size << "\r\n"                                      
-       << "Connection: Keep-Alive\r\n" 
-//       << "Connection: Close\r\n" 
+    ss << "HTTP/1.0 200 OK\r\n"
+       << "Content-Type: " << content_type << "\r\n"
+       << "Content-Length: " << data_size << "\r\n"
+       << "Connection: Keep-Alive\r\n"
+//       << "Connection: Close\r\n"
        << "\r\n";
     keep_alive_data->header = ss.str();
-    
+
     // generate footer
     keep_alive_data->footer = "\r\n\r\n";
-    
+
     // put everything in buffers
     keep_alive_data->buffers.push_back(boost::asio::buffer(keep_alive_data->header));
     keep_alive_data->buffers.push_back(boost::asio::buffer(data, data_size));
@@ -303,9 +305,9 @@ parse_request(std::string uri)
     long pos_x_raw;
     long pos_y_raw;
     try {
-        zoom_raw = std::stol(zoom_string); 
-        pos_x_raw = std::stol(pos_x_string); 
-        pos_y_raw = std::stol(pos_y_string); 
+        zoom_raw = std::stol(zoom_string);
+        pos_x_raw = std::stol(pos_x_string);
+        pos_y_raw = std::stol(pos_y_string);
     } catch ( std::exception e ) {
         return ret;
     }
@@ -320,7 +322,7 @@ parse_request(std::string uri)
 }
 
 void
-webserver::process_request(boost::shared_ptr<tcp::socket> socket,
+webserver::process_request(std::shared_ptr<tcp::socket> socket,
                            std::string filename)
 {
 
@@ -330,7 +332,7 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
     if(filename == "/")
     {
         send_data(socket, "text/html; charset=utf-8",
-                  mandelbrot_html, mandelbrot_html_len); 
+                  mandelbrot_html, mandelbrot_html_len);
         return;
     }
 
@@ -360,8 +362,8 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
     }
 
     // create a new request
-    boost::shared_ptr<request> img_request = boost::make_shared<request>();
-   
+    std::shared_ptr<request> img_request = std::make_shared<request>();
+
     // set coords
     img_request->zoom = img_coords[0];
     img_request->posx = img_coords[1];
@@ -380,7 +382,7 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
     img_request->stillValid = boost::bind(
                                         &webserver::is_socket_still_connected,
                                         this,
-                                        socket); 
+                                        socket);
 
     // set done callback
     img_request->done = strand.wrap(boost::bind(
@@ -398,7 +400,7 @@ webserver::process_request(boost::shared_ptr<tcp::socket> socket,
 
 
 bool
-webserver::is_socket_still_connected(boost::shared_ptr<tcp::socket> socket)
+webserver::is_socket_still_connected(std::shared_ptr<tcp::socket> socket)
 {
 
     return socket->is_open();
@@ -409,8 +411,8 @@ void
 webserver::new_line_read_callback(
                                const boost::system::error_code & error,
                                size_t bytes_transferred,
-                               boost::shared_ptr<tcp::socket> socket,
-                               boost::shared_ptr<boost::asio::streambuf> buffer,
+                               std::shared_ptr<tcp::socket> socket,
+                               std::shared_ptr<boost::asio::streambuf> buffer,
                                size_t lines_read,
                                std::string requested_file)
 {
@@ -429,10 +431,10 @@ webserver::new_line_read_callback(
 
     // create a string to hold the read line
     std::string line;
-    
+
     // read data to the string
     std::getline(instream, line);
-     
+
     // remove whitespace at front and end of string
     boost::algorithm::trim(line);
 
@@ -457,7 +459,7 @@ webserver::new_line_read_callback(
     else if (line.size() == 0)
     {
         // process the request
-        process_request(socket, requested_file); 
+        process_request(socket, requested_file);
 
         // continue reading lines, could be persistent socket
         start_reading_line_from_socket(buffer, socket, 0, "");
@@ -472,8 +474,8 @@ webserver::new_line_read_callback(
 
 void
 webserver::start_reading_line_from_socket(
-                              boost::shared_ptr<boost::asio::streambuf> buffer,
-                              boost::shared_ptr<tcp::socket> socket,
+                              std::shared_ptr<boost::asio::streambuf> buffer,
+                              std::shared_ptr<tcp::socket> socket,
                               size_t num_lines_already_read,
                               std::string requested_file)
 {
@@ -495,7 +497,7 @@ webserver::start_reading_line_from_socket(
 
 void
 webserver::new_connection_callback(const boost::system::error_code & error,
-                                   boost::shared_ptr<tcp::socket> socket)
+                                   std::shared_ptr<tcp::socket> socket)
 {
     // start listening for another connection, to enable multiple connections
     // at once
@@ -506,15 +508,15 @@ webserver::new_connection_callback(const boost::system::error_code & error,
     {
         // print error message
         std::cerr << "Webserver: Error while waiting for new connection: "
-                  << error.message() << std::endl; 
+                  << error.message() << std::endl;
 
         // drop this connection
         return;
     }
 
     // create a new buffer for the tcp data stream
-    boost::shared_ptr<boost::asio::streambuf> buffer = 
-                                   boost::make_shared<boost::asio::streambuf>();
+    std::shared_ptr<boost::asio::streambuf> buffer =
+                                   std::make_shared<boost::asio::streambuf>();
 
     // connect buffer to socket and start reading
     start_reading_line_from_socket(buffer, socket, 0, "");
@@ -526,8 +528,8 @@ webserver::start_listening_for_new_connection()
 {
 
     // create new socket
-    boost::shared_ptr<tcp::socket> connected_socket = 
-                                    boost::make_shared<tcp::socket>(io_service);
+    std::shared_ptr<tcp::socket> connected_socket =
+                                    std::make_shared<tcp::socket>(io_service);
 
     // register socket and callback, to wait for new connection
     acceptor.async_accept(*connected_socket,
@@ -547,9 +549,9 @@ webserver::external_start(hpx::runtime* rt)
 
     // register callback for new connections
     start_listening_for_new_connection();
-    
+
     // start the io_service
-    io_service.run(); 
+    io_service.run();
 
 }
 
@@ -557,7 +559,7 @@ void
 webserver::start()
 {
 
-    // forward this call to an external os thread 
+    // forward this call to an external os thread
     asio_thread = boost::thread(hpx::util::bind(&webserver::external_start,
                                                 this,
                                                 hpx::get_runtime_ptr()));
