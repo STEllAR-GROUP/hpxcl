@@ -127,9 +127,9 @@ public:
 	/**
 	 * \brief Creates synchronous a program with the set source code
 	 */
-	hpx::cuda::program create_program_with_source_sync(std::string source) {
-		return create_program_with_source(source).get();
-	}
+	//hpx::cuda::program create_program_with_source_sync(std::string source) {
+	//	return create_program_with_source(source).get();
+	//}
 
 	/**
 	 * \brief Creates a program with the set source code
@@ -142,7 +142,7 @@ public:
 	 *
 	 * \see Program
 	 */
-	hpx::lcos::future<hpx::cuda::program> create_program_with_source(
+	hpx::cuda::program create_program_with_source(
 			std::string source) {
 		HPX_ASSERT(this->get_gid());
 		typedef server::device::create_program_with_source_action action_type;
@@ -160,7 +160,7 @@ public:
 	 *
 	 * \see Program
 	 */
-	hpx::lcos::future<hpx::cuda::program> create_program_with_file(
+	hpx::cuda::program create_program_with_file(
 			std::string file) {
 		HPX_ASSERT(this->get_gid());
 
@@ -196,7 +196,7 @@ public:
 	 *
 	 * \return The buffer with the allocated memoery on this device
 	 */
-	hpx::lcos::future<hpx::cuda::buffer> create_buffer(size_t size) {
+	hpx::cuda::buffer create_buffer(size_t size) {
 		HPX_ASSERT(this->get_gid());
 		typedef server::device::create_buffer_action action_type;
 		return hpx::async<action_type>(this->get_gid(), size);
@@ -205,10 +205,10 @@ public:
 	/**
 	 * \brief Synchronous creation of the buffer
 	 */
-	hpx::cuda::buffer create_buffer_sync(size_t size) {
-		HPX_ASSERT(this->get_gid());
-		return create_buffer(size).get();
-	}
+	//hpx::cuda::buffer create_buffer_sync(size_t size) {
+		//HPX_ASSERT(this->get_gid());
+	//	return create_buffer(size).get();
+	//}
 };
 }
 }

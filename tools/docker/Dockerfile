@@ -5,9 +5,10 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 FROM stellargroup/hpx:dev
-Run rm -rf /var/lib/apt/lists/*
 RUN apt-get clean && apt-get update && apt-get install -y xsltproc                               \
-                                         doxygen
+                                         doxygen												 \
+										 amd-opencl-dev											 \
+										 libpng-dev	
 
 #Installation of CUDA 7.0
 RUN wget http://developer.download.nvidia.com/compute/cuda/7_0/Prod/local_installers/cuda_7.0.28_linux.run && \
