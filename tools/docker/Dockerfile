@@ -6,7 +6,9 @@
 
 FROM stellargroup/hpx:dev
 RUN apt-get clean && apt-get update && apt-get install -y xsltproc                               \
-                                         doxygen
+                                         doxygen												 \
+										 amd-opencl-dev											 \
+										 libpng-dev	
 
 #Installation of CUDA 7.0
 RUN wget http://developer.download.nvidia.com/compute/cuda/7_0/Prod/local_installers/cuda_7.0.28_linux.run && \
