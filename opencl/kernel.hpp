@@ -95,7 +95,7 @@ namespace opencl {
               : base_type(gid), device_gid(std::move(device_gid_))
             {}
 
-            kernel(hpx::shared_future<hpx::naming::id_type> const& gid)
+            kernel(hpx::future<hpx::naming::id_type> && gid)
               : base_type(std::move(gid)), device_gid()
             {}
 
