@@ -33,7 +33,7 @@ namespace hpx { namespace opencl { namespace server {
 
 }}}
 
-HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::create_devices_action);
+HPX_ACTION_USES_MEDIUM_STACK(hpx::opencl::server::create_devices_action);
 HPX_REGISTER_ACTION_DECLARATION(hpx::opencl::server::create_devices_action,
                                 hpx_opencl_server_create_devices_action)
 

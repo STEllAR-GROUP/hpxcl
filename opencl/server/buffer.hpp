@@ -290,7 +290,7 @@ hpx::opencl::server::buffer::enqueue_write(
                        hpx::serialization::serialize_buffer<T> data,
                        std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
     cl_event return_event;
@@ -325,7 +325,7 @@ hpx::opencl::server::buffer::enqueue_write_rect(
                        hpx::serialization::serialize_buffer<T> data,
                        std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
     cl_event return_event;
@@ -383,7 +383,7 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_local(
                        hpx::serialization::serialize_buffer<T> data,
                        std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
     cl_event return_event;
@@ -421,7 +421,7 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote(
     std::uintptr_t remote_data_addr,
     std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
@@ -477,7 +477,7 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_local(
                        hpx::serialization::serialize_buffer<T> data,
                        std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
     cl_event return_event;
@@ -544,7 +544,7 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_remote(
     // - send the data and extract it to the correct position in the
     //   remote destination buffer via zero-copy send
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
 

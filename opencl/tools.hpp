@@ -63,7 +63,7 @@ namespace hpx { namespace opencl { namespace tools {
     HPX_OPENCL_EXPORT const char* cl_err_to_str(cl_int errCode);
 
     // Returns true if curren thread runs on a large stack
-    HPX_OPENCL_EXPORT bool runs_on_large_stack();
+    HPX_OPENCL_EXPORT bool runs_on_medium_stack();
 
 }}}
 

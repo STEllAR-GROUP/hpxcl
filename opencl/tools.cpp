@@ -11,14 +11,14 @@
 
 namespace hpx { namespace opencl { namespace tools {
 
-bool runs_on_large_stack()
+bool runs_on_medium_stack()
 {
 
     // Get current stack size
     std::size_t current_stack_size = hpx::threads::get_ctx_ptr()->get_stacksize();
 
     // Get large stack size
-    std::size_t large_stack_size =
+    std::size_t medium_stack_size =
                             hpx::get_runtime().get_config().get_stack_size(
                                           hpx::threads::thread_stacksize_medium);
 
@@ -27,7 +27,7 @@ bool runs_on_large_stack()
                            << std::hex << large_stack_size << hpx::endl;
     */
 
-    return current_stack_size == large_stack_size;
+    return current_stack_size == medium_stack_size;
 
 }
 

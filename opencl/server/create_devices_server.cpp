@@ -74,7 +74,7 @@ std::vector<hpx::opencl::device>
 hpx::opencl::server::create_devices(cl_device_type device_type,
                                     std::string min_cl_version)
 {
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     // Parse required OpenCL version
     std::vector<int> required_version = parse_version_string(min_cl_version);
