@@ -124,8 +124,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         virtual
         ~event()
         {
-            unregister_event( device_id,
-                              this->get_base_gid() );
+            unregister_event( device_id, this->gid_ );
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -233,8 +232,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         virtual
         ~event()
         {
-            unregister_event( device_id,
-                              this->get_base_gid() );
+            unregister_event( device_id, this->gid_ );
         }
 
         ////////////////////////////////////////////////////////////////////////
