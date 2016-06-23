@@ -87,13 +87,13 @@ namespace hpx { namespace opencl{ namespace server{
         void
         activate_deferred_event_with_data(hpx::naming::id_type);
 
-    HPX_DEFINE_COMPONENT_ACTION(device, get_device_info);
-    HPX_DEFINE_COMPONENT_ACTION(device, get_platform_info);
-    HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
-    HPX_DEFINE_COMPONENT_ACTION(device, create_program_with_source);
-    HPX_DEFINE_COMPONENT_ACTION(device, create_program_with_binary);
-    HPX_DEFINE_COMPONENT_ACTION(device, release_event);
-    HPX_DEFINE_COMPONENT_ACTION(device, activate_deferred_event);
+        HPX_DEFINE_COMPONENT_ACTION(device, get_device_info);
+        HPX_DEFINE_COMPONENT_ACTION(device, get_platform_info);
+        HPX_DEFINE_COMPONENT_ACTION(device, create_buffer);
+        HPX_DEFINE_COMPONENT_ACTION(device, create_program_with_source);
+        HPX_DEFINE_COMPONENT_ACTION(device, create_program_with_binary);
+        HPX_DEFINE_COMPONENT_ACTION(device, release_event);
+        HPX_DEFINE_COMPONENT_ACTION(device, activate_deferred_event);
 
     public:
         /////////////////////////////////////////////////
