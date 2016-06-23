@@ -209,7 +209,6 @@ namespace opencl {
                                            rect_props rect_properties,
                                            Deps &&... dependencies );
 
-
             ////////////////////////////////////////////////////////////////////
             // Proxied functions
             //
@@ -234,7 +233,7 @@ namespace opencl {
             void ensure_device_id();
 
         private:
-            hpx::naming::id_type device_gid;
+            mutable hpx::naming::id_type device_gid;
             bool is_local;
 
         private:
@@ -274,6 +273,8 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
                                    hpx::serialization::serialize_buffer<T> data,
                                    Deps &&... dependencies )
 {
+    ensure_device_id();
+
     typedef hpx::serialization::serialize_buffer<T> buffer_type;
 
     // combine dependency futures in one std::vector
@@ -322,6 +323,8 @@ hpx::opencl::buffer::enqueue_read_rect(
                                    hpx::serialization::serialize_buffer<T> data,
                                    Deps &&... dependencies )
 {
+    ensure_device_id();
+
     typedef hpx::serialization::serialize_buffer<T> buffer_type;
 
     // combine dependency futures in one std::vector
@@ -368,6 +371,8 @@ hpx::opencl::buffer::enqueue_write( std::size_t offset,
                const hpx::serialization::serialize_buffer<T> data,
                Deps &&... dependencies )
 {
+    ensure_device_id();
+
     // combine dependency futures in one std::vector
     using hpx::opencl::util::enqueue_overloads::resolver;
     auto deps = resolver(std::forward<Deps>(dependencies)...);
@@ -396,6 +401,8 @@ hpx::opencl::buffer::enqueue_write_rect( rect_props rect_properties,
                     const hpx::serialization::serialize_buffer<T> data,
                     Deps &&... dependencies )
 {
+    ensure_device_id();
+
     // combine dependency futures in one std::vector
     using hpx::opencl::util::enqueue_overloads::resolver;
     auto deps = resolver(std::forward<Deps>(dependencies)...);
@@ -423,6 +430,8 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
                                    std::size_t size,
                                    Deps &&... dependencies )
 {
+    ensure_device_id();
+
     // combine dependency futures in one std::vector
     using hpx::opencl::util::enqueue_overloads::resolver;
     auto deps = resolver(std::forward<Deps>(dependencies)...);

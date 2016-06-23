@@ -14,7 +14,6 @@
 
 using hpx::opencl::buffer;
 
-
 hpx::future<std::size_t>
 buffer::size() const
 {
