@@ -22,7 +22,7 @@
 #include "util/server_definitions.hpp"
 #include "../util/rect_props.hpp"
 
-namespace hpx { namespace opencl{ namespace server{
+namespace hpx { namespace opencl { namespace server {
 
     // /////////////////////////////////////////////////////
     //  This class represents an opencl buffer.
@@ -463,10 +463,11 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote(
     parent_device->wait_for_cl_event(return_event);
 
     // send the zerocopy_buffer to the lcos::event
-    typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
-        set_data_func;
-    hpx::apply_colocated<set_data_func>(event_gid, event_gid, zerocopy_buffer);
+//     typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
+//         set_data_func;
+//     hpx::apply_colocated<set_data_func>(event_gid, event_gid, zerocopy_buffer);
 
+    hpx::set_lco_value(event_gid, std::move(zerocopy_buffer));
 }
 
 template <typename T>
@@ -606,10 +607,11 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_remote(
     parent_device->wait_for_cl_event(return_event);
 
     // send the zerocopy_buffer to the lcos::event
-    typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
-        set_data_func;
-    hpx::apply_colocated<set_data_func>(event_gid, event_gid, zerocopy_buffer);
+//     typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
+//         set_data_func;
+//     hpx::apply_colocated<set_data_func>(event_gid, event_gid, zerocopy_buffer);
 
+    hpx::set_lco_value(event_gid, std::move(zerocopy_buffer));
 }
 
 

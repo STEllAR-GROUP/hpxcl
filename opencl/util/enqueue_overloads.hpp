@@ -14,61 +14,59 @@
 
 #include "../lcos/event.hpp"
 
-namespace hpx{ namespace opencl{ namespace util{
-
-    struct resolved_events{
-        public:
-            std::vector<hpx::naming::id_type> event_ids;
-            std::vector<hpx::naming::gid_type> device_ids;
-            bool are_from_device(const hpx::naming::id_type& device_id){
-                hpx::naming::gid_type device_gid = device_id.get_gid();
-                for(const auto& id : device_ids){
-                    if(device_gid != id)
-                        return false;
-                }
-                return true;
+namespace hpx { namespace opencl { namespace util
+{
+    struct resolved_events
+    {
+    public:
+        std::vector<hpx::naming::id_type> event_ids;
+        std::vector<hpx::naming::gid_type> device_ids;
+        bool are_from_device(const hpx::naming::id_type& device_id)
+        {
+            hpx::naming::gid_type device_gid = device_id.get_gid();
+            for(const auto& id : device_ids){
+                if(device_gid != id)
+                    return false;
             }
-            bool are_from_devices( const hpx::naming::id_type& device1,
-                                   const hpx::naming::id_type& device2 ){
-                hpx::naming::gid_type device_gid1 = device1.get_gid();
-                hpx::naming::gid_type device_gid2 = device2.get_gid();
-                for(const auto& id : device_ids){
-                    if((device_gid1 != id) && (device_gid2 != id))
-                        return false;
-                }
-                return true;
+            return true;
+        }
+        bool are_from_devices( const hpx::naming::id_type& device1,
+                                const hpx::naming::id_type& device2 )
+        {
+            hpx::naming::gid_type device_gid1 = device1.get_gid();
+            hpx::naming::gid_type device_gid2 = device2.get_gid();
+            for(const auto& id : device_ids){
+                if((device_gid1 != id) && (device_gid2 != id))
+                    return false;
             }
+            return true;
+        }
     };
-
-
-
 }}}
 
-namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
-
-
+namespace hpx { namespace opencl { namespace util { namespace enqueue_overloads
+{
     // TODO implement check for correct device
     // This is the function that actually extrudes the GID from the futures.
     template<typename Future>
     hpx::naming::id_type
-    extrude_id(const Future & fut, hpx::naming::gid_type& device_id){
+    extrude_id(const Future & fut, hpx::naming::gid_type& device_id)
+    {
         typedef typename std::remove_reference<Future>::type::result_type
             result_type;
-        typedef typename hpx::opencl::lcos::event<result_type>::wrapped_type
+        typedef typename hpx::opencl::lcos::event<result_type>::shared_state_type
             event_type;
 
         auto shared_state = hpx::traits::detail::get_shared_state(fut);
+
+        HPX_ASSERT(boost::dynamic_pointer_cast<event_type>(shared_state).get());
         auto ev = boost::static_pointer_cast<event_type>(shared_state);
 
-        device_id = ev->get_device_gid();
+        HPX_ASSERT(device_id == ev->get_device_gid());
 
         auto event_id = ev->get_event_id();
         return event_id;
     }
-
-
-
-
 
     namespace detail
     {
@@ -90,7 +88,7 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
         {};
     }
 
-    // This function object switches its implementation depending on wether
+    // This function object switches its implementation depending on whether
     // the given value is a container or not
     template<bool is_vector>
     struct extrude_all_ids
@@ -104,7 +102,8 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
         void
         operator()(const T & t,
                    std::vector<hpx::naming::id_type> &event_ids,
-                   std::vector<hpx::naming::gid_type> &device_ids){
+                   std::vector<hpx::naming::gid_type> &device_ids) const
+        {
             hpx::naming::gid_type device_id;
             event_ids.push_back(std::move(extrude_id(t, device_id)));
             device_ids.push_back(std::move(device_id));
@@ -118,7 +117,8 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
         void
         operator()(const std::vector<T> & t_vec,
                    std::vector<hpx::naming::id_type> &event_ids,
-                   std::vector<hpx::naming::gid_type> &device_ids){
+                   std::vector<hpx::naming::gid_type> &device_ids) const
+        {
             for(const T & t : t_vec){
                 hpx::naming::gid_type device_id;
                 event_ids.push_back(std::move(extrude_id(t, device_id)));
@@ -139,7 +139,8 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     void
     resolver_impl(std::vector<hpx::naming::id_type>& event_ids,
                   std::vector<hpx::naming::gid_type>& device_ids,
-                  Dep&& dep){
+                  Dep&& dep)
+    {
         extrude_all_ids<detail::is_container<Dep>::value>()( dep, event_ids,
                                                                   device_ids);
     }
@@ -148,15 +149,14 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
     void
     resolver_impl(std::vector<hpx::naming::id_type>& event_ids,
                   std::vector<hpx::naming::gid_type>& device_ids,
-                  Dep&& dep, Deps&&... deps){
-
+                  Dep&& dep, Deps&&... deps)
+    {
         // process current dep
         extrude_all_ids<detail::is_container<Dep>::value>()( dep, event_ids,
                                                                   device_ids );
 
         // recursive call
         resolver_impl(event_ids, device_ids, std::forward<Deps>(deps)...);
-
     }
 
     template<typename ...Deps>
@@ -202,7 +202,5 @@ namespace hpx{ namespace opencl{ namespace util{ namespace enqueue_overloads{
 //     {                                                                           \
 //         return name##_caller<__VA_ARGS__>()(this, std::forward<Params>(params)...); \
 //     }
-
-
 
 #endif

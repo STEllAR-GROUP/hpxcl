@@ -284,33 +284,37 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
 
     // create local event
     using hpx::opencl::lcos::event;
-    event<buffer_type> ev( device_gid, data );
+    event<buffer_type> ev( device_gid );
 
     // send command to server class
-    typedef hpx::opencl::server::buffer
-        ::enqueue_read_to_userbuffer_local_action<T> func_local;
-    typedef hpx::opencl::server::buffer
-        ::enqueue_read_to_userbuffer_remote_action<T> func_remote;
-    if(!is_local){
+    if(!is_local) {
         // is remote call
 
+        typedef hpx::opencl::server::buffer
+            ::enqueue_read_to_userbuffer_remote_action<T> func_remote;
         hpx::apply<func_remote>( std::move(get_id()),
                                  std::move(ev.get_event_id()),
                                  offset,
                                  data.size() * sizeof(T),
-                                 reinterpret_cast<std::uintptr_t>
-                                    ( data.data() ),
+                                 reinterpret_cast<std::uintptr_t>(data.data()),
                                  std::move(deps.event_ids) );
 
-    } else {
-        // is local call, send direct reference to buffer
+        auto f = ev.get_future();
 
-        hpx::apply<func_local>( std::move(get_id()),
-                                std::move(ev.get_event_id()),
-                                offset,
-                                data,
-                                std::move(deps.event_ids) );
+        hpx::traits::detail::get_shared_state(f)->set_on_completed(
+            [data]() { /* just keep data alive */ });
+
+        return f;
     }
+
+    // is local call, send direct reference to buffer
+    typedef hpx::opencl::server::buffer
+        ::enqueue_read_to_userbuffer_local_action<T> func_local;
+    hpx::apply<func_local>( std::move(get_id()),
+                            std::move(ev.get_event_id()),
+                            offset,
+                            data,
+                            std::move(deps.event_ids) );
 
     // return future connected to event
     return ev.get_future();
@@ -334,32 +338,37 @@ hpx::opencl::buffer::enqueue_read_rect(
 
     // create local event
     using hpx::opencl::lcos::event;
-    event<buffer_type> ev( device_gid, data );
+    event<buffer_type> ev( device_gid );
 
     // send command to server class
-    typedef hpx::opencl::server::buffer
-        ::enqueue_read_to_userbuffer_rect_local_action<T> func_local;
-    typedef hpx::opencl::server::buffer
-        ::enqueue_read_to_userbuffer_rect_remote_action<T> func_remote;
-    if(!is_local){
+    if(!is_local) {
         // is remote call
 
+        typedef hpx::opencl::server::buffer
+            ::enqueue_read_to_userbuffer_rect_remote_action<T> func_remote;
         hpx::apply<func_remote>( std::move(get_id()),
                                  std::move(ev.get_event_id()),
                                  rect_properties,
-                                 reinterpret_cast<std::uintptr_t>
-                                    ( data.data() ),
+                                 reinterpret_cast<std::uintptr_t>(data.data()),
                                  std::move(deps.event_ids) );
 
-    } else {
-        // is local call, send direct reference to buffer
+        auto f = ev.get_future();
 
-        hpx::apply<func_local>( std::move(get_id()),
-                                std::move(ev.get_event_id()),
-                                rect_properties,
-                                data,
-                                std::move(deps.event_ids) );
+        hpx::traits::detail::get_shared_state(f)->set_on_completed(
+            [data]() { /* just keep data alive */ });
+
+        return f;
     }
+
+    // is local call, send direct reference to buffer
+
+    typedef hpx::opencl::server::buffer
+        ::enqueue_read_to_userbuffer_rect_local_action<T> func_local;
+    hpx::apply<func_local>( std::move(get_id()),
+                            std::move(ev.get_event_id()),
+                            rect_properties,
+                            data,
+                            std::move(deps.event_ids) );
 
     // return future connected to event
     return ev.get_future();

@@ -42,41 +42,41 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     // the data to result_buffer (zerocopy_buffer knows the address of the
     // result_buffer's data() member)
     // Then set result_buffer as data of this event.
-    template<typename T>
-    void set_zerocopy_data( hpx::naming::id_type event_id,
-                            hpx::opencl::lcos::zerocopy_buffer buf )
-    {
-        typedef hpx::serialization::serialize_buffer<T> buffer_type;
-        typedef hpx::lcos::base_lco_with_value<buffer_type> lco_type;
-        typedef typename hpx::opencl::lcos::event<buffer_type>::wrapped_type*
-            event_ptr;
+//     template <typename T>
+//     void set_zerocopy_data( hpx::naming::id_type event_id,
+//                             hpx::opencl::lcos::zerocopy_buffer buf )
+//     {
+//         typedef hpx::serialization::serialize_buffer<T> buffer_type;
+//         typedef hpx::lcos::base_lco_with_value<buffer_type> lco_type;
+//         typedef typename hpx::opencl::lcos::event<buffer_type>::shared_state_type
+//             event_ptr;
+//
+//         // Resolve address of lco
+//         hpx::naming::address lco_addr = agas::resolve(event_id).get();
+//
+//         // Ensure everything is correct
+//         HPX_ASSERT(hpx::get_locality() == lco_addr.locality_);
+//         HPX_ASSERT(traits::component_type_is_compatible<lco_type>::call(lco_addr));
+//
+//         // Get ptr to lco
+//         auto lco_ptr = hpx::get_lva<lco_type>::call(lco_addr.address_);
+//
+//         // Get ptr to event
+//         event_ptr event = static_cast<event_ptr>(lco_ptr);
+//
+//         // Trigger the event
+//         event->set_value(std::move(event->result_buffer));
+//     }
 
-        // Resolve address of lco
-        hpx::naming::address lco_addr = agas::resolve(event_id).get();
-
-        // Ensure everything is correct
-        HPX_ASSERT(hpx::get_locality() == lco_addr.locality_);
-        HPX_ASSERT(traits::component_type_is_compatible<lco_type>::call(lco_addr));
-
-        // Get ptr to lco
-        auto lco_ptr = hpx::get_lva<lco_type>::call(lco_addr.address_);
-
-        // Get ptr to event
-        event_ptr event = static_cast<event_ptr>(lco_ptr);
-
-        // Trigger the event
-        event->set_value(std::move(event->result_buffer));
-    }
-
-    // Action declaration
-    template <typename T>
-    struct set_zerocopy_data_action
-      : hpx::actions::make_direct_action<
-            void (*)( hpx::naming::id_type, hpx::opencl::lcos::zerocopy_buffer),
-            &set_zerocopy_data<T>,
-            set_zerocopy_data_action<T> 
-        >
-    {};
+//     // Action declaration
+//     template <typename T>
+//     struct set_zerocopy_data_action
+//       : hpx::actions::make_direct_action<
+//             void (*)( hpx::naming::id_type, hpx::opencl::lcos::zerocopy_buffer),
+//             &set_zerocopy_data<T>,
+//             set_zerocopy_data_action<T>
+//         >
+//     {};
 
     ///////////////////////////////////////////////////////////////////////////
     template <typename Result, typename RemoteResult>
@@ -96,20 +96,15 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
             unregister_event( device_id, event_id.get_gid() );
         }
 
-        void init(hpx::naming::id_type && device_id_, Result && result_buffer_)
+        void init(hpx::naming::id_type && device_id_)
         {
             device_id = std::move(device_id_);
-            result_buffer = std::move(result_buffer_);
         }
 
         void set_id(hpx::id_type const& id)
         {
             event_id = id;
         }
-
-    public:
-        // This holds the buffer that will get returned by the future.
-        Result result_buffer;
 
     public:
         hpx::naming::gid_type get_device_gid() const
@@ -153,6 +148,11 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         void init(hpx::naming::id_type && device_id_)
         {
             device_id = std::move(device_id_);
+        }
+
+        void set_id(hpx::id_type const& id)
+        {
+            event_id = id;
         }
 
     private:
@@ -214,7 +214,7 @@ namespace hpx { namespace opencl { namespace lcos
 {
     ///////////////////////////////////////////////////////////////////////////
     template <typename Result, typename RemoteResult>
-    class event 
+    class event
       : hpx::lcos::detail::promise_base<
             Result, RemoteResult, detail::event_data<Result, RemoteResult> >
     {
@@ -223,6 +223,7 @@ namespace hpx { namespace opencl { namespace lcos
             > base_type;
 
     public:
+        typedef typename base_type::shared_state_type shared_state_type;
         typedef Result result_type;
 
         /// Construct a new \a event instance. The supplied
@@ -237,11 +238,10 @@ namespace hpx { namespace opencl { namespace lcos
         ///               target for either of these actions has to be this
         ///               future instance (as it has to be sent along
         ///               with the action as the continuation parameter).
-        event(hpx::naming::id_type device_id, Result result_buffer = Result()) 
+        event(hpx::naming::id_type device_id)
           : base_type()
         {
-            this->shared_state_->init(std::move(device_id), 
-                std::move(result_buffer));
+            this->shared_state_->init(std::move(device_id));
         }
 
     public:
@@ -276,15 +276,16 @@ namespace hpx { namespace opencl { namespace lcos
     template <>
     class event<void, hpx::util::unused_type>
       : hpx::lcos::detail::promise_base<
-            void, hpx::util::unused_type, 
+            void, hpx::util::unused_type,
             detail::event_data<void, hpx::util::unused_type> >
     {
         typedef hpx::lcos::detail::promise_base<
-                void, hpx::util::unused_type, 
+                void, hpx::util::unused_type,
                 detail::event_data<void, hpx::util::unused_type>
             > base_type;
 
     public:
+        typedef base_type::shared_state_type shared_state_type;
         typedef hpx::util::unused_type result_type;
 
         /// Construct a new \a event instance. The supplied
