@@ -72,7 +72,7 @@ hpx_option(HPXCL_BUILD_TESTS BOOL "Build HPX tests (default: ON)" ON ADVANCED)
 hpx_option(HPXCL_WITH_DOCUMENTATION BOOL "The HPX documentation toolchain is available (default OFF)." OFF)
 #hpx_option(HPXCL_WITH_OPENCL BOOL "Builds the OPENCL part of HPXCL (default ON)." OFF)
 hpx_option(HPXCL_WITH_CUDA BOOL "Builds the CUDA part of HPXCL (default OFF)." OFF)
-hpx_option(HPXCL_BUILD_BENCHMARK BOOL "Builds the benchmark (default OFF)." OFF)
+hpx_option(HPXCL_WITH_BENCHMARK BOOL "Builds the benchmark (default OFF)." OFF)
 
 if(NOT HPXCL_WITH_OPENCL AND NOT HPXCL_WITH_CUDA)
     message(FATAL_ERROR "At least one of HPXCL_WITH_OPENCL or HPXCL_WITH_CUDA has to be set to ON")
