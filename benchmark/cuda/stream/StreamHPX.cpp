@@ -254,6 +254,11 @@ int main(int argc, char*argv[]) {
 	<< "-------------------------------------------------------------\n"
 	<< "This system uses " << sizeof(double)
 	<< " bytes per array element.\n"
+	 << "Memory per array = "
+	            << sizeof(double) * (size / 1024. / 1024.) << " MiB "
+	        << "(= "
+	            <<  sizeof(double) * (size / 1024. / 1024. / 1024.)
+	            << " GiB).\n"
 	<< "-------------------------------------------------------------\n"
 	<< "Each kernel will be executed " << iterations << " times.\n"
 	<< " The *best* time for each kernel (excluding the first iteration)\n"
@@ -277,11 +282,11 @@ int main(int argc, char*argv[]) {
 	};
 
 	const double bytes[4] = {
-	        2 * sizeof(double) * size,
-	        2 * sizeof(double) * size,
-	        3 * sizeof(double) * size,
-	        3 * sizeof(double) * size
-	    };
+		2 * sizeof(double) * size,
+		2 * sizeof(double) * size,
+		3 * sizeof(double) * size,
+		3 * sizeof(double) * size
+	};
 
 	// Note: skip first iteration
 	std::vector<double> avgtime(4, 0.0);
