@@ -56,4 +56,4 @@ foreach(example_program ${example_programs})
                               
 endforeach()
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernel.cu DESTINATION ../../benchmark/cuda/stencil)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernel.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/benchmark/cuda/stencil/)

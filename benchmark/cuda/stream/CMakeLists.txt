@@ -8,7 +8,7 @@
 ############################################################################
 
 set(example_programs
-   StreamHPX.cpp
+   StreamHPX
 )
 
 foreach(example_program ${example_programs})
@@ -37,3 +37,5 @@ foreach(example_program ${example_programs})
                               ${example_program}_exe)
                               
 endforeach()
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernels.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/benchmark/cuda/stream/)
