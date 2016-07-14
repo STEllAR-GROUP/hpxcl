@@ -5,7 +5,7 @@
 
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/iostreams.hpp>
-//#include <hpx/lcos/future.hpp>
+#include <hpx/version.hpp>
 
 #include <hpxcl/cuda.hpp>
 
@@ -239,14 +239,82 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 ///////////////////////////////////////////////////////////////////////////////
 int main(int argc, char*argv[]) {
 
-	if (argc != 2) {
+	if (argc != 3) {
 		std::cout << "Usage: " << argv[0] << " #elements" << std::endl;
 		exit(1);
 	}
 
 	size_t size = atoi(argv[1]);
+	size_t iterations = atoi(argv[2]);
 
-	run_benchmark(10,size);
+	std::cout
+	<< "-------------------------------------------------------------\n"
+	<< "Modified STREAM bechmark based on\nHPX version: "
+	<< hpx::build_string() << "\n"
+	<< "-------------------------------------------------------------\n"
+	<< "This system uses " << sizeof(double)
+	<< " bytes per array element.\n"
+	<< "-------------------------------------------------------------\n"
+	<< "Each kernel will be executed " << iterations << " times.\n"
+	<< " The *best* time for each kernel (excluding the first iteration)\n"
+	<< " will be used to compute the reported bandwidth.\n"
+	<< "-------------------------------------------------------------\n"
+	<< "Number of Threads requested = "
+	<< hpx::get_os_thread_count() << "\n"
+	<< "-------------------------------------------------------------\n";
+
+	double time_total = mysecond();
+	std::vector<std::vector<double> > timing;
+	timing = run_benchmark(10,size);
+	time_total = mysecond() - time_total;
+
+	/* --- SUMMARY --- */
+	const char *label[4] = {
+		"Copy:      ",
+		"Scale:     ",
+		"Add:       ",
+		"Triad:     "
+	};
+
+	const double bytes[4] = {
+	        2 * sizeof(double) * size,
+	        2 * sizeof(double) * size,
+	        3 * sizeof(double) * size,
+	        3 * sizeof(double) * size
+	    };
+
+	// Note: skip first iteration
+	std::vector<double> avgtime(4, 0.0);
+	std::vector<double> mintime(4, (std::numeric_limits<double>::max)());
+	std::vector<double> maxtime(4, 0.0);
+	for(std::size_t iteration = 1; iteration != iterations; ++iteration)
+	{
+		for (std::size_t j=0; j<4; j++)
+		{
+			avgtime[j] = avgtime[j] + timing[j][iteration];
+			mintime[j] = (std::min)(mintime[j], timing[j][iteration]);
+			maxtime[j] = (std::max)(maxtime[j], timing[j][iteration]);
+		}
+	}
+
+	printf("Function    Best Rate MB/s  Avg time     Min time     Max time\n");
+	for (std::size_t j=0; j<4; j++) {
+		avgtime[j] = avgtime[j]/(double)(iterations-1);
+
+		printf("%s%12.1f  %11.6f  %11.6f  %11.6f\n", label[j],
+				1.0E-06 * bytes[j]/mintime[j],
+				avgtime[j],
+				mintime[j],
+				maxtime[j]);
+	}
+
+	std::cout
+	<< "\nTotal time: " << time_total
+	<< " (per iteration: " << time_total/iterations << ")\n";
+
+	std::cout
+	<< "-------------------------------------------------------------\n"
+	;
 
 	return EXIT_SUCCESS;
 }
