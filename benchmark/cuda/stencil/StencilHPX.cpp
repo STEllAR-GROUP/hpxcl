@@ -70,7 +70,7 @@ int main(int argc, char*argv[]) {
 	data += timer_stop();
 
 	// Create the hello_world device program
-	program prog = cudaDevice.create_program_with_file("kernel.cu").get();
+	program prog = cudaDevice.create_program_with_file("kernel.cu");
 
 	//Add compiler flags for compiling the kernel
 	std::vector<std::string> flags;
@@ -89,10 +89,10 @@ int main(int argc, char*argv[]) {
 
 	timer_start();
 	// Create a buffer
-	buffer inBuffer = cudaDevice.create_buffer_sync(count[0] * sizeof(TYPE));
-	buffer sBuffer = cudaDevice.create_buffer_sync(3 * sizeof(TYPE));
-	buffer outBuffer = cudaDevice.create_buffer_sync(count[0] * sizeof(TYPE));
-	buffer lengthbuffer = cudaDevice.create_buffer_sync(sizeof(size_t));
+	buffer inBuffer = cudaDevice.create_buffer(count[0] * sizeof(TYPE));
+	buffer sBuffer = cudaDevice.create_buffer(3 * sizeof(TYPE));
+	buffer outBuffer = cudaDevice.create_buffer(count[0] * sizeof(TYPE));
+	buffer lengthbuffer = cudaDevice.create_buffer(sizeof(size_t));
 
 	// Copy input data to the buffer
 	data_futures.push_back(inBuffer.enqueue_write(0, count[0] * sizeof(TYPE),

@@ -3,30 +3,12 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-if(HPXCL_WITH_NAIVE_CUDA_BENCHMARK)
-	############################################################################
-	# Configure pure CUDA benchmarks
-	############################################################################
-	set(CUDA_PROPAGATE_HOST_FLAGS OFF)
-	SET(CUDA_NVCC_FLAGS "-use_fast_math; -gencode arch=compute_20,code=sm_20; 
-	-gencode arch=compute_20,code=sm_21; -gencode arch=compute_30,code=sm_30;
-	-gencode arch=compute_35,code=sm_35; -gencode arch=compute_50,code=sm_50;
-	-gencode arch=compute_52,code=sm_52; -gencode arch=compute_52,code=compute_52; -std=c++11" 
-	CACHE "NVCC_FLAGS" STRING FORCE) 
-
-	#Benchmark for single stencil kernel
-	CUDA_ADD_EXECUTABLE(StencilCuda StencilCUDA.cu)
-	#Benchmark for partitions
-	CUDA_ADD_EXECUTABLE(PartitionCuda PartitionCUDA.cu)
-endif()
-
 ############################################################################
 # Configure HPXCL benchmarks
 ############################################################################
 
 set(example_programs
-    StencilHPX
-    PartitionHPX
+   StreamHPX.cpp
 )
 
 foreach(example_program ${example_programs})
@@ -55,5 +37,3 @@ foreach(example_program ${example_programs})
                               ${example_program}_exe)
                               
 endforeach()
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernel.cu DESTINATION ../../benchmark/cuda/stencil)
