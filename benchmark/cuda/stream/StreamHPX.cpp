@@ -433,9 +433,9 @@ int main(int argc, char*argv[]) {
 
 	const double bytes[4] = {
 		(double)(2 * sizeof(double) * size),
-		2 * sizeof(double) * size,
-		3 * sizeof(double) * size,
-		3 * sizeof(double) * size
+		(double)(2 * sizeof(double) * size),
+		(double)(3 * sizeof(double) * size),
+		(double)(3 * sizeof(double) * size)
 	};
 
 	// Note: skip first iteration
