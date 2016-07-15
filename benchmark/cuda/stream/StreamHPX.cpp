@@ -11,6 +11,8 @@
 
 using namespace hpx::cuda;
 
+#define VERBOSE
+
 ///////////////////////////////////////////////////////////////////////////////
 double mysecond() {
 	return hpx::util::high_resolution_clock::now() * 1e-9;
@@ -40,6 +42,135 @@ int checktick() {
 	}
 
 	return (minDelta);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void check_results(size_t iterations, size_t size,  double* a,
+		 double* b,  double* c) {
+
+	double aj, bj, cj, scalar;
+	double aSumErr, bSumErr, cSumErr;
+	double aAvgErr, bAvgErr, cAvgErr;
+	double epsilon;
+	int ierr, err;
+
+	/* reproduce initialization */
+	aj = 1.0;
+	bj = 2.0;
+	cj = 0.0;
+	/* a[] is modified during timing check */
+	aj = 2.0E0 * aj;
+	/* now execute timing loop */
+	scalar = 3.0;
+	for (std::size_t k = 0; k < iterations; k++) {
+		cj = aj;
+		bj = scalar * cj;
+		cj = aj + bj;
+		aj = bj + scalar * cj;
+	}
+
+	/* accumulate deltas between observed and expected results */
+	aSumErr = 0.0;
+	bSumErr = 0.0;
+	cSumErr = 0.0;
+	for (std::size_t j = 0; j < size; j++) {
+		aSumErr += std::abs(a[j] - aj);
+		bSumErr += std::abs(b[j] - bj);
+		cSumErr += std::abs(c[j] - cj);
+		// if (j == 417) printf("Index 417: c[j]: %f, cj: %f\n",c[j],cj);   // MCCALPIN
+	}
+	aAvgErr = aSumErr / (double) size;
+	bAvgErr = bSumErr / (double) size;
+	cAvgErr = cSumErr / (double) size;
+
+	if (sizeof(double) == 4) {
+		epsilon = 1.e-6;
+	} else if (sizeof(double) == 8) {
+		epsilon = 1.e-13;
+	} else {
+		printf("WEIRD: sizeof(STREAM_TYPE) = %zu\n", sizeof(double));
+		epsilon = 1.e-6;
+	}
+
+	err = 0;
+	if (std::abs(aAvgErr / aj) > epsilon) {
+		err++;
+		printf("Failed Validation on array a[], AvgRelAbsErr > epsilon (%e)\n",
+				epsilon);
+		printf("     Expected Value: %e, AvgAbsErr: %e, AvgRelAbsErr: %e\n", aj,
+				aAvgErr, std::abs(aAvgErr) / aj);
+		ierr = 0;
+		for (std::size_t j = 0; j < size; j++) {
+			if (std::abs(a[j] / aj - 1.0) > epsilon) {
+				ierr++;
+#ifdef VERBOSE
+				if (ierr < 10) {
+					printf("         array a: index: %ld, expected: %e, "
+							"observed: %e, relative error: %e\n",
+							j,aj,a[j],std::abs((aj-a[j])/aAvgErr));
+				}
+#endif
+			}
+		}
+		printf("     For array a[], %d errors were found.\n", ierr);
+	}
+	if (std::abs(bAvgErr / bj) > epsilon) {
+		err++;
+		printf("Failed Validation on array b[], AvgRelAbsErr > epsilon (%e)\n",
+				epsilon);
+		printf("     Expected Value: %e, AvgAbsErr: %e, AvgRelAbsErr: %e\n", bj,
+				bAvgErr, std::abs(bAvgErr) / bj);
+		printf("     AvgRelAbsErr > Epsilon (%e)\n", epsilon);
+		ierr = 0;
+		for (std::size_t j = 0; j < size; j++) {
+			if (std::abs(b[j] / bj - 1.0) > epsilon) {
+				ierr++;
+#ifdef VERBOSE
+				if (ierr < 10) {
+					printf("         array b: index: %ld, expected: %e, "
+							"observed: %e, relative error: %e\n",
+							j,bj,b[j],std::abs((bj-b[j])/bAvgErr));
+				}
+#endif
+			}
+		}
+		printf("     For array b[], %d errors were found.\n", ierr);
+	}
+	if (std::abs(cAvgErr / cj) > epsilon) {
+		err++;
+		printf("Failed Validation on array c[], AvgRelAbsErr > epsilon (%e)\n",
+				epsilon);
+		printf("     Expected Value: %e, AvgAbsErr: %e, AvgRelAbsErr: %e\n", cj,
+				cAvgErr, std::abs(cAvgErr) / cj);
+		printf("     AvgRelAbsErr > Epsilon (%e)\n", epsilon);
+		ierr = 0;
+		for (std::size_t j = 0; j < size; j++) {
+			if (std::abs(c[j] / cj - 1.0) > epsilon) {
+				ierr++;
+#ifdef VERBOSE
+				if (ierr < 10) {
+					printf("         array c: index: %ld, expected: %e, "
+							"observed: %e, relative error: %e\n",
+							j,cj,c[j],std::abs((cj-c[j])/cAvgErr));
+				}
+#endif
+			}
+		}
+		printf("     For array c[], %d errors were found.\n", ierr);
+	}
+	if (err == 0) {
+		printf(
+				"Solution Validates: avg error less than %e on all three arrays\n",
+				epsilon);
+	}
+#ifdef VERBOSE
+	printf ("Results Validation Verbose Results: \n");
+	printf ("    Expected a(1), b(1), c(1): %f %f %f \n",aj,bj,cj);
+	printf ("    Observed a(1), b(1), c(1): %f %f %f \n",a[1],b[1],c[1]);
+	printf ("    Rel Errors on a, b, c:     %e %e %e \n",std::abs(aAvgErr/aj),
+			std::abs(bAvgErr/bj),std::abs(cAvgErr/cj));
+#endif
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,15 +225,22 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 	double* factor;
 
 	cudaMallocHost((void**) &a, sizeof(double) * size);
-	memset((void*) a, 1.0, sizeof(double) * size);
+	//cudaMemset((void*) a, 1.0, sizeof(double) * size);
 	cudaMallocHost((void**) &b, sizeof(double) * size);
-	memset((void*) b, 2.0, sizeof(double) * size);
+	//cudaMemset((void*) b, 2.0, sizeof(double) * size);
 	cudaMallocHost((void**) &c, sizeof(double) * size);
-	memset((void*) c, 3.0, sizeof(double) * size);
+	//cudaMemset((void*) c, 3.0, sizeof(double) * size);
 	cudaMallocHost((void**) &s, sizeof(size_t));
 	cudaMallocHost((void**) &factor, sizeof(double));
 	s[0] = size;
 	factor[0] = 2.;
+
+	for(size_t i = 0 ; i < size ; i++)
+	{
+		a[i] = 1.0;
+		b[i] = 2.0;
+		c[i] = 0.0;
+	}
 
 	//Allocate device buffer
 	buffer aBuffer = cudaDevice.create_buffer(size * sizeof(double));
@@ -186,13 +324,14 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 
 	factor[0] = 3.;
 	ffactor = fBuffer.enqueue_write(0, sizeof(double), factor);
-	hpx::wait_all(std::move(fk));
+	hpx::wait_all(ffactor);
 
 	for (std::size_t iteration = 0; iteration != iterations; ++iteration) {
 
 		// Copy
 		timing[0][iteration] = mysecond();
-		auto fcopy = cBuffer.enqueue_write(0, size * sizeof(double), a);
+		double* tmp = aBuffer.enqueue_read_sync<double>(0,size *sizeof(double));
+		auto fcopy = cBuffer.enqueue_write(0, size * sizeof(double), tmp);
 		hpx::wait_all(std::move(fcopy));
 		timing[0][iteration] = mysecond() - timing[0][iteration];
 
@@ -226,10 +365,22 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 		args.push_back(cBuffer);
 		args.push_back(aBuffer);
 		args.push_back(fBuffer);
-		fk = prog.run(args, "add_step", grid, block);
+		fk = prog.run(args, "triad_step", grid, block);
+		hpx::wait_all(fk);
 		timing[3][iteration] = mysecond() - timing[3][iteration];
 
 	}
+
+	double* resa = aBuffer.enqueue_read_sync<double>(0,size *sizeof(double));
+	double* resb = bBuffer.enqueue_read_sync<double>(0,size *sizeof(double));
+	double* resc = cBuffer.enqueue_read_sync<double>(0,size *sizeof(double));
+
+
+
+	check_results(iterations, size, resa, resb, resc);
+
+	std::cout
+			<< "-------------------------------------------------------------\n";
 
 	return timing;
 }
@@ -254,11 +405,11 @@ int main(int argc, char*argv[]) {
 	<< "-------------------------------------------------------------\n"
 	<< "This system uses " << sizeof(double)
 	<< " bytes per array element.\n"
-	 << "Memory per array = "
-	            << sizeof(double) * (size / 1024. / 1024.) << " MiB "
-	        << "(= "
-	            <<  sizeof(double) * (size / 1024. / 1024. / 1024.)
-	            << " GiB).\n"
+	<< "Memory per array = "
+	<< sizeof(double) * (size / 1024. / 1024.) << " MiB "
+	<< "(= "
+	<< sizeof(double) * (size / 1024. / 1024. / 1024.)
+	<< " GiB).\n"
 	<< "-------------------------------------------------------------\n"
 	<< "Each kernel will be executed " << iterations << " times.\n"
 	<< " The *best* time for each kernel (excluding the first iteration)\n"
@@ -270,7 +421,7 @@ int main(int argc, char*argv[]) {
 
 	double time_total = mysecond();
 	std::vector<std::vector<double> > timing;
-	timing = run_benchmark(10,size);
+	timing = run_benchmark(iterations,size);
 	time_total = mysecond() - time_total;
 
 	/* --- SUMMARY --- */
