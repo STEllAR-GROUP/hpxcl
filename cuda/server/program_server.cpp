@@ -41,6 +41,7 @@ program::program(hpx::naming::id_type device_id,
 
 program::~program() {
 
+	cudaSetDevice(this->parent_device_id);
 	nvrtcDestroyProgram(&prog);
 	checkCudaError("program::~program Destroy Program");
 
@@ -60,6 +61,7 @@ void program::set_source(std::string source) {
 void program::build(std::vector<std::string> compilerFlags,
 		std::vector<std::string> modulenames, unsigned int debug) {
 
+	cudaSetDevice(this->parent_device_id);
 	boost::uuids::uuid uuid = boost::uuids::random_generator()();
 	std::string filename = to_string(uuid);
 	filename.append(".cu");
