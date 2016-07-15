@@ -225,11 +225,8 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 	double* factor;
 
 	cudaMallocHost((void**) &a, sizeof(double) * size);
-	//cudaMemset((void*) a, 1.0, sizeof(double) * size);
 	cudaMallocHost((void**) &b, sizeof(double) * size);
-	//cudaMemset((void*) b, 2.0, sizeof(double) * size);
 	cudaMallocHost((void**) &c, sizeof(double) * size);
-	//cudaMemset((void*) c, 3.0, sizeof(double) * size);
 	cudaMallocHost((void**) &s, sizeof(size_t));
 	cudaMallocHost((void**) &factor, sizeof(double));
 	s[0] = size;
@@ -271,13 +268,15 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 	hpx::cuda::server::program::Dim3 grid;
 	hpx::cuda::server::program::Dim3 block;
 
+	size_t threads_per_block = std::min(1024,(int)size);
+
 	//Set the values for the grid dimension
-	grid.x = 1;
+	grid.x =  (size + threads_per_block - 1) / threads_per_block;
 	grid.y = 1;
 	grid.z = 1;
 
 	//Set the values for the block dimension
-	block.x = 32;
+	block.x = threads_per_block;
 	block.y = 1;
 	block.z = 1;
 
@@ -433,7 +432,7 @@ int main(int argc, char*argv[]) {
 	};
 
 	const double bytes[4] = {
-		2 * sizeof(double) * size,
+		(double)(2 * sizeof(double) * size),
 		2 * sizeof(double) * size,
 		3 * sizeof(double) * size,
 		3 * sizeof(double) * size
