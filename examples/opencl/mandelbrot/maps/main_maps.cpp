@@ -91,7 +91,7 @@ int hpx_main(boost::program_options::variables_map & vm)
 
         while(true)
         {
-            hpx::this_thread::sleep_for(boost::posix_time::milliseconds(1000));
+            hpx::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
 
         webserver.stop();
