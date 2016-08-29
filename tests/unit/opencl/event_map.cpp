@@ -74,21 +74,21 @@ static void cl_test( hpx::opencl::device local_device,
         hpx::future<cl_event> thread1_2 = get_async(id);
         hpx::future<cl_event> thread2_1 = get_async(id2);
 
-        hpx::this_thread::sleep_for(boost::chrono::milliseconds(100));
+        hpx::this_thread::sleep_for(std::chrono::milliseconds(100));
         HPX_TEST(!thread1_1.is_ready());
         HPX_TEST(!thread1_2.is_ready());
         HPX_TEST(!thread2_1.is_ready());
 
         map->add(id2, event2);
 
-        hpx::this_thread::sleep_for(boost::chrono::milliseconds(100));
+        hpx::this_thread::sleep_for(std::chrono::milliseconds(100));
         HPX_TEST(!thread1_1.is_ready());
         HPX_TEST(!thread1_2.is_ready());
         HPX_TEST(thread2_1.is_ready());
 
         map->add(id, event);
 
-        hpx::this_thread::sleep_for(boost::chrono::milliseconds(100));
+        hpx::this_thread::sleep_for(std::chrono::milliseconds(100));
         HPX_TEST(thread1_1.is_ready());
         HPX_TEST(thread1_2.is_ready());
         HPX_TEST(thread2_1.is_ready());

@@ -183,7 +183,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         }
 
         hpx::lcos::future_status
-        wait_until(boost::chrono::steady_clock::time_point const& abs_time,
+        wait_until(hpx::util::steady_clock::time_point const& abs_time,
             error_code& ec = throws)
         {
             this->execute_deferred();

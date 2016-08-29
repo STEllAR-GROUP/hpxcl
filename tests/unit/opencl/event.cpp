@@ -26,7 +26,7 @@ void cl_test( hpx::opencl::device cldevice, hpx::opencl::device )
 
     future.wait();
 
-    hpx::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    hpx::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     hpx::cout << gid << hpx::endl;
     hpx::cout << gid2 << hpx::endl;

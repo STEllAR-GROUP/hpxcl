@@ -94,7 +94,7 @@ static void remote_test( hpx::opencl::device cldevice )
 {
 
     // get location id
-    auto locality = hpx::get_colocation_id_sync(cldevice.get_id());
+    auto locality = hpx::get_colocation_id(hpx::launch::sync, cldevice.get_id());
 
     // remotely create a program
     hpx::opencl::program program =

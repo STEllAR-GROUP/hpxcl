@@ -61,14 +61,14 @@ namespace opencl {
               : base_type(gid), device_gid(std::move(device_gid_))
             {
                 is_local =
-                    (hpx::get_colocation_id_sync(get_id()) == hpx::find_here());
+                    (hpx::get_colocation_id(hpx::launch::sync, get_id()) == hpx::find_here());
             }
 
             buffer(hpx::future<hpx::naming::id_type> && gid)
               : base_type(std::move(gid)), device_gid()
             {
                 is_local =
-                    (hpx::get_colocation_id_sync(get_id()) == hpx::find_here());
+                    (hpx::get_colocation_id(hpx::launch::sync, get_id()) == hpx::find_here());
             }
 
             // initialization
@@ -246,7 +246,7 @@ namespace opencl {
                 ar >> hpx::serialization::base_object<base_type>(*this);
                 ar >> device_gid;
                 is_local =
-                    (hpx::get_colocation_id_sync(get_id()) == hpx::find_here());
+                    (hpx::get_colocation_id(hpx::launch::sync, get_id()) == hpx::find_here());
             }
 
             template <typename Archive>
