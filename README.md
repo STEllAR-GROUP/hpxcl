@@ -32,13 +32,26 @@ mkdir build && cd build
 cmake \
 -DHPX_ROOT=/home/diehl/opt/hpx/ \
 -DHPXCL_WITH_CUDA=ON \
--DCUDA_TOOLKIT_ROOT_DIR=/opt/packages/cuda-7.0/ 
+-DCUDA_TOOLKIT_ROOT_DIR=/opt/packages/cuda-7.0/	\
+..
 ```
 
 OpenCl
 ==
 
-The OpenCL support will not be further maintaned, but the code will be available. 
+Prerequisties:
+
+- OpenCl >= 1.1
+
+Building:
+```
+mkdir build && cd build
+cmake	\
+-DHPX_ROOT=/home/diehl/opt/hpx	\
+-DHPXCL_WITH_OPENCL=ON \
+..
+```
+
 
 Options
 ==
