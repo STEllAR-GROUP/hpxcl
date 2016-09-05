@@ -15,7 +15,7 @@ namespace cuda {
 
 /**
 * \brief Device memory.
-* 
+*
 * Every buffer belongs to one \ref device.
 */
 class buffer: public hpx::components::client_base<buffer, cuda::server::buffer> {
@@ -28,7 +28,7 @@ public:
 	buffer(hpx::future<hpx::naming::id_type> && gid) :
 			base_type(std::move(gid)) {
 
-		is_local = (hpx::get_colocation_id_sync(get_id()) == hpx::find_here());
+		is_local = (hpx::get_colocation_id(hpx::launch::sync, get_id()) == hpx::find_here());
 	}
 
 	/**

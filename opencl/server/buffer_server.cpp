@@ -30,7 +30,7 @@ static void buffer_cleanup(uintptr_t device_mem_ptr)
 {
     cl_int err;
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_mem device_mem = reinterpret_cast<cl_mem>(device_mem_ptr);
 
@@ -48,7 +48,7 @@ buffer::~buffer()
 
     hpx::threads::executors::default_executor exec(
                                           hpx::threads::thread_priority_normal,
-                                          hpx::threads::thread_stacksize_large);
+                                          hpx::threads::thread_stacksize_medium);
 
     // run dectructor in a thread, as we need it to run on a large stack size
     hpx::async( exec, &buffer_cleanup, reinterpret_cast<uintptr_t>(device_mem))
@@ -57,13 +57,18 @@ buffer::~buffer()
 
 }
 
+// Returns the parent device
+hpx::naming::id_type buffer::get_parent_device_id()
+{
+    return parent_device_id;
+}
 
 void
 buffer::init( hpx::naming::id_type device_id, cl_mem_flags flags,
                                               std::size_t size)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     this->parent_device_id = std::move(device_id);
     this->parent_device = hpx::get_ptr
@@ -92,7 +97,7 @@ std::size_t
 buffer::size()
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     std::size_t size;
     cl_int err;
@@ -112,7 +117,7 @@ buffer::enqueue_read( hpx::naming::id_type && event_gid,
                       std::size_t size,
                       std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
@@ -157,7 +162,7 @@ buffer::send_bruteforce( hpx::naming::id_type && dst,
                          std::vector<hpx::naming::id_type> && dst_dependencies)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     ////////////////////////////////////////////////////////////////////////////
     // Read
@@ -213,7 +218,7 @@ buffer::send_direct( hpx::naming::id_type && dst,
                      std::vector<hpx::naming::id_type> && dst_dependencies)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
     cl_event return_event;
@@ -258,12 +263,12 @@ void
 buffer::send_rect_bruteforce( hpx::naming::id_type && dst,
                               hpx::naming::id_type && src_event_gid,
                               hpx::naming::id_type && dst_event_gid,
-                              rect_props && rect_properties,
+                              hpx::opencl::rect_props && rect_properties,
                               std::vector<hpx::naming::id_type> && src_dependencies,
                               std::vector<hpx::naming::id_type> && dst_dependencies)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     ////////////////////////////////////////////////////////////////////////////
     // Read
@@ -318,7 +323,7 @@ buffer::send_rect_bruteforce( hpx::naming::id_type && dst,
     // Write
     //
 
-    rect_props dst_rect_properties (
+    hpx::opencl::rect_props dst_rect_properties (
         0, 0, 0,
         rect_properties.dst_x,
         rect_properties.dst_y,
@@ -345,12 +350,12 @@ buffer::send_rect_direct( hpx::naming::id_type && dst,
                               dst_buffer,
                           hpx::naming::id_type && src_event_gid,
                           hpx::naming::id_type && dst_event_gid,
-                          rect_props && rect_properties,
+                          hpx::opencl::rect_props && rect_properties,
                           std::vector<hpx::naming::id_type> && src_dependencies,
                           std::vector<hpx::naming::id_type> && dst_dependencies)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
     cl_event return_event;
@@ -413,7 +418,7 @@ void
 buffer::enqueue_send_rect( hpx::naming::id_type dst,
                            hpx::naming::id_type && src_event,
                            hpx::naming::id_type && dst_event,
-                           rect_props rect_properties,
+                           hpx::opencl::rect_props rect_properties,
                            std::vector<hpx::naming::id_type> && dependencies,
                            std::vector<hpx::naming::gid_type> &&
                                 dependency_devices )

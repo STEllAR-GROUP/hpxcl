@@ -13,6 +13,18 @@
 
 using hpx::opencl::program;
 
+void program::ensure_device_id() const
+{
+    if (!device_gid)
+    {
+        typedef
+            hpx::opencl::server::program::get_parent_device_id_action
+            action_type;
+        HPX_ASSERT(this->get_id());
+        device_gid = async<action_type>(this->get_id()).get();
+    }
+}
+
 void
 program::build() const
 {
@@ -58,10 +70,11 @@ program::create_kernel(std::string kernel_name) const
     HPX_ASSERT(this->get_id());
 
     typedef hpx::opencl::server::program::create_kernel_action func;
-    
+
     hpx::future<hpx::id_type> kernel_server =
                                  hpx::async<func>(this->get_id(), kernel_name);
 
+    ensure_device_id();
     return kernel(std::move(kernel_server), device_gid);
 
 }

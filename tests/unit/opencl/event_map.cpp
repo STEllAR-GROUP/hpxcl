@@ -14,15 +14,15 @@ using hpx::naming::id_type;
 
 static hpx::opencl::server::util::event_map *map;
 
-static std::atomic<ulong> id_counter(1);
+static std::atomic<unsigned long> id_counter(1);
 static id_type next_id(){
-    return id_type(0, id_counter++, id_type::management_type::unmanaged); 
+    return id_type(0, id_counter++, id_type::management_type::unmanaged);
 }
 
 static std::atomic<size_t> num_deleted;
 static void deletion_callback(cl_event e){
     num_deleted++;
-    hpx::cout << "deletion_callback: " << (long) e << hpx::endl;
+    hpx::cout << "deletion_callback: " << (std::size_t) e << hpx::endl;
 }
 
 static std::size_t count_deleted(){
@@ -54,14 +54,14 @@ static void cl_test( hpx::opencl::device local_device,
         cl_event event = (cl_event)id.get_lsb();
 
         map->add(id, event);
-        
+
         HPX_TEST_EQ(map->get(id), event);
 
         HPX_TEST_EQ(count_deleted(), 0);
         map->remove(id.get_gid());
         HPX_TEST_EQ(count_deleted(), 1);
     }
-        
+
     // Test reverse get functionality
     {
         id_type id = next_id();
@@ -74,21 +74,21 @@ static void cl_test( hpx::opencl::device local_device,
         hpx::future<cl_event> thread1_2 = get_async(id);
         hpx::future<cl_event> thread2_1 = get_async(id2);
 
-        hpx::this_thread::sleep_for(boost::chrono::milliseconds(100));
+        hpx::this_thread::sleep_for(std::chrono::milliseconds(100));
         HPX_TEST(!thread1_1.is_ready());
         HPX_TEST(!thread1_2.is_ready());
         HPX_TEST(!thread2_1.is_ready());
 
         map->add(id2, event2);
 
-        hpx::this_thread::sleep_for(boost::chrono::milliseconds(100));
+        hpx::this_thread::sleep_for(std::chrono::milliseconds(100));
         HPX_TEST(!thread1_1.is_ready());
         HPX_TEST(!thread1_2.is_ready());
         HPX_TEST(thread2_1.is_ready());
 
         map->add(id, event);
 
-        hpx::this_thread::sleep_for(boost::chrono::milliseconds(100));
+        hpx::this_thread::sleep_for(std::chrono::milliseconds(100));
         HPX_TEST(thread1_1.is_ready());
         HPX_TEST(thread1_2.is_ready());
         HPX_TEST(thread2_1.is_ready());
@@ -96,13 +96,13 @@ static void cl_test( hpx::opencl::device local_device,
         HPX_TEST_EQ(thread1_1.get(), event);
         HPX_TEST_EQ(thread1_2.get(), event);
         HPX_TEST_EQ(thread2_1.get(), event2);
-        
+
         HPX_TEST_EQ(count_deleted(), 0);
         map->remove(id.get_gid());
         map->remove(id2.get_gid());
         HPX_TEST_EQ(count_deleted(), 2);
     }
-    
+
 
     // Test deletion.
     delete map;

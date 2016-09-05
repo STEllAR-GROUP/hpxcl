@@ -46,6 +46,7 @@ typedef hpx::opencl::server::program program_type;
 typedef hpx::components::managed_component<program_type> program_component_type;
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(program_component_type, hpx_opencl_program);
 
+HPX_REGISTER_ACTION(program_type::get_parent_device_id_action);
 HPX_REGISTER_ACTION(program_type::build_action);
 HPX_REGISTER_ACTION(program_type::get_binary_action);
 HPX_REGISTER_ACTION(program_type::create_kernel_action);
@@ -56,6 +57,7 @@ typedef hpx::opencl::server::kernel kernel_type;
 typedef hpx::components::managed_component<kernel_type> kernel_component_type;
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(kernel_component_type, hpx_opencl_kernel);
 
+HPX_REGISTER_ACTION(kernel_type::get_parent_device_id_action);
 HPX_REGISTER_ACTION(kernel_type::set_arg_action);
 HPX_REGISTER_ACTION(kernel_type::enqueue_action);
 

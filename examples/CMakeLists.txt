@@ -5,16 +5,15 @@
 
 set(subdirs "")
 
-#if(HPXCL_WITH_OPENCL)
-#  set(subdirs
-#    ${subdirs} opencl)
-#endif()
+if(HPXCL_WITH_OPENCL)
+  set(subdirs
+    ${subdirs} opencl)
+endif()
 
 if(HPXCL_WITH_CUDA)
   set(subdirs
     ${subdirs} cuda)
 endif()
-
 
 foreach(subdir ${subdirs})
     add_hpx_pseudo_target(examples.${subdir})

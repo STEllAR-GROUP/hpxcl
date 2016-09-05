@@ -9,30 +9,25 @@
 void cl_test( hpx::opencl::device cldevice, hpx::opencl::device )
 {
     typedef hpx::opencl::lcos::event<void> event_type;
-    typedef typename event_type::wrapped_type shared_state_type;
-
+    typedef typename event_type::shared_state_type shared_state_type;
 
     event_type event(cldevice.get_id());
-
-
 
     auto future = event.get_future();
     auto future_data = hpx::traits::detail::get_shared_state(future);
     auto shared_state = boost::static_pointer_cast<shared_state_type>(future_data);
 
-
     auto gid2 = shared_state->get_event_id();
     auto gid = event.get_event_id();
-    
+
     register_event(cldevice, gid);
 
     HPX_TEST_EQ(gid, gid2);
 
     future.wait();
 
-    hpx::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    hpx::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     hpx::cout << gid << hpx::endl;
     hpx::cout << gid2 << hpx::endl;
-
 }

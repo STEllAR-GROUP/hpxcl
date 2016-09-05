@@ -48,13 +48,13 @@ static void send_test( hpx::opencl::device device1,
         device2.create_buffer(CL_MEM_READ_WRITE, test_data.size());
 
     std::string name = "send_";
-    
-    if(hpx::get_colocation_id_sync(device1.get_id()) == hpx::find_here())
+
+    if(hpx::get_colocation_id(hpx::launch::sync, device1.get_id()) == hpx::find_here())
         name += "local_";
     else
         name += "remote_";
 
-    if(hpx::get_colocation_id_sync(device2.get_id()) == hpx::find_here())
+    if(hpx::get_colocation_id(hpx::launch::sync, device2.get_id()) == hpx::find_here())
         name += "local";
     else
         name += "remote";
@@ -66,7 +66,7 @@ static void send_test( hpx::opencl::device device1,
 //    atts["size"] = std::to_string(test_data.size());
     atts["iterations"] = std::to_string(num_iterations);
     results.start_test(name, "ms", atts);
-    
+
 
     while(results.needs_more_testing())
     {
@@ -74,7 +74,7 @@ static void send_test( hpx::opencl::device device1,
         hpx::future<void> fut = buffer1.enqueue_write(0, test_data);
 
         fut.wait();
- 
+
         // RUN!
         hpx::util::high_resolution_timer walltime;
         for(std::size_t it = 0; it < num_iterations; it ++)
@@ -96,11 +96,11 @@ static void send_test( hpx::opencl::device device1,
         const double duration = walltime.elapsed();
 
         // Check if data is still valid
-        ensure_valid(buffer2.enqueue_read(0, test_data.size()).get()); 
+        ensure_valid(buffer2.enqueue_read(0, test_data.size()).get());
 
         // Calculate overhead
         const double overhead = duration * 1000.0 / num_iterations;
-        
+
         results.add(overhead);
     }
 
@@ -112,11 +112,11 @@ static void wait_test( hpx::opencl::device device )
     hpx::opencl::buffer buffer =
         device.create_buffer(CL_MEM_READ_WRITE, test_data.size());
 
-    
+
     std::string name = "wait_";
 
 
-    if(hpx::get_colocation_id_sync(device.get_id()) == hpx::find_here())
+    if(hpx::get_colocation_id(hpx::launch::sync, device.get_id()) == hpx::find_here())
         name += "local";
     else
         name += "remote";
@@ -125,7 +125,7 @@ static void wait_test( hpx::opencl::device device )
 //    atts["size"] = std::to_string(test_data.size());
     atts["iterations"] = std::to_string(num_iterations);
     results.start_test(name, "ms", atts);
-   
+
     while(results.needs_more_testing())
     {
         // initialize the buffer
@@ -162,7 +162,7 @@ static void wait_test( hpx::opencl::device device )
 
         // Calculate overhead
         const double overhead = duration * 1000.0 / num_iterations;
-        
+
         results.add(overhead);
     }
 
@@ -174,11 +174,11 @@ static void write_test( hpx::opencl::device device , bool sync )
     hpx::opencl::buffer buffer =
         device.create_buffer(CL_MEM_READ_WRITE, test_data.size());
 
-    
+
     std::string name = "write_";
 
 
-    if(hpx::get_colocation_id_sync(device.get_id()) == hpx::find_here())
+    if(hpx::get_colocation_id(hpx::launch::sync, device.get_id()) == hpx::find_here())
         name += "local";
     else
         name += "remote";
@@ -190,7 +190,7 @@ static void write_test( hpx::opencl::device device , bool sync )
 //    atts["size"] = std::to_string(test_data.size());
     atts["iterations"] = std::to_string(num_iterations);
     results.start_test(name, "ms", atts);
-   
+
     while(results.needs_more_testing())
     {
         // initialize the buffer
@@ -227,11 +227,11 @@ static void write_test( hpx::opencl::device device , bool sync )
         const double duration = walltime.elapsed();
 
         // Check if data is still valid
-        ensure_valid(buffer.enqueue_read(0, test_data.size()).get()); 
+        ensure_valid(buffer.enqueue_read(0, test_data.size()).get());
 
         // Calculate overhead
         const double overhead = duration * 1000.0 / num_iterations;
-        
+
         results.add(overhead);
     }
 
@@ -244,11 +244,11 @@ static void read_test( hpx::opencl::device device , bool sync )
     hpx::opencl::buffer buffer =
         device.create_buffer(CL_MEM_READ_WRITE, test_data.size());
 
-    
+
     std::string name = "read_";
 
 
-    if(hpx::get_colocation_id_sync(device.get_id()) == hpx::find_here())
+    if(hpx::get_colocation_id(hpx::launch::sync, device.get_id()) == hpx::find_here())
         name += "local";
     else
         name += "remote";
@@ -260,7 +260,7 @@ static void read_test( hpx::opencl::device device , bool sync )
 //    atts["size"] = std::to_string(test_data.size());
     atts["iterations"] = std::to_string(num_iterations);
     results.start_test(name, "ms", atts);
-   
+
     while(results.needs_more_testing())
     {
         // initialize the buffer
@@ -268,7 +268,7 @@ static void read_test( hpx::opencl::device device , bool sync )
                                 buffer_type::init_mode::take );
         std::copy( test_data.data(), test_data.data()+test_data.size(),
                    write_buf.data() );
-                
+
         buffer.enqueue_write(0, write_buf).get();
 
         hpx::future<buffer_type> fut;
@@ -299,11 +299,11 @@ static void read_test( hpx::opencl::device device , bool sync )
         const double duration = walltime.elapsed();
 
         // Check if data is still valid
-        ensure_valid(write_buf); 
+        ensure_valid(write_buf);
 
         // Calculate throughput
         const double overhead = duration * 1000.0 / num_iterations;
-        
+
         results.add(overhead);
     }
 
@@ -321,9 +321,9 @@ static void cl_test(hpx::opencl::device local_device,
 
     // Get localities
     hpx::naming::id_type remote_location =
-        hpx::get_colocation_id_sync(remote_device.get_id());
+        hpx::get_colocation_id(hpx::launch::sync, remote_device.get_id());
     hpx::naming::id_type local_location =
-        hpx::get_colocation_id_sync(local_device.get_id());
+        hpx::get_colocation_id(hpx::launch::sync, local_device.get_id());
     if(local_location != hpx::find_here())
         die("Internal ERROR! local_location is not here.");
 
@@ -357,11 +357,11 @@ static void cl_test(hpx::opencl::device local_device,
         // Run write test
         write_test(remote_device, false);
         write_test(remote_device, true);
-    
+
         // Run read test
         read_test(remote_device, false);
         read_test(remote_device, true);
-    
+
         // Run read test
         send_test(local_device,  remote_device, false);
         send_test(local_device,  remote_device, true);

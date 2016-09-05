@@ -18,8 +18,7 @@
 static void register_event(hpx::opencl::device cldevice,
                            const hpx::naming::id_type & event_id)
 {
-
-    boost::shared_ptr<hpx::opencl::server::device>
+    std::shared_ptr<hpx::opencl::server::device>
     parent_device = hpx::get_ptr<hpx::opencl::server::device>
                         (cldevice.get_id()).get();
 
@@ -28,7 +27,8 @@ static void register_event(hpx::opencl::device cldevice,
     cl_event event_cl = clCreateUserEvent (
             parent_device->get_context(),
             &err);
-    cl_ensure(err, "clEnqueueWriteBuffer()");
+    cl_ensure(err, "clCreateUserEvent()");
+
     err = clSetUserEventStatus(event_cl, CL_COMPLETE);
     cl_ensure(err, "clSetUserEventStatus()");
 

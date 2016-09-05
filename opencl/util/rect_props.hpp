@@ -15,13 +15,13 @@
 #include "../export_definitions.hpp"
 
 namespace hpx {
-namespace opencl { 
+namespace opencl {
 
     //////////////////////////////////////
     /// @brief Metadata vector for _rect copy operations
     ///
     /// This structure is used for Rect data copy functions.
-    /// 
+    ///
     struct rect_props
     {
         public:
@@ -103,7 +103,7 @@ namespace opencl {
         private:
             // serialization support
             friend class hpx::serialization::access;
-    
+
             ///////////////////////////////////////////////////////////////////////
             template <typename Archive>
             void save(Archive& ar, const unsigned int version) const
@@ -122,7 +122,7 @@ namespace opencl {
                 ar << dst_stride_y;
                 ar << dst_stride_z;
             }
-    
+
             ///////////////////////////////////////////////////////////////////////
             template <typename Archive>
             void load(Archive& ar, const unsigned int version)
@@ -141,7 +141,7 @@ namespace opencl {
                 ar >> dst_stride_y;
                 ar >> dst_stride_z;
             }
-    
+
             HPX_SERIALIZATION_SPLIT_MEMBER()
     };
 
@@ -150,4 +150,4 @@ namespace opencl {
 
 #endif// HPX_OPENCL_UTIL_RECT_PROPS_HPP_
 
-            
+

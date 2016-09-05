@@ -22,10 +22,16 @@ function(embed_resources)
         set(OUTPUT_FILE "${OUTPUT_PATH}/${RESOURCE_NAME}.cpp")
 
         # set the build variable
+        if(MSVC)
+            set(_output_dir ${CMAKE_BINARY_DIR}/$(Configuration)/embed_resources.exe)
+        else()
+            set(_output_dir ${CMAKE_BINARY_DIR}/embed_resources)
+        endif()
+
         add_custom_command(
             OUTPUT ${OUTPUT_FILE}
             COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_PATH}"
-            COMMAND ${CMAKE_BINARY_DIR}/embed_resources ${RESOURCE_NAME} ${OUTPUT_FILE} ${EMBED_RESOURCES_NAMESPACE}
+            COMMAND ${_output_dir} ${RESOURCE_NAME} ${OUTPUT_FILE} ${EMBED_RESOURCES_NAMESPACE}
             COMMENT "Compiling ${RESOURCE_FILE} to C++ source"
             DEPENDS embed_resources
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${RESOURCE_PATH}"

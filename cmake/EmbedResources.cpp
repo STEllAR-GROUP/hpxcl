@@ -46,7 +46,7 @@ int main(int argc, const char** argv)
     const char* iname = argv[1];
     const char* oname = argv[2];
     const char* ns = ((argc >= 4)?(argv[3]):"");
-    
+
     // calculate the char array variable name
     std::string varname(iname);
     std::replace_if(varname.begin(), varname.end(), is_not_alnum, '_');
@@ -81,7 +81,7 @@ int main(int argc, const char** argv)
     }
 
     // write all bytes to the array
-    ofile << "extern const char " << varname << "[] = \"\"";
+    ofile << "extern const char " << varname << "[] = {";
     unsigned long numchars = 0;
     unsigned char c = ifile.get();
     while(ifile.good()){
@@ -90,17 +90,17 @@ int main(int argc, const char** argv)
         }
         numchars++;
 
-        ofile << "\"\\x" << std::hex << std::setw(2) << std::setfill('0')
-              << (int)c << "\"";
+        ofile << "'\\x" << std::hex << std::setw(2) << std::setfill('0')
+              << (int)c << "',";
         c = ifile.get();
     }
-    ofile << ";" << std::endl;
+    ofile << "\n};" << std::endl;
 
     // write the array length
     ofile << "extern const unsigned long " << varname << "_len = " << std::dec << std::setw(0)
           << std::setfill(' ') << numchars << ";" << std::endl;
 
-        
+
     // close namespace brackets
     for(std::size_t i = 0; i < namespaces.size(); i++)
     {

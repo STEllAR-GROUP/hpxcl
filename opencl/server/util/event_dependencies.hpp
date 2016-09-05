@@ -15,12 +15,12 @@
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{ namespace util{
-    
+
 
     ////////////////////////////////////////////////////////
     // This class is used to convert event ids to cl_events
     //
-    class event_dependencies
+    class HPX_OPENCL_EXPORT event_dependencies
     {
     public:
         // Constructor
@@ -37,7 +37,7 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         //
         // Returns NULL if size() == 0
         cl_event* get_cl_events();
-    
+
         // Returns the number of events in this list
         std::size_t size();
 

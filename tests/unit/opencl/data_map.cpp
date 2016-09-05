@@ -25,9 +25,9 @@ static void cl_test( hpx::opencl::device local_device,
     cl_event event = (cl_event)5;
 
     // Make sure the promise did not get triggered yet
-    hpx::this_thread::sleep_for(boost::chrono::milliseconds(100));
+    hpx::this_thread::sleep_for(std::chrono::milliseconds(100));
     HPX_TEST(!future.is_ready());
-    
+
     {
         // Create some data
         buffer_type buffer("Test", sizeof("Test"), buffer_type::init_mode::copy);
@@ -46,14 +46,14 @@ static void cl_test( hpx::opencl::device local_device,
     }
 
     // Make sure the promise did not get triggered yet
-    hpx::this_thread::sleep_for(boost::chrono::milliseconds(100));
+    hpx::this_thread::sleep_for(std::chrono::milliseconds(100));
     HPX_TEST(!future.is_ready());
 
     // Trigger the promise
     map.get(event).send_data_to_client(promise.get_id());
-    
+
     // Make sure the promise got triggered
-    hpx::this_thread::sleep_for(boost::chrono::milliseconds(100));
+    hpx::this_thread::sleep_for(std::chrono::milliseconds(100));
     HPX_TEST(future.is_ready());
 
     // Make sure the data is correct

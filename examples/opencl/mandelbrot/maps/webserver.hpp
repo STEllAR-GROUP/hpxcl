@@ -7,11 +7,13 @@
 #define HPXCL_MANDELBROT_WEBSERVER_HPP_
 
 #include <hpx/hpx.hpp>
+#include <hpx/config/asio.hpp>
 #include <hpx/include/runtime.hpp>
 #include "requesthandler.hpp"
 
 #include <boost/asio.hpp>
 
+#include <memory>
 
 namespace hpx { namespace opencl { namespace examples { namespace mandelbrot {
 
@@ -40,12 +42,12 @@ private:
     // gets called when a new connection got established
     void new_connection_callback(
                         const boost::system::error_code & error,
-                        boost::shared_ptr<boost::asio::ip::tcp::socket> socket);
+                        std::shared_ptr<boost::asio::ip::tcp::socket> socket);
 
     // starts reading a new line from a socket, async call
     void start_reading_line_from_socket(
-                        boost::shared_ptr<boost::asio::streambuf> buffer,
-                        boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
+                        std::shared_ptr<boost::asio::streambuf> buffer,
+                        std::shared_ptr<boost::asio::ip::tcp::socket> socket,
                         size_t lines_read,
                         std::string requested_filename);
 
@@ -53,14 +55,14 @@ private:
     void new_line_read_callback(
                         const boost::system::error_code & error,
                         size_t bytes_transferred,
-                        boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
-                        boost::shared_ptr<boost::asio::streambuf> buffer,
+                        std::shared_ptr<boost::asio::ip::tcp::socket> socket,
+                        std::shared_ptr<boost::asio::streambuf> buffer,
                         size_t lines_read,
                         std::string requested_filename);
 
     // callback, closes the socket and returns.
     // keeps data alive until the write finishes
-    void close_socket(boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
+    void close_socket(std::shared_ptr<boost::asio::ip::tcp::socket> socket,
                       boost::any keepalive_data);
 
     // keeps data alive until the write finishes
@@ -68,15 +70,15 @@ private:
 
     // sends '500 Server Error' and closes the socket
     void send_server_error_and_close(
-                        boost::shared_ptr<boost::asio::ip::tcp::socket> socket);
+                        std::shared_ptr<boost::asio::ip::tcp::socket> socket);
 
     // sends '400 Bad Request' and closes the socket
     void send_bad_request_and_close(
-                        boost::shared_ptr<boost::asio::ip::tcp::socket> socket);
+                        std::shared_ptr<boost::asio::ip::tcp::socket> socket);
 
     // sends '404 Not Found' and closes the socket
     void send_not_found_and_close(
-                        boost::shared_ptr<boost::asio::ip::tcp::socket> socket);
+                        std::shared_ptr<boost::asio::ip::tcp::socket> socket);
 
     // reads the first http request line.
     // returns the queried filename or "" if an error occured
@@ -84,25 +86,25 @@ private:
 
     // gets called once per request.
     // this function reads the filename and creates a corresponding answer.
-    void process_request(boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
+    void process_request(std::shared_ptr<boost::asio::ip::tcp::socket> socket,
                          std::string filename);
 
     // sends data to the client and sends '100 Continue'
-    void send_data(boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
+    void send_data(std::shared_ptr<boost::asio::ip::tcp::socket> socket,
                    const char* content_type,
                    const char* data,
                    size_t data_size);
-    
+
     // sends data to the client and sends '100 Continue'
     void send_data(
-                         boost::shared_ptr<boost::asio::ip::tcp::socket> socket,
+                         std::shared_ptr<boost::asio::ip::tcp::socket> socket,
                          const char* content_type,
-                         boost::shared_ptr<std::vector<char>> data);
+                         std::shared_ptr<std::vector<char>> data);
 
     // checks wether a socket is connected or not
     bool is_socket_still_connected(
-                        boost::shared_ptr<boost::asio::ip::tcp::socket> socket);
-    
+                        std::shared_ptr<boost::asio::ip::tcp::socket> socket);
+
 
 private:
     requesthandler * req_handler;

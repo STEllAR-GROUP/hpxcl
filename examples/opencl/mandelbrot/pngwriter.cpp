@@ -45,11 +45,11 @@ my_png_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
 
 #define die(func, msg) {                                              \
     HPX_THROW_EXCEPTION(hpx::no_success, (func), (msg));              \
-} 
+}
 
 
 
-static mem_encode save_png_to_mem(boost::shared_ptr< std::vector<char> > data, size_t width, size_t height)
+static mem_encode save_png_to_mem(std::shared_ptr< std::vector<char> > data, size_t width, size_t height)
 {
 
     png_structp png_ptr = NULL;
@@ -69,7 +69,7 @@ static mem_encode save_png_to_mem(boost::shared_ptr< std::vector<char> > data, s
     if (info_ptr == NULL) {
         png_destroy_write_struct(&png_ptr, NULL);
         die("png_create_info_stuct()", "Returned NULL");
-    } 
+    }
 
     /* Set up error handling. */
     if (setjmp(png_jmpbuf(png_ptr))) {
@@ -93,19 +93,19 @@ static mem_encode save_png_to_mem(boost::shared_ptr< std::vector<char> > data, s
     row_pointers = (png_byte **)png_malloc(png_ptr, height * sizeof(png_byte *));
     for (y = 0; y < height; ++y) {
         row_pointers[y] = (png_byte *)(data->data() + 3*y*width);
-    } 
-    
+    }
+
 
     /* static */
     struct mem_encode state;
-    
+
     /* initialise - put this before png_write_png() call */
     state.buffer = NULL;
     state.size = 0;
-    
+
     /* if my_png_flush() is not needed, change the arg to NULL */
     png_set_write_fn(png_ptr, &state, my_png_write_data, NULL);
-    
+
     /* the actual write */
     png_set_rows(png_ptr, info_ptr, row_pointers);
     png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
@@ -115,15 +115,15 @@ static mem_encode save_png_to_mem(boost::shared_ptr< std::vector<char> > data, s
 
     /* Finish writing. */
     png_destroy_write_struct(&png_ptr, &info_ptr);
-    
+
     /* now state.buffer contains the PNG image of size s.size bytes */
-    
+
     return state;
 
 }
 
 
-boost::shared_array<char> create_png(boost::shared_ptr< std::vector<char> > data, size_t width, size_t height, size_t * size)
+boost::shared_array<char> create_png(std::shared_ptr< std::vector<char> > data, size_t width, size_t height, size_t * size)
 {
 
     // Create png in memory
@@ -136,7 +136,7 @@ boost::shared_array<char> create_png(boost::shared_ptr< std::vector<char> > data
     *size = png_data.size;
 
     // return the png
-    return png;    
+    return png;
 
 }
 
@@ -145,7 +145,7 @@ void png_write_to_file(boost::shared_array<char> png, size_t png_size, const cha
 
     // Open file
     std::ofstream file(filename, std::ios::out | std::ios::binary | std::ios::trunc);
-    
+
     // Ensure that file is open
     if(!file.is_open())
     {
@@ -154,17 +154,17 @@ void png_write_to_file(boost::shared_array<char> png, size_t png_size, const cha
 
     // Write to file
     file.write(png.get(), png_size);
-    
+
     // Close file
     file.close();
 
 }
 
-void save_png(boost::shared_ptr< std::vector<char> > data, size_t width, size_t height, const char* filename)
+void save_png(std::shared_ptr< std::vector<char> > data, size_t width, size_t height, const char* filename)
 {
-    
+
     size_t png_size;
-    
+
     boost::shared_array<char> png = create_png(data, width, height, &png_size);
 
     png_write_to_file(png, png_size, filename);

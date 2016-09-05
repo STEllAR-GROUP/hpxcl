@@ -29,12 +29,12 @@ static kernel   hpxcl_single_add_kernel;
 static kernel   hpxcl_single_dbl_kernel;
 
 
-static void hpxcl_single_initialize( hpx::naming::id_type node_id, 
+static void hpxcl_single_initialize( hpx::naming::id_type node_id,
                                      size_t vector_size)
 {
 
     // Query all devices on local node
-    std::vector<device> devices = create_devices( node_id, 
+    std::vector<device> devices = create_devices( node_id,
                                                   CL_DEVICE_TYPE_GPU,
                                                   "OpenCL 1.1" ).get();
 
@@ -43,7 +43,7 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
     hpx::cout << "Devices:" << hpx::endl;
     for(cl_uint i = 0; i < devices.size(); i++)
     {
-        
+
         device cldevice = devices[i];
 
         // Query name
@@ -72,7 +72,7 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
     // print device
     hpx::cout << "Device:" << hpx::endl;
     {
-        
+
         device cldevice = devices[device_id];
 
         // Query name
@@ -105,7 +105,7 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
     hpxcl_single_mul_kernel = hpxcl_single_program.create_kernel("mul");
     hpxcl_single_add_kernel = hpxcl_single_program.create_kernel("add");
     hpxcl_single_dbl_kernel = hpxcl_single_program.create_kernel("dbl");
- 
+
     // Generate buffers
     hpxcl_single_buffer_a = hpxcl_single_device.create_buffer(
                                     CL_MEM_READ_ONLY,
@@ -140,7 +140,7 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
         hpxcl_single_exp_kernel.set_arg_async(0, hpxcl_single_buffer_m));
     set_arg_futures.push_back(
         hpxcl_single_exp_kernel.set_arg_async(1, hpxcl_single_buffer_b));
-    
+
     // set kernel args for add
     set_arg_futures.push_back(
         hpxcl_single_add_kernel.set_arg_async(0, hpxcl_single_buffer_n));
@@ -154,7 +154,7 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
         hpxcl_single_dbl_kernel.set_arg_async(0, hpxcl_single_buffer_o));
     set_arg_futures.push_back(
         hpxcl_single_dbl_kernel.set_arg_async(1, hpxcl_single_buffer_c));
-    
+
     // set kernel args for mul
     set_arg_futures.push_back(
         hpxcl_single_mul_kernel.set_arg_async(0, hpxcl_single_buffer_p));
@@ -162,16 +162,16 @@ static void hpxcl_single_initialize( hpx::naming::id_type node_id,
         hpxcl_single_mul_kernel.set_arg_async(1, hpxcl_single_buffer_n));
     set_arg_futures.push_back(
         hpxcl_single_mul_kernel.set_arg_async(2, hpxcl_single_buffer_o));
-    
+
     // set kernel args for log
     set_arg_futures.push_back(
         hpxcl_single_log_kernel.set_arg_async(0, hpxcl_single_buffer_z));
     set_arg_futures.push_back(
         hpxcl_single_log_kernel.set_arg_async(1, hpxcl_single_buffer_p));
-    
+
     // wait for function calls to trigger
     hpx::wait_all( set_arg_futures );
-    
+
 
 }
 
@@ -239,7 +239,7 @@ hpxcl_single_calculate(hpx::serialization::serialize_buffer<float> a,
 
     // get total time of execution
     *t_finish = timer_stop();
- 
+
     // enqueue result read
     typedef hpx::serialization::serialize_buffer<float> buffer_type;
     buffer_type result_buffer ( new float[size], size,
@@ -250,7 +250,7 @@ hpxcl_single_calculate(hpx::serialization::serialize_buffer<float> a,
 
     // wait for calculation to complete and return data
     return read_event.get();
-   
+
 }
 
 static void hpxcl_single_shutdown()
@@ -275,7 +275,7 @@ static void hpxcl_single_shutdown()
 
     // release program
     hpxcl_single_program = program();
-    
+
     // delete device
     hpxcl_single_device = device();
 

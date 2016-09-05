@@ -22,7 +22,7 @@
 #include "util/server_definitions.hpp"
 #include "../util/rect_props.hpp"
 
-namespace hpx { namespace opencl{ namespace server{
+namespace hpx { namespace opencl { namespace server {
 
     // /////////////////////////////////////////////////////
     //  This class represents an opencl buffer.
@@ -257,15 +257,15 @@ HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, size);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_read);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_send);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(buffer, enqueue_send_rect);
-HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer, enqueue_write);
-HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer, enqueue_write_rect);
-HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
+HPX_OPENCL_TEMPLATE_ACTION_USES_MEDIUM_STACK(buffer, enqueue_write);
+HPX_OPENCL_TEMPLATE_ACTION_USES_MEDIUM_STACK(buffer, enqueue_write_rect);
+HPX_OPENCL_TEMPLATE_ACTION_USES_MEDIUM_STACK(buffer,
                                             enqueue_read_to_userbuffer_local);
-HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
+HPX_OPENCL_TEMPLATE_ACTION_USES_MEDIUM_STACK(buffer,
                                             enqueue_read_to_userbuffer_remote);
-HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
+HPX_OPENCL_TEMPLATE_ACTION_USES_MEDIUM_STACK(buffer,
                                             enqueue_read_to_userbuffer_rect_local);
-HPX_OPENCL_TEMPLATE_ACTION_USES_LARGE_STACK(buffer,
+HPX_OPENCL_TEMPLATE_ACTION_USES_MEDIUM_STACK(buffer,
                                             enqueue_read_to_userbuffer_rect_remote);
 //]
 
@@ -290,7 +290,7 @@ hpx::opencl::server::buffer::enqueue_write(
                        hpx::serialization::serialize_buffer<T> data,
                        std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
     cl_event return_event;
@@ -325,7 +325,7 @@ hpx::opencl::server::buffer::enqueue_write_rect(
                        hpx::serialization::serialize_buffer<T> data,
                        std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
     cl_event return_event;
@@ -335,7 +335,7 @@ hpx::opencl::server::buffer::enqueue_write_rect(
 
     // retrieve the command queue
     cl_command_queue command_queue = parent_device->get_write_command_queue();
-    
+
     // prepare arguments for OpenCL call
     std::size_t host_origin[] = { rect_properties.src_x * sizeof(T),
                                   rect_properties.src_y,
@@ -383,7 +383,7 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_local(
                        hpx::serialization::serialize_buffer<T> data,
                        std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
     cl_event return_event;
@@ -421,7 +421,7 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote(
     std::uintptr_t remote_data_addr,
     std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
@@ -463,10 +463,11 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_remote(
     parent_device->wait_for_cl_event(return_event);
 
     // send the zerocopy_buffer to the lcos::event
-    typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
-        set_data_func;
-    hpx::apply_colocated<set_data_func>(event_gid, event_gid, zerocopy_buffer);
+//     typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
+//         set_data_func;
+//     hpx::apply_colocated<set_data_func>(event_gid, event_gid, zerocopy_buffer);
 
+    hpx::set_lco_value(event_gid, std::move(zerocopy_buffer));
 }
 
 template <typename T>
@@ -477,7 +478,7 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_local(
                        hpx::serialization::serialize_buffer<T> data,
                        std::vector<hpx::naming::id_type> && dependencies ){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
     cl_event return_event;
@@ -544,7 +545,7 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_remote(
     // - send the data and extract it to the correct position in the
     //   remote destination buffer via zero-copy send
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
 
@@ -606,10 +607,11 @@ hpx::opencl::server::buffer::enqueue_read_to_userbuffer_rect_remote(
     parent_device->wait_for_cl_event(return_event);
 
     // send the zerocopy_buffer to the lcos::event
-    typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
-        set_data_func;
-    hpx::apply_colocated<set_data_func>(event_gid, event_gid, zerocopy_buffer);
+//     typedef hpx::opencl::lcos::detail::set_zerocopy_data_action<T>
+//         set_data_func;
+//     hpx::apply_colocated<set_data_func>(event_gid, event_gid, zerocopy_buffer);
 
+    hpx::set_lco_value(event_gid, std::move(zerocopy_buffer));
 }
 
 

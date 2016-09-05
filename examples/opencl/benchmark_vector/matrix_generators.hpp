@@ -25,7 +25,7 @@ generate_input_matrix(size_t size)
     // initialize random generator if necessary
     if(!random_initialized)
     {
-        srand(time(NULL));
+        std::srand((unsigned)std::time(nullptr));
         random_initialized = true;
     }
 

@@ -25,23 +25,23 @@
 
 
 namespace hpx {
-namespace opencl { 
+namespace opencl {
 
     ////////////////////////
     /// @brief Kernel execution dimensions.
     ///
-    /// This structure offers an alternative way to set and reuse kernel 
+    /// This structure offers an alternative way to set and reuse kernel
     /// execution dimensions.
-    /// 
+    ///
     /// Example:
     /// \code{.cpp}
     ///     // Create work_size object
-    ///     hpx::opencl::work_size<1> dim;                                           
+    ///     hpx::opencl::work_size<1> dim;
     ///
-    ///     // Set dimensions. 
-    ///     dim[0].offset = 0;                                                       
-    ///     dim[0].size = 2048; 
-    ///     
+    ///     // Set dimensions.
+    ///     dim[0].offset = 0;
+    ///     dim[0].size = 2048;
+    ///
     ///     // Set local work size.
     ///     // This can be left out.
     ///     // OpenCL will then automatically determine the best local work size.
@@ -82,7 +82,7 @@ namespace opencl {
     class HPX_OPENCL_EXPORT kernel
       : public hpx::components::client_base<kernel, server::kernel>
     {
-    
+
         typedef hpx::components::client_base<kernel, server::kernel> base_type;
 
         public:
@@ -94,13 +94,17 @@ namespace opencl {
                     hpx::naming::id_type device_gid_)
               : base_type(gid), device_gid(std::move(device_gid_))
             {}
-            
+
+            kernel(hpx::future<hpx::naming::id_type> && gid)
+              : base_type(std::move(gid)), device_gid()
+            {}
+
             // initialization
-            
+
 
             // ///////////////////////////////////////////////
             // Exposed Component functionality
-            // 
+            //
 
             /**
              *  @brief Sets a kernel argument
@@ -143,9 +147,12 @@ namespace opencl {
             enqueue_impl( std::vector<std::size_t> && size_vec,
                           hpx::opencl::util::resolved_events && deps ) const;
 
- 
+
+        protected:
+            void ensure_device_id() const;
+
         private:
-            hpx::naming::id_type device_gid;
+            mutable hpx::naming::id_type device_gid;
 
         private:
             // serialization support
@@ -154,6 +161,7 @@ namespace opencl {
             template <typename Archive>
             void serialize(Archive & ar, unsigned)
             {
+                HPX_ASSERT(device_gid);
                 ar & hpx::serialization::base_object<base_type>(*this);
                 ar & device_gid;
             }
@@ -171,11 +179,13 @@ hpx::future<void>
 hpx::opencl::kernel::enqueue( hpx::opencl::work_size<DIM> size,
                              Deps &&... dependencies ) const
 {
+    ensure_device_id();
+
     // combine dependency futures in one std::vector
     using hpx::opencl::util::enqueue_overloads::resolver;
     auto deps = resolver(std::forward<Deps>(dependencies)...);
     HPX_ASSERT(deps.are_from_device(device_gid));
- 
+
     // extract information from work_size struct
     std::vector<std::size_t> size_vec(3*DIM);
     for(std::size_t i = 0; i < DIM; i++){
@@ -187,6 +197,6 @@ hpx::opencl::kernel::enqueue( hpx::opencl::work_size<DIM> size,
     // forward to enqueue_impl
     return enqueue_impl( std::move(size_vec), std::move(deps) );
 
-} 
+}
 
 #endif

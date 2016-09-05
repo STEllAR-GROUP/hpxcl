@@ -45,6 +45,9 @@ namespace hpx { namespace opencl{ namespace server{
         /// Exposed functionality of this component
         ///
 
+        // Returns the parent device
+        hpx::naming::id_type get_parent_device_id();
+
         // builds the program.
         // mutually exclusive to compile() and link().
         void build(std::string options);
@@ -55,9 +58,10 @@ namespace hpx { namespace opencl{ namespace server{
         // creates a kernel from the buffer
         hpx::naming::id_type create_kernel(std::string kernel_name);
 
-    HPX_DEFINE_COMPONENT_ACTION(program, build);
-    HPX_DEFINE_COMPONENT_ACTION(program, get_binary);
-    HPX_DEFINE_COMPONENT_ACTION(program, create_kernel);
+        HPX_DEFINE_COMPONENT_ACTION(program, get_parent_device_id);
+        HPX_DEFINE_COMPONENT_ACTION(program, build);
+        HPX_DEFINE_COMPONENT_ACTION(program, get_binary);
+        HPX_DEFINE_COMPONENT_ACTION(program, create_kernel);
 
         //////////////////////////////////////////////////
         // Private Member Functions
@@ -84,6 +88,7 @@ namespace hpx { namespace opencl{ namespace server{
 }}}
 
 //[opencl_management_registration_declarations
+HPX_OPENCL_REGISTER_ACTION_DECLARATION(program, get_parent_device_id);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(program, build);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(program, get_binary);
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(program, create_kernel);

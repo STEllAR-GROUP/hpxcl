@@ -35,12 +35,6 @@ namespace opencl {
 
 }}
 
-
-
-
-
-
-
 #endif
 
 

@@ -8,7 +8,6 @@
 
 #include <hpxcl/opencl.hpp>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
@@ -17,7 +16,9 @@
 
 #include <hpx/lcos/local/event.hpp>
 
-/* 
+#include <memory>
+
+/*
  * a worker.
  * will ask the workqueue for new work until the workqueue finishes.
  * this is the only class that actually uses the hpxcl.
@@ -29,9 +30,9 @@ class mandelbrotworker
         // initializes the worker
         mandelbrotworker(hpx::opencl::device device_,
                          size_t num_workers,
-                         boost::function<bool(boost::shared_ptr<workload>*)>
+                         boost::function<bool(std::shared_ptr<workload>*)>
                          request_new_work,
-                         boost::function<void(boost::shared_ptr<workload>&)>
+                         boost::function<void(std::shared_ptr<workload>&)>
                          deliver_done_work,
                          bool verbose,
                          size_t workpacket_size_hint_x,
@@ -42,7 +43,7 @@ class mandelbrotworker
 
         // waits for the worker to finish initialization
         void wait_for_startup_finished();
-        
+
         // destructor, basically waits for the worker to finish
         ~mandelbrotworker();
 
@@ -68,9 +69,9 @@ class mandelbrotworker
         const unsigned int id;
         hpx::opencl::device device;
         hpx::lcos::shared_future<void> worker_finished;
-        boost::shared_ptr<hpx::lcos::local::event> worker_initialized;
-        boost::function<bool(boost::shared_ptr<workload>*)> request_new_work;
-        boost::function<void(boost::shared_ptr<workload>&)> deliver_done_work;
+        std::shared_ptr<hpx::lcos::local::event> worker_initialized;
+        boost::function<bool(std::shared_ptr<workload>*)> request_new_work;
+        boost::function<void(std::shared_ptr<workload>&)> deliver_done_work;
 };
 
 #endif

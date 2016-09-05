@@ -24,10 +24,10 @@ endif()
 
 #add -std=gnu++11 to the debug flags
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	if (CMAKE_COMPILER_IS_GNUCC)
-		 SET(CMAKE_CXX_FLAGS_DEBUG "-ggdb -D_DEBUG -O0 -std=gnu++11" CACHE STRING)
-	endif()
-endif() 
+    if (CMAKE_COMPILER_IS_GNUCC)
+        SET(CMAKE_CXX_FLAGS_DEBUG "-ggdb -D_DEBUG -O0 -std=gnu++11" CACHE STRING)
+    endif()
+endif()
 
 ########################################################################
 # Include hpx
@@ -70,7 +70,7 @@ include(EmbedResources)
 hpx_option(HPXCL_BUILD_EXAMPLES BOOL "Build HPX examples (default: ON)" ON ADVANCED)
 hpx_option(HPXCL_BUILD_TESTS BOOL "Build HPX tests (default: ON)" ON ADVANCED)
 hpx_option(HPXCL_WITH_DOCUMENTATION BOOL "The HPX documentation toolchain is available (default OFF)." OFF)
-#hpx_option(HPXCL_WITH_OPENCL BOOL "Builds the OPENCL part of HPXCL (default ON)." OFF)
+hpx_option(HPXCL_WITH_OPENCL BOOL "Builds the OPENCL part of HPXCL (default ON)." OFF)
 hpx_option(HPXCL_WITH_CUDA BOOL "Builds the CUDA part of HPXCL (default OFF)." OFF)
 hpx_option(HPXCL_WITH_BENCHMARK BOOL "Builds the benchmark (default OFF)." OFF)
 hpx_option(HPXCL_WITH_NAIVE_CUDA_BENCHMARK BOOL "Builds the naive CUDA benchmark (default OFF)." OFF)
@@ -82,13 +82,12 @@ endif()
 ########################################################################
 # further includes, depending on config
 #
-#if(HPXCL_WITH_OPENCL)
-#    find_package(OpenCL REQUIRED)
-#    include_directories(${OPENCL_INCLUDE_DIRS})
+if(HPXCL_WITH_OPENCL)
+    find_package(OpenCL REQUIRED)
+    include_directories(${OPENCL_INCLUDE_DIRS})
     #get_filename_component(PARENT_DIR ${OPENCL_LIBRARIES} OPENCL_LIBRARY_DIR)
-    #link_directories(${OPENCL_LIBRARY_DIR})
-    
-#endif()
+    link_directories(${OPENCL_LIBRARY_DIR})
+endif()
 
 if(HPXCL_WITH_CUDA)
     find_package(CUDA 7.0 REQUIRED)
@@ -96,13 +95,13 @@ if(HPXCL_WITH_CUDA)
     include_directories(${CUDA_INCLUDE_DIRS})
 endif()
 
-#Only search for PNG lib, if HPXCL_WITH_OPENCL is build
-#if(HPXCL_BUILD_EXAMPLES AND HPXCL_WITH_OPENCL)
-#    find_package(PNG)
-#    if(PNG_FOUND)
-#        include_directories(${PNG_INCLUDE_DIRS})
-#    endif()
-#endif()
+# Only search for PNG lib, if HPXCL_WITH_OPENCL is build
+if(HPXCL_BUILD_EXAMPLES AND HPXCL_WITH_OPENCL)
+    find_package(PNG)
+    if(PNG_FOUND)
+        include_directories(${PNG_INCLUDE_DIRS})
+    endif()
+endif()
 
 if(MSVC)
   hpx_add_compile_flag(-Ox CONFIGURATIONS Release LANGUAGES CXX C)
@@ -115,11 +114,22 @@ if(MSVC)
   # VS2013 and above know how to do link time constant data segment folding
   # VS2013 update 2 and above know how to remove debug information for
   #     non-referenced functions and data (-Zc:inline)
-  if(MSVC12 OR MSVC13)
+  if(MSVC12 OR MSVC14)
     hpx_add_compile_flag(-Zc:inline)
     hpx_add_compile_flag(-Gw CONFIGURATIONS Release RelWithDebInfo MinSizeRelease)
     hpx_add_compile_flag(-Zo CONFIGURATIONS RelWithDebInfo)
   endif()
+
+  if(MSVC14)
+    # assume conforming (throwing) operator new implementations
+    hpx_add_target_compile_option(-Zc:throwingNew)
+
+    # enable faster linking (requires VS2015 Update1)
+    # disabled for now as this flag crashes debugger
+    # hpx_remove_link_flag(/debug CONFIGURATIONS Debug)
+    # hpx_add_link_flag(/debug:fastlink CONFIGURATIONS Debug)
+  endif()
+
   hpx_add_compile_flag(-EHsc)       # Exceptions
   hpx_add_compile_flag(-GR)         # Runtime type information
   hpx_add_compile_flag(-MP)         # Multiprocessor build
@@ -132,9 +142,9 @@ endif()
 #
 
 # build opencl
-#if(HPXCL_WITH_OPENCL)
-#    add_subdirectory(opencl)
-#endif()
+if(HPXCL_WITH_OPENCL)
+    add_subdirectory(opencl)
+endif()
 
 # build cuda
 if(HPXCL_WITH_CUDA)
@@ -151,40 +161,42 @@ endif()
 
 if(HPXCL_WITH_DOCUMENTATION)
   include(HPX_Documentation)
-  hpx_option(HPX_BUILD_DOCUMENTATION_SINGLEPAGE BOOL "The HPX documentation should be build as a single page HTML (default OFF)." OFF)
+  hpx_option(HPX_BUILD_DOCUMENTATION_SINGLEPAGE BOOL
+    "The HPX documentation should be build as a single page HTML (default OFF)." OFF)
   add_subdirectory(docs)
 endif()
 
 if(HPXCL_WITH_BENCHMARK)
-	add_hpx_pseudo_target(benchmark)
-	include_directories(benchmark)
+    add_hpx_pseudo_target(benchmark)
+    include_directories(benchmark)
     add_subdirectory(benchmark)
 endif()
 
 ###############################################################################
 
-#if(HPXCL_BUILD_TESTS)
-#
-#  file(COPY ${HPX_ROOT}/bin/hpxrun.py DESTINATION ${PROJECT_BINARY_DIR}/bin)
-#
-#  hpx_option(HPXCL_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
-#  hpx_option(HPXCL_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
-#  hpx_option(HPXCL_BUILD_TESTS_UNIT BOOL "Build HPX unit tests (default: ON)" ON ADVANCED)
-#
-#  add_hpx_pseudo_target(tests)
-#
-#  enable_testing()
-#  include(CTest)
-#
-#  add_custom_command(TARGET tests POST_BUILD
-#    COMMAND ctest --output-on-failure)
-#
-#  include_directories(tests)
-#  add_subdirectory(tests)
-#else()
+if(HPXCL_BUILD_TESTS)
+  file(COPY ${HPX_PREFIX}/bin/hpxrun.py DESTINATION ${PROJECT_BINARY_DIR}/bin)
+
+  hpx_option(HPXCL_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
+  hpx_option(HPXCL_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
+  hpx_option(HPXCL_BUILD_TESTS_UNIT BOOL "Build HPX unit tests (default: ON)" ON ADVANCED)
+
+  add_hpx_pseudo_target(tests)
+
+  enable_testing()
+  include(CTest)
+
+  if(HPX_WITH_PSEUDO_DEPENDENCIES)
+    add_custom_command(TARGET tests POST_BUILD
+      COMMAND ctest --output-on-failure)
+  endif()
+
+  include_directories(tests)
+  add_subdirectory(tests)
+else()
   unset(HPXCL_BUILD_TESTS_BENCHMARKS CACHE)
   unset(HPXCL_BUILD_TESTS_REGRESSIONS CACHE)
   unset(HPXCL_BUILD_TESTS_UNIT CACHE)
-#endif()
+endif()
 
 

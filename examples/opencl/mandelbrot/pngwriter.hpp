@@ -9,13 +9,13 @@
 
 #include <cstdlib>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/shared_array.hpp>
 
 // writes data to png file
-void save_png(boost::shared_ptr< std::vector<char> > data, size_t width, size_t height, const char* filename);
+void save_png(std::shared_ptr< std::vector<char> > data, size_t width, size_t height, const char* filename);
 
-boost::shared_array<char> create_png(boost::shared_ptr< std::vector<char> > data, size_t width, size_t height, size_t * size);
+boost::shared_array<char> create_png(std::shared_ptr< std::vector<char> > data, size_t width, size_t height, size_t * size);
 
 void png_write_to_file(boost::shared_array<char> png, size_t png_size, const char* filename);
 

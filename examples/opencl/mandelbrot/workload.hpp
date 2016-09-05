@@ -6,12 +6,12 @@
 #ifndef MANDELBROT_WORKLOAD_H_
 #define MANDELBROT_WORKLOAD_H_
 
-#include <cstdlib>
-#include <vector>
-
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
-#include <boost/shared_ptr.hpp>
+
+#include <cstdlib>
+#include <memory>
+#include <vector>
 
 /*
  * A workload, defines a mandelbrot line and will be filled by workers with
@@ -33,7 +33,7 @@ class workload
                  size_t pos_in_img_x_,
                  size_t pos_in_img_y_,
                  size_t line_offset_);
-        
+
         // Will hold the calculated pixels
         hpx::serialization::serialize_buffer<char> pixeldata;
         // the number of pixels on the rectangle

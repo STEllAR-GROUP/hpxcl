@@ -11,20 +11,21 @@ void
 hpx::opencl::lcos::detail::unregister_event( hpx::naming::id_type device_id,
                                              hpx::naming::gid_type event_gid )
 {
+    HPX_ASSERT(device_id && event_gid);
 
     typedef hpx::opencl::server::device::release_event_action func;
     hpx::apply<func>( device_id, event_gid );
-
 }
 
 //template<>
-void hpx::opencl::lcos::detail::event<void, hpx::util::unused_type>::arm(){
+void hpx::opencl::lcos::detail::event_data<void, hpx::util::unused_type>::arm()
+{
+    HPX_ASSERT(device_id && event_id);
 
     // Tell the device server that we'd like to be informed when the cl_event
     // is completed
     typedef hpx::opencl::server::device::activate_deferred_event_action func;
     hpx::apply<func>(device_id, event_id);
-
 }
 
 

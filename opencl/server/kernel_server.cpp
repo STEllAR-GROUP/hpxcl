@@ -31,7 +31,7 @@ static void kernel_cleanup(uintptr_t kernel_id_ptr)
 
     cl_int err;
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_kernel kernel_id = reinterpret_cast<cl_kernel>(kernel_id_ptr);
 
@@ -49,7 +49,7 @@ kernel::~kernel()
 
     hpx::threads::executors::default_executor exec(
                                           hpx::threads::thread_priority_normal,
-                                          hpx::threads::thread_stacksize_large);
+                                          hpx::threads::thread_stacksize_medium);
 
     // run dectructor in a thread, as we need it to run on a large stack size
     hpx::async( exec, &kernel_cleanup, reinterpret_cast<uintptr_t>(kernel_id))
@@ -58,13 +58,17 @@ kernel::~kernel()
 
 }
 
+hpx::naming::id_type kernel::get_parent_device_id()
+{
+    return parent_device_id;
+}
 
 void
 kernel::init( hpx::naming::id_type device_id, cl_program program,
               std::string kernel_name )
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     this->parent_device_id = std::move(device_id);
     this->parent_device = hpx::get_ptr
@@ -85,7 +89,7 @@ void
 kernel::set_arg(cl_uint arg_index, hpx::naming::id_type buffer_id)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
     cl_int err;
 
     // Get direct pointer to buffer
@@ -105,7 +109,7 @@ kernel::enqueue( hpx::naming::id_type && event_gid,
                  std::vector<std::size_t> size_vec,
                  std::vector<hpx::naming::id_type> && dependencies )
 {
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
     cl_event return_event;

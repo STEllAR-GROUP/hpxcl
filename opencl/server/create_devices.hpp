@@ -13,14 +13,15 @@
 #include "../cl_headers.hpp"
 
 #include "../fwd_declarations.hpp"
+#include "../device.hpp"
 
 ////////////////////////////////////////////////////////////////
-namespace hpx { namespace opencl{ namespace server{
+namespace hpx { namespace opencl { namespace server {
 
 
     // /////////////////////////////////////////////////////
     //  Global opencl functions
-    //  
+    //
 
     // Returns the IDs of all devices on current host
     std::vector<hpx::opencl::device>
@@ -32,7 +33,7 @@ namespace hpx { namespace opencl{ namespace server{
 
 }}}
 
-HPX_ACTION_USES_LARGE_STACK(hpx::opencl::server::create_devices_action);
+HPX_ACTION_USES_MEDIUM_STACK(hpx::opencl::server::create_devices_action);
 HPX_REGISTER_ACTION_DECLARATION(hpx::opencl::server::create_devices_action,
                                 hpx_opencl_server_create_devices_action)
 

@@ -16,7 +16,7 @@
 #include "image_generator.hpp"
 
 #include <string>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 
 
@@ -24,7 +24,7 @@ void grainsize_bench(std::vector<hpx::opencl::device> devices,
                    size_t img_x, size_t img_y,
                    size_t num_iterations, size_t num_kernels, bool verbose)
 {
-    
+
             // default benchmark image
             double posx = -0.743643887037151;
             double posy = 0.131825904205330;
@@ -42,7 +42,7 @@ void grainsize_bench(std::vector<hpx::opencl::device> devices,
             {
                 hpx::cerr << "Starting test with grainsize " << grainsize << " ..."
                           << hpx::endl;
-               
+
                 // calculate tile size
                 size_t tilesize_x, tilesize_y;
                 if(grainsize < img_x)
@@ -55,7 +55,7 @@ void grainsize_bench(std::vector<hpx::opencl::device> devices,
                     tilesize_x = img_x;
                     tilesize_y = grainsize/img_x;
                 }
-               
+
                 hpx::cerr << "Using tilesizes: " << tilesize_x << "x"
                           << tilesize_y << hpx::endl;
 
@@ -99,10 +99,10 @@ void grainsize_bench(std::vector<hpx::opencl::device> devices,
 
                 // calculate average time
                 double time = total_time / (double)num_iterations;
-                
+
                 hpx::cerr << "Time: " << time << " ms" << hpx::endl;
                 hpx::cout << grainsize
-                          << "\t" << time 
+                          << "\t" << time
                           << hpx::endl;
 
             }
@@ -110,16 +110,16 @@ void grainsize_bench(std::vector<hpx::opencl::device> devices,
             hpx::cerr << "Done." << hpx::endl;
             img_gen.shutdown();
 
-   
-    
-    
+
+
+
 }
 
 void speedup_bench(std::vector<hpx::opencl::device> devices,
                    size_t tilesize_x, size_t tilesize_y, size_t img_x, size_t img_y,
                    size_t num_iterations, size_t num_kernels, bool verbose)
 {
-    
+
             // default benchmark image
             double posx = -0.743643887037151;
             double posy = 0.131825904205330;
@@ -137,13 +137,13 @@ void speedup_bench(std::vector<hpx::opencl::device> devices,
             {
                 hpx::cerr << "Starting test with " << num_gpus << " gpus ..."
                           << hpx::endl;
-               
+
                 // Add another worker
                 if(verbose){
                      hpx::cerr << "adding worker ..."
                                << hpx::endl;
                 }
-                img_gen.add_worker(devices[devices.size() - num_gpus], 4); 
+                img_gen.add_worker(devices[devices.size() - num_gpus], 4);
 
                 // Wait for the worker to initialize
                 if(verbose){
@@ -171,15 +171,15 @@ void speedup_bench(std::vector<hpx::opencl::device> devices,
                 // stop timer
                 double time = timer_stop();
                 time = time / (double)num_iterations - 1;
-                
+
                 // save time if we only have one gpu
                 if(num_gpus == 1)
                     single_gpu_time = time;
-                
+
                 hpx::cerr << "Time: " << time << " ms" << hpx::endl;
-                hpx::cout << num_gpus 
-                          << "\t" << time 
-                          << "\t" << (single_gpu_time / time) 
+                hpx::cout << num_gpus
+                          << "\t" << time
+                          << "\t" << (single_gpu_time / time)
                           << "\t" << ((single_gpu_time / time) / (double)num_gpus)
                           << hpx::endl;
 
@@ -188,9 +188,9 @@ void speedup_bench(std::vector<hpx::opencl::device> devices,
             hpx::cerr << "Done." << hpx::endl;
             img_gen.shutdown();
 
-   
-    
-    
+
+
+
 }
 
 
@@ -213,7 +213,7 @@ int hpx_main(boost::program_options::variables_map & vm)
     {
 
         // get all devices
-        std::vector<hpx::opencl::device> devices = 
+        std::vector<hpx::opencl::device> devices =
             hpx::opencl::create_all_devices(
                             CL_DEVICE_TYPE_GPU | CL_DEVICE_TYPE_ACCELERATOR,
                             "OpenCL 1.1").get();
@@ -247,16 +247,16 @@ int hpx_main(boost::program_options::variables_map & vm)
         {
             // create image_generator
             image_generator img_gen(img_x, 8, num_kernels, verbose, devices);
-            
+
             // wait for workers to finish initialization
             if(verbose) hpx::cout << "waiting for workers to finish startup ..." << hpx::endl;
             img_gen.wait_for_startup_finished();
-    
+
             // start timer
             timer_start();
-    
+
             // queue image
-            boost::shared_ptr<std::vector<char>> img_data =
+            std::shared_ptr<std::vector<char>> img_data =
                 img_gen.compute_image(posx,
                                       posy,
                                       zoom,
@@ -266,20 +266,20 @@ int hpx_main(boost::program_options::variables_map & vm)
                                       false,
                                       img_x,
                                       4).get();
-            
+
             // stop timer
             double time = timer_stop();
-    
+
             hpx::cout << "time: " << time << " ms" << hpx::endl;
-    
+
             // end the image generator
             img_gen.shutdown();
-    
+
             // save the png
             save_png(img_data, img_x, img_y, "test.png");
-        
+
         } else {
-            
+
             /*speedup_bench(devices,
                           3840, 8,
                           3840, 2160,
@@ -297,7 +297,7 @@ int hpx_main(boost::program_options::variables_map & vm)
     }
 
     if(verbose) hpx::cout << "Program finished." << hpx::endl;
-   
+
     // End the program
     return hpx::finalize();
 

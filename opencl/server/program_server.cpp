@@ -31,7 +31,7 @@ static void program_cleanup(uintptr_t program_id_ptr)
 
     cl_int err;
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_program program_id = reinterpret_cast<cl_program>(program_id_ptr);
 
@@ -49,7 +49,7 @@ program::~program()
 
     hpx::threads::executors::default_executor exec(
                                           hpx::threads::thread_priority_normal,
-                                          hpx::threads::thread_stacksize_large);
+                                          hpx::threads::thread_stacksize_medium);
 
     // run dectructor in a thread, as we need it to run on a large stack size
     hpx::async( exec, &program_cleanup, reinterpret_cast<uintptr_t>(program_id))
@@ -58,13 +58,17 @@ program::~program()
 
 }
 
+hpx::naming::id_type program::get_parent_device_id()
+{
+    return parent_device_id;
+}
 
 void
 program::init_with_source( hpx::naming::id_type device_id,
                            hpx::serialization::serialize_buffer<char> src )
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     this->parent_device_id = std::move(device_id);
     this->parent_device = hpx::get_ptr
@@ -99,7 +103,7 @@ program::init_with_binary( hpx::naming::id_type device_id,
                            hpx::serialization::serialize_buffer<char> binary )
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     this->parent_device_id = std::move(device_id);
     this->parent_device = hpx::get_ptr
@@ -167,7 +171,7 @@ program::acquire_build_log()
 void
 program::throw_on_build_errors(const char* function_name){
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
     cl_build_status build_status;
@@ -207,7 +211,7 @@ build_callback( cl_program program_id, void* user_data )
 void
 program::build(std::string options)
 {
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     cl_int err;
 
@@ -245,7 +249,7 @@ program::build(std::string options)
 hpx::serialization::serialize_buffer<char>
 program::get_binary()
 {
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
     cl_int err;
@@ -295,7 +299,7 @@ hpx::naming::id_type
 program::create_kernel(std::string kernel_name)
 {
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_large_stack());
+    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
     // Create new kernel
     hpx::id_type kernel = hpx::components::new_<hpx::opencl::server::kernel>
