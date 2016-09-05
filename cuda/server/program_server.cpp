@@ -41,6 +41,7 @@ program::program(hpx::naming::id_type device_id,
 
 program::~program() {
 
+	cudaSetDevice(this->parent_device_id);
 	nvrtcDestroyProgram(&prog);
 	checkCudaError("program::~program Destroy Program");
 
@@ -60,6 +61,7 @@ void program::set_source(std::string source) {
 void program::build(std::vector<std::string> compilerFlags,
 		std::vector<std::string> modulenames, unsigned int debug) {
 
+	cudaSetDevice(this->parent_device_id);
 	boost::uuids::uuid uuid = boost::uuids::random_generator()();
 	std::string filename = to_string(uuid);
 	filename.append(".cu");
@@ -121,7 +123,9 @@ void program::run(std::vector<hpx::naming::id_type> args,
 		std::string modulename, Dim3 grid, Dim3 block,
 		std::vector<hpx::naming::id_type> dependencies, int stream) {
 
-	void *args_pointer[args.size()];
+	std::vector<void*> args_pointer(args.size());
+
+	//void *args_pointer[args.size()];
 
 	unsigned int i = 0;
 	for (auto arg : args) {
@@ -137,7 +141,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 	//Run on the default stream
 	if (dependencies.size() == 0 and stream == -1) {
 		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
-				block.x, block.y, block.z, 0, this->streams[0], args_pointer,
+				block.x, block.y, block.z, 0, this->streams[0], args_pointer.data(),
 				0);
 		checkCudaError("program::run Run kernel");
 		cudaStreamSynchronize(this->streams[0]);
@@ -147,7 +151,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 	else if (dependencies.size() == 0 and stream >= 0) {
 		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
 				block.x, block.y, block.z, 0, this->streams[stream], // shared mem and stream
-				args_pointer, 0);
+				args_pointer.data(), 0);
 		checkCudaError("program::run Run kernel");
 		cudaStreamSynchronize(this->streams[stream]);
 		checkCudaError("program::run Error during synchronization of stream");
@@ -158,7 +162,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 				hpx::get_ptr<hpx::cuda::server::buffer>(dependencies[0]).get();
 		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
 				block.x, block.y, block.z, 0, buffer->get_stream(), // shared mem and stream
-				args_pointer, 0);
+				args_pointer.data(), 0);
 		checkCudaError("program::run Run kernel");
 		cudaStreamSynchronize(buffer->get_stream());
 		checkCudaError("program::run Error during synchronization of stream");
@@ -176,7 +180,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 
 		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
 				block.x, block.y, block.z, 0, this->streams[stream], // shared mem and stream
-				args_pointer, 0);
+				args_pointer.data(), 0);
 		checkCudaError("program::run Run kernel");
 		cudaStreamSynchronize(this->streams[stream]);
 		checkCudaError("program::run Error during synchronization of stream");
@@ -191,7 +195,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 
 		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
 				block.x, block.y, block.z, 0, this->streams[0], // shared mem and stream
-				args_pointer, 0);
+				args_pointer.data(), 0);
 		checkCudaError("program::run Run kernel");
 		cudaStreamSynchronize(this->streams[0]);
 		checkCudaError("program::run Error during synchronization of stream");

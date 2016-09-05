@@ -44,6 +44,7 @@ Options
 ==
 
 - Build CUDA support: -HPXCL_WITH_CUDA (Default=Off)
-- Build examples: -DHPXCL_BUILD_EXAMPLES (Default=Off)
+- Build examples: -DHPXCL_BUILD_EXAMPLES (Default=On)
 - Build benchmark: -DHPXCL_BUILD_BENCHMARK (Default=Off)
 - Build documentation: -DHPX_BUILD_DOCUMENTATION (Defaut=Off)
+- Build the naive CUDA benchmarks: -DHPXCL_WITH_NAIVE_CUDA_BENCHMARK (DEFAULT=Off)
