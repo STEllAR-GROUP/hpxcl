@@ -68,8 +68,7 @@ static void run_opencl_local_test( hpx::opencl::device device )
     while(results.needs_more_testing())
     {
         // initialize the buffer
-        buffer_type buf ( new char[test_data.size()], test_data.size(),
-                          buffer_type::init_mode::take );
+        buffer_type buf ( test_data.size() );
         std::copy(test_data.data(), test_data.data()+test_data.size(), buf.data());
 
         cl_int err;
@@ -150,8 +149,7 @@ static void run_opencl_local_send_test( hpx::opencl::device device )
     while(results.needs_more_testing())
     {
         // initialize the buffer
-        buffer_type buf ( new char[test_data.size()], test_data.size(),
-                          buffer_type::init_mode::take );
+        buffer_type buf ( test_data.size() );
         std::copy(test_data.data(), test_data.data()+test_data.size(), buf.data());
 
         cl_int err;
@@ -330,10 +328,8 @@ static void run_hpxcl_read_write_test( hpx::opencl::device device )
     while(results.needs_more_testing())
     {
         // initialize the buffer
-        buffer_type read_buf ( new char[test_data.size()], test_data.size(),
-                               buffer_type::init_mode::take );
-        buffer_type write_buf ( new char[test_data.size()], test_data.size(),
-                                buffer_type::init_mode::take );
+        buffer_type read_buf ( test_data.size() );
+        buffer_type write_buf ( test_data.size() );
         std::copy( test_data.data(), test_data.data()+test_data.size(),
                    write_buf.data() );
 
@@ -433,8 +429,7 @@ static void cl_test(hpx::opencl::device local_device,
 
     // Generate random vector
     std::cerr << "Generating test data ..." << std::endl;
-    test_data = buffer_type ( new char[testdata_size], testdata_size,
-                              buffer_type::init_mode::take );
+    test_data = buffer_type ( testdata_size );
     std::cerr << "Test data generated." << std::endl;
     for(std::size_t i = 0; i < testdata_size; i++){
         test_data[i] = static_cast<char>(rand());

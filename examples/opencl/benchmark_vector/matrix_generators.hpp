@@ -31,7 +31,7 @@ generate_input_matrix(size_t size)
 
     // allocate output matrix
     typedef hpx::serialization::serialize_buffer<float> buffer_type;
-    buffer_type ret( new float[size], size, buffer_type::init_mode::take );
+    buffer_type ret( size );
 
     // fill output matrix
     for(size_t i = 0; i < size; i++)
@@ -63,7 +63,7 @@ calculate_result( hpx::serialization::serialize_buffer<float> a,
 
     // allocate output matrix
     typedef hpx::serialization::serialize_buffer<float> buffer_type;
-    buffer_type res( new float[size], size, buffer_type::init_mode::take );
+    buffer_type res( size );
     for(size_t i = 0; i < size; i++)
     {
         res[i] = 0.0f;

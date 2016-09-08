@@ -106,8 +106,7 @@ static void cl_test( hpx::opencl::device local_device,
 
     // test read to buffer
     {
-        intbuffer_type readbuffer( new uint32_t[2], 2,
-                               intbuffer_type::init_mode::take );
+        intbuffer_type readbuffer( 2 );
 
         auto data_read_future = buffer.enqueue_read(1, readbuffer);
 
