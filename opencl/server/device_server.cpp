@@ -153,10 +153,8 @@ device::get_device_info(cl_device_info info_type)
     cl_ensure(err, "clGetDeviceInfo()");
 
     // Retrieve
-    hpx::serialization::serialize_buffer<char> info( new char[param_size],
-                                            param_size,
-                                            hpx::serialization::serialize_buffer<char>::take);
-    err = clGetDeviceInfo(device_id, info_type, param_size, info.data(), 0);
+    hpx::serialization::serialize_buffer<char> info( param_size );
+    err = clGetDeviceInfo(device_id, info_type, info.size(), info.data(), 0);
     cl_ensure(err, "clGetDeviceInfo()");
 
     // Return
@@ -180,10 +178,8 @@ device::get_platform_info(cl_platform_info info_type)
     cl_ensure(err, "clGetPlatformInfo()");
 
     // Retrieve
-    hpx::serialization::serialize_buffer<char>
-    info( new char[param_size], param_size,
-          hpx::serialization::serialize_buffer<char>::take);
-    err = clGetPlatformInfo(platform_id, info_type, param_size, info.data(), 0);
+    hpx::serialization::serialize_buffer<char> info( param_size );
+    err = clGetPlatformInfo(platform_id, info_type, info.size(), info.data(), 0);
     cl_ensure(err, "clGetPlatformInfo()");
 
     // Return

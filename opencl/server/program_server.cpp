@@ -281,8 +281,7 @@ program::get_binary()
     }
 
     // get binary code
-    buffer_type binary( new char[binary_size], binary_size,
-                        buffer_type::init_mode::take );
+    buffer_type binary( binary_size );
     char* binary_ptr = binary.data();
     err = clGetProgramInfo( program_id, CL_PROGRAM_BINARIES,
                             sizeof(unsigned char*),

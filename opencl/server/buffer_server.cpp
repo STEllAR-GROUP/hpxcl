@@ -131,7 +131,7 @@ buffer::enqueue_read( hpx::naming::id_type && event_gid,
     cl_command_queue command_queue = parent_device->get_read_command_queue();
 
     // create new target buffer
-    buffer_type data( new char[size], size, buffer_type::init_mode::take );
+    buffer_type data( size );
 
     // run the OpenCL-call
     err = clEnqueueReadBuffer( command_queue, device_mem, CL_FALSE, offset,
@@ -180,7 +180,7 @@ buffer::send_bruteforce( hpx::naming::id_type && dst,
     cl_command_queue command_queue = parent_device->get_read_command_queue();
 
     // create new target buffer
-    buffer_type data( new char[size], size, buffer_type::init_mode::take );
+    buffer_type data( size );
 
     // run the OpenCL-call
     err = clEnqueueReadBuffer( command_queue, device_mem, CL_FALSE, src_offset,
@@ -288,8 +288,7 @@ buffer::send_rect_bruteforce( hpx::naming::id_type && dst,
     // create new target buffer
     std::size_t dst_size = rect_properties.size_x * rect_properties.size_y
                            * rect_properties.size_z;
-    buffer_type data( new char[dst_size], dst_size,
-                      buffer_type::init_mode::take );
+    buffer_type data( dst_size );
 
     // prepare arguments for OpenCL call
     std::size_t buffer_origin[] = { rect_properties.src_x,

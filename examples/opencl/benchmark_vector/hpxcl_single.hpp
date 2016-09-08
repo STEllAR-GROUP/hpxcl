@@ -242,8 +242,7 @@ hpxcl_single_calculate(hpx::serialization::serialize_buffer<float> a,
 
     // enqueue result read
     typedef hpx::serialization::serialize_buffer<float> buffer_type;
-    buffer_type result_buffer ( new float[size], size,
-                                buffer_type::init_mode::take );
+    buffer_type result_buffer ( size );
     auto read_event =
         hpxcl_single_buffer_z.enqueue_read( 0, result_buffer,
                                             kernel_log_event );

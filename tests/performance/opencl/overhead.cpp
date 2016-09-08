@@ -129,10 +129,8 @@ static void wait_test( hpx::opencl::device device )
     while(results.needs_more_testing())
     {
         // initialize the buffer
-        buffer_type write_buf1 ( new char[test_data.size()], test_data.size(),
-                                 buffer_type::init_mode::take );
-        buffer_type write_buf2 ( new char[test_data.size()], test_data.size(),
-                                 buffer_type::init_mode::take );
+        buffer_type write_buf1 ( test_data.size() );
+        buffer_type write_buf2 ( test_data.size() );
         std::copy( test_data.data(), test_data.data()+test_data.size(),
                    write_buf1.data() );
         std::copy( test_data.data(), test_data.data()+test_data.size(),
@@ -194,8 +192,7 @@ static void write_test( hpx::opencl::device device , bool sync )
     while(results.needs_more_testing())
     {
         // initialize the buffer
-        buffer_type write_buf ( new char[test_data.size()], test_data.size(),
-                                buffer_type::init_mode::take );
+        buffer_type write_buf ( test_data.size() );
         std::copy( test_data.data(), test_data.data()+test_data.size(),
                    write_buf.data() );
 
@@ -264,8 +261,7 @@ static void read_test( hpx::opencl::device device , bool sync )
     while(results.needs_more_testing())
     {
         // initialize the buffer
-        buffer_type write_buf ( new char[test_data.size()], test_data.size(),
-                                buffer_type::init_mode::take );
+        buffer_type write_buf ( test_data.size() );
         std::copy( test_data.data(), test_data.data()+test_data.size(),
                    write_buf.data() );
 
@@ -329,8 +325,7 @@ static void cl_test(hpx::opencl::device local_device,
 
     // Generate random vector
     std::cerr << "Generating test data ..." << std::endl;
-    test_data = buffer_type ( new char[testdata_size], testdata_size,
-                              buffer_type::init_mode::take );
+    test_data = buffer_type ( testdata_size );
     std::cerr << "Test data generated." << std::endl;
     for(std::size_t i = 0; i < testdata_size; i++){
         test_data[i] = static_cast<char>(rand());
