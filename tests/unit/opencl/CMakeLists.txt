@@ -46,9 +46,9 @@ foreach(test ${tests})
   if(DEFINED ENV{CIRCLECI})
     message(STATUS "WARNING: CircleCI detected. Disabling test ${test}_remote ...")
   else()
-    add_hpx_unit_test("opencl" ${test}_remote EXECUTABLE ${test}
-                                              LOCALITIES 2
-                                              THREADS_PER_LOCALITY 2)
+		  #add_hpx_unit_test("opencl" ${test}_remote EXECUTABLE ${test}
+		  #                                      LOCALITIES 2
+		  #                                     THREADS_PER_LOCALITY 2)
   endif()
 
   # add a custom target for this example

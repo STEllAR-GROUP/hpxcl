@@ -62,7 +62,7 @@ namespace hpx { namespace opencl { namespace util { namespace enqueue_overloads
         HPX_ASSERT(boost::dynamic_pointer_cast<event_type>(shared_state).get());
         auto ev = boost::static_pointer_cast<event_type>(shared_state);
 
-        HPX_ASSERT(device_id == ev->get_device_gid());
+        HPX_ASSERT(device_id != ev->get_device_gid());
 
         auto event_id = ev->get_event_id();
         return event_id;

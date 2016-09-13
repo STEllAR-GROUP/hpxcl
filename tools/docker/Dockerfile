@@ -23,3 +23,4 @@ RUN wget http://developer.download.nvidia.com/compute/cuda/7_0/Prod/local_instal
 ENV LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-7.0/lib64
 ENV PATH=$PATH:/usr/local/cuda-7.0/bin
 ENV CUDA_LIB_PATH=/usr/local/cuda-7.0/lib64/stubs/
+ENV CTEST_OUTPUT_ON_FAILURE=1
