@@ -279,7 +279,7 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
 
     // combine dependency futures in one std::vector
     using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
     HPX_ASSERT(deps.are_from_device(device_gid));
 
     // create local event
@@ -333,7 +333,7 @@ hpx::opencl::buffer::enqueue_read_rect(
 
     // combine dependency futures in one std::vector
     using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
     HPX_ASSERT(deps.are_from_device(device_gid));
 
     // create local event
@@ -384,7 +384,7 @@ hpx::opencl::buffer::enqueue_write( std::size_t offset,
 
     // combine dependency futures in one std::vector
     using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
     HPX_ASSERT(deps.are_from_device(device_gid));
 
     // create local event
@@ -414,7 +414,7 @@ hpx::opencl::buffer::enqueue_write_rect( rect_props rect_properties,
 
     // combine dependency futures in one std::vector
     using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
     HPX_ASSERT(deps.are_from_device(device_gid));
 
     // create local event
@@ -443,7 +443,7 @@ hpx::opencl::buffer::enqueue_read( std::size_t offset,
 
     // combine dependency futures in one std::vector
     using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
     HPX_ASSERT(deps.are_from_device(device_gid));
 
     return enqueue_read_impl( std::move(offset),
@@ -461,7 +461,7 @@ hpx::opencl::buffer::enqueue_send( const hpx::opencl::buffer& dst,
 {
     // combine dependency futures in one std::vector
     using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
 
     return enqueue_send_impl( dst,
                               std::move(src_offset),
@@ -478,7 +478,7 @@ hpx::opencl::buffer::enqueue_send_rect( const hpx::opencl::buffer& dst,
 {
     // combine dependency futures in one std::vector
     using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(std::forward<Deps>(dependencies)...);
+    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
 
     return enqueue_send_rect_impl( dst,
                                    std::move(rect_properties),

@@ -102,11 +102,11 @@ namespace hpx { namespace opencl { namespace util { namespace enqueue_overloads
     {
         template<typename T>
         void
-        operator()(const T & t,
+        operator()(hpx::naming::gid_type device_id,const T & t,
                    std::vector<hpx::naming::id_type> &event_ids,
                    std::vector<hpx::naming::gid_type> &device_ids) const
         {
-            hpx::naming::gid_type device_id;
+            //hpx::naming::gid_type device_id;
             event_ids.push_back(std::move(extrude_id(t, device_id)));
             device_ids.push_back(std::move(device_id));
         }
@@ -117,12 +117,12 @@ namespace hpx { namespace opencl { namespace util { namespace enqueue_overloads
     {
         template<typename T>
         void
-        operator()(const std::vector<T> & t_vec,
+        operator()(hpx::naming::gid_type device_id,const std::vector<T> & t_vec,
                    std::vector<hpx::naming::id_type> &event_ids,
                    std::vector<hpx::naming::gid_type> &device_ids) const
         {
             for(const T & t : t_vec){
-                hpx::naming::gid_type device_id;
+                //hpx::naming::gid_type device_id;
                 event_ids.push_back(std::move(extrude_id(t, device_id)));
                 device_ids.push_back(std::move(device_id));
             }
@@ -134,41 +134,41 @@ namespace hpx { namespace opencl { namespace util { namespace enqueue_overloads
     // an arbitrary number of future and std::vector<future> to
     // one single std::vector<id_type>.
     HPX_OPENCL_EXPORT void
-    resolver_impl(std::vector<hpx::naming::id_type>&,
+    resolver_impl(hpx::naming::gid_type device_id,std::vector<hpx::naming::id_type>&,
                   std::vector<hpx::naming::gid_type>&);
 
     template<typename Dep>
     void
-    resolver_impl(std::vector<hpx::naming::id_type>& event_ids,
+    resolver_impl(hpx::naming::gid_type device_id,std::vector<hpx::naming::id_type>& event_ids,
                   std::vector<hpx::naming::gid_type>& device_ids,
                   Dep&& dep)
     {
-        extrude_all_ids<detail::is_container<Dep>::value>()( dep, event_ids,
+        extrude_all_ids<detail::is_container<Dep>::value>()(device_id, dep, event_ids,
                                                                   device_ids);
     }
 
     template<typename Dep, typename ...Deps>
     void
-    resolver_impl(std::vector<hpx::naming::id_type>& event_ids,
+    resolver_impl(hpx::naming::gid_type device_id,std::vector<hpx::naming::id_type>& event_ids,
                   std::vector<hpx::naming::gid_type>& device_ids,
                   Dep&& dep, Deps&&... deps)
     {
         // process current dep
-        extrude_all_ids<detail::is_container<Dep>::value>()( dep, event_ids,
+        extrude_all_ids<detail::is_container<Dep>::value>()(device_id, dep, event_ids,
                                                                   device_ids );
 
         // recursive call
-        resolver_impl(event_ids, device_ids, std::forward<Deps>(deps)...);
+        resolver_impl(device_id,event_ids, device_ids, std::forward<Deps>(deps)...);
     }
 
     template<typename ...Deps>
     resolved_events
-    resolver(Deps&&... deps)
+    resolver(hpx::naming::gid_type device_id,Deps&&... deps)
     {
         resolved_events res;
         res.event_ids.reserve(sizeof...(deps));
         res.device_ids.reserve(sizeof...(deps));
-        resolver_impl( res.event_ids, res.device_ids,
+        resolver_impl(device_id, res.event_ids, res.device_ids,
                        std::forward<Deps>(deps)... );
         return res;
     }

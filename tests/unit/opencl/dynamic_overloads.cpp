@@ -17,9 +17,9 @@ class test_client{
     {
         // combine dependency futures in one std::vector
         using hpx::opencl::util::enqueue_overloads::resolver;
-        auto deps = resolver(std::forward<Deps>(dependencies)...);
+        //auto deps = resolver(std::forward<Deps>(dependencies)...);
 
-        return func_impl( std::move(a), std::move(b), std::move(deps) );
+        //return func_impl( std::move(a), std::move(b), std::move(deps) );
     }
 
     hpx::future<int> func_impl( int && a, int && b,
