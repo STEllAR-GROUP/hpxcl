@@ -108,7 +108,7 @@ namespace hpx { namespace opencl { namespace util { namespace enqueue_overloads
         {
             //hpx::naming::gid_type device_id;
             event_ids.push_back(std::move(extrude_id(t, device_id)));
-            device_ids.push_back(std::move(device_id));
+            device_ids.push_back(device_id);
         }
     };
 
@@ -124,7 +124,7 @@ namespace hpx { namespace opencl { namespace util { namespace enqueue_overloads
             for(const T & t : t_vec){
                 //hpx::naming::gid_type device_id;
                 event_ids.push_back(std::move(extrude_id(t, device_id)));
-                device_ids.push_back(std::move(device_id));
+                device_ids.push_back(device_id);
             }
         }
     };
