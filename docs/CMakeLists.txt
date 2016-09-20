@@ -65,6 +65,7 @@ set(doxygen_definition_list
 # Definitions for autodoc.doxy.in
 set(doxygen_output_file "${CMAKE_CURRENT_BINARY_DIR}/hpxcl_autodoc")
 set(doxygen_output_dir "${CMAKE_CURRENT_BINARY_DIR}/doxygen")
+set(doxygen_example_path "${hpxcl_SOURCE_DIR}/examples/opencl/ ${hpxcl_SOURCE_DIR}/examples/cuda/")
 
 foreach(doxygen_predef ${doxygen_definition_list})
   set(doxygen_definitions "${doxygen_definitions} \"${doxygen_predef}\"")
