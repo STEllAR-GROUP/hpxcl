@@ -28,19 +28,23 @@ set(all_documentation_dependencies
     ${documentation_files}
     ${documentation_dependencies})
     
+if(HPXCL_WITH_OPENCL)  
 set(doxygen_opencl 
 	${hpxcl_SOURCE_DIR}/opencl/buffer.hpp
     ${hpxcl_SOURCE_DIR}/opencl/device.hpp
     ${hpxcl_SOURCE_DIR}/opencl/kernel.hpp
     ${hpxcl_SOURCE_DIR}/opencl/program.hpp
     ${hpxcl_SOURCE_DIR}/hpxcl/opencl.hpp)
+endif()
 
+if(HPXCL_WITH_CUDA)  
 set(doxygen_cuda 
 	${hpxcl_SOURCE_DIR}/cuda/buffer.hpp
     ${hpxcl_SOURCE_DIR}/cuda/device.hpp
     ${hpxcl_SOURCE_DIR}/cuda/get_devices.hpp
     ${hpxcl_SOURCE_DIR}/cuda/program.hpp
     ${hpxcl_SOURCE_DIR}/hpxcl/cuda.hpp)
+endif()
     
 set(doxygen_dependencies ${doxygen_opencl} ${doxygen_cuda})
 
