@@ -6,9 +6,11 @@
 hpx_write_boostbook_catalog(${CMAKE_CURRENT_BINARY_DIR}/boostbook_catalog.xml)
 
 find_package(XSLTPROC)
+find_package(Doxygen)
 
-file(GLOB base_files ${hpxcl_SOURCE_DIR}/docs/*.qbk)
-file(GLOB_RECURSE index_files ${hpxcl_SOURCE_DIR}/docs/*.idx)
+file(GLOB base_files "${PROJECT_SOURCE_DIR}/docs/*.qbk")
+file(GLOB build_system_files "${PROJECT_SOURCE_DIR}/docs/manual/build_system/*.qbk")
+file(GLOB_RECURSE index_files "${PROJECT_SOURCE_DIR}/docs/*.idx")
 
 set(documentation_files
     ${manual_files} ${build_system_files} ${tutorial_files}
@@ -28,23 +30,19 @@ set(all_documentation_dependencies
     ${documentation_files}
     ${documentation_dependencies})
     
-if(HPXCL_WITH_OPENCL)  
 set(doxygen_opencl 
 	${hpxcl_SOURCE_DIR}/opencl/buffer.hpp
     ${hpxcl_SOURCE_DIR}/opencl/device.hpp
     ${hpxcl_SOURCE_DIR}/opencl/kernel.hpp
     ${hpxcl_SOURCE_DIR}/opencl/program.hpp
     ${hpxcl_SOURCE_DIR}/hpxcl/opencl.hpp)
-endif()
-
-if(HPXCL_WITH_CUDA)  
+ 
 set(doxygen_cuda 
 	${hpxcl_SOURCE_DIR}/cuda/buffer.hpp
     ${hpxcl_SOURCE_DIR}/cuda/device.hpp
     ${hpxcl_SOURCE_DIR}/cuda/get_devices.hpp
     ${hpxcl_SOURCE_DIR}/cuda/program.hpp
     ${hpxcl_SOURCE_DIR}/hpxcl/cuda.hpp)
-endif()
     
 set(doxygen_dependencies ${doxygen_opencl} ${doxygen_cuda})
 
@@ -107,7 +105,7 @@ configure_file(
   @ONLY
 )
 
-set(all_documentation_dependencies ${all_documentation_dependencies} ${documentation_dependencies} ${doxygen_dependencies})
+set(all_documentation_dependencies ${all_documentation_dependencies} ${doxygen_dependencies})
 
 hpx_quickbook_to_html(hpxcl
   SOURCE hpxcl.qbk
@@ -128,11 +126,6 @@ hpx_quickbook_to_html(hpxcl
   SINGLEPAGE ${HPX_WITH_DOCUMENTATION_SINGLEPAGE})
   
   if(FOP_FOUND)
-  # This assumes that Quickbook -> BoostBook succeeded above.
-#  hpx_quickbook_to_boostbook(hpx_pdf SOURCE hpx.qbk
-#    DEPENDENCIES ${all_documentation_dependencies}
-#    QUICKBOOK_ARGS ${quickbook_fixme_mode} ${auto_index_mode}
-#    NODOXYGEN)
 
   if(BOOSTAUTOINDEX_FOUND)
     hpx_docbook_to_xslfo(hpxcl SOURCE hpxcl_auto_index.dbk
@@ -157,7 +150,7 @@ endif()
 set_target_properties(docs
     PROPERTIES FOLDER "Documentation/")
 
-if(HPX_WITH_DOCUMENTATION_SINGLEPAGE)
+if(HPX_BUILD_DOCUMENTATION_SINGLE)
   add_custom_target(singlepage_docs
     DEPENDS hpxcl_singlepage_HTML.manifest
     SOURCES ${documentation_files})
