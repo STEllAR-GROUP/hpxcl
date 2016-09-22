@@ -186,7 +186,6 @@
 [def __accumulator_example__    [link hpx.tutorial.examples.accumulator Accumulator Example]]
 [def __futurization_example__   [link hpx.tutorial.futurization_example Futurization Example]]
 
-[def __people__                 [link hpx.people People]]
 [def __getting_started__        [link hpx.tutorial.getting_started Getting Started]]
 [def __intro__                  [link hpx.tutorial.intro Introduction]]
 
@@ -294,18 +293,11 @@ from __lsu__'s __cct__ and the __fau__'s __inf3__. For a full list of people
 working in this group and participating in writing this documentation see
 __people__.
 
-This documentation is automatically generated for __hpx__ __version__ (from Git
-commit: [git_commit_link __hpx_git_commit__]) by the Boost __boost_quickbook__
-and __boost_auto_index__ documentation tools. __boost_quickbook__ and
-__boost_auto_index__ can be found in the collection of __boost_tools__.
-
-
-
 
 [? __use_auto_index__
     [index Index]
 ]
 
-[? __hpx_doxygen__ [xinclude __hpxcl_docs_dir__/hpxcl_autodoc.xml]]
+[? __hpx_doxygen__ [xinclude /hpxcl_autodoc.xml]]
 
 
