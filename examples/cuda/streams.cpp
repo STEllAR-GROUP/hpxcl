@@ -69,8 +69,6 @@ int main(int argc, char*argv[]) {
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
 
-	std::vector<hpx::future<void>> dependencies;
-
 	// Create the hello_world device program
 	program prog = cudaDevice.create_program_with_source(kernel_src);
 
@@ -85,7 +83,6 @@ int main(int argc, char*argv[]) {
 	flags.push_back(mode);
 
 	auto f = prog.build(flags, "kernel");
-	hpx::wait_all(f);
 
 	std::vector<buffer> bufferIn;
 	for (size_t i = 0; i < nStreams; i++)
@@ -115,9 +112,10 @@ int main(int argc, char*argv[]) {
 	block.y = 1;
 	block.z = 1;
 
-	hpx::wait_all(dependencies);
+	//hpx::wait_all(dependencies);
 
 	std::vector<hpx::future<void>> kernelFutures;
+	hpx::wait_all(f);
 	for (size_t i = 0; i < nStreams; i++)
 	{
 		args.push_back(bufferIn[i]);

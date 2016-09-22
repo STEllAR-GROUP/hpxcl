@@ -3,9 +3,8 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-PROJECT_NAME = HPXCL
 EXPAND_ONLY_PREDEF = YES
-GENERATE_HTML = YES
+GENERATE_HTML = NO
 GENERATE_XML = YES
 MACRO_EXPANSION = YES
 PREDEFINED = @doxygen_definitions@
@@ -13,4 +12,4 @@ XML_OUTPUT = @doxygen_output_file@
 OUTPUT_DIRECTORY = @doxygen_output_dir@
 GENERATE_LATEX = NO
 INPUT = @doxygen_inputs@
-EXAMPLE_PATH = /home/diehl/git/hpxcl/examples/cuda /home/diehl/git/hpxcl/examples/opencl
+EXAMPLE_PATH = @doxygen_example_path@

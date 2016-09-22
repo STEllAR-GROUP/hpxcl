@@ -390,7 +390,7 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 int main(int argc, char*argv[]) {
 
 	if (argc != 3) {
-		std::cout << "Usage: " << argv[0] << " #elements" << std::endl;
+		std::cout << "Usage: " << argv[0] << " #elements #iterations"  << std::endl;
 		exit(1);
 	}
 
