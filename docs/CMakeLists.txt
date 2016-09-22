@@ -161,4 +161,12 @@ if(HPX_BUILD_DOCUMENTATION_SINGLE)
   set_target_properties(singlepage_docs
       PROPERTIES FOLDER "Documentation/")
 endif()
+
+# Create links to properly view the docs in the build directory
+set(DOCS_OUTPUT_DIR "${CMAKE_BINARY_DIR}/share/hpx-${HPX_VERSION}/docs/html")
+execute_process(COMMAND "${CMAKE_COMMAND}" -E make_directory "${DOCS_OUTPUT_DIR}" )
+execute_process(
+  COMMAND "${CMAKE_COMMAND}" -E create_symlink "${PROJECT_SOURCE_DIR}/docs/html/images" "${DOCS_OUTPUT_DIR}/images")
+
+
   
