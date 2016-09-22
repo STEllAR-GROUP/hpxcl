@@ -8,7 +8,7 @@
 ===============================================================================/]
 
 [article HPX
-    [quickbook 1.7]
+    [quickbook 1.5]
     [id hpx]
     [authors [STE||AR Group, The]]
     [version 1.0.0]

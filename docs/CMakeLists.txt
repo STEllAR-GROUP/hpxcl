@@ -3,14 +3,17 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-hpx_write_boostbook_catalog(${CMAKE_CURRENT_BINARY_DIR}/boostbook_catalog.xml)
+#hpx_write_boostbook_catalog(${CMAKE_CURRENT_BINARY_DIR}/boostbook_catalog.xml)
 
 find_package(XSLTPROC)
+#find_package(BoostAutoIndex)
+find_package(BoostQuickBook)
 find_package(Doxygen)
 
-file(GLOB base_files "${PROJECT_SOURCE_DIR}/docs/*.qbk")
-file(GLOB build_system_files "${PROJECT_SOURCE_DIR}/docs/manual/build_system/*.qbk")
-file(GLOB_RECURSE index_files "${PROJECT_SOURCE_DIR}/docs/*.idx")
+
+file(GLOB base_files "${hpxcl_SOURCE_DIR}/docs/*.qbk")
+file(GLOB build_system_files "${hpxcl_SOURCE_DIR}/docs/manual/build_system/*.qbk")
+file(GLOB_RECURSE index_files "${hpxcl_SOURCE_DIR}/docs/*.idx")
 
 set(documentation_files
     ${manual_files} ${build_system_files} ${tutorial_files}
@@ -109,8 +112,8 @@ configure_file(
 set(all_documentation_dependencies ${all_documentation_dependencies} ${doxygen_dependencies})
 
 hpx_quickbook_to_html(hpxcl
-  SOURCE hpxcl.qbk
-  INDEX hpxcl.idx
+  SOURCE "${hpxcl_SOURCE_DIR}/docs/hpxcl.qbk"
+  INDEX "${hpxcl_SOURCE_DIR}/docs/hpxcl.idx"
   DEPENDENCIES
     ${all_documentation_dependencies}
     "${PROJECT_SOURCE_DIR}/docs/manual/build_system/cmake_variables.qbk"
