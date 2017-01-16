@@ -76,7 +76,7 @@ add_hpx_pseudo_dependencies(examples.opencl
 
 # add dependencies to pseudo-target
 add_hpx_pseudo_dependencies(examples.opencl.mandelbrot_maps
-                            mandelbrot_maps_exe)
+		mandelbrot_maps_exe)
 
 target_link_libraries(mandelbrot_exe ${PNG_LIBRARIES})
 target_link_libraries(mandelbrot_maps_exe ${PNG_LIBRARIES})

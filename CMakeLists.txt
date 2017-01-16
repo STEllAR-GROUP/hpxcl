@@ -29,6 +29,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     endif()
 endif()
 
+#Set mixed target_libraries allowed
+cmake_policy(SET CMP0023 OLD)
+
 ########################################################################
 # Include hpx
 # Instruct cmake to find the HPX settings
