@@ -135,7 +135,7 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
 
     public:
         event_data()
-          : is_armed(false)
+         : is_armed(false)
         {
         }
 

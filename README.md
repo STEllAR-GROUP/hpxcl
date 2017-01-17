@@ -17,7 +17,7 @@ Build
 
 - CMake >= 3.0
 - GCC >= 4.9 
-- HPX >= 0.9
+- HPX (Please use the current version in the master branch)
 
 CUDA
 ==
