@@ -37,9 +37,9 @@ public:
 	 * \brief Method prints the properties of this device
 	 */
 	void get_cuda_info() {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 		typedef server::device::get_cuda_info_action action_type;
-		hpx::apply<action_type>(this->get_gid());
+		hpx::apply<action_type>(this->get_id());
 	}
 
 	/**
@@ -48,9 +48,9 @@ public:
 	 * \note All information of the cudaDeviceproperties are shown.
 	 */
 	void get_extended_cuda_info() {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 		typedef server::device::get_extended_cuda_info_action action_type;
-		hpx::apply<action_type>(this->get_gid());
+		hpx::apply<action_type>(this->get_id());
 	}
 
 	/**
@@ -58,9 +58,9 @@ public:
 	 * \return Major compute capability of this device
 	 */
 	hpx::lcos::future<int> get_device_architecture_major() {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 		typedef server::device::get_device_architecture_major_action action_type;
-		return hpx::async<action_type>(this->get_gid());
+		return hpx::async<action_type>(this->get_id());
 	}
 
 	/**
@@ -68,9 +68,9 @@ public:
 	 * \return Minor compute capability of this device
 	 */
 	hpx::lcos::future<int> get_device_architecture_minor() {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 		typedef server::device::get_device_architecture_minor_action action_type;
-		return hpx::async<action_type>(this->get_gid());
+		return hpx::async<action_type>(this->get_id());
 	}
 
 	/**
@@ -93,26 +93,26 @@ public:
 	}
 
 	void set_device(int dev) {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 		typedef server::device::set_device_action action_type;
-		hpx::async<action_type>(this->get_gid(), dev);
+		hpx::async<action_type>(this->get_id(), dev);
 	}
 
 	hpx::lcos::future<int> get_device_id() {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 		typedef server::device::get_device_id_action action_type;
-		return hpx::async<action_type>(this->get_gid());
+		return hpx::async<action_type>(this->get_id());
 	}
 
 	int get_device_id_sync() {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 		return get_device_id().get();
 	}
 
 	hpx::lcos::future<int> get_context() {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 		typedef server::device::get_context_action action_type;
-		return hpx::async<action_type>(this->get_gid());
+		return hpx::async<action_type>(this->get_id());
 	}
 
 	int get_context_sync() {
@@ -144,9 +144,9 @@ public:
 	 */
 	hpx::cuda::program create_program_with_source(
 			std::string source) {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 		typedef server::device::create_program_with_source_action action_type;
-		return hpx::async<action_type>(this->get_gid(), source);
+		return hpx::async<action_type>(this->get_id(), source);
 	}
 
 	/**
@@ -162,7 +162,7 @@ public:
 	 */
 	hpx::cuda::program create_program_with_file(
 			std::string file) {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 
 		std::string source;
 		std::string tmp;
@@ -183,7 +183,7 @@ public:
 		}
 
 		typedef server::device::create_program_with_source_action action_type;
-		return hpx::async<action_type>(this->get_gid(), source);
+		return hpx::async<action_type>(this->get_id(), source);
 	}
 
 	/**
@@ -197,16 +197,16 @@ public:
 	 * \return The buffer with the allocated memoery on this device
 	 */
 	hpx::cuda::buffer create_buffer(size_t size) {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 		typedef server::device::create_buffer_action action_type;
-		return hpx::async<action_type>(this->get_gid(), size);
+		return hpx::async<action_type>(this->get_id(), size);
 	}
 
 	/**
 	 * \brief Synchronous creation of the buffer
 	 */
 	//hpx::cuda::buffer create_buffer_sync(size_t size) {
-		//HPX_ASSERT(this->get_gid());
+		//HPX_ASSERT(this->get_id());
 	//	return create_buffer(size).get();
 	//}
 };

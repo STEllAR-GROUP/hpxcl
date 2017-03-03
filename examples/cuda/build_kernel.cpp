@@ -10,8 +10,6 @@
 
 #include <hpxcl/cuda.hpp>
 
-#include <unistd.h>
-
 //#define DEBUG
 #define SIZE 1000
 

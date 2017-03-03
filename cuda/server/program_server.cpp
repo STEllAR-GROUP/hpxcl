@@ -11,8 +11,10 @@
 #include "cuda/server/program.hpp"
 #include "cuda/server/buffer.hpp"
 
+#include <ciso646>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace hpx {
 namespace cuda {
@@ -74,15 +76,15 @@ void program::build(std::vector<std::string> compilerFlags,
 	nvrtcCreateProgram(&prog, this->kernel_source.c_str(), filename.c_str(), 0,
 			NULL, NULL);
 	checkCudaError("program::build Create Program");
-	const char * opts[compilerFlags.size()];
+  std::vector<const char*> opts(compilerFlags.size());
 	unsigned int i = 0;
 	for (auto opt : compilerFlags) {
 		opts[i] = compilerFlags[i].c_str();
 		i++;
 	}
 
-	nvrtcResult compileResult = nvrtcCompileProgram(prog, compilerFlags.size(),
-			opts);
+	nvrtcResult compileResult = nvrtcCompileProgram(prog, (int)compilerFlags.size(),
+			opts.data());
 
 	if (compileResult != NVRTC_SUCCESS) {
 		size_t logSize;
@@ -204,7 +206,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 }
 
 unsigned int program::get_streams_size() {
-	return this->streams.size();
+	return (int)this->streams.size();
 }
 
 unsigned int program::create_stream() {
@@ -214,7 +216,7 @@ unsigned int program::create_stream() {
 	cudaStreamCreate(&stream);
 	checkCudaError("program::program Error in creating default stream");
 	this->streams.push_back(stream);
-	return this->streams.size() - 1;
+	return (int)this->streams.size() - 1;
 }
 
 }

@@ -30,7 +30,7 @@ class test_client{
 hpx::future<int>
 test_client::func_impl( int && a, int && b,
                         hpx::opencl::util::resolved_events && ids){
-    return hpx::make_ready_future<int>(ids.event_ids.size() + 1000 * a + 100 * b);
+    return hpx::make_ready_future<int>((int)ids.event_ids.size() + 1000 * a + 100 * b);
 };
 
 static void cl_test( hpx::opencl::device local_device, 
