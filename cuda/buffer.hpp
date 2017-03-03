@@ -37,9 +37,9 @@ public:
 	 */
 
 	hpx::lcos::future<size_t> size() {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 		typedef server::buffer::size_action action_type;
-		return hpx::async<action_type>(this->get_gid());
+		return hpx::async<action_type>(this->get_id());
 
 	}
 
@@ -57,9 +57,9 @@ public:
 	 */
 
 	hpx::lcos::future<void> set_size(size_t size) {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 		typedef server::buffer::set_size_action action_type;
-		return hpx::async<action_type>(this->get_gid(), size);
+		return hpx::async<action_type>(this->get_id(), size);
 
 	}
 
@@ -102,10 +102,10 @@ public:
 
 	hpx::future<hpx::serialization::serialize_buffer<char>> enqueue_read(
 			size_t offset, size_t size) {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 
 		typedef server::buffer::enqueue_read_action action_type;
-		return hpx::async<action_type>(this->get_gid(), offset, size);
+		return hpx::async<action_type>(this->get_id(), offset, size);
 
 	}
 
@@ -119,10 +119,10 @@ public:
 	 */
 
 	hpx::future<uintptr_t> enqueue_read_local(size_t offset, size_t size) {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 
 		typedef server::buffer::enqueue_read_local_action action_type;
-		return hpx::async<action_type>(this->get_gid(), offset, size);
+		return hpx::async<action_type>(this->get_id(), offset, size);
 
 	}
 
@@ -135,7 +135,7 @@ public:
 
 	hpx::future<void> enqueue_write(size_t offset, size_t size,
 			const void* data) const {
-		HPX_ASSERT(this->get_gid());
+		HPX_ASSERT(this->get_id());
 
 		if (is_local) {
 
@@ -150,7 +150,7 @@ public:
 					hpx::serialization::serialize_buffer<char>::init_mode::reference);
 
 			typedef server::buffer::enqueue_write_action action_type;
-			return hpx::async<action_type>(this->get_gid(), offset, size,
+			return hpx::async<action_type>(this->get_id(), offset, size,
 					serializable_data);
 		}
 

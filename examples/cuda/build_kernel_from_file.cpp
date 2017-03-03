@@ -10,8 +10,6 @@
 
 #include <hpxcl/cuda.hpp>
 
-#include <unistd.h>
-
 #define SIZE 100000
 
 using namespace hpx::cuda;
