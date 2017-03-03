@@ -90,6 +90,11 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     public:
         event_data() {}
 
+        event_data(init_no_addref no_addref)
+          : parent_type(no_addref)
+        {
+        }
+
         ~event_data()
         {
             HPX_ASSERT(device_id && event_id);
@@ -136,6 +141,12 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
     public:
         event_data()
          : is_armed(false)
+        {
+        }
+
+        event_data(init_no_addref no_addref)
+         : is_armed(false)
+         , parent_type(no_addref)
         {
         }
 
