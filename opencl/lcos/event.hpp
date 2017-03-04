@@ -88,6 +88,8 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         typedef typename parent_type::result_type result_type;
 
     public:
+        typedef typename parent_type::init_no_addref init_no_addref;
+
         event_data() {}
 
         event_data(init_no_addref no_addref)
@@ -139,6 +141,8 @@ namespace hpx { namespace opencl { namespace lcos { namespace detail
         typedef parent_type::result_type result_type;
 
     public:
+        typedef typename parent_type::init_no_addref init_no_addref;
+
         event_data()
          : is_armed(false)
         {
