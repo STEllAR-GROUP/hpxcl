@@ -38,4 +38,14 @@ foreach(example_program ${example_programs})
 
 endforeach()
 
+
+set(subdirs
+mandelbrot
+)
+
+
+foreach(subdir ${subdirs})
+    add_subdirectory(${subdir})
+endforeach()
+
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernel.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/example/cuda)
