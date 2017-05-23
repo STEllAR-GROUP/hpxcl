@@ -10,7 +10,7 @@
 
 #include <hpxcl/cuda.hpp>
 
-#include <hpxcl/examples/opencl/mandelbrot/pngwriter.hpp>
+//#include <hpxcl/examples/opencl/mandelbrot/pngwriter.hpp>
 
 using std::atoi;
 using namespace hpx::cuda;
