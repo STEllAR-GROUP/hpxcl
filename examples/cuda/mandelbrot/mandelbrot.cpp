@@ -12,6 +12,7 @@
 
 #include <hpxcl/examples/opencl/mandelbrot/pngwriter.hpp>
 
+using std::atoi;
 using namespace hpx::cuda;
 
 //###########################################################################
@@ -22,7 +23,7 @@ int main(int argc, char* argv[]){
 
 	//Reading a list of available devices in hpx locality
 	//Returns a future
-	std::std::vector<device> devices = get_all_devices(2, 0).get();
+	std::vector<device> devices = get_all_devices(2, 0).get();
 
 	if(devices.size() < 1) {
 		hpx::cerr << "No CUDA devices found! Terminating...." << hpx::endl;
@@ -34,12 +35,15 @@ int main(int argc, char* argv[]){
 		exit(1);
 	}
 
+	int width = atoi(argv[2]);
+	int height = atoi(argv[3]);
+	int iterations = atoi(argv[1]);
 	const int bytes = sizeof(char) * width * height * 3;
 
 	//Malloc Host
 	char *image;
 	cudaMallocHost((void**) &image, bytes);
-	memset(in, 0, bytes);
+	//memset(in, 0, bytes);
 
 	//Creating a new device from the list of devices
 	device cudaDevice = devices[0];
@@ -79,10 +83,13 @@ int main(int argc, char* argv[]){
 	grid.z = 1;
 
 	//creating vector of futures
-	std::std::vector<hpx::future<void>> kernelFutures;
+	std::vector<hpx::future<void>> kernelFutures;
 	hpx::wait_all(f);
 
-	args.push_back(bufferIn[0]);
+	args.push_back(image);
+	args.push_back(width);
+	args.push_back(height);
+	args.push_back(iterations);
 	kernelFutures.push_back(prog.run(args, "kernel", grid, block, args));
 	args.clear();
 
