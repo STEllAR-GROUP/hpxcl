@@ -22,7 +22,3 @@ add_hpx_pseudo_target(examples.cuda.mandelbrot)
 # make pseudo-targets depend on master pseudo-target
 add_hpx_pseudo_dependencies(examples.cuda
                             examples.cuda.mandelbrot)
-
-# add dependencies to pseudo-target
-add_hpx_pseudo_dependencies(examples.cuda.mandelbrot
-                            mandelbrot_exe)
