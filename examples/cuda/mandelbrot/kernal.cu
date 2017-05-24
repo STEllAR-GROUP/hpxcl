@@ -1,9 +1,9 @@
-__global void kernel(char *out, int width, int height, int numIterations){
-	unsigned int xDim = blockId.x * blockDim.x + threadId.x;
-	unsigned int yDim = blockId.y * blockDim.y + threadId.y;
+__global__ void kernel(char *out, int width, int height, int numIterations){
+	unsigned int xDim = blockIdx.x * blockDim.x + threadIdx.x;
+	unsigned int yDim = blockIdx.y * blockDim.y + threadIdx.y;
 
 	//index of the output array, multiplied by 3 for R,G,B values
-	int arrayIndex = 3 * width * y_dim + x_dim*3;
+	int arrayIndex = 3 * width * yDim + xDim*3;
 
 	float xPoint = ((float) xDim/width)*3.25 - 2;
 	float yPoint = ((float) yDim/width)*2.5 - 1.25; 
@@ -15,7 +15,7 @@ __global void kernel(char *out, int width, int height, int numIterations){
 	int iterationCount = 0;
 	//terminating condition x^2+y^2 < 4 or iterations >numIterations
 	while(y*y+x*x<=4 && iterationCount<numIterations){
-		xTemp = x*x-y*y + xPoint;
+		float xTemp = x*x-y*y + xPoint;
 		y = 2*x*y + yPoint;
 		x = xTemp;
 		iterationCount++;
