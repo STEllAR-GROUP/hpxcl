@@ -34,7 +34,7 @@ int main(int argc, char* argv[]){
 		return hpx::finalize();
 	}
 	
-	if (argc != 3) {
+	if (argc != 4) {
 		std::cout << "Usage: " << argv[0] << " #iterations width height"<< std::endl;
 		exit(1);
 	}
