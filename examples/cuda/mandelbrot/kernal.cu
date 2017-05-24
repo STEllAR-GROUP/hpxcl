@@ -1,4 +1,4 @@
-__global__ void kernel(char *out, int *width, int *height, int *numIterations){
+extern "C" __global__ void kernel(char *out, int *width, int *height, int *numIterations){
 	unsigned int xDim = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int yDim = blockIdx.y * blockDim.y + threadIdx.y;
 
