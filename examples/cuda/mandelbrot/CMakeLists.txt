@@ -14,7 +14,7 @@ source_group("Source Files" FILES ${sources})
 # add example executable
 add_hpx_executable(mandlbrot
                    SOURCES ${sources}
-                   COMPONENT_DEPENDENCIES iostreams
+                   COMPONENT_DEPENDENCIES iostreams cuda
                    FOLDER "Examples/CUDA/mandelbrot")
 
 # add a custom target for this example
