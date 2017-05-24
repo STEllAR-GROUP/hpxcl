@@ -5,6 +5,7 @@
 
 set(sources
     mandelbrot.cpp
+    kernal.cu
 )
 
 
@@ -14,7 +15,7 @@ source_group("Source Files" FILES ${sources})
 add_hpx_executable(mandlbrot
                    SOURCES ${sources}
                    COMPONENT_DEPENDENCIES iostreams
-                   FOLDER "Examples/cuda/mandelbrot")
+                   FOLDER "Examples/CUDA/mandelbrot")
 
 # add a custom target for this example
 add_hpx_pseudo_target(examples.cuda.mandelbrot)

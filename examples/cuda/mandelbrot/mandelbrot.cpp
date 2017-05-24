@@ -10,7 +10,8 @@
 
 #include <hpxcl/cuda.hpp>
 
-//#include <hpxcl/examples/opencl/mandelbrot/pngwriter.hpp>
+//for writing image
+#include "examples\opencl\mandelbrot\pngwriter.hpp"
 
 using std::atoi;
 using namespace hpx::cuda;
@@ -20,6 +21,9 @@ using namespace hpx::cuda;
 //###########################################################################
 
 int main(int argc, char* argv[]){
+
+	//Vector for all futures for the data management
+	std::vector<hpx::lcos::future<void>> data_futures;
 
 	//Reading a list of available devices in hpx locality
 	//Returns a future
@@ -63,10 +67,6 @@ int main(int argc, char* argv[]){
 
 	auto f = prog.build(flags, "kernel");
 
-	std::vector<buffer> bufferIn;
-	
-	bufferIn.push_back(cudaDevice.create_buffer(bytes));
-
 	char *mainImage = (char*) malloc(bytes);
 
 	std::vector<hpx::cuda::buffer> args;
@@ -86,13 +86,30 @@ int main(int argc, char* argv[]){
 	std::vector<hpx::future<void>> kernelFutures;
 	hpx::wait_all(f);
 
-	args.push_back(image);
-	args.push_back(width);
-	args.push_back(height);
-	args.push_back(iterations);
+	//creating buffers
+	buffer imageBuffer = cudaDevice.create_buffer(bytes);
+	buffer widthBuffer = cudaDevice.create_buffer(sizeof(int));
+	buffer heightBuffer = cudaDevice.create_buffer(sizeof(int));
+	buffer iterationsBuffer = cudaDevice.create_buffer(sizeof(int));
+
+
+	// Copy input data to the buffer
+	data_futures.push_back(imageBuffer.enqueue_write(0, bytes, image));
+	data_futures.push_back(widthBuffer.enqueue_write(0, sizeof(int), &width));
+	data_futures.push_back(heightBuffer.enqueue_write(0, sizeof(int), &height));
+	data_futures.push_back(iterationsBuffer.enqueue_write(0, sizeof(int), &iterations));
+
+	args.push_back(imageBuffer);
+	args.push_back(widthBuffer);
+	args.push_back(heightBuffer);
+	args.push_back(iterationsBuffer);
+
+	//run the program on the device
 	kernelFutures.push_back(prog.run(args, "kernel", grid, block, args));
+	//for multiple runs
 	args.clear();
 
+	//wait for all the kernal futures to return
 	hpx::wait_all(kernelFutures);
 
 	//Free Memory
