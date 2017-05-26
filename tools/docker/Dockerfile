@@ -11,7 +11,7 @@ RUN apt-get clean && apt-get update && apt-get install -y xsltproc              
 										 libpng-dev	
 
 #Installation of CUDA 7.0
-RUN https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda_8.0.61_375.26_linux-run && \
+RUN wget https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda_8.0.61_375.26_linux-run && \
     chmod +x cuda_8.0.61_375.26_linux-run && \
     mkdir nvidia_installers && \
     ./cuda_8.0.61_375.26_linux-run -extract=`pwd`/nvidia_installers && \
