@@ -18,6 +18,8 @@
 #include "../workload.hpp"
 #include "../mandelbrotworker.hpp"
 
+#include <boost/thread/locks.hpp>
+
 /*
  * this class is the main observer of the image generation.
  * it gets image queries, which it then splits into subimages and sends it to
