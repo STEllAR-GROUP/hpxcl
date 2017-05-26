@@ -13,6 +13,8 @@
 #include "../../export_definitions.hpp"
 #include "../../cl_headers.hpp"
 
+#include <boost/thread/mutex.hpp>
+
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{ namespace util{
 
