@@ -11,15 +11,17 @@ RUN apt-get clean && apt-get update && apt-get install -y xsltproc              
 										 libpng-dev	
 
 #Installation of CUDA 7.0
-RUN wget http://developer.download.nvidia.com/compute/cuda/7_0/Prod/local_installers/cuda_7.0.28_linux.run && \
-    chmod +x cuda_7.0.28_linux.run && \
+RUN https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda_8.0.61_375.26_linux-run && \
+    chmod +x cuda_8.0.61_375.26_linux-run && \
     mkdir nvidia_installers && \
-    ./cuda_7.0.28_linux.run -extract=`pwd`/nvidia_installers && \
+    ./cuda_8.0.61_375.26_linux-run -extract=`pwd`/nvidia_installers && \
     cd nvidia_installers && \
-    ./cuda-linux64-rel-7.0.28-19326674.run -noprompt && \
+    cuda-linux64-rel-8.0.61-21551265.run -noprompt && \
     cd .. && \
     rm -r nvidia_installers
 
-ENV LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-7.0/lib64
-ENV PATH=$PATH:/usr/local/cuda-7.0/bin
-ENV CUDA_LIB_PATH=/usr/local/cuda-7.0/lib64/stubs/
+ENV LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-8.0/lib64
+ENV PATH=$PATH:/usr/local/cuda-8.0/bin
+ENV CUDA_LIB_PATH=/usr/local/cuda-8.0/lib64/stubs/
+
+
