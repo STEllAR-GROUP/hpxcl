@@ -16,7 +16,7 @@ RUN wget https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cu
     mkdir nvidia_installers && \
     ./cuda_8.0.61_375.26_linux-run -extract=`pwd`/nvidia_installers && \
     cd nvidia_installers && \
-    cuda-linux64-rel-8.0.61-21551265.run -noprompt && \
+    ./cuda-linux64-rel-8.0.61-21551265.run -noprompt && \
     cd .. && \
     rm -r nvidia_installers
 
