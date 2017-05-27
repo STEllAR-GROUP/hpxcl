@@ -114,7 +114,7 @@ private:
     boost::asio::strand strand;
 
     // the main external worker thread
-    boost::thread asio_thread;
+    hpx::compat::thread asio_thread;
 
 };
 
