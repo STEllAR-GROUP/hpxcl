@@ -12,7 +12,7 @@
 #include "requesthandler.hpp"
 
 #include <boost/asio.hpp>
-#include <boost/thread.hpp>
+#include <hpx/compat/thread.hpp>
 
 #include <memory>
 
