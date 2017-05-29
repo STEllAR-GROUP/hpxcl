@@ -12,7 +12,7 @@
 #include "requesthandler.hpp"
 
 #include <boost/asio.hpp>
-#include <boost/thread.hpp>
+#include <hpx/compat/thread.hpp>
 
 #include <memory>
 
@@ -114,7 +114,7 @@ private:
     boost::asio::strand strand;
 
     // the main external worker thread
-    boost::thread asio_thread;
+    hpx::compat::thread asio_thread;
 
 };
 

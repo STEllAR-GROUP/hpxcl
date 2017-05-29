@@ -560,7 +560,7 @@ webserver::start()
 {
 
     // forward this call to an external os thread
-    asio_thread = boost::thread(hpx::util::bind(&webserver::external_start,
+    asio_thread = hpx::compat::thread(hpx::util::bind(&webserver::external_start,
                                                 this,
                                                 hpx::get_runtime_ptr()));
 
