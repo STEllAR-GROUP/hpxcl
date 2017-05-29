@@ -8,6 +8,7 @@ set(sources
     kernal.cu
 )
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 
 source_group("Source Files" FILES ${sources})
 
@@ -23,3 +24,5 @@ add_hpx_pseudo_target(examples.cuda.mandelbrot)
 # make pseudo-targets depend on master pseudo-target
 add_hpx_pseudo_dependencies(examples.cuda
                             examples.cuda.mandelbrot)
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernal.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/example/cuda/mandelbrot)
