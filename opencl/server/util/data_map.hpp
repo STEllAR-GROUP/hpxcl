@@ -13,7 +13,7 @@
 #include "../../export_definitions.hpp"
 #include "../../cl_headers.hpp"
 
-#include <boost/thread/mutex.hpp>
+#include <hpx/compat/mutex.hpp>
 
 ////////////////////////////////////////////////////////////////
 namespace hpx { namespace opencl{ namespace server{ namespace util{
@@ -80,7 +80,7 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
 
             {
                 // Lock the map
-            	 boost::mutex::scoped_lock lock(this->m);
+            	std::lock_guard<hpx::compat::mutex> lock(this->m);
 
                 // Insert the data into the map
                 map.insert(std::move(
@@ -109,7 +109,7 @@ namespace hpx { namespace opencl{ namespace server{ namespace util{
         map_type map;
 
         // Lock for synchronization
-        boost::mutex m;
+        hpx::compat::mutex m;
 
 
     };

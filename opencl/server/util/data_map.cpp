@@ -26,7 +26,7 @@ data_map::remove(cl_event event)
 {
     // Lock
     //lock_type::scoped_lock l(lock);
-	boost::mutex::scoped_lock lock(this->m);
+	std::lock_guard<hpx::compat::mutex> lock(this->m);
 
     // Remove element
     map.erase(event);
@@ -42,7 +42,7 @@ data_map::get(cl_event event)
     {
         // Lock
         //lock_type::scoped_lock l(lock);
-    	 boost::mutex::scoped_lock lock(this->m);
+    	std::lock_guard<hpx::compat::mutex> lock(this->m);
 
         // Retrieve the data from the map
         map_type::iterator it = map.find(event);
@@ -65,7 +65,7 @@ data_map::has_data(cl_event event)
     {
         // Lock
         //lock_type::scoped_lock l(lock);
-        boost::mutex::scoped_lock lock(this->m);
+    	std::lock_guard<hpx::compat::mutex> lock(this->m);
 
 
         // Try to find the entry
