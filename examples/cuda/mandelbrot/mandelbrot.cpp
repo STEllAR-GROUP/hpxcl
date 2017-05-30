@@ -11,7 +11,7 @@
 #include <hpxcl/cuda.hpp>
 
 //for writing image
-#include "examples\opencl\mandelbrot\pngwriter.hpp"
+#include "examples/opencl/mandelbrot/pngwriter.cpp"
 
 using std::atoi;
 using namespace hpx::cuda;
