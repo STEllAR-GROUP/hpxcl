@@ -5,15 +5,15 @@ extern "C" __global__ void kernel(char *out, int *width, int *height, int *numIt
 	//index of the output array, multiplied by 3 for R,G,B values
 	int arrayIndex = 3 * (*width) * yDim + xDim*3;
 
-	float xPoint = ((float) xDim/(*width));
-	float yPoint = ((float) yDim/(*width)); 
+	float xPoint = ((float) xDim/(*width)) * 3.25f - 2.0f;
+	float yPoint = ((float) yDim/(*height)) * 2.5f - 1.25f; 
 
 	//for calculation of complex number
-	float x = 0;
-	float y = 0;
+	float x = 0.0;
+	float y = 0.0;
 
 	int iterationCount = 0;
-	//terminating condition x^2+y^2 < 4 or iterations >numIterations
+	//terminating condition x^2+y^2 < 4 or iterations >= numIterations
 	while(y*y+x*x<=4 && iterationCount<(*numIterations)){
 		float xTemp = x*x-y*y + xPoint;
 		y = 2*x*y + yPoint;
