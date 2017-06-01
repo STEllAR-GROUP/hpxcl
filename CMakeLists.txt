@@ -98,8 +98,8 @@ if(HPXCL_WITH_CUDA)
     include_directories(${CUDA_INCLUDE_DIRS})
 endif()
 
-# Only search for PNG lib, if HPXCL_WITH_OPENCL is build
-if(HPXCL_BUILD_EXAMPLES AND HPXCL_WITH_OPENCL)
+# Only search for PNG lib, if HPXCL_BUILD_EXAMPLES is build
+if(HPXCL_BUILD_EXAMPLES)
     find_package(PNG)
     if(PNG_FOUND)
         include_directories(${PNG_INCLUDE_DIRS})
