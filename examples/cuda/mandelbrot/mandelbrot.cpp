@@ -49,7 +49,8 @@ int main(int argc, char* argv[]){
 	cudaMallocHost((void**) &image, bytes);
 	//memset(in, 0, bytes);
 
-	int numDevices = min(4, devices.size());
+	int deviceCount = devices.size();
+	int numDevices = std::min(4, deviceCount);
 
 	char *mainImage = (char*)malloc(bytes);
 
