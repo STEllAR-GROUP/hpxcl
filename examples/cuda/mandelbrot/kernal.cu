@@ -1,12 +1,12 @@
-extern "C" __global__ void kernel(char *out, int *width, int *height, int *numIterations, int *xStart){
+extern "C" __global__ void kernel(char *out, int *width, int *height, int *numIterations, int *yStart){
 	unsigned int xDim = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int yDim = blockIdx.y * blockDim.y + threadIdx.y;
 
 	//index of the output array, multiplied by 3 for R,G,B values
 	int arrayIndex = 3 * (*width) * yDim + xDim*3;
 
-	float xPoint = ((float) (xDim + *xStart)/(*width)) * 3.25f - 2.0f;
-	float yPoint = ((float) yDim/(*height)) * 2.5f - 1.25f; 
+	float xPoint = ((float) (xDim)/(*width)) * 3.25f - 2.0f;
+	float yPoint = ((float) (yDim+*yStart)/(*height)) * 2.5f - 1.25f; 
 
 	//for calculation of complex number
 	float x = 0.0;
