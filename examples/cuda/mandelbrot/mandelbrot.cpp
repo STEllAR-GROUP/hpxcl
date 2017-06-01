@@ -142,17 +142,21 @@ int main(int argc, char* argv[]){
 	//wait for all the kernal futures to return
 	hpx::wait_all(kernelFutures);
 
+	//write images to file
+	std::shared_ptr<std::vector<char>> img_data;
+
+	std::vector<char> imageVector;
 	//Stich multiple images
 	for (int i = 0; i < numDevices; i++)
 	{
 		int pointer = i*width / numDevices;
-		strncpy(&image[pointer],imageBufferVector.at(i).enqueue_read_sync<char>(0, bytes/numDevices), bytes/numDevices);
+		image = imageBufferVector.at(i).enqueue_read_sync<char>(0, bytes/numDevices);
+		std::vector<char> tmpVector(image, image + bytes / numDevices);
+		imageVector.insert(imageVector.end(), tmpVector.begin(), tmpVector.end());
 	}
-
-	//write images to file
-	std::shared_ptr<std::vector<char>> img_data;
 	img_data = std::make_shared <std::vector <char> >
-		(std::vector<char>(image, image + bytes));
+		(imageVector);
+	
 
 	save_png(img_data, width, height, "Mandelbrot_img.png");
 
