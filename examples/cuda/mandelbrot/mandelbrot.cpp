@@ -112,10 +112,12 @@ int main(int argc, char* argv[]){
 	//wait for all the kernal futures to return
 	hpx::wait_all(kernelFutures);
 
+	image = imageBuffer.enqueue_read_sync<char>(0, bytes);
+
 	//write images to file
 	std::shared_ptr<std::vector<char>> img_data;
 	img_data = std::make_shared <std::vector <char> >
-		(std::vector<char>(image, image + sizeof image / sizeof image[0]));
+		(std::vector<char>(image, image + bytes));
 
 	save_png(img_data, width, height, "Mandelbrot_img.png");
 
