@@ -49,25 +49,9 @@ int main(int argc, char* argv[]){
 	cudaMallocHost((void**) &image, bytes);
 	//memset(in, 0, bytes);
 
-	//Creating a new device from the list of devices
-	device cudaDevice = devices[0];
+	int numDevices = min(4, devices.size());
 
-	//Create a Mandelbrot device program
-	program prog = cudaDevice.create_program_with_file("kernel.cu");
-
-	//Compile with the kernal
-	std::vector<std::string> flags;
-	std::string mode = "--gpu-architecture=compute_";
-	mode.append(
-			std::to_string(cudaDevice.get_device_architecture_major().get()));
-	mode.append(
-			std::to_string(cudaDevice.get_device_architecture_minor().get()));
-
-	flags.push_back(mode);
-
-	auto f = prog.build(flags, "kernel");
-
-	char *mainImage = (char*) malloc(bytes);
+	char *mainImage = (char*)malloc(bytes);
 
 	std::vector<hpx::cuda::buffer> args;
 	//Generate the grid and block dim
@@ -78,41 +62,91 @@ int main(int argc, char* argv[]){
 	block.y = 16;
 	block.z = 1;
 
-	grid.x = width/block.x;
-	grid.y = height/block.y;
+	grid.x = width / block.x;
+	grid.y = height / block.y;
 	grid.z = 1;
+
+	std::vector<hpx::future<void>> progBuildVector;
+	std::vector<program> progVector;
+	std::vector<device> deviceVector;
 
 	//creating vector of futures
 	std::vector<hpx::future<void>> kernelFutures;
-	hpx::wait_all(f);
 
-	//creating buffers
-	buffer imageBuffer = cudaDevice.create_buffer(bytes);
-	buffer widthBuffer = cudaDevice.create_buffer(sizeof(int));
-	buffer heightBuffer = cudaDevice.create_buffer(sizeof(int));
-	buffer iterationsBuffer = cudaDevice.create_buffer(sizeof(int));
+	for(int i = 0;i<numDevices;i++)
+	{ 
+		//Creating new devices array from the list of devices
+		device cudaDevice = devices[0];
 
+		//Create a Mandelbrot device program
+		program prog = cudaDevice.create_program_with_file("kernel.cu");
 
-	// Copy input data to the buffer
-	data_futures.push_back(imageBuffer.enqueue_write(0, bytes, image));
-	data_futures.push_back(widthBuffer.enqueue_write(0, sizeof(int), &width));
-	data_futures.push_back(heightBuffer.enqueue_write(0, sizeof(int), &height));
-	data_futures.push_back(iterationsBuffer.enqueue_write(0, sizeof(int), &iterations));
+		//Compile with the kernal
+		std::vector<std::string> flags;
+		std::string mode = "--gpu-architecture=compute_";
+		mode.append(
+			std::to_string(cudaDevice.get_device_architecture_major().get()));
+		mode.append(
+			std::to_string(cudaDevice.get_device_architecture_minor().get()));
 
-	args.push_back(imageBuffer);
-	args.push_back(widthBuffer);
-	args.push_back(heightBuffer);
-	args.push_back(iterationsBuffer);
+		flags.push_back(mode);
 
-	//run the program on the device
-	kernelFutures.push_back(prog.run(args, "kernel", grid, block, args));
-	//for multiple runs
-	args.clear();
+		progBuildVector.push_back(prog.build(flags, "kernel"));
+		progVector.push_back(prog);
+		deviceVector.push_back(cudaDevice);
+	}
+
+	//wait for program to build on all devices
+	hpx::wait_all(progBuildVector);
+
+	//Image Buffer Vector
+	std::vector<buffer> imageBufferVector;
+
+	for (int i = 0; i < numDevices; i++)
+	{
+		//calculate the start position
+		int xStart = i*width / numDevices;
+		
+		device cudaDevice = deviceVector.at(i);
+		program prog = progVector.at(i);
+		
+		//creating buffers
+		buffer imageBuffer = cudaDevice.create_buffer(bytes/numDevices);
+		buffer widthBuffer = cudaDevice.create_buffer(sizeof(int));
+		buffer heightBuffer = cudaDevice.create_buffer(sizeof(int));
+		buffer iterationsBuffer = cudaDevice.create_buffer(sizeof(int));
+		buffer xStartBuffer = cudaDevice.create_buffer(sizeof(int));
+
+		// Copy input data to the buffer
+		data_futures.push_back(imageBuffer.enqueue_write(0, bytes, image));
+		data_futures.push_back(widthBuffer.enqueue_write(0, sizeof(int), &width));
+		data_futures.push_back(heightBuffer.enqueue_write(0, sizeof(int), &height));
+		data_futures.push_back(iterationsBuffer.enqueue_write(0, sizeof(int), &iterations));
+		data_futures.push_back(xStartBuffer.enqueue_write(0, sizeof(int), &iterations));
+
+		args.push_back(imageBuffer);
+		args.push_back(widthBuffer);
+		args.push_back(heightBuffer);
+		args.push_back(iterationsBuffer);
+		args.push_back(xStartBuffer);
+
+		imageBufferVector.push_back(imageBuffer);
+
+		//run the program on the device
+		kernelFutures.push_back(prog.run(args, "kernel", grid, block, args));
+		//for multiple runs
+		args.clear();
+	}
 
 	//wait for all the kernal futures to return
 	hpx::wait_all(kernelFutures);
 
-	image = imageBuffer.enqueue_read_sync<char>(0, bytes);
+	//Stich multiple images
+	for (int i = 0; i < numDevices; i++)
+	{
+		int pointer = i*width / numDevices;
+		strncpy(&image[pointer],imageBufferVector.at(i).enqueue_read_sync<char>(0, bytes/numDevices), bytes/numDevices);
+	}
 
 	//write images to file
 	std::shared_ptr<std::vector<char>> img_data;
