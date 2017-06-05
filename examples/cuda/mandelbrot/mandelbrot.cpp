@@ -34,14 +34,13 @@ int main(int argc, char* argv[]){
 		return hpx::finalize();
 	}
 	
-	if (argc != 4) {
-		std::cout << "Usage: " << argv[0] << " #iterations width height"<< std::endl;
+	if (argc != 3) {
+		std::cout << "Usage: " << argv[0] << "width height"<< std::endl;
 		exit(1);
 	}
 
-	int width = atoi(argv[2]);
-	int height = atoi(argv[3]);
-	int iterations = atoi(argv[1]);
+	int width = atoi(argv[1]);
+	int height = atoi(argv[2]);
 	const int bytes = sizeof(char) * width * height * 3;
 
 	//Malloc Host
@@ -115,23 +114,24 @@ int main(int argc, char* argv[]){
 		buffer imageBuffer = cudaDevice.create_buffer(bytes);
 		buffer widthBuffer = cudaDevice.create_buffer(sizeof(int));
 		buffer heightBuffer = cudaDevice.create_buffer(sizeof(int));
-		buffer iterationsBuffer = cudaDevice.create_buffer(sizeof(int));
 		buffer yStartBuffer = cudaDevice.create_buffer(sizeof(int));
 
 		// Copy input data to the buffer
 		data_futures.push_back(imageBuffer.enqueue_write(0, bytes, image));
 		data_futures.push_back(widthBuffer.enqueue_write(0, sizeof(int), &width));
 		data_futures.push_back(heightBuffer.enqueue_write(0, sizeof(int), &height));
-		data_futures.push_back(iterationsBuffer.enqueue_write(0, sizeof(int), &iterations));
 		data_futures.push_back(yStartBuffer.enqueue_write(0, sizeof(int), &yStart));
 
+		//Synchronize copy to buffer
 		hpx::wait_all(data_futures);
 
 		args.push_back(imageBuffer);
 		args.push_back(widthBuffer);
 		args.push_back(heightBuffer);
-		args.push_back(iterationsBuffer);
 		args.push_back(yStartBuffer);
+
+		//Synchronize data transfer before new data is written
+		hpx::wait_all(args);
 
 		imageBufferVector.push_back(imageBuffer);
 

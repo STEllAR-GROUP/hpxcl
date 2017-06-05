@@ -34,4 +34,4 @@ target_link_libraries(mandelbrot_cuda_exe ${PNG_LIBRARIES})
 endif(PNG_FOUND)
 
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernal.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/example/cuda/mandelbrot)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernal.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/example/cuda/mandelbrot/kernel.cu)
