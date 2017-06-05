@@ -64,7 +64,7 @@ int main(int argc, char* argv[]){
 	block.z = 1;
 
 	grid.x = width / block.x;
-	grid.y = height / (block.y*numDevices);
+	grid.y = 1+std::ceil(height / (block.y*numDevices));
 	grid.z = 1;
 
 	std::vector<hpx::future<void>> progBuildVector;
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]){
 		program prog = progVector.at(i);
 		
 		//creating buffers
-		buffer imageBuffer = cudaDevice.create_buffer(bytes/numDevices);
+		buffer imageBuffer = cudaDevice.create_buffer(bytes);
 		buffer widthBuffer = cudaDevice.create_buffer(sizeof(int));
 		buffer heightBuffer = cudaDevice.create_buffer(sizeof(int));
 		buffer iterationsBuffer = cudaDevice.create_buffer(sizeof(int));
@@ -145,17 +145,16 @@ int main(int argc, char* argv[]){
 	//write images to file
 	std::shared_ptr<std::vector<char>> img_data;
 
-	std::vector<char> imageVector;
 	//Stich multiple images
 	for (int i = 0; i < numDevices; i++)
 	{
-		int pointer = i*width / numDevices;
 		image = imageBufferVector.at(i).enqueue_read_sync<char>(0, bytes/numDevices);
-		std::vector<char> tmpVector(image, image + bytes / numDevices);
-		imageVector.insert(imageVector.end(), tmpVector.begin(), tmpVector.end());
+		std::copy(image,
+			image + width*(height / numDevices) * 3 - 1,
+			mainImage + 0);
 	}
 	img_data = std::make_shared <std::vector <char> >
-		(imageVector);
+		(image, image+bytes);
 	
 
 	save_png(img_data, width, height, "Mandelbrot_img.png");
