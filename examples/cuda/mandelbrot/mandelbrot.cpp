@@ -125,6 +125,8 @@ int main(int argc, char* argv[]){
 		data_futures.push_back(iterationsBuffer.enqueue_write(0, sizeof(int), &iterations));
 		data_futures.push_back(yStartBuffer.enqueue_write(0, sizeof(int), &yStart));
 
+		hpx::wait_all(data_futures);
+
 		args.push_back(imageBuffer);
 		args.push_back(widthBuffer);
 		args.push_back(heightBuffer);
