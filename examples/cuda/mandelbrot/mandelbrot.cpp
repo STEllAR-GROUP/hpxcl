@@ -154,7 +154,7 @@ int main(int argc, char* argv[]){
 			mainImage + width*(height / numDevices) * 3*i);
 	}
 	img_data = std::make_shared <std::vector <char> >
-		(image, image+bytes);
+		(mainImage, mainImage+bytes);
 	
 
 	save_png(img_data, width, height, "Mandelbrot_img.png");
