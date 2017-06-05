@@ -151,7 +151,7 @@ int main(int argc, char* argv[]){
 		image = imageBufferVector.at(i).enqueue_read_sync<char>(0, bytes/numDevices);
 		std::copy(image,
 			image + width*(height / numDevices) * 3 - 1,
-			mainImage + 0);
+			mainImage + width*(height / numDevices) * 3*i);
 	}
 	img_data = std::make_shared <std::vector <char> >
 		(image, image+bytes);
