@@ -23,3 +23,5 @@ RUN wget https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cu
 ENV LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-8.0/lib64
 ENV PATH=$PATH:/usr/local/cuda-8.0/bin
 ENV CUDA_LIB_PATH=/usr/local/cuda-8.0/lib64/stubs/
+
+

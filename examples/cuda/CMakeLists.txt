@@ -1,4 +1,5 @@
 # Copyright (c)       2015 Patrick Diehl
+#                     2017 Madhavan Seshadri
 #
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -36,6 +37,16 @@ foreach(example_program ${example_programs})
   add_hpx_pseudo_dependencies(examples.cuda.${example_program}
                               ${example_program}_exe)
 
+endforeach()
+
+
+set(subdirs
+mandelbrot
+)
+
+
+foreach(subdir ${subdirs})
+    add_subdirectory(${subdir})
 endforeach()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/kernel.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/example/cuda)
