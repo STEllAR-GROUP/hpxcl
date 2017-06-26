@@ -30,7 +30,7 @@ Building:
 ```
 mkdir build && cd build
 cmake \
--DHPX_ROOT=/home/diehl/opt/hpx/ \
+-DHPX_ROOT=/home/ubuntu/opt/hpx/ \
 -DHPXCL_WITH_CUDA=ON \
 -DCUDA_TOOLKIT_ROOT_DIR=/opt/packages/cuda-7.0/	\
 ..
@@ -47,7 +47,7 @@ Building:
 ```
 mkdir build && cd build
 cmake	\
--DHPX_ROOT=/home/diehl/opt/hpx	\
+-DHPX_ROOT=/home/ubuntu/opt/hpx	\
 -DHPXCL_WITH_OPENCL=ON \
 ..
 ```
@@ -58,6 +58,6 @@ Options
 
 - Build CUDA support: -HPXCL_WITH_CUDA (Default=Off)
 - Build examples: -DHPXCL_BUILD_EXAMPLES (Default=On)
-- Build benchmark: -DHPXCL_BUILD_BENCHMARK (Default=Off)
-- Build documentation: -DHPX_BUILD_DOCUMENTATION (Defaut=Off)
+- Build benchmark: -DHPXCL_WITH_BENCHMARK (Default=Off)
+- Build documentation: -DHPX_WITH_DOCUMENTATION (Defaut=Off)
 - Build the naive CUDA benchmarks: -DHPXCL_WITH_NAIVE_CUDA_BENCHMARK (DEFAULT=Off)
