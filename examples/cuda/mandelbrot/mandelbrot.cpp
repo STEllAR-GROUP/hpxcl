@@ -136,7 +136,11 @@ int main(int argc, char* argv[]){
 		imageBufferVector.push_back(imageBuffer);
 
 		//run the program on the device
-		kernelFutures.push_back(prog.run(args, "kernel", grid, block, args));
+		#ifdef HPXCL_CUDA_WITH_STREAMS
+			kernelFutures.push_back(prog.run(args, "kernel", grid, block, args));
+		#else
+			kernelFutures.push_back(prog.run(args, "kernel", grid, block));
+		#endif
 		//for multiple runs
 		args.clear();
 	}

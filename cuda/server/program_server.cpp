@@ -126,7 +126,7 @@ void program::build(std::vector<std::string> compilerFlags,
 		nvrtcGetProgramLog(prog, log);
 		checkCudaError("program::build Get Log");
 
-		std::cout << log << endl;
+		std::cout << log << std::endl;
 		delete[] log;
 		exit(1);
 	}
