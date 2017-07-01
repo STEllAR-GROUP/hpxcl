@@ -126,7 +126,7 @@ void program::build(std::vector<std::string> compilerFlags,
 		nvrtcGetProgramLog(prog, log);
 		checkCudaError("program::build Get Log");
 
-		hpx::cout << log << "\n" <<hpx::flush;
+		std::cout << log << endl;
 		delete[] log;
 		exit(1);
 	}
