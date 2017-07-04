@@ -291,6 +291,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 	cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
 				block.x, block.y, block.z, 0, 0, args_pointer.data(),
 				0);
+	cudaStreamSynchronize(0);
 	checkCudaError("program::run Run kernel");
 
 }
