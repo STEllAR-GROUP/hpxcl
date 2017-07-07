@@ -8,7 +8,7 @@ FROM stellargroup/hpx:dev
 RUN apt-get clean && apt-get update && apt-get install -y xsltproc      \
         doxygen								\
 	libpng-dev							\	
-	libboost-date-time
+	libboost-date-time-dev
 
 #Installation of CUDA 7.0
 RUN wget https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda_8.0.61_375.26_linux-run && \
