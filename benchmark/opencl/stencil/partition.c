@@ -42,6 +42,7 @@ int main(int argc, char*argv[]) {
 
 	//Memory objects for kernel parameters
 	cl_mem inMemobj = NULL;
+	cl_mem offsetMemobj = NULL;
 
 	cl_program program = NULL;
 	cl_kernel kernel = NULL;
@@ -111,8 +112,11 @@ int main(int argc, char*argv[]) {
 		kernel = clCreateKernel(program, "partition", &ret);
 		
 		inMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE, streamBytes, NULL, &ret);
+		offsetMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(size_t), &offset, &ret);
+		
+		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&offsetMemobj);
 		ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&inMemobj);
-
+		
 		//Execute opencl kernel
 		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,NULL);
 
