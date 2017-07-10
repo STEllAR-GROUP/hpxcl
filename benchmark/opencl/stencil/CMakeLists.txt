@@ -10,5 +10,7 @@ if(HPXCL_WITH_NAIVE_OPENCL_BENCHMARK)
 	
 	link_directories(${OpenCL_LIBRARY})
 	add_executable (stencil_opencl stencil.c)
+	add_executable (partition_opencl partition.c)
 	target_include_directories (stencil_opencl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+	target_include_directories (partition_opencl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
