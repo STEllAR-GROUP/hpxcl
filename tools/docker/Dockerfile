@@ -5,11 +5,12 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 FROM stellargroup/hpx:dev
+RUN apt-get autoremove -y
 RUN apt-get update && apt-get install -y xsltproc      \
         doxygen								\
 	libpng-dev								
 
-#Installation of CUDA 7.0
+Installation of CUDA 8.0
 RUN wget https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda_8.0.61_375.26_linux-run && \
     chmod +x cuda_8.0.61_375.26_linux-run && \
     mkdir nvidia_installers && \
