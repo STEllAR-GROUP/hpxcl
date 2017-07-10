@@ -17,7 +17,7 @@ general:
 
 dependencies:
     pre:
-        - docker build -t $IMAGE_NAME tools/docker:
+        - docker build --rm=false -t $IMAGE_NAME tools/docker:
             timeout: 1200
         - mkdir -p build
 
