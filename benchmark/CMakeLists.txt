@@ -1,15 +1,14 @@
 # Copyright (c)       2016 Patrick Diehl
-#					  2017 Madhavan Seshadri
 #
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 set(subdirs "")
 
-if(HPXCL_WITH_NAIVE_OPENCL_BENCHMARK)
-  set(subdirs
-    ${subdirs} opencl)
-endif()
+#if(HPXCL_WITH_OPENCL)
+#  set(subdirs
+#    ${subdirs} opencl)
+#endif()
 
 if(HPXCL_WITH_CUDA)
   set(subdirs
