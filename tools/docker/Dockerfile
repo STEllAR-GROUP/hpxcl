@@ -6,9 +6,10 @@
 
 FROM stellargroup/hpx:dev
 RUN apt-get install -y xsltproc      \
-        doxygen			\
+        doxygen		    \
 	libpng-dev          \
-    wget
+        wget	 	    \
+	amd-opencl-dev
 
 #Installation of CUDA 8.0
 ENV PERL5LIB=.
