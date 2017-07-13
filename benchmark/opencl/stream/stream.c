@@ -103,11 +103,11 @@ double** stream_benchmark(int size, int iterations) {
 		exit(1);
 	}
 
-	a = malloc(a, sizeof(double) * size);
-	b = malloc(a, sizeof(double) * size);
-	c = malloc(a, sizeof(double) * size);
-	scale = malloc(scale, sizeof(double));
-	s = malloc(s, sizeof(size_t));
+	a = malloc(sizeof(double) * size);
+	b = malloc(sizeof(double) * size);
+	c = malloc(sizeof(double) * size);
+	scale = malloc(sizeof(double));
+	s = malloc(sizeof(size_t));
 
 	s[0] = size;
 	scale[0] = 2.0;

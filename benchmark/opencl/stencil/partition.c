@@ -76,7 +76,7 @@ int main(int argc, char*argv[]) {
 		exit(1);
 	}
 
-	in = (TYPE *) malloc(in, bytes);
+	in = (TYPE *) malloc(bytes);
 
 	kernelSource = (char *) malloc(SOURCE_SIZE_MAX);
 	sourceSize = fread(kernelSource, 1, SOURCE_SIZE_MAX, file);
