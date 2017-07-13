@@ -11,7 +11,7 @@ RUN apt-get install -y xsltproc      \
     wget
 
 #Installation of CUDA 8.0
-RUN export PERL5LIB=.
+ENV PERL5LIB=.
 RUN wget https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda_8.0.61_375.26_linux-run && \
     chmod +x cuda_8.0.61_375.26_linux-run && \
     mkdir nvidia_installers && \
