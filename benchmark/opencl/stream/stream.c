@@ -28,10 +28,38 @@ double mysecond() {
 }
 
 //###########################################################################
+//checktick function
+//###########################################################################
+int checktick() {
+	static const size_t M = 20;
+	int minDelta, Delta;
+	double t1, t2, timesfound[20];
+
+	// Collect a sequence of M unique time values from the system.
+	for (size_t i = 0; i < M; i++) {
+		t1 = mysecond();
+		while (((t2 = mysecond()) - t1) < 1.0E-6)
+			;
+		timesfound[i] = t1 = t2;
+	}
+
+	// Determine the minimum difference between these M values.
+	// This result will be our estimate (in microseconds) for the
+	// clock granularity.
+	minDelta = 1000000;
+	for (size_t i = 1; i < M; i++) {
+		Delta = (int) (1.0E6 * (timesfound[i] - timesfound[i - 1]));
+		minDelta = (int) fmin(minDelta, (int) fmax(Delta, 0));
+	}
+
+	return (minDelta);
+}
+
+//###########################################################################
 //stream benchmark
 //###########################################################################
 
-int stream_benchmark(int size, int iterations) {
+double** stream_benchmark(int size, int iterations) {
 
 	cl_device_id deviceId = NULL;
 	cl_context context = NULL;
@@ -158,7 +186,10 @@ int stream_benchmark(int size, int iterations) {
 	scale[0] = 3.0;
 	scaleMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(double), scale, &ret);
 
-	double timing[4][iterations];
+	double *timing[4];
+	for (int j = 0; j < 4; j++)
+		timing[j] = malloc(sizeof(double) * 4 * iterations);
+
 	for (iteration = 0; iteration != iterations; ++iteration) {
 
 		// Copy
@@ -243,6 +274,8 @@ int stream_benchmark(int size, int iterations) {
 	ret = clReleaseMemObject(sizeMemobj);
 	ret = clReleaseCommandQueue(commandQueue);
 	ret = clReleaseContext(context);
+
+	return timing;
 }
 
 //###########################################################################
@@ -258,7 +291,7 @@ int main(int argc, char*argv[]) {
 
 	int size = atoi(argv[1]);
 	int iterations = atoi(argv[2]);
-
+	int iteration;
 	/* --- SUMMARY --- */
 	const char *label[4] = {
 		"Copy:      ",
@@ -267,7 +300,39 @@ int main(int argc, char*argv[]) {
 		"Triad:     "
 	};
 
-	
+	const double bytes[4] = {
+		(double)(2 * sizeof(double) * size),
+		(double)(2 * sizeof(double) * size),
+		(double)(3 * sizeof(double) * size),
+		(double)(3 * sizeof(double) * size)
+	};
+
+	double minTime[4];
+	double maxTime[4];
+	double avgTime[4];
+
+	double time_total = mysecond();
+	double **timing = stream_benchmark(size,iterations);
+	time_total = mysecond() - time_total;
+
+	for(iteration = 1; iteration < iterations; iteration++) {
+		for(int j = 0;j<4;j++) {
+			minTime[j] = fmin(minTime[j], timing[j][iteration]);
+			maxTime[j] = fmax(maxTime[j], timing[j][iteration]);
+			avgTime[j] = avgTime[j] + timing[j][iteration];
+		}
+	}
+
+	printf("Function    Best Rate MB/s  Avg time     Min time     Max time\n");
+	for (int j=0; j<4; j++) {
+		avgTime[j] = avgTime[j]/(double)(iterations-1);
+
+		printf("%s%12.1f  %11.6f  %11.6f  %11.6f\n", label[j],
+				1.0E-06 * bytes[j]/minTime[j],
+				avgTime[j],
+				minTime[j],
+				maxTime[j]);
+	}
 
 	return 0;
 }
