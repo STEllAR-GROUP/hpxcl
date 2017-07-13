@@ -10,7 +10,7 @@ RUN apt-get install -y xsltproc      \
 	libpng-dev          \
         wget	 	    \
 	opencl-headers      \
-	amd-libopencl1
+	ocl-icd-opencl-dev
 
 #Installation of CUDA 8.0
 ENV PERL5LIB=.
