@@ -89,7 +89,8 @@ double** stream_benchmark(int size, int iterations) {
 	double* scale;
 	double quantum;
 	int iteration;
-
+	size_t i;
+	
 	//reading kernel from file
 	FILE *file;
 	char fileName[] = "./streamKernel.cl";
@@ -113,7 +114,7 @@ double** stream_benchmark(int size, int iterations) {
 	scale[0] = 2.0;
 
 	//Initialize all the arrays
-	for(size_t i = 0 ; i < size ; i++)
+	for(i = 0 ; i < size ; i++)
 	{
 		a[i] = 1.0;
 		b[i] = 2.0;
@@ -313,13 +314,13 @@ int main(int argc, char*argv[]) {
 	double avgTime[4];
 
 	int j;
-	
+
 	double time_total = mysecond();
 	double **timing = stream_benchmark(size,iterations);
 	time_total = mysecond() - time_total;
 
 	for(iteration = 1; iteration < iterations; iteration++) {
-		for(int j = 0;j<4;j++) {
+		for(j = 0;j<4;j++) {
 			minTime[j] = fmin(minTime[j], timing[j][iteration]);
 			maxTime[j] = fmax(maxTime[j], timing[j][iteration]);
 			avgTime[j] = avgTime[j] + timing[j][iteration];
