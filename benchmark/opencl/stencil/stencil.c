@@ -58,6 +58,7 @@ int main(int argc, char*argv[]) {
 	cl_int ret;
 	size_t contextDescriptorSize;
 
+	TYPE *inObject;
 	TYPE *outObject;
 	TYPE *sObject; 
 
@@ -74,6 +75,7 @@ int main(int argc, char*argv[]) {
 		exit(1);
 	}
 
+	inObject = (TYPE *) malloc(count * sizeof(TYPE));
 	outObject = (TYPE *) malloc(count * sizeof(TYPE));
 	sObject = (TYPE *) malloc(3 * sizeof(TYPE));
 
@@ -97,15 +99,16 @@ int main(int argc, char*argv[]) {
 	commandQueue = clCreateCommandQueue(context, deviceId, 0, &ret);
 
 	//randomly generate s vector
+	fillRandomVector(inObject, count);
 	sObject[0] = 0.5;
 	sObject[1] = 1.0;
 	sObject[2] = 0.5;
 
 	//Create memory object
-	countMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(size_t), NULL, &ret);
-	inMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,count * sizeof(TYPE), NULL, &ret);
-	outMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,count * sizeof(TYPE), NULL, &ret);
-	sMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,3 * sizeof(TYPE), NULL, &ret);
+	countMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(size_t), &count, &ret);
+	inMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,count * sizeof(TYPE), inObject, &ret);
+	outMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,count * sizeof(TYPE), outObject, &ret);
+	sMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,3 * sizeof(TYPE), sObject, &ret);
 
 	//Create kernel program from source
 	program = clCreateProgramWithSource(context, 1, (const char **)&kernelSource,(const size_t *)&sourceSize, &ret);
@@ -127,6 +130,8 @@ int main(int argc, char*argv[]) {
 
 	//copy the result back
 	ret = clEnqueueReadBuffer(commandQueue, outMemobj, CL_TRUE, 0, count * sizeof(TYPE),outObject, 0, NULL, NULL);
+
+	printf(" Check Result: %d", checkStencil(in, out, s, size));
 
 	//Before program termination
 	ret = clFlush(commandQueue);
