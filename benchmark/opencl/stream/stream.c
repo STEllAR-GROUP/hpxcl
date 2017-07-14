@@ -34,9 +34,9 @@ int checktick() {
 	static const size_t M = 20;
 	int minDelta, Delta;
 	double t1, t2, timesfound[20];
-
+	size_t i;
 	// Collect a sequence of M unique time values from the system.
-	for (size_t i = 0; i < M; i++) {
+	for (i = 0; i < M; i++) {
 		t1 = mysecond();
 		while (((t2 = mysecond()) - t1) < 1.0E-6)
 			;
@@ -47,7 +47,7 @@ int checktick() {
 	// This result will be our estimate (in microseconds) for the
 	// clock granularity.
 	minDelta = 1000000;
-	for (size_t i = 1; i < M; i++) {
+	for (i = 1; i < M; i++) {
 		Delta = (int) (1.0E6 * (timesfound[i] - timesfound[i - 1]));
 		minDelta = (int) fmin(minDelta, (int) fmax(Delta, 0));
 	}
@@ -187,7 +187,8 @@ double** stream_benchmark(int size, int iterations) {
 	scaleMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(double), scale, &ret);
 
 	double *timing[4];
-	for (int j = 0; j < 4; j++)
+	int j;
+	for (j = 0; j < 4; j++)
 		timing[j] = malloc(sizeof(double) * 4 * iterations);
 
 	for (iteration = 0; iteration != iterations; ++iteration) {
@@ -311,6 +312,8 @@ int main(int argc, char*argv[]) {
 	double maxTime[4];
 	double avgTime[4];
 
+	int j;
+	
 	double time_total = mysecond();
 	double **timing = stream_benchmark(size,iterations);
 	time_total = mysecond() - time_total;
@@ -324,7 +327,7 @@ int main(int argc, char*argv[]) {
 	}
 
 	printf("Function    Best Rate MB/s  Avg time     Min time     Max time\n");
-	for (int j=0; j<4; j++) {
+	for (j=0; j<4; j++) {
 		avgTime[j] = avgTime[j]/(double)(iterations-1);
 
 		printf("%s%12.1f  %11.6f  %11.6f  %11.6f\n", label[j],
