@@ -131,7 +131,7 @@ int main(int argc, char*argv[]) {
 	//copy the result back
 	ret = clEnqueueReadBuffer(commandQueue, outMemobj, CL_TRUE, 0, count * sizeof(TYPE),outObject, 0, NULL, NULL);
 
-	printf(" Check Result: %d", checkStencil(in, out, s, size));
+	printf(" Check Result: %d", checkStencil(inObject, outObject, sObject, count));
 
 	//Before program termination
 	ret = clFlush(commandQueue);

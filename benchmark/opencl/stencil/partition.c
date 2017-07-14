@@ -103,7 +103,6 @@ int main(int argc, char*argv[]) {
 	//Build the kernel program
 	ret = clBuildProgram(program, 1, &deviceId, "-I ./", NULL, NULL);
 
-
 	for(i = 0; i < nStreams; i++)
 	{
 		offset = i * streamSize;
@@ -121,18 +120,20 @@ int main(int argc, char*argv[]) {
 		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,NULL);
 
 		//copy the result back
-		ret = clEnqueueReadBuffer(commandQueue, inMemobj, CL_TRUE, 0, streamSize, &in[offset], 0, NULL, NULL);
+		ret = clEnqueueReadBuffer(commandQueue, inMemobj, CL_TRUE, 0, streamBytes, &in[offset], 0, NULL, NULL);
 
 		ret = clFlush(commandQueue);
 		ret = clReleaseKernel(kernel);
 		ret = clReleaseMemObject(inMemobj);
+		ret = clReleaseMemObject(offsetMemobj);
 	}
+
+	printf("Validate Result: %d", checkKernel(in,n));
 
 	//Before program termination
 	ret = clFlush(commandQueue);
 	ret = clFinish(commandQueue);
 	ret = clReleaseProgram(program);
-	ret = clReleaseMemObject(inMemobj);
 	ret = clReleaseCommandQueue(commandQueue);
 	ret = clReleaseContext(context);
 
