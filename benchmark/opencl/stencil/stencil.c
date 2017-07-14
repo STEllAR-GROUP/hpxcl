@@ -147,8 +147,10 @@ int main(int argc, char*argv[]) {
 }
 
 bool checkStencil(TYPE *in, TYPE *out, TYPE *s, size_t size) {
+	size_t i;
 	bool validate = true;
-	for (size_t i = 1; i < size - 1; ++i) {
+
+	for (i = 1; i < size - 1; ++i) {
 		TYPE res = in[i - 1] * s[0] + in[i] * s[1] + in[i + 1] * s[2];
 
 		if (abs(res - out[i]) >= 10e-5) {
@@ -161,9 +163,10 @@ bool checkStencil(TYPE *in, TYPE *out, TYPE *s, size_t size) {
 }
 
 void fillRandomVector(TYPE *matrix, size_t size) {
+	size_t i;
 	srand(time(NULL));
 
-	for (size_t i = 0; i < size; i++) {
+	for (i = 0; i < size; i++) {
 
 		matrix[i] = (TYPE) (0.5) * ((TYPE) rand()) / (TYPE) RAND_MAX;
 	}
