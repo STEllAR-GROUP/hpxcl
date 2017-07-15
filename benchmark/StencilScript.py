@@ -17,15 +17,15 @@ os.system("cmake -DHPX_ROOT=~/packagaes/hpx-4.9/ -DHPXCL_WITH_CUDA=ON -DHPXCL_WI
 os.system("make")
 
 #profiling Stencil HPX code
-for i in range(1,8):
+for i in range(1000000,100000000,10000000):
 	os.system("srun -p tycho -N 1 ./StencilHPX " + str(i) + " >> StencilHPX.dat")
 
 #profiling Stencil Cuda code
-for i in range(1,8):
+for i in range(1000000,100000000,10000000):
 	os.system("srun -p tycho -N 1 ./StencilCuda " + str(i) + " >> StencilCuda.dat")
 
 stencilCudaX = []
-stencilCudaX = []
+stencilCudaY = []
 with open('StencilCuda.dat', 'rb') as f:
     reader = csv.reader(f, delimiter=' ', quoting=csv.QUOTE_NONE)
     for row in reader:
@@ -48,8 +48,8 @@ os.system("cmake -DHPX_ROOT=~/packagaes/hpx-4.9/ -DHPXCL_WITH_CUDA=ON -DHPXCL_WI
 os.system("make")
 
 
-#profiling Partition HPX code
-for i in range(1,8):
+#profiling Stencil HPX code
+for i in range(1000000,100000000,10000000):
 	os.system("srun -p tycho -N 1 ./StencilHPX " + str(i) + " >> StencilStreamHPX.dat")
 
 stencilStreamHpxX = []
