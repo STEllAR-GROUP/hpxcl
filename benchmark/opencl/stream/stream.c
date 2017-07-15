@@ -24,7 +24,7 @@
 double mysecond() {
 	clock_t time;
 	time = clock();
-	return ((double) time);
+	return ((double) time * 1e-9);
 }
 
 //###########################################################################
