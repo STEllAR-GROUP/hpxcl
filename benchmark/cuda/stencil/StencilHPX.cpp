@@ -27,25 +27,29 @@ int main(int argc, char*argv[]) {
 		exit(1);
 	}
 
+	double data = 0.;
+
+	timer_start();
 	size_t* count;
 	cudaMallocHost((void**)&count,sizeof(size_t));
 	count[0]= atoi(argv[1]);
-
+	data += timer_stop();
 	std::cout << count[0] << " ";
 
+	timer_start();
 	//Vector for all futures for the data management
 	std::vector<hpx::lcos::future<void>> data_futures;
 
 	// Get list of available Cuda Devices.
 	std::vector<device> devices = get_all_devices(1, 0).get();
-
+	data += timer_stop();
 	// Check whether there are any devices
 	if (devices.size() < 1) {
 		hpx::cerr << "No CUDA devices found!" << hpx::endl;
 		return hpx::finalize();
 	}
 
-	double data = 0.;
+	
 	timer_start();
 
 	//Pointer
