@@ -80,6 +80,7 @@ void checkKernel(int err, cl_program program, cl_device_id deviceId){
 
     fprintf(stderr,"Build log: \n%s\n", buff_erro); //Be careful with  the fprint
     free(buff_erro);
+	}
 }
 //###########################################################################
 //stream benchmark
@@ -111,7 +112,7 @@ double** stream_benchmark(int size, int iterations) {
 	double* a;
 	double* b;
 	double* c;
-	size_t* s;
+	int* s;
 	double* scale;
 	double quantum;
 	int iteration;
@@ -170,7 +171,7 @@ double** stream_benchmark(int size, int iterations) {
 	aMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(double) * size, a, &ret);
 	bMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(double) * size, b, &ret);
 	cMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(double) * size, c, &ret);
-	sMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(size_t) , s, &ret);
+	sMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(int) , s, &ret);
 	scaleMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(double), scale, &ret);
 	sizeMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(int), &size, &ret);
 
@@ -186,15 +187,15 @@ double** stream_benchmark(int size, int iterations) {
 	
 	//Pass arguments to kernel
 	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&aMemobj);
-	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&bMemobj);
-	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&scaleMemobj);
-	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&sizeMemobj);
+	ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&bMemobj);
+	ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&scaleMemobj);
+	ret = clSetKernelArg(kernel, 3, sizeof(cl_mem), (void *)&sizeMemobj);
 
 
 	double time = mysecond();
 	//Execute opencl kernel
 	cl_event event = NULL;
-	cl_ulong time_start, time_end;
+	cl_ulong time_start = 0, time_end = 0;
 	ret = clEnqueueTask(commandQueue, kernel, 0, NULL,NULL);
 	clWaitForEvents(1, &event);
 
