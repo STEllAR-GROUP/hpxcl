@@ -166,8 +166,18 @@ double** stream_benchmark(int size, int iterations) {
 
 	double time = mysecond();
 	//Execute opencl kernel
+	cl_event event = NULL;
+	cl_ulong time_start, time_end;
 	ret = clEnqueueTask(commandQueue, kernel, 0, NULL,NULL);
-	time = 1.0E6 * (mysecond() - time);
+	clWaitForEvents(1, &event);
+
+    double total_time;
+    
+    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+
+    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+	
+	time = 1.0E-9 * (time_end-time_start);
 
 	quantum = checktick();
 	if (quantum >= 1) {
