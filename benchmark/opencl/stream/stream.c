@@ -55,6 +55,32 @@ int checktick() {
 	return (minDelta);
 }
 
+void checkKernel(int err, cl_program program, cl_device_id deviceId){
+	 if (err != CL_SUCCESS) {
+	char *buff_erro;
+	cl_int errcode;
+	size_t build_log_len;
+	errcode = clGetProgramBuildInfo(program, deviceId, CL_PROGRAM_BUILD_LOG, 0, NULL, &build_log_len);
+	if (errcode) {
+            printf("clGetProgramBuildInfo failed at line %d\n", __LINE__);
+            exit(-1);
+        }
+
+    buff_erro = malloc(build_log_len);
+    if (!buff_erro) {
+        printf("malloc failed at line %d\n", __LINE__);
+        exit(-2);
+    }
+
+    errcode = clGetProgramBuildInfo(program, deviceId, CL_PROGRAM_BUILD_LOG, build_log_len, buff_erro, NULL);
+    if (errcode) {
+        printf("clGetProgramBuildInfo failed at line %d\n", __LINE__);
+        exit(-3);
+    }
+
+    fprintf(stderr,"Build log: \n%s\n", buff_erro); //Be careful with  the fprint
+    free(buff_erro);
+}
 //###########################################################################
 //stream benchmark
 //###########################################################################
@@ -156,7 +182,8 @@ double** stream_benchmark(int size, int iterations) {
 
 	//Create a opencl kernel
 	kernel = clCreateKernel(program, "STREAM_Scale", &ret);
-
+	checkKernel(ret, program, deviceId);
+	
 	//Pass arguments to kernel
 	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&aMemobj);
 	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&bMemobj);
