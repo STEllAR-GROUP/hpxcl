@@ -95,7 +95,7 @@ int main(int argc, char*argv[]) {
 	clGetContextInfo(context, CL_CONTEXT_DEVICES, 0, 0, &contextDescriptorSize); 
 
 	//command queue for the first device
-	commandQueue = clCreateCommandQueue(context, deviceId, 0, &ret);
+	commandQueue = clCreateCommandQueue(context, deviceId, CL_QUEUE_PROFILING_ENABLE, &ret);
 
 	//Create kernel program from source
 	program = clCreateProgramWithSource(context, 1, (const char **)&kernelSource,(const size_t *)&sourceSize, &ret);
@@ -121,7 +121,7 @@ int main(int argc, char*argv[]) {
 
 		//copy the result back
 		ret = clEnqueueReadBuffer(commandQueue, inMemobj, CL_TRUE, 0, streamBytes, &in[offset], 0, NULL, NULL);
-
+		ret = clFinish(commandQueue);
 		ret = clFlush(commandQueue);
 		ret = clReleaseKernel(kernel);
 		ret = clReleaseMemObject(inMemobj);
