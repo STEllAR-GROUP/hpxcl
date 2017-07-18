@@ -15,7 +15,7 @@ with open('StencilCuda.dat', 'rb') as f:
         stencilCudaX.append(int(row[0]))
         stencilCudaY.append(float(row[2]))
 
-plt.plot(stencilCudaX, stencilCudaX, label='Naive CUDA')
+plt.plot(stencilCudaX, stencilCudaY, label='Naive CUDA')
 
 stencilHpxX = []
 stencilHpxY = []
@@ -25,6 +25,8 @@ with open('StencilHPX.dat', 'rb') as f:
         stencilHpxX.append(int(row[0]))
         stencilHpxY.append(float(row[2]))
 
+plt.plot(stencilHpxX, stencilHpxY,marker='o', linestyle='--', color='r', label='HPXCL CUDA')
+
 stencilStreamHpxX = []
 stencilStreamHpxY = []
 with open('StencilStreamHPX.dat', 'rb') as f:
@@ -32,6 +34,7 @@ with open('StencilStreamHPX.dat', 'rb') as f:
     for row in reader:
         stencilStreamHpxX.append(int(row[0]))
         stencilStreamHpxY.append(float(row[2]))
+
 
 plt.plot(stencilStreamHpxX, stencilStreamHpxY,marker='o', linestyle='--', color='b', label='HPXCL CUDA WITH STREAM')
 

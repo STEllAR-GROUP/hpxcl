@@ -32,7 +32,7 @@ with open('StencilCuda.dat', 'rb') as f:
         stencilCudaX.append(int(row[0]))
         stencilCudaY.append(float(row[2]))
 
-plt.plot(stencilCudaX, stencilCudaX, label='Naive CUDA')
+plt.plot(stencilCudaX, stencilCudaY, label='Naive CUDA')
 
 stencilHpxX = []
 stencilHpxY = []
