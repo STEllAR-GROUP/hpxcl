@@ -196,16 +196,15 @@ double** stream_benchmark(int size, int iterations) {
 	//Execute opencl kernel
 	cl_event event = NULL;
 	cl_ulong time_start = 0, time_end = 0;
-	ret = clEnqueueTask(commandQueue, kernel, 0, NULL,NULL);
+	ret = clEnqueueTask(commandQueue, kernel, 0, NULL,&event);
 	clWaitForEvents(1, &event);
 
-    double total_time;
-    
+    clFinish(commandQueue);
     clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
 
     clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
 	
-	time = 1.0E-9 * (time_end-time_start);
+	time = 1.0E-6 * (time_end-time_start);
 
 	quantum = checktick();
 	if (quantum >= 1) {
@@ -243,8 +242,18 @@ double** stream_benchmark(int size, int iterations) {
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&bMemobj);
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&sizeMemobj);
 
-		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,NULL);
-		timing[0][iteration] = mysecond() - timing[0][iteration];
+		event = NULL;
+		time_start = 0, time_end = 0;
+
+		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,&event);
+		clWaitForEvents(1, &event);
+
+	    clFinish(commandQueue);
+	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+
+
+		timing[0][iteration] = 1.0E-6 * (time_end-time_start);
 
 		ret = clFlush(commandQueue);
 		ret = clReleaseKernel(kernel);
@@ -261,8 +270,17 @@ double** stream_benchmark(int size, int iterations) {
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&scaleMemobj);
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&sizeMemobj);
 
-		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,NULL);
-		timing[1][iteration] = mysecond() - timing[1][iteration];
+		event = NULL;
+		time_start = 0, time_end = 0;
+
+		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,&event);
+		clWaitForEvents(1, &event);
+
+	    clFinish(commandQueue);
+	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+
+		timing[1][iteration] = 1.0E-6 * (time_end-time_start);
 
 		ret = clFlush(commandQueue);
 		ret = clReleaseKernel(kernel);
@@ -278,8 +296,17 @@ double** stream_benchmark(int size, int iterations) {
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&cMemobj);
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&sizeMemobj);
 
-		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,NULL);
-		timing[2][iteration] = mysecond() - timing[2][iteration];
+		event = NULL;
+		time_start = 0, time_end = 0;
+
+		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,&event);
+		clWaitForEvents(1, &event);
+
+	    clFinish(commandQueue);
+	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+
+		timing[2][iteration] = 1.0E-6 * (time_end-time_start);
 
 		ret = clFlush(commandQueue);
 		ret = clReleaseKernel(kernel);
@@ -296,8 +323,17 @@ double** stream_benchmark(int size, int iterations) {
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&scaleMemobj);
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&sizeMemobj);
 
-		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,NULL);
-		timing[3][iteration] = mysecond() - timing[3][iteration];
+		event = NULL;
+		time_start = 0, time_end = 0;
+
+		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,&event);
+		clWaitForEvents(1, &event);
+
+	    clFinish(commandQueue);
+	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
+	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
+
+		timing[3][iteration] = 1.0E-6 * (time_end-time_start);
 
 		ret = clFlush(commandQueue);
 		ret = clReleaseKernel(kernel);
