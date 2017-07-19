@@ -245,8 +245,8 @@ double** stream_benchmark(int size, int iterations) {
 
 		//Pass arguments to kernel
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&aMemobj);
-		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&bMemobj);
-		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&sizeMemobj);
+		ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&bMemobj);
+		ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&sizeMemobj);
 
 		event = NULL;
 		time_start = 0, time_end = 0;
@@ -272,9 +272,9 @@ double** stream_benchmark(int size, int iterations) {
 
 		//Pass arguments to kernel
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&aMemobj);
-		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&bMemobj);
-		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&scaleMemobj);
-		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&sizeMemobj);
+		ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&bMemobj);
+		ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&scaleMemobj);
+		ret = clSetKernelArg(kernel, 3, sizeof(cl_mem), (void *)&sizeMemobj);
 
 		event = NULL;
 		time_start = 0, time_end = 0;
@@ -298,9 +298,9 @@ double** stream_benchmark(int size, int iterations) {
 		kernel = clCreateKernel(program, "STREAM_Add", &ret);
 
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&aMemobj);
-		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&bMemobj);
-		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&cMemobj);
-		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&sizeMemobj);
+		ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&bMemobj);
+		ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&cMemobj);
+		ret = clSetKernelArg(kernel, 3, sizeof(cl_mem), (void *)&sizeMemobj);
 
 		event = NULL;
 		time_start = 0, time_end = 0;
@@ -324,10 +324,10 @@ double** stream_benchmark(int size, int iterations) {
 		kernel = clCreateKernel(program, "STREAM_Triad", &ret);
 
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&aMemobj);
-		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&bMemobj);
-		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&cMemobj);
-		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&scaleMemobj);
-		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&sizeMemobj);
+		ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&bMemobj);
+		ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&cMemobj);
+		ret = clSetKernelArg(kernel, 3, sizeof(cl_mem), (void *)&scaleMemobj);
+		ret = clSetKernelArg(kernel, 4, sizeof(cl_mem), (void *)&sizeMemobj);
 
 		event = NULL;
 		time_start = 0, time_end = 0;
