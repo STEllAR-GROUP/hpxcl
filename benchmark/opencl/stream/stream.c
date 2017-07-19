@@ -18,6 +18,9 @@
 //Properties for reading the kernel
 //###########################################################################
 
+#define min(a,b) (((a)<(b))?(a):(b))
+#define max(a,b) (((a)>(b))?(a):(b))
+
 #define SOURCE_SIZE_MAX (0x100000)
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -199,7 +202,7 @@ double** stream_benchmark(int size, int iterations) {
 	//Execute opencl kernel
 	cl_event event = NULL;
 	cl_ulong time_start = 0, time_end = 0;
-	ret = cclEnqueueNDRangeKernel (commandQueue, kernel, 1, 0, &global_work_size, &local_work_size, 0, NULL, &event);
+	ret = clEnqueueNDRangeKernel (commandQueue, kernel, 1, 0, &global_work_size, &local_work_size, 0, NULL, &event);
 	clWaitForEvents(1, &event);
 
     clFinish(commandQueue);
