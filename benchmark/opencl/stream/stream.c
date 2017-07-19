@@ -178,6 +178,9 @@ double** stream_benchmark(int size, int iterations) {
 	//Create kernel program from source
 	program = clCreateProgramWithSource(context, 1, (const char **)&kernelSource,(const size_t *)&sourceSize, &ret);
 
+	const size_t global_work_size = max(pow(2,ceil(log(size)/log(2))),512);
+	const size_t local_work_size = 512;
+
 	//Build the kernel program
 	ret = clBuildProgram(program, 1, &deviceId, "-I ./", NULL, NULL);
 
@@ -196,7 +199,7 @@ double** stream_benchmark(int size, int iterations) {
 	//Execute opencl kernel
 	cl_event event = NULL;
 	cl_ulong time_start = 0, time_end = 0;
-	ret = clEnqueueTask(commandQueue, kernel, 0, NULL,&event);
+	ret = cclEnqueueNDRangeKernel (commandQueue, kernel, 1, 0, &global_work_size, &local_work_size, 0, NULL, &event);
 	clWaitForEvents(1, &event);
 
     clFinish(commandQueue);
@@ -245,7 +248,7 @@ double** stream_benchmark(int size, int iterations) {
 		event = NULL;
 		time_start = 0, time_end = 0;
 
-		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,&event);
+		ret = clEnqueueNDRangeKernel (commandQueue, kernel, 1, 0, &global_work_size, &local_work_size, 0, NULL, &event);
 		clWaitForEvents(1, &event);
 
 	    clFinish(commandQueue);
@@ -273,7 +276,7 @@ double** stream_benchmark(int size, int iterations) {
 		event = NULL;
 		time_start = 0, time_end = 0;
 
-		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,&event);
+		ret = clEnqueueNDRangeKernel (commandQueue, kernel, 1, 0, &global_work_size, &local_work_size, 0, NULL, &event);
 		clWaitForEvents(1, &event);
 
 	    clFinish(commandQueue);
@@ -299,7 +302,7 @@ double** stream_benchmark(int size, int iterations) {
 		event = NULL;
 		time_start = 0, time_end = 0;
 
-		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,&event);
+		ret = clEnqueueNDRangeKernel (commandQueue, kernel, 1, 0, &global_work_size, &local_work_size, 0, NULL, &event);
 		clWaitForEvents(1, &event);
 
 	    clFinish(commandQueue);
@@ -326,7 +329,7 @@ double** stream_benchmark(int size, int iterations) {
 		event = NULL;
 		time_start = 0, time_end = 0;
 
-		ret = clEnqueueTask(commandQueue, kernel, 0, NULL,&event);
+		ret = clEnqueueNDRangeKernel (commandQueue, kernel, 1, 0, &global_work_size, &local_work_size, 0, NULL, &event);
 		clWaitForEvents(1, &event);
 
 	    clFinish(commandQueue);
