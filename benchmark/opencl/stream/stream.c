@@ -165,7 +165,7 @@ double** stream_benchmark(int size, int iterations) {
 	clGetContextInfo(context, CL_CONTEXT_DEVICES, 0, 0, &contextDescriptorSize); 
 
 	//command queue for the first device
-	commandQueue = clCreateCommandQueue(context, deviceId, 0, &ret);
+	commandQueue = clCreateCommandQueue(context, deviceId, CL_QUEUE_PROFILING_ENABLE, &ret);
 
 	//Create memory object
 	aMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(double) * size, a, &ret);
