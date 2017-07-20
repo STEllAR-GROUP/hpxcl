@@ -23,7 +23,7 @@
 #define SOURCE_SIZE_MAX (0x100000)
 bool checkKernel(TYPE *in, size_t size);
 
-void checkKernel(int err, cl_program program, cl_device_id deviceId){
+void checkBuild(int err, cl_program program, cl_device_id deviceId){
 	 if (err != CL_SUCCESS) {
 	char *buff_erro;
 	cl_int errcode;
@@ -92,7 +92,7 @@ int main(int argc, char*argv[]) {
 	const int bytes = n * sizeof(TYPE);
 	int i;
 	int offset;
-
+	int stream = streamSize;
 	const size_t global_work_size = n;
 	const size_t local_work_size = 256;
 
@@ -137,7 +137,7 @@ int main(int argc, char*argv[]) {
 
 	//Build the kernel program
 	ret = clBuildProgram(program, 1, &deviceId, "-I ./", NULL, NULL);
-	checkKernel(ret, program, deviceId);
+	checkBuild(ret, program, deviceId);
 
 	for(i = 0; i < nStreams; i++)
 	{
@@ -148,7 +148,7 @@ int main(int argc, char*argv[]) {
 		
 		inMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE, streamBytes, NULL, &ret);
 		offsetMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(size_t), &offset, &ret);
-		streamSizeMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(size_t), &streamSize, &ret);
+		streamSizeMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int), &stream, &ret);
 
 		ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&offsetMemobj);
 		ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&inMemobj);
