@@ -210,7 +210,7 @@ double** stream_benchmark(int size, int iterations) {
 
     clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
 	
-	time = 1.0E-6 * (time_end-time_start);
+	time = 1.0E-3 * (time_end-time_start);
 
 	quantum = checktick();
 	if (quantum >= 1) {
@@ -259,7 +259,7 @@ double** stream_benchmark(int size, int iterations) {
 	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
 
 
-		timing[0][iteration] = 1.0E-6 * (time_end-time_start);
+		timing[0][iteration] = (time_end-time_start) * 1e-9;
 
 		ret = clFlush(commandQueue);
 		ret = clReleaseKernel(kernel);
@@ -286,7 +286,7 @@ double** stream_benchmark(int size, int iterations) {
 	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
 	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
 
-		timing[1][iteration] = 1.0E-6 * (time_end-time_start);
+		timing[1][iteration] = (time_end-time_start) * 1e-9;
 
 		ret = clFlush(commandQueue);
 		ret = clReleaseKernel(kernel);
@@ -312,7 +312,7 @@ double** stream_benchmark(int size, int iterations) {
 	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
 	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
 
-		timing[2][iteration] = 1.0E-6 * (time_end-time_start);
+		timing[2][iteration] = (time_end-time_start)* 1e-9;
 
 		ret = clFlush(commandQueue);
 		ret = clReleaseKernel(kernel);
@@ -339,7 +339,7 @@ double** stream_benchmark(int size, int iterations) {
 	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
 	    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
 
-		timing[3][iteration] = 1.0E-6 * (time_end-time_start);
+		timing[3][iteration] = (time_end-time_start) * 1e-9;
 
 		ret = clFlush(commandQueue);
 		ret = clReleaseKernel(kernel);
@@ -398,6 +398,9 @@ int main(int argc, char*argv[]) {
 	double time_total = mysecond();
 	double **timing = stream_benchmark(size,iterations);
 	time_total = mysecond() - time_total;
+
+	for(j = 0;j<4;j++)
+		minTime[j] = 999999.9;
 
 	for(iteration = 1; iteration < iterations; iteration++) {
 		for(j = 0;j<4;j++) {
