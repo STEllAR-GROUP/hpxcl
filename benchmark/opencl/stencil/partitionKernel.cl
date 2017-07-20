@@ -7,14 +7,14 @@
 //Kernels
 //###########################################################################
 
-__kernel void partition(__global size_t *offset,__global TYPE* in, __global int *len) {
+__kernel void partition(__global size_t *offset,__global float* in, __global int *len) {
 	int threadIdX = get_local_id(0);
 	int workGroupSize = get_global_size(0);
 	size_t i = *offset + get_global_id(0);
-	if(i < len)	{
-		TYPE x = (TYPE) i;
-		TYPE s = sinf(x);
-		TYPE c = cosf(x);
+	if(i < *len)	{
+		float x = (float) i;
+		float s = sinf(x);
+		float c = cosf(x);
 		in[i] = in[i] + sqrt(s*s+c*c);
 	}
 }
