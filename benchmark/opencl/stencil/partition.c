@@ -98,7 +98,7 @@ int main(int argc, char*argv[]) {
 
 	//reading kernel from file
 	FILE *file;
-	char fileName[] = "./stencilKernel.cl";
+	char fileName[] = "./partitionKernel.cl";
 	char *kernelSource;
 	size_t sourceSize;
 
