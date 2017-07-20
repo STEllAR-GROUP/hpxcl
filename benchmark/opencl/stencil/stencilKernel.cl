@@ -7,14 +7,14 @@
 //Kernels
 //###########################################################################
 
-__kernel void stencil(size_t count, TYPE* in, TYPE* out, TYPE* s) {
+__kernel void stencil(__global size_t *count,__global TYPE* in,__global TYPE* out,__global TYPE* s) {
 	int workGroupX = get_local_size(0);
 	int workIdX = get_group_id(0);
 	int threadIdX = get_local_id(0);
 	int workGroupSize = get_global_size(0);
 	int i;
 	
-	for(i = (workGroupX * workIdX + 1) + threadIdX; i < count - 1; i += workGroupSize) {
+	for(i = (workGroupX * workIdX + 1) + threadIdX; i < *count - 1; i += workGroupSize) {
 		out[i] = s[0] * in[i-1] + s[1] * in[i] + s[2] * in[i+1];
 	}
 
