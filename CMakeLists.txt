@@ -1,6 +1,6 @@
 # Copyright (c) 2014 Martin Stumpf
 # Copyright (c) 2015 Patrick Diehl
-# Copyright (c) 2017 Madhavan Seshadri         
+# Copyright (c) 2017 Madhavan Seshadri
 #
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -79,6 +79,7 @@ hpx_option(HPXCL_WITH_CUDA BOOL "Builds the CUDA part of HPXCL (default OFF)." O
 hpx_option(HPXCL_WITH_BENCHMARK BOOL "Builds the benchmark (default OFF)." OFF)
 hpx_option(HPXCL_WITH_NAIVE_CUDA_BENCHMARK BOOL "Builds the naive CUDA benchmark (default OFF)." OFF)
 hpx_option(HPXCL_CUDA_WITH_STREAM BOOL "Builds multiple stream version (default ON)." ON)
+hpx_option(HPXCL_WITH_NAIVE_OPENCL_BENCHMARK BOOL "Builds the naive OPENCL benchmark (default OFF)." OFF)
 
 if(NOT HPXCL_WITH_OPENCL AND NOT HPXCL_WITH_CUDA)
     message(FATAL_ERROR "At least one of HPXCL_WITH_OPENCL or HPXCL_WITH_CUDA has to be set to ON")
@@ -87,12 +88,11 @@ endif()
 ########################################################################
 # further includes, depending on config
 #
-
 if(HPXCL_CUDA_WITH_STREAM)
 	add_definitions(-DHPXCL_CUDA_WITH_STREAMS=1)
 endif()
 
-if(HPXCL_WITH_OPENCL)
+if(HPXCL_WITH_OPENCL OR HPXCL_WITH_NAIVE_OPENCL_BENCHMARK)
     find_package(OpenCL REQUIRED)
     include_directories(${OPENCL_INCLUDE_DIRS})
     #get_filename_component(PARENT_DIR ${OPENCL_LIBRARIES} OPENCL_LIBRARY_DIR)
@@ -208,5 +208,3 @@ else()
   unset(HPXCL_BUILD_TESTS_REGRESSIONS CACHE)
   unset(HPXCL_BUILD_TESTS_UNIT CACHE)
 endif()
-
-

@@ -5,12 +5,15 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 FROM stellargroup/hpx:dev
-RUN apt-get clean && apt-get update && apt-get install -y xsltproc                               \
-                                         doxygen												 \
-										 amd-opencl-dev											 \
-										 libpng-dev	
+RUN apt-get install -y xsltproc      \
+        doxygen		    \
+	libpng-dev          \
+        wget	 	    \
+	opencl-headers      \
+	ocl-icd-opencl-dev
 
-#Installation of CUDA 7.0
+#Installation of CUDA 8.0
+ENV PERL5LIB=.
 RUN wget https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda_8.0.61_375.26_linux-run && \
     chmod +x cuda_8.0.61_375.26_linux-run && \
     mkdir nvidia_installers && \
