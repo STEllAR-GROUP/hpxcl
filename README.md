@@ -61,3 +61,4 @@ Options
 - Build benchmark: -DHPXCL_WITH_BENCHMARK (Default=Off)
 - Build documentation: -DHPX_WITH_DOCUMENTATION (Defaut=Off)
 - Build the naive CUDA benchmarks: -DHPXCL_WITH_NAIVE_CUDA_BENCHMARK (DEFAULT=Off)
+- Build the HPXCL CUDA Version with Streams: -DHPXCL_CUDA_WITH_STREAM (Default=On)

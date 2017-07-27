@@ -101,6 +101,7 @@ public:
 		hpx::async<action_type>(this->get_id(), source).get();
 	}
 
+#ifdef HPXCL_CUDA_WITH_STREAMS
 	/**
 	 * \brief This method executes the kernel, compiled or set to this program
 	 *
@@ -228,6 +229,36 @@ public:
 		typedef server::program::create_stream_action action_type;
 		return hpx::async<action_type>(this->get_id());
 	}
+#else
+	/**
+	*
+	*\brief This method executes the kernel set to the program
+	*
+	*\param args List of arguments to the kernel
+	*\param modulename Name of the kernel program to be executed
+	*\param grid Grid dimension of the kernel
+	*\param block Block dimension of the kernel
+	*
+	*\note The kernel is executed the null stream provided by CUDA API
+	*/
+	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
+			std::string modulename, hpx::cuda::server::program::Dim3 grid,
+			hpx::cuda::server::program::Dim3 block) {
+		
+		HPX_ASSERT(this->get_id());
+
+		std::vector<hpx::naming::id_type> args_id;
+
+		for (unsigned int i = 0; i < args.size(); i++) {
+
+			args_id.push_back(args[i].get_id());
+		}
+
+		typedef server::program::run_action action_type;
+		return hpx::async<action_type>(this->get_id(), args_id, modulename,
+				grid, block);				
+	}
+#endif
 
 };
 }

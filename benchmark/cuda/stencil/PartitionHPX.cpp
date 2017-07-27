@@ -132,7 +132,11 @@ int main(int argc, char*argv[]) {
 	for (size_t i = 0; i < nStreams; i++)
 	{
 		args.push_back(bufferIn[i]);
+		#ifdef HPXCL_CUDA_WITH_STREAMS
 		kernelFutures.push_back(prog.run(args, "kernel", grid, block,args));
+		#else
+		kernelFutures.push_back(prog.run(args, "kernel", grid, block));
+		#endif
 		args.clear();
 	}
 
