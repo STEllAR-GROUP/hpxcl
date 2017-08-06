@@ -95,7 +95,7 @@ int main(int argc, char*argv[]) {
 
 	flags.push_back(mode);
 
-	progBuildVector.push_back(prog.build(flags, "kernel"));
+	progBuildVector.push_back(prog.build(flags, "dgemm"));
 	progVector.push_back(prog);
 	deviceVector.push_back(cudaDevice);
 
@@ -118,8 +118,8 @@ int main(int argc, char*argv[]) {
 	data_futures.push_back(mBuffer.enqueue_write(0, sizeof( int ), &m));
 	data_futures.push_back(nBuffer.enqueue_write(0, sizeof( int ), &n));
 	data_futures.push_back(kBuffer.enqueue_write(0, sizeof( int ), &k));
-	data_futures.push_back(alphaBuffer.enqueue_write(0, sizeof( int ), &alpha));
-	data_futures.push_back(betaBuffer.enqueue_write(0, sizeof( int ), &beta));
+	data_futures.push_back(alphaBuffer.enqueue_write(0, sizeof( double ), &alpha));
+	data_futures.push_back(betaBuffer.enqueue_write(0, sizeof( double ), &beta));
 
 	//Synchronize copy to buffer
 	hpx::wait_all(data_futures);
