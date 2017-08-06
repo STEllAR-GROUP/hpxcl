@@ -71,7 +71,7 @@ int main(int argc, char*argv[]) {
 	}
 
 	dim3 blocksize(32,32);
-	dim3 gridsize(1+ceil(m / block.x),1+ceil(n / block.y));
+	dim3 gridsize(1+ceil(m / blocksize.x),1+ceil(n / blocksize.y));
 
 	/*
 	 * Copy data
@@ -83,7 +83,7 @@ int main(int argc, char*argv[]) {
 	/*
 	 * Kernel launch
 	 */
-	stencil<TYPE><<<gridsize, blocksize>>>(A_dev, B_dev, C_dev, &m, &n, &k, &alpha, &beta);
+	dgemm<<<gridsize, blocksize>>>(A_dev, B_dev, C_dev, &m, &n, &k, &alpha, &beta);
 	cudaDeviceSynchronize();
 
 	/*
