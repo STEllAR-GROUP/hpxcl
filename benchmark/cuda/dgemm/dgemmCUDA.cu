@@ -11,15 +11,15 @@
 //Kernels
 //###########################################################################
 
-__global__ void dgemm(double *A, double *B, double *C, int *m, int *n, int *k, double *alpha, double *beta){
+__global__ void dgemm(double *A, double *B, double *C, int m, int n, int k, double alpha, double beta){
 	int ROW = blockIdx.y*blockDim.y+threadIdx.y;
 	int COL = blockIdx.x*blockDim.x+threadIdx.x;
 
-	if(ROW < (*n) && COL < (*m)){
+	if(ROW < (n) && COL < (m)){
 		double sum = 0;
-		for(int i = 0;i<*k;i++)
-			sum+=(*alpha) * A[ROW * (*k) + i] * B[i*(*n)+COL];
-		C[ROW*(*n)+COL] = sum + (*beta) * C[ROW*(*n)+COL];
+		for(int i = 0;i<k;i++)
+			sum+=(alpha) * A[ROW * (k) + i] * B[i*(n)+COL];
+		C[ROW*(n)+COL] = sum + (beta) * C[ROW*(n)+COL];
 	}	
 }
 
@@ -82,8 +82,8 @@ int main(int argc, char*argv[]) {
 	/*
 	 * Kernel launch
 	 */
-	HANDLE_ERROR(dgemm<<<gridsize, blocksize>>>(A_dev, B_dev, C_dev, &m, &n, &k, &alpha, &beta);
-	cudaDeviceSynchronize());
+	dgemm<<<gridsize, blocksize>>>(A_dev, B_dev, C_dev, m, n, k, alpha, beta);
+	cudaDeviceSynchronize();
 
 	/*
 	 * Copy result back
