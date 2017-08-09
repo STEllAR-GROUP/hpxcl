@@ -11,7 +11,6 @@
 //Kernels
 //###########################################################################
 
-template<typename T>
 __global__ void dgemm(double *A, double *B, double *C, int *m, int *n, int *k, double *alpha, double *beta){
 	int ROW = blockIdx.y*blockDim.y+threadIdx.y;
 	int COL = blockIdx.x*blockDim.x+threadIdx.x;
@@ -83,8 +82,8 @@ int main(int argc, char*argv[]) {
 	/*
 	 * Kernel launch
 	 */
-	dgemm<<<gridsize, blocksize>>>(A_dev, B_dev, C_dev, &m, &n, &k, &alpha, &beta);
-	cudaDeviceSynchronize();
+	HANDLE_ERROR(dgemm<<<gridsize, blocksize>>>(A_dev, B_dev, C_dev, &m, &n, &k, &alpha, &beta);
+	cudaDeviceSynchronize());
 
 	/*
 	 * Copy result back
