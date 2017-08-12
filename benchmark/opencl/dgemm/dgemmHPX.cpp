@@ -13,7 +13,7 @@ using namespace hpx::opencl;
 
 static const char dgemm_src_str[] = 
 "                                                                          \n"
-"   __kernel void dgemm(__global double *A,__global double *B, __global double *C, int *m, int *n, int *k, double *alpha, double *beta)                       \n"
+"   __kernel void dgemm(__global double *A,__global double *B, __global double *C,__global int *m,__global int *n,__global int *k,__global double *alpha,__global double *beta)                       \n"
 "   {                                                                      \n"
 "       int ROW = get_global_id(1);                                 	   \n"
 "       int COL = get_global_id(0);                                    	   \n"
