@@ -51,19 +51,23 @@ int main(int argc, char* argv[])
         return hpx::finalize();
     }
 
-    buffer_parameter_type m(1),n(1),k(1),i(1);
-	buffer_parameter_type alpha(1), beta(1);
+    int m,n,k,i;
+	double alpha, beta;
 
     //Initilizing the matrix dimensions
-	m[0] = 2000;
-	n[0] = 1000;
-	k[0] = 200;
+	m = 2000;
+	n = 1000;
+	k = 200;
 
     // Create a device component from the first device found
     device cldevice = devices[0];
 
-    buffer_data_type A(m*k), B (k*n), C(m*n);
+    double *A, *B, *C;
 	
+    A = new double[m*k];
+    B = new double[k*n];
+    C = new double[m*n];
+
 	//initializing values of alpha and beta
 	alpha = 1.0;
 	beta = 0.0;
@@ -92,8 +96,8 @@ int main(int argc, char* argv[])
 	buffer kBuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, sizeof(int));
 
 	// Initialize a list of future events for asynchronous set_arg calls
-    std::vector<shared_future<void>> set_arg_futures;
-    std::vector<shared_future<void>> write_futures;
+    std::vector<hpx::lcos::future<void>> set_arg_futures;
+    std::vector<hpx::lcos::future<void>> write_futures;
 
     // Create the hello_world device program
     program prog = cldevice.create_program_with_source(dgemm_src);
@@ -101,15 +105,47 @@ int main(int argc, char* argv[])
     //Build the program
     prog.build();
 
+    buffer_data_type A_serialized(
+					A, m*k,
+					buffer_data_type::init_mode::reference);
+
+    buffer_data_type B_serialized(
+					B, k*n,
+					buffer_data_type::init_mode::reference);
+
+    buffer_data_type C_serialized(
+					C, m*n,
+					buffer_data_type::init_mode::reference);
+
+	buffer_data_type alpha_serialized(
+					&alpha, 1,
+					buffer_data_type::init_mode::reference);    
+
+	buffer_data_type beta_serialized(
+					&beta, 1,
+					buffer_data_type::init_mode::reference);
+
+	buffer_parameter_type m_serialized(
+					&m, 1,
+					buffer_parameter_type::init_mode::reference);
+
+	buffer_parameter_type n_serialized(
+					&n, 1,
+					buffer_parameter_type::init_mode::reference);
+
+	buffer_parameter_type k_serialized(
+					&k, 1,
+					buffer_parameter_type::init_mode::reference);
+
     //Write data to the buffers
-    write_futures.push_back(ABuffer.enqueue_write(0, A, null));
-    write_futures.push_back(BBuffer.enqueue_write(0, B, null));
-    write_futures.push_back(CBuffer.enqueue_write(0, C, null));
-    write_futures.push_back(alphaBuffer.enqueue_write(0, alpha, null));
-    write_futures.push_back(betaBuffer.enqueue_write(0, beta, null));
-    write_futures.push_back(mBuffer.enqueue_write(0, m, null));
-    write_futures.push_back(nBuffer.enqueue_write(0, n, null));
-    write_futures.push_back(kBuffer.enqueue_write(0, k, null));
+    write_futures.push_back(ABuffer.enqueue_write(0, A_serialized, null));
+    write_futures.push_back(BBuffer.enqueue_write(0, B_serialized, null));
+    write_futures.push_back(CBuffer.enqueue_write(0, C_serialized, null));
+    write_futures.push_back(alphaBuffer.enqueue_write(0, alpha_serialized, null));
+    write_futures.push_back(betaBuffer.enqueue_write(0, beta_serialized, null));
+    write_futures.push_back(mBuffer.enqueue_write(0, m_serialized, null));
+    write_futures.push_back(nBuffer.enqueue_write(0, n_serialized, null));
+    write_futures.push_back(kBuffer.enqueue_write(0, k_serialized, null));
 
     // wait for function calls to trigger
     hpx::wait_all( write_futures );
@@ -145,6 +181,6 @@ int main(int argc, char* argv[])
 
     // Wait for the data to arrive
     auto data = read_future.get();
-    
+
     return 0;
 }

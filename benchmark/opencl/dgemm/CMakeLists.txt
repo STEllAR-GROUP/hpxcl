@@ -14,7 +14,7 @@ add_hpx_executable(dgemmHPX
                    SOURCES ${sources}
                    DEPENDENCIES opencl_component
                    COMPONENT_DEPENDENCIES iostreams
-                   FOLDER "benchmark/opencl/dgemm")
+                   FOLDER "Benchmark/opencl/dgemm")
 
 # add a custom target for this example
 add_hpx_pseudo_target(examples.opencl.dgemmHPX)
