@@ -45,9 +45,6 @@ int main(int argc, char*argv[]) {
 	n[0] = 1000;
 	k[0] = 200;
 
-    // Create a device component from the first device found
-    device cldevice = devices[0];
-
     double *A, *B, *C;
 	
     A = (double *) malloc(m[0]*k[0]*sizeof(double));
@@ -125,7 +122,7 @@ int main(int argc, char*argv[]) {
 	//Create memory object
 	AMemobj = clCreateBuffer(context, CL_MEM_READ_ONLY, m[0]*k[0] * sizeof(double), A, &ret);
 	BMemobj = clCreateBuffer(context, CL_MEM_READ_ONLY, k[0]*n[0] * sizeof(double), B, &ret);
-	CMemobj = clCreateBuffer(context, CL_MEM_READ_ONLY, m[0]*n[0] * sizeof(double), C, &ret);
+	CMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE, m[0]*n[0] * sizeof(double), C, &ret);
 	mMemobj = clCreateBuffer(context, CL_MEM_READ_ONLY, 1 * sizeof(int), m, &ret);
 	nMemobj = clCreateBuffer(context, CL_MEM_READ_ONLY, 1 * sizeof(int), n, &ret);
 	kMemobj = clCreateBuffer(context, CL_MEM_READ_ONLY, 1 * sizeof(int), k, &ret);
@@ -155,7 +152,7 @@ int main(int argc, char*argv[]) {
 	ret = clEnqueueTask(commandQueue, kernel, 0, NULL,NULL);
 
 	//copy the result back
-	ret = clEnqueueReadBuffer(commandQueue, outMemobj, CL_TRUE, 0, count * sizeof(TYPE),outObject, 0, NULL, NULL);
+	ret = clEnqueueReadBuffer(commandQueue, CMemobj, CL_TRUE, 0, m[0]*n[0]*sizeof(double), C, 0, NULL, NULL);
 
 	//Before program termination
 	ret = clFlush(commandQueue);
@@ -174,7 +171,14 @@ int main(int argc, char*argv[]) {
 	ret = clReleaseContext(context);
 	 
 	free(kernelSource);
-	free(outObject);
+	free(A);
+	free(B);
+	free(C);
+	free(m);
+	free(n);
+	free(k);
+	free(alpha);
+	free(beta);
 
 	return 0;
 }
