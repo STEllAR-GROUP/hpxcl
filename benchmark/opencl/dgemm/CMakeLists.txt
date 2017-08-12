@@ -3,6 +3,16 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+if(HPXCL_WITH_NAIVE_OPENCL_BENCHMARK)
+	############################################################################
+	# Configure pure OPENCL benchmarks
+	############################################################################
+	
+	add_executable (dgemm_opencl dgemmCUDA.c)
+	target_link_libraries(dgemm_opencl m ${OPENCL_LIBRARIES})
+	target_include_directories (dgemm_opencl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+
 set(sources
     dgemmHPX.cpp
 )
