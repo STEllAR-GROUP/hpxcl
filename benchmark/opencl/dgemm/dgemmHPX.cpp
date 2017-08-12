@@ -13,16 +13,16 @@ using namespace hpx::opencl;
 
 static const char dgemm_src_str[] = 
 "                                                                          \n"
-"   __kernel void dgemm(const __global double *A, const __global double *B, __global double *C, const int m, const int n, const int k, const double alpha, const double beta)                       \n"
+"   __kernel void dgemm(__global double *A,__global double *B, __global double *C, int *m, int *n, int *k, double *alpha, double *beta)                       \n"
 "   {                                                                      \n"
 "       int ROW = get_global_id(1);                                 	   \n"
 "       int COL = get_global_id(0);                                    	   \n"
 "                                                                          \n"
-"       if(ROW<(n) && COL<(m)){                                            \n"
+"       if(ROW<(n[0]) && COL<(m[0])){                                            \n"
 "       	double sum = 0.0;                                              \n"
-"       	for(int i = 0;i<k;i++)                                         \n"
-"       		sum+=(alpha) * A[ROW * (k) + i] * B[i*(n)+COL];            \n"
-"       	C[ROW*(n)+COL] = sum + (beta) * C[ROW*(n)+COL];                \n"
+"       	for(int i = 0;i<k[0];i++)                                         \n"
+"       		sum+=(alpha) * A[ROW * (k) + i] * B[i*(n[0])+COL];            \n"
+"       	C[ROW*(n[0])+COL] = sum + (beta) * C[ROW*(n[0])+COL];                \n"
 "       }                                                                  \n"
 "                                                                          \n"
 "   }                                                                      \n"
@@ -51,44 +51,51 @@ int main(int argc, char* argv[])
         return hpx::finalize();
     }
 
-    int m,n,k,i;
-	double alpha, beta;
+    int *m,*n,*k,i;
+	double *alpha, *beta;
+
+	//allocating memory for the vectors
+	m = new int[1];
+	n = new int[1];
+	k = new int[1];
+	alpha = new double[1];
+	beta = new double[1];
 
     //Initilizing the matrix dimensions
-	m = 2000;
-	n = 1000;
-	k = 200;
+	m[0] = 2000;
+	n[0] = 1000;
+	k[0] = 200;
 
     // Create a device component from the first device found
     device cldevice = devices[0];
 
     double *A, *B, *C;
 	
-    A = new double[m*k];
-    B = new double[k*n];
-    C = new double[m*n];
+    A = new double[m[0]*k[0]];
+    B = new double[k[0]*n[0]];
+    C = new double[m[0]*n[0]];
 
 	//initializing values of alpha and beta
-	alpha = 1.0;
-	beta = 0.0;
+	alpha[0] = 1.0;
+	beta[0] = 0.0;
 
 	printf (" Intializing matrix data \n\n");
-	for (i = 0; i < (m*k); i++) {
+	for (i = 0; i < (m[0]*k[0]); i++) {
 		A[i] = (double)(i+1);
 	}
 
-	for (i = 0; i < (k*n); i++) {
+	for (i = 0; i < (k[0]*n[0]); i++) {
 		B[i] = (double)(-i-1);
 	}
 
-	for (i = 0; i < (m*n); i++) {
+	for (i = 0; i < (m[0]*n[0]); i++) {
 		C[i] = 0.0;
 	}
 
 	//creating buffers
-	buffer ABuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, m*k*sizeof( double ));
-	buffer BBuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, n*k*sizeof( double ));
-	buffer CBuffer = cldevice.create_buffer(CL_MEM_READ_WRITE, m*n*sizeof( double ));
+	buffer ABuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, m[0]*k[0]*sizeof( double ));
+	buffer BBuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, n[0]*k[0]*sizeof( double ));
+	buffer CBuffer = cldevice.create_buffer(CL_MEM_READ_WRITE, m[0]*n[0]*sizeof( double ));
 	buffer alphaBuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, sizeof(double));
 	buffer betaBuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, sizeof(double));
 	buffer mBuffer = cldevice.create_buffer(CL_MEM_READ_ONLY,sizeof(int));
@@ -106,46 +113,46 @@ int main(int argc, char* argv[])
     prog.build();
 
     buffer_data_type A_serialized(
-					A, m*k,
+					A, m[0]*k[0],
 					buffer_data_type::init_mode::reference);
 
     buffer_data_type B_serialized(
-					B, k*n,
+					B, k[0]*n[0],
 					buffer_data_type::init_mode::reference);
 
     buffer_data_type C_serialized(
-					C, m*n,
+					C, m[0]*n[0],
 					buffer_data_type::init_mode::reference);
 
 	buffer_data_type alpha_serialized(
-					&alpha, 1,
+					alpha, 1,
 					buffer_data_type::init_mode::reference);    
 
 	buffer_data_type beta_serialized(
-					&beta, 1,
+					beta, 1,
 					buffer_data_type::init_mode::reference);
 
 	buffer_parameter_type m_serialized(
-					&m, 1,
+					m, 1,
 					buffer_parameter_type::init_mode::reference);
 
 	buffer_parameter_type n_serialized(
-					&n, 1,
+					n, 1,
 					buffer_parameter_type::init_mode::reference);
 
 	buffer_parameter_type k_serialized(
-					&k, 1,
+					k, 1,
 					buffer_parameter_type::init_mode::reference);
 
     //Write data to the buffers
-    write_futures.push_back(ABuffer.enqueue_write(0, A_serialized, null));
-    write_futures.push_back(BBuffer.enqueue_write(0, B_serialized, null));
-    write_futures.push_back(CBuffer.enqueue_write(0, C_serialized, null));
-    write_futures.push_back(alphaBuffer.enqueue_write(0, alpha_serialized, null));
-    write_futures.push_back(betaBuffer.enqueue_write(0, beta_serialized, null));
-    write_futures.push_back(mBuffer.enqueue_write(0, m_serialized, null));
-    write_futures.push_back(nBuffer.enqueue_write(0, n_serialized, null));
-    write_futures.push_back(kBuffer.enqueue_write(0, k_serialized, null));
+    write_futures.push_back(ABuffer.enqueue_write(0, A_serialized, NULL));
+    write_futures.push_back(BBuffer.enqueue_write(0, B_serialized, NULL));
+    write_futures.push_back(CBuffer.enqueue_write(0, C_serialized, NULL));
+    write_futures.push_back(alphaBuffer.enqueue_write(0, alpha_serialized, NULL));
+    write_futures.push_back(betaBuffer.enqueue_write(0, beta_serialized, NULL));
+    write_futures.push_back(mBuffer.enqueue_write(0, m_serialized, NULL));
+    write_futures.push_back(nBuffer.enqueue_write(0, n_serialized, NULL));
+    write_futures.push_back(kBuffer.enqueue_write(0, k_serialized, NULL));
 
     // wait for function calls to trigger
     hpx::wait_all( write_futures );
@@ -169,15 +176,15 @@ int main(int argc, char* argv[])
     // Run the kernel
     hpx::opencl::work_size<2> dim;
     dim[0].offset = 0;
-    dim[0].size = m*k;
+    dim[0].size = m[0]*k[0];
     dim[1].offset = 0;
-    dim[1].size = n*k;
+    dim[1].size = n[0]*k[0];
 
     hpx::future<void> kernel_future = dgemm_kernel.enqueue(dim); 
 
     // Start reading the buffer ( With kernel_future as dependency.
     //                            All hpxcl enqueue calls are nonblocking. )
-    auto read_future = CBuffer.enqueue_read(0, m*n, kernel_future);
+    auto read_future = CBuffer.enqueue_read(0, m[0]*n[0], kernel_future);
 
     // Wait for the data to arrive
     auto data = read_future.get();
