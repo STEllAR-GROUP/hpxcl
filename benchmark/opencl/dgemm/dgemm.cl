@@ -7,14 +7,16 @@
 //Kernels
 //###########################################################################
 
-__kernel void dgemm(const __global double *A, const __global double *B, __global double *C, const int m, const int n, const int k, const double alpha, const double beta){
-	int ROW = get_global_id(1);
-	int COL = get_global_id(0);
-
-	if(ROW<(n) && COL<(m)){
-	double sum = 0.0;
-	for(int i = 0;i<k;i++)
-		sum+=(alpha) * A[ROW * (k) + i] * B[i*(n)+COL];
-	C[ROW*(n)+COL] = sum + (beta) * C[ROW*(n)+COL];
-	}
-}
+__kernel void dgemm(__global double *A,__global double *B, __global double *C,__global int *m,__global int *n,__global int *k,__global double *alpha,__global double *beta)
+{                                                                     
+   int ROW = get_global_id(1);                                 	   
+   int COL = get_global_id(0);                                    	  
+                                                                      
+   if(ROW<(n[0]) && COL<(m[0])){                                            
+   	double sum = 0.0;                                              
+   	for(int i = 0;i<k[0];i++)                                         
+   		sum+=(alpha[0]) * A[ROW * (k[0]) + i] * B[i*(n[0])+COL];            
+   	C[ROW*(n[0])+COL] = sum + (beta[0]) * C[ROW*(n[0])+COL];                
+   }                                                                  
+                                                                      
+}                                                                      
