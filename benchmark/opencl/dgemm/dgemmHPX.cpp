@@ -21,8 +21,8 @@ static const char dgemm_src_str[] =
 "       if(ROW<(n[0]) && COL<(m[0])){                                            \n"
 "       	double sum = 0.0;                                              \n"
 "       	for(int i = 0;i<k[0];i++)                                         \n"
-"       		sum+=(alpha) * A[ROW * (k) + i] * B[i*(n[0])+COL];            \n"
-"       	C[ROW*(n[0])+COL] = sum + (beta) * C[ROW*(n[0])+COL];                \n"
+"       		sum+=(alpha[0]) * A[ROW * (k[0]) + i] * B[i*(n[0])+COL];            \n"
+"       	C[ROW*(n[0])+COL] = sum + (beta[0]) * C[ROW*(n[0])+COL];                \n"
 "       }                                                                  \n"
 "                                                                          \n"
 "   }                                                                      \n"
@@ -145,14 +145,14 @@ int main(int argc, char* argv[])
 					buffer_parameter_type::init_mode::reference);
 
     //Write data to the buffers
-    write_futures.push_back(ABuffer.enqueue_write(0, A_serialized, NULL));
-    write_futures.push_back(BBuffer.enqueue_write(0, B_serialized, NULL));
-    write_futures.push_back(CBuffer.enqueue_write(0, C_serialized, NULL));
-    write_futures.push_back(alphaBuffer.enqueue_write(0, alpha_serialized, NULL));
-    write_futures.push_back(betaBuffer.enqueue_write(0, beta_serialized, NULL));
-    write_futures.push_back(mBuffer.enqueue_write(0, m_serialized, NULL));
-    write_futures.push_back(nBuffer.enqueue_write(0, n_serialized, NULL));
-    write_futures.push_back(kBuffer.enqueue_write(0, k_serialized, NULL));
+    write_futures.push_back(ABuffer.enqueue_write(0, A_serialized));
+    write_futures.push_back(BBuffer.enqueue_write(0, B_serialized));
+    write_futures.push_back(CBuffer.enqueue_write(0, C_serialized));
+    write_futures.push_back(alphaBuffer.enqueue_write(0, alpha_serialized));
+    write_futures.push_back(betaBuffer.enqueue_write(0, beta_serialized));
+    write_futures.push_back(mBuffer.enqueue_write(0, m_serialized));
+    write_futures.push_back(nBuffer.enqueue_write(0, n_serialized));
+    write_futures.push_back(kBuffer.enqueue_write(0, k_serialized));
 
     // wait for function calls to trigger
     hpx::wait_all( write_futures );
@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
 
     // Start reading the buffer ( With kernel_future as dependency.
     //                            All hpxcl enqueue calls are nonblocking. )
-    auto read_future = CBuffer.enqueue_read(0, m[0]*n[0], kernel_future);
+    auto read_future = CBuffer.enqueue_read(0, C_serialized, kernel_future);
 
     // Wait for the data to arrive
     auto data = read_future.get();
