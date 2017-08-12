@@ -148,8 +148,11 @@ int main(int argc, char*argv[]) {
 	ret = clSetKernelArg(kernel, 6, sizeof(cl_mem), (void *)&alphaMemobj);
 	ret = clSetKernelArg(kernel, 7, sizeof(cl_mem), (void *)&betaMemobj);
 
+	// Execute OpenCL kernel in data parallel
+	size_t dim[] = { n, m, 1 };
+
 	//Execute opencl kernel
-	ret = clEnqueueTask(commandQueue, kernel, 0, NULL,NULL);
+	ret = clEnqueueNDRangeKernel( commandQueue, kernel, 1, NULL, worksize, 0, 0, 0, 0 );
 
 	//copy the result back
 	ret = clEnqueueReadBuffer(commandQueue, CMemobj, CL_TRUE, 0, m[0]*n[0]*sizeof(double), C, 0, NULL, NULL);
