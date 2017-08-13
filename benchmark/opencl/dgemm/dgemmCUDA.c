@@ -134,8 +134,8 @@ int main(int argc, char*argv[]) {
 
 	//Write data to the buffer
 	ret = clEnqueueWriteBuffer(commandQueue, AMemobj, CL_TRUE, 0, sizeof(double) * m[0]*k[0], A, 0, NULL, NULL);
-	ret = clEnqueueWriteBuffer(commandQueue, BMemobj, CL_TRUE, 0, sizeof(double) * k[0]*n[0], A, 0, NULL, NULL);
-	ret = clEnqueueWriteBuffer(commandQueue, CMemobj, CL_TRUE, 0, sizeof(double) * m[0]*n[0], A, 0, NULL, NULL);
+	ret = clEnqueueWriteBuffer(commandQueue, BMemobj, CL_TRUE, 0, sizeof(double) * k[0]*n[0], B, 0, NULL, NULL);
+	ret = clEnqueueWriteBuffer(commandQueue, CMemobj, CL_TRUE, 0, sizeof(double) * m[0]*n[0], C, 0, NULL, NULL);
 	ret = clEnqueueWriteBuffer(commandQueue, mMemobj, CL_TRUE, 0, 1 * sizeof(int), m, 0, NULL, NULL);
 	ret = clEnqueueWriteBuffer(commandQueue, nMemobj, CL_TRUE, 0, 1 * sizeof(int), n, 0, NULL, NULL);
 	ret = clEnqueueWriteBuffer(commandQueue, kMemobj, CL_TRUE, 0, 1 * sizeof(int), k, 0, NULL, NULL);
@@ -161,7 +161,7 @@ int main(int argc, char*argv[]) {
 	// Execute OpenCL kernel in data parallel
     const int TS = 32;
 	const size_t local[2] = { TS, TS };
-	const size_t global[2] = { 2048, 2048 };
+	const size_t global[2] = { (int)(2,pow(ceil(log(m[0])/log(2)))), (int)(2,pow(ceil(log(n[0])/log(2)))) };
 
     //Execute opencl kernel
     ret = clEnqueueNDRangeKernel( commandQueue, kernel, 2, NULL, global, local, 0, 0, 0 );
