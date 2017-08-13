@@ -41,7 +41,7 @@ static buffer_type dgemm_src( dgemm_src_str,
 int main(int argc, char* argv[])
 {
 
-	if (argc != 2) {
+	if (argc != 4) {
 		std::cout << "Usage: " << argv[0] << " #m #n #k";
 		exit(1);
 	}
