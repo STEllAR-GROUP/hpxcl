@@ -11,9 +11,6 @@
 
 #include <CL/cl.h>
 
-//For timing the code snippets
-#include "opencl/benchmark_vector/timer.hpp"
-
 //add this line for compiling with Visual Studio 
 #pragma comment(lib, "OpenCL.lib")
 
@@ -45,11 +42,10 @@ int main(int argc, char*argv[]) {
 
 	double time = 0;
 
-	timer_start();
+	clock_t begin = clock();
 	cl_device_id deviceId = NULL;
 	cl_context context = NULL;
 	cl_command_queue commandQueue = NULL;
-
 
 	double *alpha, *beta;
 
@@ -68,10 +64,12 @@ int main(int argc, char*argv[]) {
 	alpha[0] = 1.0;
 	beta[0] = 0.0;
 
-	time += timer_stop();
+	clock_t end = clock();
+
+	time += (double)(end - begin) / CLOCKS_PER_SEC;
 
 	printf (" Intializing matrix data \n\n");
-	timer_start();
+	begin = clock();
 	for (i = 0; i < (m[0]*k[0]); i++) {
 		A[i] = (double)(i+1);
 	}
@@ -212,7 +210,9 @@ int main(int argc, char*argv[]) {
 	free(beta);
 
 	//Printing timing result
-	time += timer_stop();
+	end = clock();
+	time += (double)(end - begin) / CLOCKS_PER_SEC;
+
 	printf("%d\n", time);
 
 	return 0;
