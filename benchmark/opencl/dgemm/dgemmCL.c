@@ -11,6 +11,9 @@
 
 #include <CL/cl.h>
 
+//For timing the code snippets
+#include "opencl/benchmark_vector/timer.hpp"
+
 //add this line for compiling with Visual Studio 
 #pragma comment(lib, "OpenCL.lib")
 
@@ -26,24 +29,34 @@
  
 int main(int argc, char*argv[]) {
 
+	if (argc != 4) {
+		printf("Usage: %s #m #n #k\n", argv[0]);
+		exit(1);
+	}
+	int *m,*n,*k,i;
+	m = (int *) malloc(sizeof(int));
+	n = (int *) malloc(sizeof(int));
+	k = (int *) malloc(sizeof(int));
+
+	//Initilizing the matrix dimensions
+	m[0] = atoi(argv[1]);
+	n[0] = atoi(argv[2]);
+	k[0] = atoi(argv[3]);
+
+	double time = 0;
+
+	timer_start();
 	cl_device_id deviceId = NULL;
 	cl_context context = NULL;
 	cl_command_queue commandQueue = NULL;
 
-    int *m,*n,*k,i;
+
 	double *alpha, *beta;
 
 	//allocating memory for the vectors
-	m = (int *) malloc(sizeof(int));
-	n = (int *) malloc(sizeof(int));
-	k = (int *) malloc(sizeof(int));
+	
 	alpha = (double *) malloc(sizeof(double));
 	beta = (double *) malloc(sizeof(double));
-
-    //Initilizing the matrix dimensions
-	m[0] = 2000;
-	n[0] = 1000;
-	k[0] = 200;
 
     double *A, *B, *C;
 	
@@ -55,7 +68,10 @@ int main(int argc, char*argv[]) {
 	alpha[0] = 1.0;
 	beta[0] = 0.0;
 
+	time += timer_stop();
+
 	printf (" Intializing matrix data \n\n");
+	timer_start();
 	for (i = 0; i < (m[0]*k[0]); i++) {
 		A[i] = (double)(i+1);
 	}
@@ -194,6 +210,10 @@ int main(int argc, char*argv[]) {
 	free(k);
 	free(alpha);
 	free(beta);
+
+	//Printing timing result
+	time += timer_stop();
+	printf("%d\n", time);
 
 	return 0;
 }
