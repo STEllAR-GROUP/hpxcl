@@ -161,7 +161,7 @@ int main(int argc, char*argv[]) {
 	// Execute OpenCL kernel in data parallel
     const int TS = 32;
 	const size_t local[2] = { TS, TS };
-	const size_t global[2] = { (int)(2,pow(ceil(log(m[0])/log(2)))), (int)(2,pow(ceil(log(n[0])/log(2)))) };
+	const size_t global[2] = { (int)(pow(2,ceil(log(m[0])/log(2)))), (int)(pow(2,ceil(log(n[0])/log(2)))) };
 
     //Execute opencl kernel
     ret = clEnqueueNDRangeKernel( commandQueue, kernel, 2, NULL, global, local, 0, 0, 0 );
