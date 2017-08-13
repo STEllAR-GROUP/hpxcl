@@ -7,6 +7,7 @@
 #include <hpx/include/iostreams.hpp>
 #include <hpx/lcos/future.hpp>
 
+#include "examples/opencl/benchmark_vector/timer.hpp"
 #include <hpxcl/opencl.hpp>
 
 using namespace hpx::opencl;
@@ -40,6 +41,26 @@ static buffer_type dgemm_src( dgemm_src_str,
 int main(int argc, char* argv[])
 {
 
+	if (argc != 2) {
+		std::cout << "Usage: " << argv[0] << " #m #n #k";
+		exit(1);
+	}
+
+	int *m,*n,*k,i;
+
+	//allocating memory for the vectors
+	m = new int[1];
+	n = new int[1];
+	k = new int[1];
+
+	//Initilizing the matrix dimensions
+	m[0] = atoi(argv[1]);
+	n[0] = atoi(argv[2]);
+	k[0] = atoi(argv[3]);
+
+	double time = 0;
+	timer_start();
+
     // Get available OpenCL Devices.
     std::vector<device> devices = create_all_devices(CL_DEVICE_TYPE_ALL,
                                                      "OpenCL 1.1" ).get();
@@ -51,20 +72,11 @@ int main(int argc, char* argv[])
         return hpx::finalize();
     }
 
-    int *m,*n,*k,i;
+    
 	double *alpha, *beta;
 
-	//allocating memory for the vectors
-	m = new int[1];
-	n = new int[1];
-	k = new int[1];
 	alpha = new double[1];
 	beta = new double[1];
-
-    //Initilizing the matrix dimensions
-	m[0] = 2000;
-	n[0] = 1000;
-	k[0] = 200;
 
     // Create a device component from the first device found
     device cldevice = devices[0];
@@ -79,7 +91,9 @@ int main(int argc, char* argv[])
 	alpha[0] = 1.0;
 	beta[0] = 0.0;
 
-	printf (" Intializing matrix data \n\n");
+	time+=timer_stop();
+	//printf (" Intializing matrix data \n\n");
+	timer_start();
 	for (i = 0; i < (m[0]*k[0]); i++) {
 		A[i] = (double)(i+1);
 	}
@@ -188,6 +202,10 @@ int main(int argc, char* argv[])
 
     // Wait for the data to arrive
     auto data = read_future.get();
+
+    //Printing the end timing result
+    time+=timer_stop();
+    std:: cout << time << std::endl;
 
     return 0;
 }

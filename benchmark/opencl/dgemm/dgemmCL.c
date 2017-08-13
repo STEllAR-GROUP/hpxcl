@@ -68,7 +68,7 @@ int main(int argc, char*argv[]) {
 
 	time += (double)(end - begin) / CLOCKS_PER_SEC;
 
-	printf (" Intializing matrix data \n\n");
+	//printf (" Intializing matrix data \n\n");
 	begin = clock();
 	for (i = 0; i < (m[0]*k[0]); i++) {
 		A[i] = (double)(i+1);
@@ -211,9 +211,9 @@ int main(int argc, char*argv[]) {
 
 	//Printing timing result
 	end = clock();
-	time += (double)(end - begin) / CLOCKS_PER_SEC;
+	time += (double)(end - begin) *1000 / CLOCKS_PER_SEC;
 
-	printf("%d\n", time);
+	printf("%lf\n", time);
 
 	return 0;
 }
