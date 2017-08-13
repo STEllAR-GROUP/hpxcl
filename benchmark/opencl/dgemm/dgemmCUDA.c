@@ -132,6 +132,16 @@ int main(int argc, char*argv[]) {
 	//Create kernel program from source
 	program = clCreateProgramWithSource(context, 1, (const char **)&kernelSource,(const size_t *)&sourceSize, &ret);
 
+	//Write data to the buffer
+	ret = clEnqueueWriteBuffer(commandQueue, AMemobj, CL_TRUE, 0, sizeof(double) * m[0]*k[0], A, 0, NULL, NULL);
+	ret = clEnqueueWriteBuffer(commandQueue, BMemobj, CL_TRUE, 0, sizeof(double) * k[0]*n[0], A, 0, NULL, NULL);
+	ret = clEnqueueWriteBuffer(commandQueue, CMemobj, CL_TRUE, 0, sizeof(double) * m[0]*n[0], A, 0, NULL, NULL);
+	ret = clEnqueueWriteBuffer(commandQueue, mMemobj, CL_TRUE, 0, 1 * sizeof(int), m, 0, NULL, NULL);
+	ret = clEnqueueWriteBuffer(commandQueue, nMemobj, CL_TRUE, 0, 1 * sizeof(int), n, 0, NULL, NULL);
+	ret = clEnqueueWriteBuffer(commandQueue, kMemobj, CL_TRUE, 0, 1 * sizeof(int), k, 0, NULL, NULL);
+	ret = clEnqueueWriteBuffer(commandQueue, alphaMemobj, CL_TRUE, 0, 1 * sizeof(double), alpha, 0, NULL, NULL);
+	ret = clEnqueueWriteBuffer(commandQueue, betaMemobj, CL_TRUE, 0, 1 * sizeof(double), beta, 0, NULL, NULL);
+
 	//Build the kernel program
 	ret = clBuildProgram(program, 1, &deviceId, "-I ./", NULL, NULL);
 
@@ -149,10 +159,12 @@ int main(int argc, char*argv[]) {
 	ret = clSetKernelArg(kernel, 7, sizeof(cl_mem), (void *)&betaMemobj);
 
 	// Execute OpenCL kernel in data parallel
-	size_t dim[] = { n, m, 1 };
+    const int TS = 32;
+	const size_t local[2] = { TS, TS };
+	const size_t global[2] = { 2048, 2048 };
 
-	//Execute opencl kernel
-	ret = clEnqueueNDRangeKernel( commandQueue, kernel, 1, NULL, worksize, 0, 0, 0, 0 );
+    //Execute opencl kernel
+    ret = clEnqueueNDRangeKernel( commandQueue, kernel, 2, NULL, global, local, 0, 0, 0 );
 
 	//copy the result back
 	ret = clEnqueueReadBuffer(commandQueue, CMemobj, CL_TRUE, 0, m[0]*n[0]*sizeof(double), C, 0, NULL, NULL);
