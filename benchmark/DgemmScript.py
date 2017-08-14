@@ -1,3 +1,8 @@
+# Copyright (c)       2017 Madhavan Seshadri
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
 ##############################################################################################################
 #This Script uses varying k values to benchmark the dgemm 
 ##############################################################################################################
@@ -45,7 +50,7 @@ with open('dgemmCUDA.dat', 'rb') as f:
         dgemmCudaY.append(float(row[0]))
         xValue += step
 
-plt.plot(dgemmCudaX, dgemmCudaY, label='Naive CUDA')
+plt.plot(dgemmCudaX, dgemmCudaY,marker='.', linestyle=':', color='b', label='Naive CUDA')
 
 dgemmHpxX = []
 dgemmHpxY = []
@@ -57,7 +62,7 @@ with open('dgemmHPX.dat', 'rb') as f:
         dgemmHpxY.append(float(row[0]))
         xValue += step
 
-plt.plot(dgemmHpxX, dgemmHpxY,marker='.', linestyle='--', color='r', label='HPXCL CUDA')
+plt.plot(dgemmHpxX, dgemmHpxY,marker='.', linestyle='-', color='r', label='HPXCL CUDA')
 
 ######################################Profiling for the OpenCL part #############################################
 os.chdir("../../opencl/dgemm")
@@ -81,7 +86,7 @@ with open('dgemmHPX.dat', 'rb') as f:
         dgemmOpenclY.append(float(row[0]))
         xValue += step
 
-plt.plot(dgemmOpenclX, dgemmOpenclY,,marker='o', linestyle='-.', color='r', label='Naive OpenCL')
+plt.plot(dgemmOpenclX, dgemmOpenclY,marker='o', linestyle='-.', color='g', label='Naive OpenCL')
 
 dgemmHpxOpenclX = []
 dgemmHpxOpenclY = []
@@ -93,7 +98,7 @@ with open('dgemmCL.dat', 'rb') as f:
         dgemmHpxOpenclY.append(float(row[0]))
         xValue += step
 
-plt.plot(dgemmHpxOpenclX, dgemmHpxOpenclY,marker='o', linestyle='-.', color='r', label='HPXCL OpenCL')
+plt.plot(dgemmHpxOpenclX, dgemmHpxOpenclY,marker='o', linestyle='-', color='k', label='HPXCL OpenCL')
 
 plt.xlabel('k')
 plt.ylabel('Time in milliseconds')
