@@ -82,8 +82,8 @@ int main(int argc, char*argv[]) {
 	hpx::cuda::server::program::Dim3 grid;
 	hpx::cuda::server::program::Dim3 block;
 
-	block.x = 16;
-	block.y = 16;
+	block.x = 32;
+	block.y = 32;
 	block.z = 1;
 
 	grid.x = 1+std::ceil(m / block.x);
