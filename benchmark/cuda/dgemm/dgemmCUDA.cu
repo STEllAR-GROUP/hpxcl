@@ -7,6 +7,8 @@
 #include <iostream>
 #include <cmath>
 
+#include "examples/opencl/benchmark_vector/timer.hpp"
+
 //###########################################################################
 //Kernels
 //###########################################################################
@@ -28,16 +30,25 @@ __global__ void dgemm(double *A, double *B, double *C, int m, int n, int k, doub
 //###########################################################################
 
 int main(int argc, char*argv[]) {
+	
+	if (argc != 4) {
+		std::cout << "Usage: " << argv[0] << " #m #n #k";
+		exit(1);
+	}
+
+	int m,n,k,i;
+
+	//Initilizing the matrix dimensions
+	m = atoi(argv[1]);
+	n = atoi(argv[2]);
+	k = atoi(argv[3]);
+
+	double time = 0;
+	timer_start();
 
 	double *A, *B, *C;
 	double *A_dev, *B_dev, *C_dev;
-	int m,n,k,i;
 	double alpha, beta;
-
-	//Initilizing the matrix dimensions
-	m = 2000;
-	n = 1000;
-	k = 200;
 
 	//initializing values of alpha and beta
 	alpha = 1.0;
@@ -56,7 +67,9 @@ int main(int argc, char*argv[]) {
 	cudaMalloc((void**) &B_dev, n*k*sizeof( double ));
 	cudaMalloc((void**) &C_dev, m*n*sizeof( double ));
 	
-	printf (" Intializing matrix data \n\n");
+	time+=timer_stop();
+	//printf (" Intializing matrix data \n\n");
+	timer_start();
 	for (i = 0; i < (m*k); i++) {
 		A[i] = (double)(i+1);
 	}
@@ -99,6 +112,10 @@ int main(int argc, char*argv[]) {
 	cudaFree(A_dev);
 	cudaFree(B_dev);
 	cudaFree(C_dev);
+
+	//Printing the end timing result
+    time+=timer_stop();
+    std:: cout << time << std::endl;
 
 	return EXIT_SUCCESS;
 }
