@@ -23,7 +23,7 @@ endif()
 ############################################################################
 
 set(example_programs
-   dgemmHPX
+   dgemmHPXCL
 )
 
 foreach(example_program ${example_programs})

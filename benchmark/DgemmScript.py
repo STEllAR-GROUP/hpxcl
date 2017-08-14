@@ -29,7 +29,7 @@ os.system("make")
 
 #profiling Dgemm HPX code
 for i in range(start,end,step):
-	os.system("srun -p tycho -N 1 ./dgemmHPX 10240 10240 " + str(i) + " >> dgemmHPX.dat")
+	os.system("srun -p tycho -N 1 ./dgemmHPXCL 10240 10240 " + str(i) + " >> dgemmHPX.dat")
 
 #profiling Dgemm Cuda code
 for i in range(start,end,step):
