@@ -9,12 +9,29 @@
 
 #include <hpxcl/cuda.hpp>
 
+#include "examples/opencl/benchmark_vector/timer.hpp"
+
 using namespace hpx::cuda;
 
 //###########################################################################
 //Main
 //###########################################################################
 int main(int argc, char*argv[]) {
+
+	if (argc != 4) {
+		std::cout << "Usage: " << argv[0] << " #m #n #k";
+		exit(1);
+	}
+
+	int m,n,k,i;
+
+	//Initilizing the matrix dimensions
+	m = atoi(argv[1]);
+	n = atoi(argv[2]);
+	k = atoi(argv[3]);
+
+	double time = 0;
+	timer_start();
 
 	//Vector for all futures for the data management
 	std::vector<hpx::lcos::future<void>> data_futures;
@@ -29,13 +46,8 @@ int main(int argc, char*argv[]) {
 	}
 
 	double *A, *B, *C;
-	int m,n,k,i;
+	
 	double alpha, beta;
-
-	//Initilizing the matrix dimensions
-	m = 2000;
-	n = 1000;
-	k = 200;
 
 	//initializing values of alpha and beta
 	alpha = 1.0;
@@ -46,7 +58,10 @@ int main(int argc, char*argv[]) {
 	cudaMallocHost((void**) &B, n*k*sizeof( double ));
 	cudaMallocHost((void**) &C, m*n*sizeof( double ));
 
-	printf (" Intializing matrix data \n\n");
+	time+=timer_stop();
+	//printf (" Intializing matrix data \n\n");
+	timer_start();
+
 	for (i = 0; i < (m*k); i++) {
 		A[i] = (double)(i+1);
 	}
@@ -151,6 +166,10 @@ int main(int argc, char*argv[]) {
 	cudaFree(A);
 	cudaFree(B);
 	cudaFree(C);
+
+    //Printing the end timing result
+    time+=timer_stop();
+    std:: cout << time << std::endl;
 
 	return 0;
 }
