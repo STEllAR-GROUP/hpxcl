@@ -19,7 +19,10 @@ HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::set_source_action,
     cuda_program_set_source_action);
 HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::run_action,
     cuda_program_run_action);
+
+#ifdef HPXCL_CUDA_WITH_STREAMS
 HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::get_streams_size_action,
     cuda_get_streams_size_action);
 HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::create_stream_action,
     cuda_create_stream_action);
+#endif
