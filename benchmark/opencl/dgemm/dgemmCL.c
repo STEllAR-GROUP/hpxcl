@@ -66,7 +66,7 @@ int main(int argc, char*argv[]) {
 
 	clock_t end = clock();
 
-	time += (double)(end - begin) / CLOCKS_PER_SEC;
+	time += (double)(end - begin) * 1000 / CLOCKS_PER_SEC;
 
 	//printf (" Intializing matrix data \n\n");
 	begin = clock();
