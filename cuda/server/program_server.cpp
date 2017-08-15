@@ -180,7 +180,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 
 	//Run on the default stream
 	if (dependencies.size() == 0 and stream == -1) {
-		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
+		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.z,
 				block.x, block.y, block.z, 0, this->streams[0], args_pointer.data(),
 				0);
 		checkCudaError("program::run Run kernel");
@@ -189,7 +189,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 	}
 	//Run on the provided stream
 	else if (dependencies.size() == 0 and stream >= 0) {
-		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
+		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.z,
 				block.x, block.y, block.z, 0, this->streams[stream], // shared mem and stream
 				args_pointer.data(), 0);
 		checkCudaError("program::run Run kernel");
@@ -200,7 +200,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 	else if (dependencies.size() == 1 and stream == -1) {
 		auto buffer =
 				hpx::get_ptr<hpx::cuda::server::buffer>(dependencies[0]).get();
-		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
+		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.z,
 				block.x, block.y, block.z, 0, buffer->get_stream(), // shared mem and stream
 				args_pointer.data(), 0);
 		checkCudaError("program::run Run kernel");
@@ -218,7 +218,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 					"program::run Error during synchronization of stream");
 		}
 
-		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
+		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.z,
 				block.x, block.y, block.z, 0, this->streams[stream], // shared mem and stream
 				args_pointer.data(), 0);
 		checkCudaError("program::run Run kernel");
@@ -233,7 +233,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 					"program::run Error during synchronization of stream");
 		}
 
-		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
+		cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.z,
 				block.x, block.y, block.z, 0, this->streams[0], // shared mem and stream
 				args_pointer.data(), 0);
 		checkCudaError("program::run Run kernel");
@@ -288,7 +288,7 @@ void program::run(std::vector<hpx::naming::id_type> args,
 
 	//When 0 is passed as the attribute for CUStream, the default stream is used. 
 	//This behavior is explained in http://docs.nvidia.com/cuda/cuda-driver-api/stream-sync-behavior.html#axzz4lWmm2anH 
-	cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.y,
+	cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.z,
 				block.x, block.y, block.z, 0, 0, args_pointer.data(),
 				0);
 	cudaStreamSynchronize(0);
