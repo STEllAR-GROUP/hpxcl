@@ -190,9 +190,11 @@ int main(int argc, char* argv[])
     // Run the kernel
     hpx::opencl::work_size<2> dim;
     dim[0].offset = 0;
-    dim[0].size = m[0];
+    dim[0].size = (int)(std::pow(2,std::ceil(std::log(m[0])/std::log(2))));
+    dim[0].local_size = 32;
     dim[1].offset = 0;
-    dim[1].size = n[0];
+    dim[1].size = (int)(std::pow(2,std::ceil(std::log(n[0])/std::log(2))));
+    dim[1].local_size = 32;
 
     hpx::future<void> kernel_future = dgemm_kernel.enqueue(dim); 
 

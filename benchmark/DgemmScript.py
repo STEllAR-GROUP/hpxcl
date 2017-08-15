@@ -10,6 +10,7 @@
 import os
 import csv
 import subprocess
+import sys
 
 #for headless display in python
 import matplotlib
@@ -25,28 +26,34 @@ step = 1000
 #Load modules
 os.system("module load cmake/3.7.2 gcc/4.9.4 cuda/8.0.61")
 
+os.chdir("benchmark/cuda/dgemm/")
 os.system("rm *.dat")
 
 os.system("cmake -DHPX_ROOT=~/packagaes/hpx-4.9/ -DHPXCL_WITH_CUDA=ON -DHPXCL_WITH_OPENCL=ON -DHPXCL_WITH_BENCHMARK=ON -DHPXCL_WITH_NAIVE_OPENCL_BENCHMARK=ON -DHPXCL_WITH_NAIVE_CUDA_BENCHMARK=ON -DOPENCL_ROOT=/usr/local/cuda-8.0/ -DHPXCL_CUDA_WITH_STREAM=ON ~/hpxcl/")
 os.system("make")
 
 ######################################Profiling for the CUDA part #############################################
-
+print ('Profiling Naive CUDA DGEMM......\n')
 #profiling Dgemm HPX code
 for i in range(start,end,step):
-    try:
-        subprocess.call(["srun -p reno -N 1 ./benchmark/cuda/dgemm/dgemmHPXCL 10240 10240 " + str(i) + " >> dgemmHPX_cuda.dat"])
-    except OSError:
-        print ('trying again......\n')
-        subprocess.call(["srun -p reno -N 1 ./benchmark/cuda/dgemm/dgemmHPXCL 10240 10240 " + str(i) + " >> dgemmHPX_cuda.dat"])
-
+    try_again = int(sys.argv[2])
+    for j in range(try_again,0,-1):
+        try:
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemmHPXCL 10240 10240 " + str(i) + " >> dgemmHPX_cuda.dat",shell=True)
+            break
+        except OSError:
+            print ('trying again......\n')
+            
+print ('Profiling HPXCL CUDA DGEMM......\n')
 #profiling Dgemm Cuda code
 for i in range(start,end,step):
-    try:
-        subprocess.call(["srun -p reno -N 1 ./benchmark/cuda/dgemm/dgemmCUDA 10240 10240 " + str(i) + " >> dgemmCUDA.dat"])
-    except OSError:
-        print ('trying again......\n')
-        subprocess.call(["srun -p reno -N 1 ./benchmark/cuda/dgemm/dgemmCUDA 10240 10240 " + str(i) + " >> dgemmCUDA.dat"])
+    try_again = int(sys.argv[2])
+    for j in range(try_again,0,-1):
+        try:
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemmCUDA 10240 10240 " + str(i) + " >> dgemmCUDA.dat",shell=True)
+            break
+        except OSError:
+            print ('trying again......\n')
 
 dgemmCudaX = []
 dgemmCudaY = []
@@ -73,22 +80,29 @@ with open('dgemmHPX_cuda.dat', 'rb') as f:
 plt.plot(dgemmHpxX, dgemmHpxY,marker='.', linestyle='-', color='r', label='HPXCL CUDA')
 
 ######################################Profiling for the OpenCL part #############################################
+os.chdir("../../opencl/dgemm/")
 
+print ('Profiling HPXCL OpenCL DGEMM......\n')
 #profiling Dgemm HPX code
 for i in range(start,end,step):
-    try:
-        subprocess.call(["srun -p reno -N 1 ./benchmark/opencl/dgemm/dgemmHPX 10240 10240 " + str(i) + " >> dgemmHPX_opencl.dat"])
-    except OSError:
-        print ('trying again......\n')
-        subprocess.call(["srun -p reno -N 1 ./benchmark/opencl/dgemm/dgemmHPX 10240 10240 " + str(i) + " >> dgemmHPX_opencl.dat"])
+    try_again = int(sys.argv[2])
+    for j in range(try_again,0,-1):
+        try:
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemmHPX 10240 10240 " + str(i) + " >> dgemmHPX_opencl.dat",shell=True)
+            break
+        except OSError:
+            print ('trying again......\n')
 
+print ('Profiling Naive OpenCL DGEMM......\n')
 #profiling Dgemm Cuda code
 for i in range(start,end,step):
-    try:
-        subprocess.call(["srun -p reno -N 1 ./benchmark/opencl/dgemm/dgemm_opencl 10240 10240 " + str(i) + " >> dgemmCL.dat"])
-    except OSError:
-        print ('trying again......\n')
-        subprocess.call(["srun -p reno -N 1 ./benchmark/opencl/dgemm/dgemm_opencl 10240 10240 " + str(i) + " >> dgemmCL.dat"])
+    try_again = int(sys.argv[2])
+    for j in range(try_again,0,-1):
+        try:
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemm_opencl 10240 10240 " + str(i) + " >> dgemmCL.dat",shell=True)
+            break
+        except OSError:
+            print ('trying again......\n')
 
 dgemmOpenclX = []
 dgemmOpenclY = []
