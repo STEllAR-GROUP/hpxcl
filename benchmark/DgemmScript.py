@@ -9,6 +9,7 @@
 
 import os
 import csv
+import subprocess
 
 #for headless display in python
 import matplotlib
@@ -23,7 +24,6 @@ step = 1000
 
 #Load modules
 os.system("module load cmake/3.7.2 gcc/4.9.4 cuda/8.0.61")
-os.chdir("benchmark/cuda/dgemm")
 
 os.system("rm *.dat")
 
@@ -34,11 +34,19 @@ os.system("make")
 
 #profiling Dgemm HPX code
 for i in range(start,end,step):
-	os.system("srun -p tycho -N 1 ./dgemmHPXCL 10240 10240 " + str(i) + " >> dgemmHPX.dat")
+    try:
+        subprocess.call(["srun -p reno -N 1 ./benchmark/cuda/dgemm/dgemmHPXCL 10240 10240 " + str(i) + " >> dgemmHPX_cuda.dat"])
+    except OSError:
+        print ('trying again......\n')
+        subprocess.call(["srun -p reno -N 1 ./benchmark/cuda/dgemm/dgemmHPXCL 10240 10240 " + str(i) + " >> dgemmHPX_cuda.dat"])
 
 #profiling Dgemm Cuda code
 for i in range(start,end,step):
-	os.system("srun -p tycho -N 1 ./dgemmCUDA 10240 10240 " + str(i) + " >> dgemmCUDA.dat")
+    try:
+        subprocess.call(["srun -p reno -N 1 ./benchmark/cuda/dgemm/dgemmCUDA 10240 10240 " + str(i) + " >> dgemmCUDA.dat"])
+    except OSError:
+        print ('trying again......\n')
+        subprocess.call(["srun -p reno -N 1 ./benchmark/cuda/dgemm/dgemmCUDA 10240 10240 " + str(i) + " >> dgemmCUDA.dat"])
 
 dgemmCudaX = []
 dgemmCudaY = []
@@ -54,7 +62,7 @@ plt.plot(dgemmCudaX, dgemmCudaY,marker='.', linestyle=':', color='b', label='Nai
 
 dgemmHpxX = []
 dgemmHpxY = []
-with open('dgemmHPX.dat', 'rb') as f:
+with open('dgemmHPX_cuda.dat', 'rb') as f:
     reader = csv.reader(f, delimiter=' ', quoting=csv.QUOTE_NONE)
     xValue = start
     for row in reader:
@@ -65,20 +73,26 @@ with open('dgemmHPX.dat', 'rb') as f:
 plt.plot(dgemmHpxX, dgemmHpxY,marker='.', linestyle='-', color='r', label='HPXCL CUDA')
 
 ######################################Profiling for the OpenCL part #############################################
-os.chdir("../../opencl/dgemm")
-os.system("rm *.dat")
 
 #profiling Dgemm HPX code
 for i in range(start,end,step):
-    os.system("srun -p tycho -N 1 ./dgemmHPX 10240 10240 " + str(i) + " >> dgemmHPX.dat")
+    try:
+        subprocess.call(["srun -p reno -N 1 ./benchmark/opencl/dgemm/dgemmHPX 10240 10240 " + str(i) + " >> dgemmHPX_opencl.dat"])
+    except OSError:
+        print ('trying again......\n')
+        subprocess.call(["srun -p reno -N 1 ./benchmark/opencl/dgemm/dgemmHPX 10240 10240 " + str(i) + " >> dgemmHPX_opencl.dat"])
 
 #profiling Dgemm Cuda code
 for i in range(start,end,step):
-    os.system("srun -p tycho -N 1 ./dgemmCL 10240 10240 " + str(i) + " >> dgemmCL.dat")
+    try:
+        subprocess.call(["srun -p reno -N 1 ./benchmark/opencl/dgemm/dgemm_opencl 10240 10240 " + str(i) + " >> dgemmCL.dat"])
+    except OSError:
+        print ('trying again......\n')
+        subprocess.call(["srun -p reno -N 1 ./benchmark/opencl/dgemm/dgemm_opencl 10240 10240 " + str(i) + " >> dgemmCL.dat"])
 
 dgemmOpenclX = []
 dgemmOpenclY = []
-with open('dgemmHPX.dat', 'rb') as f:
+with open('dgemmCL.dat', 'rb') as f:
     reader = csv.reader(f, delimiter=' ', quoting=csv.QUOTE_NONE)
     xValue = start
     for row in reader:
@@ -90,7 +104,7 @@ plt.plot(dgemmOpenclX, dgemmOpenclY,marker='o', linestyle='-.', color='g', label
 
 dgemmHpxOpenclX = []
 dgemmHpxOpenclY = []
-with open('dgemmCL.dat', 'rb') as f:
+with open('dgemmHPX_opencl.dat', 'rb') as f:
     reader = csv.reader(f, delimiter=' ', quoting=csv.QUOTE_NONE)
     xValue = start
     for row in reader:
