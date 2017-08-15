@@ -18,6 +18,9 @@ matplotlib.use('agg')
 
 import matplotlib.pyplot as plt
 
+if(len(sys.argv) != 2)
+    print("Usage #node_name #retry_attempts")
+
 ############Parameters for varying k#######
 start = 1000
 end = 11000
