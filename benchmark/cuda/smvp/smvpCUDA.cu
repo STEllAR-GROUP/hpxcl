@@ -123,8 +123,8 @@ int main(int argc, char*argv[]) {
 	 * Copy data
 	 */
 	cudaMemcpy(A_dev, A_data,  count*sizeof( double ), cudaMemcpyHostToDevice);
-	cudaMemcpy(AIndices_dev, A_indices,  count*sizeof( double ), cudaMemcpyHostToDevice);
-	cudaMemcpy(APointers_dev, A_pointers,  m*sizeof( double ), cudaMemcpyHostToDevice);
+	cudaMemcpy(AIndices_dev, A_indices,  count*sizeof( int ), cudaMemcpyHostToDevice);
+	cudaMemcpy(APointers_dev, A_pointers,  m*sizeof( int ), cudaMemcpyHostToDevice);
 	cudaMemcpy(B_dev, B,  n*sizeof( double ), cudaMemcpyHostToDevice);
 	cudaMemcpy(C_dev, C,  m*sizeof( double ), cudaMemcpyHostToDevice);
 
@@ -137,7 +137,7 @@ int main(int argc, char*argv[]) {
 	/*
 	 * Copy result back
 	 */
-	cudaMemcpy(C, C_dev, m*n*sizeof( double ), cudaMemcpyDeviceToHost);
+	cudaMemcpy(C, C_dev, m*sizeof( double ), cudaMemcpyDeviceToHost);
 
 	/*
 	 * Free
