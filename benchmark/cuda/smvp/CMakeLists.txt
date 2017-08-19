@@ -15,7 +15,7 @@ if(HPXCL_WITH_NAIVE_CUDA_BENCHMARK)
   CACHE "NVCC_FLAGS" STRING FORCE) 
 
   #Benchmark for single dgemm kernel
-  CUDA_ADD_EXECUTABLE(dgemmCUDA dgemmCUDA.cu)
+  #CUDA_ADD_EXECUTABLE(dgemmCUDA dgemmCUDA.cu)
 endif()
 
 ############################################################################
@@ -23,7 +23,7 @@ endif()
 ############################################################################
 
 set(example_programs
-   dgemmHPXCL
+   smvpHPXCL
 )
 
 foreach(example_program ${example_programs})
@@ -53,4 +53,4 @@ foreach(example_program ${example_programs})
                               
 endforeach()
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/dgemm.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/benchmark/cuda/dgemm/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smvp.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/benchmark/cuda/smvp/)

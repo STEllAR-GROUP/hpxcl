@@ -42,7 +42,8 @@ if (argc != 3) {
 	}
 
 	double *A, *B, *C;
-	double *A_data, *A_indices, *A_pointers;
+	double *A_data;
+	int *A_indices, *A_pointers;
 
 	double alpha;
 
@@ -64,8 +65,8 @@ if (argc != 3) {
 	cudaMallocHost((void**) &B, n*1*sizeof( double ));
 	cudaMallocHost((void**) &C, m*1*sizeof( double ));
 	cudaMallocHost((void**) &A_data, count * sizeof( double ));
-	cudaMallocHost((void**) &A_indices, count*sizeof( double ));
-	cudaMallocHost((void**) &A_pointers, m * sizeof( double ));
+	cudaMallocHost((void**) &A_indices, count*sizeof( int ));
+	cudaMallocHost((void**) &A_pointers, m * sizeof( int ));
 
 	printf (" Intializing matrix data \n");
 	
@@ -76,7 +77,6 @@ if (argc != 3) {
 	for (i = 0; i < (m*1); i++) {
 		C[i] = 0.0;
 	}
-
 	
 	//Counters for compression
 	int data_counter = 0;
@@ -139,23 +139,26 @@ if (argc != 3) {
 
 	//creating buffers
 	buffer ADataBuffer = cudaDevice.create_buffer(count*sizeof( double ));
-	buffer AIndexBuffer = cudaDevice.create_buffer(count*sizeof( double ));
-	buffer APointerBuffer = cudaDevice.create_buffer(m*sizeof( double ));
+	buffer AIndexBuffer = cudaDevice.create_buffer(count*sizeof( int ));
+	buffer APointerBuffer = cudaDevice.create_buffer(m*sizeof( int ));
 
 	buffer BBuffer = cudaDevice.create_buffer(n*1*sizeof( double ));
 	buffer CBuffer = cudaDevice.create_buffer(m*1*sizeof( double ));
 	buffer alphaBuffer = cudaDevice.create_buffer(sizeof(double));
 	buffer mBuffer = cudaDevice.create_buffer(sizeof(int));
 	buffer nBuffer = cudaDevice.create_buffer(sizeof(int));
+	buffer countBuffer = cudaDevice.create_buffer(sizeof(int));
+
 
 	data_futures.push_back(ADataBuffer.enqueue_write(0, count*sizeof( double ), A_data));
-	data_futures.push_back(AIndexBuffer.enqueue_write(0, count*sizeof( double ), A_indices));
-	data_futures.push_back(APointerBuffer.enqueue_write(0, m*sizeof( double ), A_pointers));
+	data_futures.push_back(AIndexBuffer.enqueue_write(0, count*sizeof( int ), A_indices));
+	data_futures.push_back(APointerBuffer.enqueue_write(0, m*sizeof( int ), A_pointers));
 
-	data_futures.push_back(BBuffer.enqueue_write(0, n*k*sizeof( double ), B));
-	data_futures.push_back(CBuffer.enqueue_write(0, m*n*sizeof( double ), C));
+	data_futures.push_back(BBuffer.enqueue_write(0, n*sizeof( double ), B));
+	data_futures.push_back(CBuffer.enqueue_write(0, m*sizeof( double ), C));
 	data_futures.push_back(mBuffer.enqueue_write(0, sizeof( int ), &m));
 	data_futures.push_back(nBuffer.enqueue_write(0, sizeof( int ), &n));
+	data_futures.push_back(countBuffer.enqueue_write(0, sizeof( int ), &count));
 	data_futures.push_back(alphaBuffer.enqueue_write(0, sizeof( double ), &alpha));
 
 	//Synchronize copy to buffer
@@ -169,6 +172,7 @@ if (argc != 3) {
 	args.push_back(CBuffer);
 	args.push_back(mBuffer);
 	args.push_back(nBuffer);
+	args.push_back(countBuffer);
 	args.push_back(alphaBuffer);
 
 	//Synchronize data transfer before new data is written
@@ -186,9 +190,13 @@ if (argc != 3) {
 
 	//Free Memory
 	args.clear();
+	
 	cudaFree(A);
 	cudaFree(B);
 	cudaFree(C);
+	cudaFree(A_data);
+	cudaFree(A_indices);
+	cudaFree(A_pointers);
 
 	return 0;
 }
