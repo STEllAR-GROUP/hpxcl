@@ -12,7 +12,7 @@
 
 using namespace hpx::opencl;
 
-static const char dgemm_src_str[] = 
+static const char smvp_src_str[] = 
 "                                                                          					   \n"
 "__kernel void smvp(__global double *A_data,__global int *A_indices, __global int *A_pointers, \n"
 "__global double *B, __global double *C, __global int *m, __global int *n, __global int *count,\n"
