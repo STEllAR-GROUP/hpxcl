@@ -8,13 +8,13 @@ extern "C" __global__ void smvp(double *A_data, int *A_indices, int *A_pointers,
 
 	if(ROW<*m){
 		int start = A_pointers[ROW];
-		int end = (start==m-1)?(*count):A_pointers[ROW+1];
+		int end = (start==*m-1)?(*count):A_pointers[ROW+1];
 
 		double sum = 0;
 		for(int i = start;i<end;i++)
 		{
 			int index = A_indices[i];
-			sum += (*alpha) * A_data[index] * B[index];
+			sum += (*alpha) * A_data[i] * B[index];
 		}
 		C[ROW] = sum;
 	}	

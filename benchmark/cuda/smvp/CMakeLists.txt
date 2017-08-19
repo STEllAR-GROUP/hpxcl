@@ -15,7 +15,7 @@ if(HPXCL_WITH_NAIVE_CUDA_BENCHMARK)
   CACHE "NVCC_FLAGS" STRING FORCE) 
 
   #Benchmark for single dgemm kernel
-  #CUDA_ADD_EXECUTABLE(dgemmCUDA dgemmCUDA.cu)
+  CUDA_ADD_EXECUTABLE(smvpCUDA smvpCUDA.cu)
 endif()
 
 ############################################################################

@@ -29,6 +29,9 @@ if (argc != 3) {
 	m = atoi(argv[1]);
 	n = atoi(argv[2]);
 
+	double time = 0;
+	timer_start();
+
 	//Vector for all futures for the data management
 	std::vector<hpx::lcos::future<void>> data_futures;
 
@@ -68,7 +71,7 @@ if (argc != 3) {
 	cudaMallocHost((void**) &A_indices, count*sizeof( int ));
 	cudaMallocHost((void**) &A_pointers, m * sizeof( int ));
 
-	printf (" Intializing matrix data \n");
+	//printf (" Intializing matrix data \n");
 	
 	for (i = 0; i < (1*n); i++) {
 		B[i] = (double)(-i-1);
@@ -198,5 +201,9 @@ if (argc != 3) {
 	cudaFree(A_indices);
 	cudaFree(A_pointers);
 
+	//Printing the end timing result
+    time+=timer_stop();
+    std:: cout << time << std::endl;
+	
 	return 0;
 }
