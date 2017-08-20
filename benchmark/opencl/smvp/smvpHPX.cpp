@@ -54,11 +54,14 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 
-	int *m,*n,*k,i;
+	int *m,*n,i;
 
 	//allocating memory for the vectors
 	m = new int[1];
 	n = new int[1];
+
+	m[0] = atoi(argv[1]);
+	n[0] = atoi(argv[2]);
 
 	// Get available OpenCL Devices.
     std::vector<device> devices = create_all_devices(CL_DEVICE_TYPE_ALL,
@@ -101,6 +104,11 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	A_data = new double[count[0]];
+	A_indices = new int[count[0]];
+	A_pointers = new int[m[0]];
+
+
 	for (i = 0; i < (1*n[0]); i++) {
 		B[i] = (double)(-i-1);
 	}
@@ -126,9 +134,9 @@ int main(int argc, char* argv[])
 	}
 
 	//creating buffers
-	buffer ADataBuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, (count[0])*sizeof( int ));
+	buffer ADataBuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, (count[0])*sizeof( double ));
 	buffer AIndexBuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, (count[0])*sizeof( int ));
-	buffer APointerBuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, m[0]*sizeof( double ));	
+	buffer APointerBuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, m[0]*sizeof( int ));	
 
 	buffer BBuffer = cldevice.create_buffer(CL_MEM_READ_ONLY, n[0]*sizeof( double ));
 	buffer CBuffer = cldevice.create_buffer(CL_MEM_READ_WRITE, m[0]*sizeof( double ));
