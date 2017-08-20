@@ -4,7 +4,7 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 ##############################################################################################################
-#This Script uses varying k values to benchmark the dgemm 
+#This Script uses varying k values to benchmark the smvp
 ##############################################################################################################
 
 import os
@@ -22,119 +22,119 @@ if(len(sys.argv) != 2)
     print("Usage #node_name #retry_attempts")
 
 ############Parameters for varying k#######
-start = 1000
-end = 11000
-step = 1000
+start = 10000
+end = 100000
+step = 10000
 
 #Load modules
 os.system("module load cmake/3.7.2 gcc/4.9.4 cuda/8.0.61")
 
-os.chdir("benchmark/cuda/dgemm/")
+os.chdir("benchmark/cuda/smvp/")
 os.system("rm *.dat")
 
 os.system("cmake -DHPX_ROOT=~/packagaes/hpx-4.9/ -DHPXCL_WITH_CUDA=ON -DHPXCL_WITH_OPENCL=ON -DHPXCL_WITH_BENCHMARK=ON -DHPXCL_WITH_NAIVE_OPENCL_BENCHMARK=ON -DHPXCL_WITH_NAIVE_CUDA_BENCHMARK=ON -DOPENCL_ROOT=/usr/local/cuda-8.0/ -DHPXCL_CUDA_WITH_STREAM=ON ~/hpxcl/")
 os.system("make")
 
 ######################################Profiling for the CUDA part #############################################
-print ('Profiling Naive CUDA DGEMM......\n')
-#profiling Dgemm HPX code
+print ('Profiling Naive CUDA SMVP......\n')
+#profiling SMVP HPX code
 for i in range(start,end,step):
     try_again = int(sys.argv[2])
     for j in range(try_again,0,-1):
         try:
-            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemmHPXCL 10240 10240 " + str(i) + " >> dgemmHPX_cuda.dat",shell=True)
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./smvpHPXCL 10240 " + str(i) + " >> smvpHPX_cuda.dat",shell=True)
             break
         except OSError:
             print ('trying again......\n')
             
-print ('Profiling HPXCL CUDA DGEMM......\n')
-#profiling Dgemm Cuda code
+print ('Profiling HPXCL CUDA SMVP......\n')
+#profiling SMVP Cuda code
 for i in range(start,end,step):
     try_again = int(sys.argv[2])
     for j in range(try_again,0,-1):
         try:
-            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemmCUDA 10240 10240 " + str(i) + " >> dgemmCUDA.dat",shell=True)
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./smvpCUDA 10240 " + str(i) + " >> smvpCUDA.dat",shell=True)
             break
         except OSError:
             print ('trying again......\n')
 
-dgemmCudaX = []
-dgemmCudaY = []
-with open('dgemmCUDA.dat', 'rb') as f:
+smvpCudaX = []
+smvpCudaY = []
+with open('smvpCUDA.dat', 'rb') as f:
     reader = csv.reader(f, delimiter=' ', quoting=csv.QUOTE_NONE)
     xValue = start
     for row in reader:
-        dgemmCudaX.append(int(xValue))
-        dgemmCudaY.append(float(row[0]))
+        smvpCudaX.append(int(xValue))
+        smvpCudaY.append(float(row[0]))
         xValue += step
 
-plt.plot(dgemmCudaX, dgemmCudaY,marker='.', linestyle=':', color='b', label='Naive CUDA')
+plt.plot(smvpCudaX, smvpCudaY,marker='.', linestyle=':', color='b', label='Naive CUDA')
 
-dgemmHpxX = []
-dgemmHpxY = []
-with open('dgemmHPX_cuda.dat', 'rb') as f:
+smvpHpxX = []
+smvpHpxY = []
+with open('smvpHPX_cuda.dat', 'rb') as f:
     reader = csv.reader(f, delimiter=' ', quoting=csv.QUOTE_NONE)
     xValue = start
     for row in reader:
-        dgemmHpxX.append(int(xValue))
-        dgemmHpxY.append(float(row[0]))
+        smvpHpxX.append(int(xValue))
+        smvpHpxY.append(float(row[0]))
         xValue += step
 
-plt.plot(dgemmHpxX, dgemmHpxY,marker='.', linestyle='-', color='r', label='HPXCL CUDA')
+plt.plot(smvpHpxX, smvpHpxY,marker='.', linestyle='-', color='r', label='HPXCL CUDA')
 
 ######################################Profiling for the OpenCL part #############################################
-os.chdir("../../opencl/dgemm/")
+os.chdir("../../opencl/smvp/")
 
-print ('Profiling HPXCL OpenCL DGEMM......\n')
-#profiling Dgemm HPX code
+print ('Profiling HPXCL OpenCL SMVP......\n')
+#profiling smvp HPX code
 for i in range(start,end,step):
     try_again = int(sys.argv[2])
     for j in range(try_again,0,-1):
         try:
-            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemmHPX 10240 10240 " + str(i) + " >> dgemmHPX_opencl.dat",shell=True)
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./smvpHPX 10240 " + str(i) + " >> smvpHPX_opencl.dat",shell=True)
             break
         except OSError:
             print ('trying again......\n')
 
-print ('Profiling Naive OpenCL DGEMM......\n')
-#profiling Dgemm Cuda code
+print ('Profiling Naive OpenCL SMVP......\n')
+#profiling smvp Cuda code
 for i in range(start,end,step):
     try_again = int(sys.argv[2])
     for j in range(try_again,0,-1):
         try:
-            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemm_opencl 10240 10240 " + str(i) + " >> dgemmCL.dat",shell=True)
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./smvp_opencl 10240 " + str(i) + " >> smvpCL.dat",shell=True)
             break
         except OSError:
             print ('trying again......\n')
 
-dgemmOpenclX = []
-dgemmOpenclY = []
-with open('dgemmCL.dat', 'rb') as f:
+smvpOpenclX = []
+smvpOpenclY = []
+with open('smvpCL.dat', 'rb') as f:
     reader = csv.reader(f, delimiter=' ', quoting=csv.QUOTE_NONE)
     xValue = start
     for row in reader:
-        dgemmOpenclX.append(int(xValue))
-        dgemmOpenclY.append(float(row[0]))
+        smvpOpenclX.append(int(xValue))
+        smvpOpenclY.append(float(row[0]))
         xValue += step
 
-plt.plot(dgemmOpenclX, dgemmOpenclY,marker='o', linestyle='-.', color='g', label='Naive OpenCL')
+plt.plot(smvpOpenclX, smvpOpenclY,marker='o', linestyle='-.', color='g', label='Naive OpenCL')
 
-dgemmHpxOpenclX = []
-dgemmHpxOpenclY = []
-with open('dgemmHPX_opencl.dat', 'rb') as f:
+smvpHpxOpenclX = []
+smvpHpxOpenclY = []
+with open('smvpHPX_opencl.dat', 'rb') as f:
     reader = csv.reader(f, delimiter=' ', quoting=csv.QUOTE_NONE)
     xValue = start
     for row in reader:
-        dgemmHpxOpenclX.append(int(xValue))
-        dgemmHpxOpenclY.append(float(row[0]))
+        smvpHpxOpenclX.append(int(xValue))
+        smvpHpxOpenclY.append(float(row[0]))
         xValue += step
 
-plt.plot(dgemmHpxOpenclX, dgemmHpxOpenclY,marker='o', linestyle='-', color='k', label='HPXCL OpenCL')
+plt.plot(smvpHpxOpenclX, smvpHpxOpenclY,marker='o', linestyle='-', color='k', label='HPXCL OpenCL')
 
-plt.xlabel('k')
+plt.xlabel('n')
 plt.ylabel('Time in milliseconds')
-plt.title('k vs. Time DGEMM Benchmark')
+plt.title('n vs. Time SMVP Benchmark')
 plt.legend()
 plt.grid()
 os.chdir("../../")
-plt.savefig('dgemm.png')
+plt.savefig('smvp.png')
