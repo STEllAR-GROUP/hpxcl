@@ -63,6 +63,9 @@ int main(int argc, char* argv[])
 	m[0] = atoi(argv[1]);
 	n[0] = atoi(argv[2]);
 
+	double time = 0;
+	timer_start();
+
 	// Get available OpenCL Devices.
     std::vector<device> devices = create_all_devices(CL_DEVICE_TYPE_ALL,
                                                      "OpenCL 1.1" ).get();
@@ -237,6 +240,10 @@ int main(int argc, char* argv[])
 
     // Wait for the data to arrive
     auto data = read_future.get();
+
+    //Printing the end timing result
+    time+=timer_stop();
+    std:: cout << time << std::endl;
 
     return 0;
 }

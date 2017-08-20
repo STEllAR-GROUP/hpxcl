@@ -26,7 +26,7 @@
  
 int main(int argc, char*argv[]) {
 
-	if (argc != 4) {
+	if (argc != 3) {
 		printf("Usage: %s #m #n\n", argv[0]);
 		exit(1);
 	}
@@ -38,6 +38,10 @@ int main(int argc, char*argv[]) {
 	//Initilizing the matrix dimensions
 	m[0] = atoi(argv[1]);
 	n[0] = atoi(argv[2]);
+
+	double time = 0;
+
+	clock_t begin = clock();
 
 	cl_device_id deviceId = NULL;
 	cl_context context = NULL;
@@ -99,8 +103,8 @@ int main(int argc, char*argv[]) {
 
 	//Memory objects for kernel parameters
 	cl_mem ADataMemobj = NULL;
-	cl_mem AIndicesMemobj = NULL;
-	cl_mem APointersMemobj = NULL;
+	cl_mem AIndexMemobj = NULL;
+	cl_mem APointerMemobj = NULL;
 	cl_mem BMemobj = NULL;
 	cl_mem CMemobj = NULL;
 	cl_mem mMemobj = NULL;
@@ -157,7 +161,7 @@ int main(int argc, char*argv[]) {
 	CMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE, m[0]*n[0] * sizeof(double), C, &ret);
 	mMemobj = clCreateBuffer(context, CL_MEM_READ_ONLY, 1 * sizeof(int), m, &ret);
 	nMemobj = clCreateBuffer(context, CL_MEM_READ_ONLY, 1 * sizeof(int), n, &ret);
-	countMemobj = clCreateBuffer(context, CL_MEM_READ_ONLY, 1 * sizeof(int), k, &ret);
+	countMemobj = clCreateBuffer(context, CL_MEM_READ_ONLY, 1 * sizeof(int), count, &ret);
 	alphaMemobj = clCreateBuffer(context, CL_MEM_READ_ONLY, 1 * sizeof(double), alpha, &ret);
 	
 	//Create kernel program from source
@@ -182,14 +186,14 @@ int main(int argc, char*argv[]) {
 
 	//Pass arguments to kernel
 	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&ADataMemobj);
-	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&AIndexMemobj);
-	ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&APointerMemobj);
-	ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&BMemobj);
-	ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&CMemobj);
-	ret = clSetKernelArg(kernel, 3, sizeof(cl_mem), (void *)&mMemobj);
-	ret = clSetKernelArg(kernel, 4, sizeof(cl_mem), (void *)&nMemobj);
-	ret = clSetKernelArg(kernel, 5, sizeof(cl_mem), (void *)&countMemobj);
-	ret = clSetKernelArg(kernel, 6, sizeof(cl_mem), (void *)&alphaMemobj);
+	ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&AIndexMemobj);
+	ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&APointerMemobj);
+	ret = clSetKernelArg(kernel, 3, sizeof(cl_mem), (void *)&BMemobj);
+	ret = clSetKernelArg(kernel, 4, sizeof(cl_mem), (void *)&CMemobj);
+	ret = clSetKernelArg(kernel, 5, sizeof(cl_mem), (void *)&mMemobj);
+	ret = clSetKernelArg(kernel, 6, sizeof(cl_mem), (void *)&nMemobj);
+	ret = clSetKernelArg(kernel, 7, sizeof(cl_mem), (void *)&countMemobj);
+	ret = clSetKernelArg(kernel, 8, sizeof(cl_mem), (void *)&alphaMemobj);
 
 	// Execute OpenCL kernel in data parallel
     const int TS = 32;
@@ -231,5 +235,9 @@ int main(int argc, char*argv[]) {
 	free(alpha);
 	free(count);
 
+	clock_t end = clock();
+	time += (double)(end - begin) * 1000 / CLOCKS_PER_SEC;
+	printf("%lf\n", time);
+	
 	return 0;
 }
