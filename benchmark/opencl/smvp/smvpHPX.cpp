@@ -86,6 +86,13 @@ int main(int argc, char* argv[])
 	// Create a device component from the first device found
     device cldevice = devices[0];
 
+    // Create the hello_world device program
+    program prog = cldevice.create_program_with_source(smvp_src);
+
+    //Build the program
+    auto program_future = prog.build_async();
+
+
     double *A, *B, *C;
 	
     double *A_data;
@@ -152,12 +159,6 @@ int main(int argc, char* argv[])
     std::vector<hpx::lcos::future<void>> set_arg_futures;
     std::vector<hpx::lcos::future<void>> write_futures;
 
-    // Create the hello_world device program
-    program prog = cldevice.create_program_with_source(smvp_src);
-
-    //Build the program
-    prog.build();
-
     buffer_data_type AData_serialized(
 					A_data, (*count),
 					buffer_data_type::init_mode::reference);
@@ -208,6 +209,8 @@ int main(int argc, char* argv[])
 
     // wait for function calls to trigger
     hpx::wait_all( write_futures );
+
+	auto program_compile = program_future.get();
 
     //Creating the kernal
     kernel smvp_kernel = prog.create_kernel("smvp");
