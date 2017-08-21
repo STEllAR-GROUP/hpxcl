@@ -236,7 +236,7 @@ int main(int argc, char*argv[]) {
 	free(count);
 
 	clock_t end = clock();
-	time += (double)(end - begin) * 1000 / CLOCKS_PER_SEC;
+	time += (double)(end - begin) * 1000.0 / CLOCKS_PER_SEC;
 	printf("%lf\n", time);
 	
 	return 0;

@@ -210,8 +210,8 @@ int main(int argc, char* argv[])
     // wait for function calls to trigger
     hpx::wait_all( write_futures );
 
-	auto program_compile = program_future.get();
-
+	hpx::wait_all(program_future);
+    
     //Creating the kernal
     kernel smvp_kernel = prog.create_kernel("smvp");
 

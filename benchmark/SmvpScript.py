@@ -18,7 +18,7 @@ matplotlib.use('agg')
 
 import matplotlib.pyplot as plt
 
-if(len(sys.argv) != 2):
+if(len(sys.argv) != 3):
     print("Usage #node_name #retry_attempts")
 	sys.exit()
 	
@@ -85,6 +85,7 @@ plt.plot(smvpHpxX, smvpHpxY,marker='.', linestyle='-', color='r', label='HPXCL C
 
 ######################################Profiling for the OpenCL part #############################################
 os.chdir("../../opencl/smvp/")
+os.system("rm *.dat")
 
 print ('Profiling HPXCL OpenCL SMVP......\n')
 #profiling smvp HPX code
