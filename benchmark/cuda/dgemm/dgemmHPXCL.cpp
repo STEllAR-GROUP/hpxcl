@@ -55,8 +55,11 @@ int main(int argc, char*argv[]) {
 
 	//Malloc Host
 	cudaMallocHost((void**) &A, m*k*sizeof( double ));
+	checkCudaError("Malloc A");
 	cudaMallocHost((void**) &B, n*k*sizeof( double ));
+	checkCudaError("Malloc B");
 	cudaMallocHost((void**) &C, m*n*sizeof( double ));
+	checkCudaError("Malloc C");
 
 	time+=timer_stop();
 	//printf (" Intializing matrix data \n\n");
@@ -163,9 +166,12 @@ int main(int argc, char*argv[]) {
 
 	//Free Memory
 	args.clear();
-	cudaFree(A);
-	cudaFree(B);
-	cudaFree(C);
+	cudaFreeHost(A);
+	checkCudaError("Free A");
+	cudaFreeHost(B);
+	checkCudaError("Free B");
+	cudaFreeHost(C);
+	checkCudaError("Free C");
 
     //Printing the end timing result
     time+=timer_stop();

@@ -64,6 +64,8 @@ int main(int argc, char*argv[]) {
 	//Malloc Host
 	float* in;
 	cudaMallocHost((void**) &in, bytes);
+	checkCudaError("Malloc in");
+
 	memset(in, 0, bytes);
 
 	// Create a device component from the first device found
@@ -131,6 +133,7 @@ int main(int argc, char*argv[]) {
 
 	//Clean
 	cudaFreeHost(in);
+	checkCudaError("Free in");
 
 	return EXIT_SUCCESS;
 }

@@ -70,6 +70,7 @@ int main(int argc, char*argv[]) {
 	//Malloc Host
 	TYPE* in;
 	cudaMallocHost((void**) &in, bytes);
+	checkCudaError("Malloc in");
 	memset(in, 0, bytes);
 
 	time += timer_stop();
@@ -157,6 +158,7 @@ int main(int argc, char*argv[]) {
 
 	//Clean
 	cudaFreeHost(in);
+	checkCudaError("Free in");
 
 	std:: cout << check << " " << time + timer_stop() << std::endl;
 
