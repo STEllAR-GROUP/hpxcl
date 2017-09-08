@@ -53,7 +53,7 @@ buffer::~buffer() {
 #endif
 
 	//Free the device pointer
-	cudaFree(this->data_device);
+	cudaFree(data_device);
 	checkCudaError("buffer::~buffer Error during free of the device pointer");
 
 	//Destroy the buffer stream created
