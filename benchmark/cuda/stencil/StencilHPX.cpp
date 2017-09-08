@@ -32,6 +32,7 @@ int main(int argc, char*argv[]) {
 	timer_start();
 	size_t* count;
 	cudaMallocHost((void**)&count,sizeof(size_t));
+	checkCudaError("Malloc count");
 	count[0]= atoi(argv[1]);
 	data += timer_stop();
 	std::cout << count[0] << " ";
@@ -59,8 +60,11 @@ int main(int argc, char*argv[]) {
 
 	//Malloc Host
 	cudaMallocHost((void**) &out, count[0] * sizeof(TYPE));
+	checkCudaError("Mallloc out");
 	cudaMallocHost((void**) &in, count[0] * sizeof(TYPE));
+	checkCudaError("Malloc in");
 	cudaMallocHost((void**) &s, 3 * sizeof(TYPE));
+	checkCudaError("Malloc s");
 
 	//Initialize the data
 	fillRandomVector(in, count[0]);
@@ -145,9 +149,13 @@ int main(int argc, char*argv[]) {
 
 	//Cleanup
 	cudaFreeHost(in);
+	checkCudaError("Free in");
 	cudaFreeHost(s);
+	checkCudaError("Free s");
 	cudaFreeHost(out);
+	checkCudaError("Free out");
 	cudaFreeHost(count);
+	checkCudaError("Free count");
 
 	std::cout << data + timer_stop() << std::endl;
 

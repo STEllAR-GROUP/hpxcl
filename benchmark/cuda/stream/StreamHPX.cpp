@@ -225,10 +225,15 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 	double* factor;
 
 	cudaMallocHost((void**) &a, sizeof(double) * size);
+	checkCudaError("Malloc a");
 	cudaMallocHost((void**) &b, sizeof(double) * size);
+	checkCudaError("Malloc b");
 	cudaMallocHost((void**) &c, sizeof(double) * size);
+	checkCudaError("Malloc c");
 	cudaMallocHost((void**) &s, sizeof(size_t));
+	checkCudaError("Malloc s");
 	cudaMallocHost((void**) &factor, sizeof(double));
+	checkCudaError("Malloc factor");
 	s[0] = size;
 	factor[0] = 2.;
 
