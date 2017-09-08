@@ -14,7 +14,7 @@ void checkCudaError(char const* function) {
     if (cudaSuccess != err) {
 
         std::stringstream errorMessage;
-        errorMessage << "CudaError: " << cudaGetErrorString(err) << std::endl;
+        errorMessage << "CudaError: " << cudaGetErrorString(err) << " at " << function << std::endl;
 
         HPX_THROW_EXCEPTION(hpx::no_success, function,
                 errorMessage.str().c_str());

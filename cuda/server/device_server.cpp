@@ -24,6 +24,7 @@ namespace server {
 device::device() {
 	cuInit(0);
 	cuDeviceGet(&cu_device, 0);
+	checkCudaError("device::device Init");
 	//cuCtxCreate(&cu_context, 0, cu_device);
 	//checkCudaError("device::device Create context");
 	device_name = props.name;

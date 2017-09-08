@@ -55,7 +55,7 @@ int main(int argc, char*argv[]) {
 
 	//Malloc Host
 	cudaMallocHost((void**) &A, m * n * sizeof(double));
-
+	checkCudaError("svmp malloc A");
 	int count = 0;
 	//Input can be anything sparse
 	for (i = 0; i < (m * n); i++) {
@@ -66,12 +66,14 @@ int main(int argc, char*argv[]) {
 	}
 
 	cudaMallocHost((void**) &B, n * 1 * sizeof(double));
+	checkCudaError("svmp malloc B");
 	cudaMallocHost((void**) &C, m * 1 * sizeof(double));
+	checkCudaError("svmp malloc C");
 	cudaMallocHost((void**) &A_data, count * sizeof(double));
+	checkCudaError("svmp malloc A_data");
 	cudaMallocHost((void**) &A_indices, count * sizeof(int));
+	checkCudaError("svmp malloc A_pointers");
 	cudaMallocHost((void**) &A_pointers, m * sizeof(int));
-
-	//printf (" Intializing matrix data \n");
 
 	for (i = 0; i < (1 * n); i++) {
 		B[i] = (double) (-i - 1);
@@ -196,12 +198,18 @@ int main(int argc, char*argv[]) {
 	//Free Memory
 	args.clear();
 
-	cudaFree(A);
-	cudaFree(B);
-	cudaFree(C);
-	cudaFree(A_data);
-	cudaFree(A_indices);
-	cudaFree(A_pointers);
+	cudaFreeHost(A);
+	checkCudaError("svmp free A");
+	cudaFreeHost(B);
+	checkCudaError("svmp free B");
+	cudaFreeHost(C);
+	checkCudaError("svmp free C");
+	cudaFreeHost(A_data);
+	checkCudaError("svmp free A_data");
+	cudaFreeHost(A_indices);
+	checkCudaError("svmp free A_indices");
+	cudaFreeHost(A_pointers);
+	checkCudaError("svmp free A_pointers");
 
 	//Printing the end timing result
 	time += timer_stop();
