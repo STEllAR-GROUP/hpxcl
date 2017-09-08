@@ -98,7 +98,7 @@ int main(int argc, char*argv[]) {
 	device cudaDevice = devices[0];
 
 	//Create a Mandelbrot device program
-	program prog = cudaDevice.create_program_with_file("dgemm.cu");
+	hpx::lcos::future<program> fProg = cudaDevice.create_program_with_file("dgemm.cu");
 
 	//Compile with the kernal
 	std::vector<std::string> flags;
@@ -110,6 +110,7 @@ int main(int argc, char*argv[]) {
 
 	flags.push_back(mode);
 
+	program prog = fProg.get();
 	progBuildVector.push_back(prog.build(flags, "dgemm"));
 	progVector.push_back(prog);
 	deviceVector.push_back(cudaDevice);
@@ -118,22 +119,31 @@ int main(int argc, char*argv[]) {
 	hpx::wait_all(progBuildVector);
 
 	//creating buffers
-	buffer ABuffer = cudaDevice.create_buffer(m*k*sizeof( double ));
-	buffer BBuffer = cudaDevice.create_buffer(n*k*sizeof( double ));
-	buffer CBuffer = cudaDevice.create_buffer(m*n*sizeof( double ));
-	buffer alphaBuffer = cudaDevice.create_buffer(sizeof(double));
-	buffer betaBuffer = cudaDevice.create_buffer(sizeof(double));
-	buffer mBuffer = cudaDevice.create_buffer(sizeof(int));
-	buffer nBuffer = cudaDevice.create_buffer(sizeof(int));
-	buffer kBuffer = cudaDevice.create_buffer(sizeof(int));
+	hpx::lcos::future<hpx::cuda::buffer> fABuffer = cudaDevice.create_buffer(m*k*sizeof( double ));
+	hpx::lcos::future<hpx::cuda::buffer> fBBuffer = cudaDevice.create_buffer(n*k*sizeof( double ));
+	hpx::lcos::future<hpx::cuda::buffer> fCBuffer = cudaDevice.create_buffer(m*n*sizeof( double ));
+	hpx::lcos::future<hpx::cuda::buffer> falphaBuffer = cudaDevice.create_buffer(sizeof(double));
+	hpx::lcos::future<hpx::cuda::buffer> fbetaBuffer = cudaDevice.create_buffer(sizeof(double));
+	hpx::lcos::future<hpx::cuda::buffer> fmBuffer = cudaDevice.create_buffer(sizeof(int));
+	hpx::lcos::future<hpx::cuda::buffer> fnBuffer = cudaDevice.create_buffer(sizeof(int));
+	hpx::lcos::future<hpx::cuda::buffer> fkBuffer = cudaDevice.create_buffer(sizeof(int));
 
+
+	buffer ABuffer = fABuffer.get();
 	data_futures.push_back(ABuffer.enqueue_write(0, m*k*sizeof( double ), A));
+	buffer BBuffer = fBBuffer.get();
 	data_futures.push_back(BBuffer.enqueue_write(0, n*k*sizeof( double ), B));
+	buffer CBuffer = fCBuffer.get();
 	data_futures.push_back(CBuffer.enqueue_write(0, m*n*sizeof( double ), C));
+	buffer mBuffer = fmBuffer.get();
 	data_futures.push_back(mBuffer.enqueue_write(0, sizeof( int ), &m));
+	buffer nBuffer = fnBuffer.get();
 	data_futures.push_back(nBuffer.enqueue_write(0, sizeof( int ), &n));
+	buffer kBuffer = fkBuffer.get();
 	data_futures.push_back(kBuffer.enqueue_write(0, sizeof( int ), &k));
+	buffer alphaBuffer = falphaBuffer.get();
 	data_futures.push_back(alphaBuffer.enqueue_write(0, sizeof( double ), &alpha));
+	buffer betaBuffer = fbetaBuffer.get();
 	data_futures.push_back(betaBuffer.enqueue_write(0, sizeof( double ), &beta));
 
 	//Synchronize copy to buffer

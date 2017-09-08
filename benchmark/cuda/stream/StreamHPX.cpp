@@ -194,7 +194,7 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 	//Compile the kernels
 
 	// Create the hello_world device program
-	program prog = cudaDevice.create_program_with_file("kernels.cu");
+	program prog = cudaDevice.create_program_with_file("kernels.cu").get();
 
 	//Add compiler flags for compiling the kernel
 	std::vector<std::string> flags;
@@ -240,22 +240,27 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 	}
 
 	//Allocate device buffer
-	buffer aBuffer = cudaDevice.create_buffer(size * sizeof(double));
-	buffer bBuffer = cudaDevice.create_buffer(size * sizeof(double));
-	buffer cBuffer = cudaDevice.create_buffer(size * sizeof(double));
-	buffer sizeBuffer = cudaDevice.create_buffer(sizeof(size_t));
-	buffer fBuffer = cudaDevice.create_buffer(sizeof(double));
+	hpx::lcos::future<hpx::cuda::buffer> faBuffer = cudaDevice.create_buffer(size * sizeof(double));
+	hpx::lcos::future<hpx::cuda::buffer> fbBuffer = cudaDevice.create_buffer(size * sizeof(double));
+	hpx::lcos::future<hpx::cuda::buffer> fcBuffer = cudaDevice.create_buffer(size * sizeof(double));
+	hpx::lcos::future<hpx::cuda::buffer> fsizeBuffer = cudaDevice.create_buffer(sizeof(size_t));
+	hpx::lcos::future<hpx::cuda::buffer> ffBuffer = cudaDevice.create_buffer(sizeof(double));
 
 	//Fill device buffer
-	hpx::wait_all(aBuffer);
+	//hpx::wait_all(faBuffer);
+	buffer aBuffer = faBuffer.get();
 	auto fa = aBuffer.enqueue_write(0, size * sizeof(double), a);
-	hpx::wait_all(bBuffer);
+	//hpx::wait_all(bBuffer);
+	buffer bBuffer = fbBuffer.get();
 	auto fb = bBuffer.enqueue_write(0, size * sizeof(double), b);
-	hpx::wait_all(cBuffer);
+	//hpx::wait_all(cBuffer);
+	buffer cBuffer = fcBuffer.get();
 	auto fc = cBuffer.enqueue_write(0, size * sizeof(double), c);
-	hpx::wait_all(sizeBuffer);
+	//hpx::wait_all(sizeBuffer);
+	buffer sizeBuffer = fsizeBuffer.get();
 	auto fsize = sizeBuffer.enqueue_write(0, sizeof(size_t), s);
-	hpx::wait_all(fBuffer);
+	//hpx::wait_all(fBuffer);
+	buffer fBuffer = ffBuffer.get();
 	auto ffactor = fBuffer.enqueue_write(0, sizeof(double), factor);
 
 	futures.push_back(std::move(fa));

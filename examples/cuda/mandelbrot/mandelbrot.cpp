@@ -79,7 +79,7 @@ int main(int argc, char* argv[]){
 		device cudaDevice = devices[i];
 
 		//Create a Mandelbrot device program
-		program prog = cudaDevice.create_program_with_file("kernel.cu");
+		program prog = cudaDevice.create_program_with_file("kernel.cu").get();
 
 		//Compile with the kernal
 		std::vector<std::string> flags;
@@ -111,10 +111,10 @@ int main(int argc, char* argv[]){
 		program prog = progVector.at(i);
 		
 		//creating buffers
-		buffer imageBuffer = cudaDevice.create_buffer(bytes);
-		buffer widthBuffer = cudaDevice.create_buffer(sizeof(int));
-		buffer heightBuffer = cudaDevice.create_buffer(sizeof(int));
-		buffer yStartBuffer = cudaDevice.create_buffer(sizeof(int));
+		buffer imageBuffer = cudaDevice.create_buffer(bytes).get();
+		buffer widthBuffer = cudaDevice.create_buffer(sizeof(int)).get();
+		buffer heightBuffer = cudaDevice.create_buffer(sizeof(int)).get();
+		buffer yStartBuffer = cudaDevice.create_buffer(sizeof(int)).get();
 
 		// Copy input data to the buffer
 		data_futures.push_back(imageBuffer.enqueue_write(0, bytes, image));
