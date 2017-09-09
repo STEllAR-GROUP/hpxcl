@@ -46,7 +46,8 @@ int main(int argc, char* argv[]){
 	//Malloc Host
 	char *image;
 	cudaMallocHost((void**) &image, bytes);
-	//memset(in, 0, bytes);
+	checkCudaError("Malloc image");
+
 
 	int deviceCount = devices.size();
 	int numDevices = std::min(4, deviceCount);
@@ -81,7 +82,7 @@ int main(int argc, char* argv[]){
 		//Create a Mandelbrot device program
 		program prog = cudaDevice.create_program_with_file("kernel.cu").get();
 
-		//Compile with the kernal
+		//Compile with the kernel
 		std::vector<std::string> flags;
 		std::string mode = "--gpu-architecture=compute_";
 		mode.append(
@@ -167,6 +168,7 @@ int main(int argc, char* argv[]){
 
 	//Free Memory
 	cudaFree(image);
+	checkCudaError("Free image");
 	free(mainImage);
 
 	return EXIT_SUCCESS;

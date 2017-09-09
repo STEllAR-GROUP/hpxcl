@@ -56,6 +56,7 @@ program::program(hpx::naming::id_type device_id,
 program::~program() {
 
 	cudaSetDevice(this->parent_device_id);
+	checkCudaError("program::~program set device");
 
 	//Destroy the program in device
 	nvrtcDestroyProgram(&prog);
@@ -88,6 +89,7 @@ void program::build(std::vector<std::string> compilerFlags,
 
 	// Set CUDA device to be used	
 	cudaSetDevice(this->parent_device_id);
+	checkCudaError("program::build Set device");
 
 	// Convert the kernel provided into a .cu file to be used for building
 	boost::uuids::uuid uuid = boost::uuids::random_generator()();
@@ -291,8 +293,9 @@ void program::run(std::vector<hpx::naming::id_type> args,
 	cuLaunchKernel(this->kernels[modulename], grid.x, grid.y, grid.z,
 				block.x, block.y, block.z, 0, 0, args_pointer.data(),
 				0);
+	checkCudaError("program::run launch kernel");
 	cudaStreamSynchronize(0);
-	checkCudaError("program::run Run kernel");
+	checkCudaError("program::run synchronize kernel");
 
 }
 #endif

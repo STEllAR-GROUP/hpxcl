@@ -5,3 +5,4 @@
 
 #add_subdirectory(stencil)
 add_subdirectory(dgemm)
+add_subdirectory(smvp)

@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) {
 	// Generate Input data
 	unsigned int* inputData;
 	cudaMallocHost((void**)&inputData, sizeof(unsigned int)*SIZE);
+	checkCudaError("Malloc inputData");
 
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
@@ -83,6 +84,7 @@ int main(int argc, char* argv[]) {
 	// Create the buffer for the result
 	unsigned int* result;
 	cudaMallocHost((void**)&result,sizeof(unsigned int));
+	checkCudaError("Malloc result");
 	result[0] = 0;
 	buffer resbuffer = cudaDevice.create_buffer(sizeof(unsigned int)).get();
 	data_futures.push_back(resbuffer.enqueue_write(0,sizeof(unsigned int), result));
@@ -90,6 +92,7 @@ int main(int argc, char* argv[]) {
 	//Create the buffer for the length of the array
 	unsigned int* n;
 	cudaMallocHost((void**)&n,sizeof(unsigned int));
+	checkCudaError("Malloc size n");
 	result[0] = SIZE;
 	buffer lengthbuffer = cudaDevice.create_buffer(sizeof(unsigned int)).get();
 	data_futures.push_back(lengthbuffer.enqueue_write(0,sizeof(unsigned int), n));
@@ -132,6 +135,13 @@ int main(int argc, char* argv[]) {
 		hpx::cout << "wrong" << hpx::endl;
 	else
 		hpx::cout << "correct" << hpx::endl;
+
+	cudaFreeHost(n);
+	checkCudaError("Free n");
+	cudaFreeHost(inputData);
+	checkCudaError("Free inputData");
+	cudaFreeHost(result);
+	checkCudaError("Free result");
 
 	return EXIT_SUCCESS;
 }
