@@ -98,20 +98,20 @@ static void remote_test( hpx::opencl::device cldevice )
 
     // remotely create a program
     hpx::opencl::program program =
-        hpx::async<create_program_action>(locality, cldevice);
+        hpx::async<create_program_action>(locality, cldevice).get();
 
     // build program
     program.build();
 
     // remotely create a kernel
     hpx::opencl::kernel kernel =
-        hpx::async<create_kernel_action>(locality, program);
+        hpx::async<create_kernel_action>(locality, program).get();
 
     // remotely create buffers
     hpx::opencl::buffer buffer_src =
-        hpx::async<create_buffer_action>(locality, cldevice);
+        hpx::async<create_buffer_action>(locality, cldevice).get();
     hpx::opencl::buffer buffer_dst =
-        hpx::async<create_buffer_action>(locality, cldevice);
+        hpx::async<create_buffer_action>(locality, cldevice).get();
 
     // test if buffer initialization worked
     {

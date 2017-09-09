@@ -3,7 +3,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-extern "C" __global__ void dgemm(double *A, double *B, double *C, int *m, int *n, int *k, double *alpha, double *beta){
+extern "C" { __global__ void dgemm(double *A, double *B, double *C, int *m, int *n, int *k, double *alpha, double *beta){
 	int ROW = blockIdx.y*blockDim.y+threadIdx.y;
 	int COL = blockIdx.x*blockDim.x+threadIdx.x;
 
@@ -14,4 +14,5 @@ extern "C" __global__ void dgemm(double *A, double *B, double *C, int *m, int *n
 		C[ROW*(*n)+COL] = sum + (*beta) * C[ROW*(*n)+COL];
 	}	
 
+}
 }

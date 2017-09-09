@@ -53,13 +53,13 @@ int main(int argc, char* argv[]) {
 	inputData[i] = 1;
 
 	// Create a buffer
-	buffer outbuffer = cudaDevice.create_buffer(SIZE * sizeof(unsigned int));
+	buffer outbuffer = cudaDevice.create_buffer(SIZE * sizeof(unsigned int)).get();
 
 	// Copy input data to the buffer
 	data_futures.push_back(outbuffer.enqueue_write(0, SIZE * sizeof(unsigned int), inputData));
 
 	// Create the hello_world device program
-	program prog = cudaDevice.create_program_with_source(kernel_src);
+	program prog = cudaDevice.create_program_with_source(kernel_src).get();
 
 	// Add compiler flags for compiling the kernel
 
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
 	cudaMallocHost((void**)&result,sizeof(unsigned int));
 	checkCudaError("Malloc result");
 	result[0] = 0;
-	buffer resbuffer = cudaDevice.create_buffer(sizeof(unsigned int));
+	buffer resbuffer = cudaDevice.create_buffer(sizeof(unsigned int)).get();
 	data_futures.push_back(resbuffer.enqueue_write(0,sizeof(unsigned int), result));
 
 	//Create the buffer for the length of the array
@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
 	cudaMallocHost((void**)&n,sizeof(unsigned int));
 	checkCudaError("Malloc size n");
 	result[0] = SIZE;
-	buffer lengthbuffer = cudaDevice.create_buffer(sizeof(unsigned int));
+	buffer lengthbuffer = cudaDevice.create_buffer(sizeof(unsigned int)).get();
 	data_futures.push_back(lengthbuffer.enqueue_write(0,sizeof(unsigned int), n));
 
 	//Generate the grid and block dim

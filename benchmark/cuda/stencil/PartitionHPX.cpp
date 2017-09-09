@@ -81,7 +81,7 @@ int main(int argc, char*argv[]) {
 	std::vector<hpx::future<void>> dependencies;
 
 	// Create the hello_world device program
-	program prog = cudaDevice.create_program_with_source(kernel_src);
+	program prog = cudaDevice.create_program_with_source(kernel_src).get();
 
 	// Add compiler flags for compiling the kernel
 
@@ -102,14 +102,14 @@ int main(int argc, char*argv[]) {
 	std::vector<buffer> bufferIn;
 	for (size_t i = 0; i < nStreams; i++)
 	{
-		bufferIn.push_back(cudaDevice.create_buffer(streamBytes));
+		bufferIn.push_back(cudaDevice.create_buffer(streamBytes).get());
 
 	}
 
 	for (size_t i = 0; i < nStreams; i++)
 	{
 
-		bufferIn[i].enqueue_write(i*streamSize,streamBytes,in);
+		dependencies.push_back(bufferIn[i].enqueue_write(i*streamSize,streamBytes,in));
 	}
 
 	std::vector<hpx::cuda::buffer> args;
