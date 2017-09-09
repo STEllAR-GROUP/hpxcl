@@ -3,7 +3,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-extern "C" __global__ void smvp(double *A_data, int *A_indices, int *A_pointers, double *B, double *C, int *m, int *n, int *count, double *alpha){
+extern "C" { __global__ void smvp(double *A_data, int *A_indices, int *A_pointers, double *B, double *C, int *m, int *n, int *count, double *alpha){
 	int ROW = blockIdx.x*blockDim.x+threadIdx.x;
 
 	if(ROW<*m){
@@ -18,5 +18,5 @@ extern "C" __global__ void smvp(double *A_data, int *A_indices, int *A_pointers,
 		}
 		C[ROW] = sum;
 	}	
-
+}
 }
