@@ -7,7 +7,7 @@
 //Kernels
 //###########################################################################
 
-__kernel void stencil(__global size_t *count,__global TYPE* in,__global TYPE* out,__global TYPE* s) {
+__kernel void stencil(__global size_t *count,__global double* in,__global double* out,__global double* s) {
 	int workGroupX = get_local_size(0);
 	int workIdX = get_group_id(0);
 	int threadIdX = get_local_id(0);
