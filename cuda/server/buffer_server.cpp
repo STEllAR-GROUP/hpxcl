@@ -46,8 +46,6 @@ buffer::~buffer() {
 	cudaSetDevice(this->parent_device_num);
 	checkCudaError("buffer::~buffer Error in setting device");
 
-	std::cout << this->arg_buffer_size << std::endl;
-
 	//Synchronize the stream so that all operations are completed before stream is destroyed
 #ifdef HPXCL_CUDA_WITH_STREAMS
 	cudaStreamSynchronize(this->stream);

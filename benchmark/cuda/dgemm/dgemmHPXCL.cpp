@@ -10,6 +10,7 @@
 #include <hpxcl/cuda.hpp>
 
 #include "examples/opencl/benchmark_vector/timer.hpp"
+#include "validation.hpp"
 
 using namespace hpx::cuda;
 
@@ -23,7 +24,7 @@ int main(int argc, char*argv[]) {
 		exit(1);
 	}
 
-	int m,n,k,i;
+	int m, n, k, i;
 
 	//Initilizing the matrix dimensions
 	m = atoi(argv[1]);
@@ -46,7 +47,7 @@ int main(int argc, char*argv[]) {
 	}
 
 	double *A, *B, *C;
-	
+
 	double alpha, beta;
 
 	//initializing values of alpha and beta
@@ -54,26 +55,26 @@ int main(int argc, char*argv[]) {
 	beta = 0.0;
 
 	//Malloc Host
-	cudaMallocHost((void**) &A, m*k*sizeof( double ));
+	cudaMallocHost((void**) &A, m * k * sizeof(double));
 	checkCudaError("Malloc A");
-	cudaMallocHost((void**) &B, n*k*sizeof( double ));
+	cudaMallocHost((void**) &B, n * k * sizeof(double));
 	checkCudaError("Malloc B");
-	cudaMallocHost((void**) &C, m*n*sizeof( double ));
+	cudaMallocHost((void**) &C, m * n * sizeof(double));
 	checkCudaError("Malloc C");
 
-	time+=timer_stop();
+	time += timer_stop();
 	//printf (" Intializing matrix data \n\n");
 	timer_start();
 
-	for (i = 0; i < (m*k); i++) {
-		A[i] = (double)(i+1);
+	for (i = 0; i < (m * k); i++) {
+		A[i] = (double) (i + 1);
 	}
 
-	for (i = 0; i < (k*n); i++) {
-		B[i] = (double)(-i-1);
+	for (i = 0; i < (k * n); i++) {
+		B[i] = (double) (-i - 1);
 	}
 
-	for (i = 0; i < (m*n); i++) {
+	for (i = 0; i < (m * n); i++) {
 		C[i] = 0.0;
 	}
 
@@ -89,8 +90,8 @@ int main(int argc, char*argv[]) {
 	block.y = 32;
 	block.z = 1;
 
-	grid.x = 1+std::ceil(m / block.x);
-	grid.y = 1+std::ceil(n / block.y);
+	grid.x = 1 + std::ceil(m / block.x);
+	grid.y = 1 + std::ceil(n / block.y);
 	grid.z = 1;
 
 	std::vector<hpx::future<void>> progBuildVector;
@@ -101,15 +102,16 @@ int main(int argc, char*argv[]) {
 	device cudaDevice = devices[0];
 
 	//Create a Mandelbrot device program
-	hpx::lcos::future<program> fProg = cudaDevice.create_program_with_file("dgemm.cu");
+	hpx::lcos::future<program> fProg = cudaDevice.create_program_with_file(
+			"dgemm.cu");
 
 	//Compile with the kernal
-	std::vector<std::string> flags;
+	std::vector < std::string > flags;
 	std::string mode = "--gpu-architecture=compute_";
 	mode.append(
-		std::to_string(cudaDevice.get_device_architecture_major().get()));
+			std::to_string(cudaDevice.get_device_architecture_major().get()));
 	mode.append(
-		std::to_string(cudaDevice.get_device_architecture_minor().get()));
+			std::to_string(cudaDevice.get_device_architecture_minor().get()));
 
 	flags.push_back(mode);
 
@@ -122,32 +124,40 @@ int main(int argc, char*argv[]) {
 	hpx::wait_all(progBuildVector);
 
 	//creating buffers
-	hpx::lcos::future<hpx::cuda::buffer> fABuffer = cudaDevice.create_buffer(m*k*sizeof( double ));
-	hpx::lcos::future<hpx::cuda::buffer> fBBuffer = cudaDevice.create_buffer(n*k*sizeof( double ));
-	hpx::lcos::future<hpx::cuda::buffer> fCBuffer = cudaDevice.create_buffer(m*n*sizeof( double ));
-	hpx::lcos::future<hpx::cuda::buffer> falphaBuffer = cudaDevice.create_buffer(sizeof(double));
-	hpx::lcos::future<hpx::cuda::buffer> fbetaBuffer = cudaDevice.create_buffer(sizeof(double));
-	hpx::lcos::future<hpx::cuda::buffer> fmBuffer = cudaDevice.create_buffer(sizeof(int));
-	hpx::lcos::future<hpx::cuda::buffer> fnBuffer = cudaDevice.create_buffer(sizeof(int));
-	hpx::lcos::future<hpx::cuda::buffer> fkBuffer = cudaDevice.create_buffer(sizeof(int));
-
+	hpx::lcos::future<hpx::cuda::buffer> fABuffer = cudaDevice.create_buffer(
+			m * k * sizeof(double));
+	hpx::lcos::future<hpx::cuda::buffer> fBBuffer = cudaDevice.create_buffer(
+			n * k * sizeof(double));
+	hpx::lcos::future<hpx::cuda::buffer> fCBuffer = cudaDevice.create_buffer(
+			m * n * sizeof(double));
+	hpx::lcos::future<hpx::cuda::buffer> falphaBuffer =
+			cudaDevice.create_buffer(sizeof(double));
+	hpx::lcos::future<hpx::cuda::buffer> fbetaBuffer = cudaDevice.create_buffer(
+			sizeof(double));
+	hpx::lcos::future<hpx::cuda::buffer> fmBuffer = cudaDevice.create_buffer(
+			sizeof(int));
+	hpx::lcos::future<hpx::cuda::buffer> fnBuffer = cudaDevice.create_buffer(
+			sizeof(int));
+	hpx::lcos::future<hpx::cuda::buffer> fkBuffer = cudaDevice.create_buffer(
+			sizeof(int));
 
 	buffer ABuffer = fABuffer.get();
-	data_futures.push_back(ABuffer.enqueue_write(0, m*k*sizeof( double ), A));
+	data_futures.push_back(ABuffer.enqueue_write(0, m * k * sizeof(double), A));
 	buffer BBuffer = fBBuffer.get();
-	data_futures.push_back(BBuffer.enqueue_write(0, n*k*sizeof( double ), B));
+	data_futures.push_back(BBuffer.enqueue_write(0, n * k * sizeof(double), B));
 	buffer CBuffer = fCBuffer.get();
-	data_futures.push_back(CBuffer.enqueue_write(0, m*n*sizeof( double ), C));
+	data_futures.push_back(CBuffer.enqueue_write(0, m * n * sizeof(double), C));
 	buffer mBuffer = fmBuffer.get();
-	data_futures.push_back(mBuffer.enqueue_write(0, sizeof( int ), &m));
+	data_futures.push_back(mBuffer.enqueue_write(0, sizeof(int), &m));
 	buffer nBuffer = fnBuffer.get();
-	data_futures.push_back(nBuffer.enqueue_write(0, sizeof( int ), &n));
+	data_futures.push_back(nBuffer.enqueue_write(0, sizeof(int), &n));
 	buffer kBuffer = fkBuffer.get();
-	data_futures.push_back(kBuffer.enqueue_write(0, sizeof( int ), &k));
+	data_futures.push_back(kBuffer.enqueue_write(0, sizeof(int), &k));
 	buffer alphaBuffer = falphaBuffer.get();
-	data_futures.push_back(alphaBuffer.enqueue_write(0, sizeof( double ), &alpha));
+	data_futures.push_back(
+			alphaBuffer.enqueue_write(0, sizeof(double), &alpha));
 	buffer betaBuffer = fbetaBuffer.get();
-	data_futures.push_back(betaBuffer.enqueue_write(0, sizeof( double ), &beta));
+	data_futures.push_back(betaBuffer.enqueue_write(0, sizeof(double), &beta));
 
 	//Synchronize copy to buffer
 	hpx::wait_all(data_futures);
@@ -165,14 +175,24 @@ int main(int argc, char*argv[]) {
 	hpx::wait_all(args);
 
 	//run the program on the device
-	#ifdef HPXCL_CUDA_WITH_STREAMS
-		kernelFutures.push_back(prog.run(args, "dgemm", grid, block, args));
-	#else
-		kernelFutures.push_back(prog.run(args, "dgemm", grid, block));
-	#endif
+#ifdef HPXCL_CUDA_WITH_STREAMS
+	kernelFutures.push_back(prog.run(args, "dgemm", grid, block, args));
+#else
+	kernelFutures.push_back(prog.run(args, "dgemm", grid, block));
+#endif
 
 	//wait for all the kernal futures to return
-	hpx::wait_all(kernelFutures);	
+	hpx::wait_all(kernelFutures);
+
+
+	double* res = CBuffer.enqueue_read_sync<double>(0, n * m * sizeof(double));
+
+	//Printing the end timing result
+	time += timer_stop();
+	std::cout << time << " ";
+
+	// Validating the result
+	std::cout << validateDgemm(A, B, res, alpha, beta, n, m, k) << std::endl;
 
 	//Free Memory
 	args.clear();
@@ -182,10 +202,6 @@ int main(int argc, char*argv[]) {
 	checkCudaError("Free B");
 	cudaFreeHost(C);
 	checkCudaError("Free C");
-
-    //Printing the end timing result
-    time+=timer_stop();
-    std:: cout << time << std::endl;
 
 	return 0;
 }

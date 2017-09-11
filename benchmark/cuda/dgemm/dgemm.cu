@@ -10,7 +10,9 @@ extern "C" { __global__ void dgemm(double *A, double *B, double *C, int *m, int 
 	if(ROW<*n && COL<*m){
 		double sum = 0;
 		for(int i = 0;i<*k;i++)
+		{
 			sum+=(*alpha) * A[ROW * (*k) + i] * B[i*(*n)+COL];
+			}
 		C[ROW*(*n)+COL] = sum + (*beta) * C[ROW*(*n)+COL];
 	}	
 
