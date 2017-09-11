@@ -122,7 +122,8 @@ int main(int argc, char*argv[]) {
 	device cudaDevice = devices[0];
 
 	//Create a Mandelbrot device program
-	program prog = cudaDevice.create_program_with_file("smvp.cu");
+	hpx::lcos::future < program > fProg = cudaDevice.create_program_with_file(
+			"smvp.cu");
 
 	//Compile with the kernal
 	std::vector < std::string > flags;
@@ -134,21 +135,40 @@ int main(int argc, char*argv[]) {
 
 	flags.push_back(mode);
 
+	program prog = fProg.get();
 	progBuildVector.push_back(prog.build(flags, "smvp"));
 	progVector.push_back(prog);
 	deviceVector.push_back(cudaDevice);
 
 	//creating buffers
-	buffer ADataBuffer = cudaDevice.create_buffer(count * sizeof(double));
-	buffer AIndexBuffer = cudaDevice.create_buffer(count * sizeof(int));
-	buffer APointerBuffer = cudaDevice.create_buffer(m * sizeof(int));
+	hpx::lcos::future<buffer> fADataBuffer = cudaDevice.create_buffer(
+			count * sizeof(double));
+	hpx::lcos::future<buffer> fAIndexBuffer = cudaDevice.create_buffer(
+			count * sizeof(int));
+	hpx::lcos::future<buffer> fAPointerBuffer = cudaDevice.create_buffer(
+			m * sizeof(int));
 
-	buffer BBuffer = cudaDevice.create_buffer(n * 1 * sizeof(double));
-	buffer CBuffer = cudaDevice.create_buffer(m * 1 * sizeof(double));
-	buffer alphaBuffer = cudaDevice.create_buffer(sizeof(double));
-	buffer mBuffer = cudaDevice.create_buffer(sizeof(int));
-	buffer nBuffer = cudaDevice.create_buffer(sizeof(int));
-	buffer countBuffer = cudaDevice.create_buffer(sizeof(int));
+	hpx::lcos::future<buffer> fBBuffer = cudaDevice.create_buffer(
+			n * 1 * sizeof(double));
+	hpx::lcos::future<buffer> fCBuffer = cudaDevice.create_buffer(
+			m * 1 * sizeof(double));
+	hpx::lcos::future<buffer> falphaBuffer = cudaDevice.create_buffer(
+			sizeof(double));
+	hpx::lcos::future<buffer> fmBuffer = cudaDevice.create_buffer(sizeof(int));
+	hpx::lcos::future<buffer> fnBuffer = cudaDevice.create_buffer(sizeof(int));
+	hpx::lcos::future<buffer> fcountBuffer = cudaDevice.create_buffer(
+			sizeof(int));
+
+	buffer ADataBuffer = fADataBuffer.get();
+	buffer AIndexBuffer = fAIndexBuffer.get();
+	buffer APointerBuffer = fAPointerBuffer.get();
+
+	buffer BBuffer = fBBuffer.get();
+	buffer CBuffer = fCBuffer.get();
+	buffer alphaBuffer = falphaBuffer.get();
+	buffer mBuffer = fmBuffer.get();
+	buffer nBuffer = fnBuffer.get();
+	buffer countBuffer = fcountBuffer.get();
 
 	data_futures.push_back(
 			ADataBuffer.enqueue_write(0, count * sizeof(double), A_data));
