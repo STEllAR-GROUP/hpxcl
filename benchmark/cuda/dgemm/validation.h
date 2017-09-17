@@ -5,7 +5,7 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <cstring>
-#include <hpxcl/cuda.hpp>
+#include <cuda.h>
 
 #define EPS 1e-7
 

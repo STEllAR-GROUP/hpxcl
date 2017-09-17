@@ -10,6 +10,7 @@
 #include <hpxcl/cuda.hpp>
 
 #include "examples/opencl/benchmark_vector/timer.hpp"
+#include "validation.h"
 
 using namespace hpx::cuda;
 
@@ -217,7 +218,9 @@ int main(int argc, char*argv[]) {
 
 	//Free Memory
 	args.clear();
-
+	
+	double* res = CBuffer.enqueue_read_sync<double>(0, m * sizeof(double));
+	
 	cudaFreeHost(A);
 	checkCudaError("svmp free A");
 	cudaFreeHost(B);
@@ -233,7 +236,10 @@ int main(int argc, char*argv[]) {
 
 	//Printing the end timing result
 	time += timer_stop();
-	std::cout << time << std::endl;
+	std::cout << time << " ";
+
+	// Validating the result
+	std::cout << validateSmvp(A_data, A_indices, A_pointers, B, res, m, n, count, alpha) << std::endl;
 
 	return 0;
 }

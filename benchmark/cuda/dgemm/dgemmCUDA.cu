@@ -119,7 +119,7 @@ int main(int argc, char*argv[]) {
     std::cout << time << " ";
 
 	// Validating the result
-	std::cout << validateDgemm(A, B, res, alpha, beta, n, m, k) << std::endl;
+	std::cout << validateDgemm(A, B, C, alpha, beta, n, m, k) << std::endl;
 
 	return EXIT_SUCCESS;
 }

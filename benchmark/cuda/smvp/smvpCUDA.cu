@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include "examples/opencl/benchmark_vector/timer.hpp"
+#include "validation.h"
 
 //###########################################################################
 //Kernels
@@ -156,7 +157,10 @@ int main(int argc, char*argv[]) {
 
 	//Printing the end timing result
     time+=timer_stop();
-    std:: cout << time << std::endl;
+    std:: cout << time << " ";
+
+	// Validating the result
+	std::cout << validateSmvp(A_data, A_indices, A_pointers, B, C, m, n, count, alpha) << std::endl;
 
 	return EXIT_SUCCESS;
 }
