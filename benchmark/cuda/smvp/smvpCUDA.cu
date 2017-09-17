@@ -160,7 +160,7 @@ int main(int argc, char*argv[]) {
     std:: cout << time << " ";
 
 	// Validating the result
-	std::cout << validateSmvp(A_data, A_indices, A_pointers, B, C, m, n, count, alpha) << std::endl;
+	std::cout << validateSmvp(A_data, A_indices, A_pointers, B, C, &m, &n, &count, &alpha) << std::endl;
 
 	return EXIT_SUCCESS;
 }
