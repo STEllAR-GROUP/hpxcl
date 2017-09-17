@@ -10,7 +10,7 @@
 #include <hpxcl/cuda.hpp>
 
 #include "examples/opencl/benchmark_vector/timer.hpp"
-#include "validation.hpp"
+#include "validation.h"
 
 using namespace hpx::cuda;
 

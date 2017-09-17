@@ -6,7 +6,7 @@
 #include <cuda.h>
 #include <iostream>
 #include <cmath>
-#include "validation.hpp"
+#include "validation.h"
 
 #include "examples/opencl/benchmark_vector/timer.hpp"
 
