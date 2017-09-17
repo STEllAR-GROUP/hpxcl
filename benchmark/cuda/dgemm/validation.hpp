@@ -1,5 +1,8 @@
-#ifndef HPX_CUDA_VALIDATION_DGEMM_HPP_
-#define HPX_CUDA_VALIDATION_DGEMM_HPP_
+// Copyright (c)       2017 Patrick Diehl
+// 				       2017 Madhavan Seshadri
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <cstring>
 #include <hpxcl/cuda.hpp>
@@ -10,7 +13,7 @@ int validateDgemm(double* A, double* B, double* C, double alpha, double beta, in
 
 	double * CTest;
 	cudaMallocHost((void**) &CTest, n*m*sizeof( double ));
-	//checkCudaError("Malloc CTest");
+	
 	std::memset(CTest, 0, sizeof CTest);
 
 
@@ -20,10 +23,10 @@ int validateDgemm(double* A, double* B, double* C, double alpha, double beta, in
 
 			for(size_t l = 0; l < k; l++) {
 
-				sum+= alpha * A[i * k + l] * B[l*n+j];
+				sum+= alpha * A[j * k + l] * B[l*n+i];
 			}
 
-			CTest[i*n+j] = sum + beta * CTest[i*n+j];
+			CTest[j*n+i] = sum + beta * CTest[j*n+i];
 		}
 	}
 
@@ -42,5 +45,3 @@ int validateDgemm(double* A, double* B, double* C, double alpha, double beta, in
 
 	return success;
 }
-
-#endif
