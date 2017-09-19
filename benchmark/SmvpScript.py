@@ -21,6 +21,9 @@ import matplotlib.pyplot as plt
 if(len(sys.argv) != 3):
     print("Usage #node_name #retry_attempts")
 	sys.exit()
+
+############Parameters for varying m#######
+m_value = 10240
 	
 ############Parameters for varying k#######
 start = 10000
@@ -43,7 +46,7 @@ for i in range(start,end,step):
     try_again = int(sys.argv[2])
     for j in range(try_again,0,-1):
         try:
-            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./smvpHPXCL 10240 " + str(i) + " >> smvpHPX_cuda.dat",shell=True)
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./smvpHPXCL "+str(m_value)+" " + str(i) + " >> smvpHPX_cuda.dat",shell=True)
             break
         except OSError:
             print ('trying again......\n')
@@ -54,7 +57,7 @@ for i in range(start,end,step):
     try_again = int(sys.argv[2])
     for j in range(try_again,0,-1):
         try:
-            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./smvpCUDA 10240 " + str(i) + " >> smvpCUDA.dat",shell=True)
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./smvpCUDA "+str(m_value)+" " + str(i) + " >> smvpCUDA.dat",shell=True)
             break
         except OSError:
             print ('trying again......\n')
@@ -82,7 +85,7 @@ with open('smvpHPX_cuda.dat', 'rb') as f:
         xValue += step
 
 plt.plot(smvpHpxX, smvpHpxY,marker='.', linestyle='-', color='r', label='HPXCL CUDA')
-
+"""
 ######################################Profiling for the OpenCL part #############################################
 os.chdir("../../opencl/smvp/")
 os.system("rm *.dat")
@@ -93,7 +96,7 @@ for i in range(start,end,step):
     try_again = int(sys.argv[2])
     for j in range(try_again,0,-1):
         try:
-            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./smvpHPX 10240 " + str(i) + " >> smvpHPX_opencl.dat",shell=True)
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./smvpHPX "+str(m_value)+" " + str(i) + " >> smvpHPX_opencl.dat",shell=True)
             break
         except OSError:
             print ('trying again......\n')
@@ -104,7 +107,7 @@ for i in range(start,end,step):
     try_again = int(sys.argv[2])
     for j in range(try_again,0,-1):
         try:
-            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./smvp_opencl 10240 " + str(i) + " >> smvpCL.dat",shell=True)
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./smvp_opencl "+str(m_value)+" " + str(i) + " >> smvpCL.dat",shell=True)
             break
         except OSError:
             print ('trying again......\n')
@@ -132,7 +135,7 @@ with open('smvpHPX_opencl.dat', 'rb') as f:
         xValue += step
 
 plt.plot(smvpHpxOpenclX, smvpHpxOpenclY,marker='o', linestyle='-', color='k', label='HPXCL OpenCL')
-
+"""
 plt.xlabel('n')
 plt.ylabel('Time in milliseconds')
 plt.title('n vs. Time SMVP Benchmark')

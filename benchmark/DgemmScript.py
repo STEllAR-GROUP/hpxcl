@@ -21,7 +21,13 @@ import matplotlib.pyplot as plt
 if(len(sys.argv) != 3):
     print("Usage #node_name #retry_attempts")
 	sys.exit()
-	
+
+############Parameters for varying m#######
+m_value = 10240
+
+############Parameters for varying n#######	
+n_value = 10240
+
 ############Parameters for varying k#######
 start = 1000
 end = 11000
@@ -43,7 +49,7 @@ for i in range(start,end,step):
     try_again = int(sys.argv[2])
     for j in range(try_again,0,-1):
         try:
-            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemmHPXCL 10240 10240 " + str(i) + " >> dgemmHPX_cuda.dat",shell=True)
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemmHPXCL "+str(m_value)+" "+str(n_value)+" " + str(i) + " >> dgemmHPX_cuda.dat",shell=True)
             break
         except OSError:
             print ('trying again......\n')
@@ -54,7 +60,7 @@ for i in range(start,end,step):
     try_again = int(sys.argv[2])
     for j in range(try_again,0,-1):
         try:
-            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemmCUDA 10240 10240 " + str(i) + " >> dgemmCUDA.dat",shell=True)
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemmCUDA "+str(m_value)+" "+str(n_value)+" " + str(i) + " >> dgemmCUDA.dat",shell=True)
             break
         except OSError:
             print ('trying again......\n')
@@ -82,7 +88,7 @@ with open('dgemmHPX_cuda.dat', 'rb') as f:
         xValue += step
 
 plt.plot(dgemmHpxX, dgemmHpxY,marker='.', linestyle='-', color='r', label='HPXCL CUDA')
-
+"""
 ######################################Profiling for the OpenCL part #############################################
 os.chdir("../../opencl/dgemm/")
 os.system("rm *.dat")
@@ -93,7 +99,7 @@ for i in range(start,end,step):
     try_again = int(sys.argv[2])
     for j in range(try_again,0,-1):
         try:
-            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemmHPX 10240 10240 " + str(i) + " >> dgemmHPX_opencl.dat",shell=True)
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemmHPX "+str(m_value)+" "+str(n_value)+" " + str(i) + " >> dgemmHPX_opencl.dat",shell=True)
             break
         except OSError:
             print ('trying again......\n')
@@ -104,7 +110,7 @@ for i in range(start,end,step):
     try_again = int(sys.argv[2])
     for j in range(try_again,0,-1):
         try:
-            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemm_opencl 10240 10240 " + str(i) + " >> dgemmCL.dat",shell=True)
+            subprocess.call("srun -p "+ str(sys.argv[1]) + " -N 1 ./dgemm_opencl "+str(m_value)+" "+str(n_value)+" " + str(i) + " >> dgemmCL.dat",shell=True)
             break
         except OSError:
             print ('trying again......\n')
@@ -132,7 +138,7 @@ with open('dgemmHPX_opencl.dat', 'rb') as f:
         xValue += step
 
 plt.plot(dgemmHpxOpenclX, dgemmHpxOpenclY,marker='o', linestyle='-', color='k', label='HPXCL OpenCL')
-
+"""
 plt.xlabel('k')
 plt.ylabel('Time in milliseconds')
 plt.title('k vs. Time DGEMM Benchmark')
