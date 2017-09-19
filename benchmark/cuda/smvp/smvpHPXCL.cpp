@@ -221,6 +221,14 @@ int main(int argc, char*argv[]) {
 	
 	double* res = CBuffer.enqueue_read_sync<double>(0, m * sizeof(double));
 	
+	//Printing the end timing result
+	time += timer_stop();
+	std::cout << time << " ";
+
+	// Validating the result
+	std::cout << validateSmvp(A_data, A_indices, A_pointers, B, res, &m, &n, &count, &alpha) << std::endl;
+	
+	
 	cudaFreeHost(A);
 	checkCudaError("svmp free A");
 	cudaFreeHost(B);
@@ -233,13 +241,6 @@ int main(int argc, char*argv[]) {
 	checkCudaError("svmp free A_indices");
 	cudaFreeHost(A_pointers);
 	checkCudaError("svmp free A_pointers");
-
-	//Printing the end timing result
-	time += timer_stop();
-	std::cout << time << " ";
-
-	// Validating the result
-	std::cout << validateSmvp(A_data, A_indices, A_pointers, B, res, &m, &n, &count, &alpha) << std::endl;
 
 	return 0;
 }

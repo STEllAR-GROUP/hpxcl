@@ -139,7 +139,15 @@ int main(int argc, char*argv[]) {
 	 * Copy result back
 	 */
 	cudaMemcpy(C, C_dev, m*sizeof( double ), cudaMemcpyDeviceToHost);
+	
+	//Printing the end timing result
+    time+=timer_stop();
+    std:: cout << time << " ";
 
+	// Validating the result
+	std::cout << validateSmvp(A_data, A_indices, A_pointers, B, C, &m, &n, &count, &alpha) << std::endl;
+	
+	
 	/*
 	 * Free
 	 */
@@ -154,13 +162,6 @@ int main(int argc, char*argv[]) {
 	cudaFree(C_dev);
 	cudaFree(AIndices_dev);
 	cudaFree(APointers_dev);
-
-	//Printing the end timing result
-    time+=timer_stop();
-    std:: cout << time << " ";
-
-	// Validating the result
-	std::cout << validateSmvp(A_data, A_indices, A_pointers, B, C, &m, &n, &count, &alpha) << std::endl;
 
 	return EXIT_SUCCESS;
 }
