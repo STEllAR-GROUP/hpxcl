@@ -6,6 +6,7 @@
 #include <cuda.h>
 #include <iostream>
 #include <cmath>
+#include "validation.h"
 
 #include "examples/opencl/benchmark_vector/timer.hpp"
 
@@ -17,7 +18,7 @@ __global__ void dgemm(double *A, double *B, double *C, int m, int n, int k, doub
 	int ROW = blockIdx.y*blockDim.y+threadIdx.y;
 	int COL = blockIdx.x*blockDim.x+threadIdx.x;
 
-	if(ROW < (n) && COL < (m)){
+	if(ROW < (m) && COL < (n)){
 		double sum = 0;
 		for(int i = 0;i<k;i++)
 			sum+=(alpha) * A[ROW * (k) + i] * B[i*(n)+COL];
@@ -115,7 +116,10 @@ int main(int argc, char*argv[]) {
 
 	//Printing the end timing result
     time+=timer_stop();
-    std:: cout << time << std::endl;
+    std::cout << time << " ";
+
+	// Validating the result
+	std::cout << validateDgemm(A, B, C, alpha, beta, n, m, k) << std::endl;
 
 	return EXIT_SUCCESS;
 }

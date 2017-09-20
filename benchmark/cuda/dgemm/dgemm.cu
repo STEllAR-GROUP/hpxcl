@@ -7,7 +7,7 @@ extern "C" { __global__ void dgemm(double *A, double *B, double *C, int *m, int 
 	int ROW = blockIdx.y*blockDim.y+threadIdx.y;
 	int COL = blockIdx.x*blockDim.x+threadIdx.x;
 
-	if(ROW<*n && COL<*m){
+	if(ROW<*m && COL<*n){
 		double sum = 0;
 		for(int i = 0;i<*k;i++)
 		{
