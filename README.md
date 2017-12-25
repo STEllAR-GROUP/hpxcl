@@ -1,7 +1,9 @@
 hpxcl
 ====
 
-This repository contains components that will support percolation via OpenCL and CUDA
+HPX is an open-source, general purpose C++ library for developing parallel and distributed applications with a broad community usage. This repository is for the development of HPX Compute language (HPXCL) API for the integration of GPU computation with asynchronous many task execution library HPX. Asynchronous functions are provided for kernel launch, kernel execution and data transfer with the capability to hide the communication latency through computation. This is done through the provision of Buffer, Device and Program.
+
+To give an example, computation on multiple CPU nodes, GPU nodes can all occur in parallel and can be synchronized when the results are required by the user through the use of futures. This system unleashes the potential to take computation to the exa-scale level.
 
 The [documentation](http://stellar-group.github.io/hpxcl/docs/html/index.html) of the nightly build is available.
 
