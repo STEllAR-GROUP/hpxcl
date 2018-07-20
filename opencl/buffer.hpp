@@ -348,7 +348,7 @@ hpx::opencl::buffer::enqueue_read_rect(
             ::enqueue_read_to_userbuffer_rect_remote_action<T> func_remote;
         hpx::apply<func_remote>( std::move(get_id()),
                                  std::move(ev.get_event_id()),
-                                 rect_properties,
+                                 std::move(rect_properties),
                                  reinterpret_cast<std::uintptr_t>(data.data()),
                                  std::move(deps.event_ids) );
 
@@ -366,7 +366,7 @@ hpx::opencl::buffer::enqueue_read_rect(
         ::enqueue_read_to_userbuffer_rect_local_action<T> func_local;
     hpx::apply<func_local>( std::move(get_id()),
                             std::move(ev.get_event_id()),
-                            rect_properties,
+                            std::move(rect_properties),
                             data,
                             std::move(deps.event_ids) );
 
@@ -425,7 +425,7 @@ hpx::opencl::buffer::enqueue_write_rect( rect_props rect_properties,
     typedef hpx::opencl::server::buffer::enqueue_write_rect_action<T> func;
     hpx::apply<func>( this->get_id(),
                       ev.get_event_id(),
-                      rect_properties,
+                      std::move(rect_properties),
                       data,
                       std::move(deps.event_ids) );
 
