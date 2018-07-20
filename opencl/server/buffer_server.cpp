@@ -15,6 +15,7 @@
 
 // HPX dependencies
 #include <hpx/include/thread_executors.hpp>
+#include <hpx/parallel/executors/service_executors.hpp>
 
 
 using namespace hpx::opencl::server;
@@ -47,12 +48,12 @@ buffer::~buffer()
 {
 
     hpx::threads::executors::default_executor exec(
-                                          hpx::threads::thread_priority_normal,
-                                          hpx::threads::thread_stacksize_medium);
+                                       hpx::threads::thread_priority_normal,
+                                         hpx::threads::thread_stacksize_medium);
 
-    // run dectructor in a thread, as we need it to run on a large stack size
-    hpx::async( exec, &buffer_cleanup, reinterpret_cast<uintptr_t>(device_mem))
-                                                                        .wait();
+    // run destructor in a thread, as we need it to run on a large stack size
+    hpx::threads::async_execute(exec,&buffer_cleanup, reinterpret_cast<uintptr_t>(device_mem));
+
 
 
 }

@@ -15,6 +15,7 @@
 
 // HPX dependencies
 #include <hpx/include/thread_executors.hpp>
+#include <hpx/parallel/executors/service_executors.hpp>
 
 using namespace hpx::opencl::server;
 
@@ -68,7 +69,7 @@ device::~device()
                                           hpx::threads::thread_stacksize_medium);
 
     // run dectructor in a thread, as we need it to run on a large stack size
-    hpx::async( exec, &device_cleanup, (uintptr_t)command_queue,
+    hpx::threads::async_execute( exec, &device_cleanup, (uintptr_t)command_queue,
                                        (uintptr_t)context).wait();
 
 }
@@ -345,8 +346,13 @@ device::wait_for_cl_event(cl_event event)
     // be really slow.
     for(std::size_t i = 0; execution_state != CL_COMPLETE; i++){
 
-        // Do exponential backup, stolen from the hpx spinlock class
-        hpx::lcos::local::spinlock::yield(i);
+        // Do exponential backup
+    	//hpx::util::yield_while(i);
+
+    	  hpx::util::yield_while([i]()
+    	        { return i; });
+
+
 
         // Query OpenCL for the event state
         err = clGetEventInfo( event, CL_EVENT_COMMAND_EXECUTION_STATUS,

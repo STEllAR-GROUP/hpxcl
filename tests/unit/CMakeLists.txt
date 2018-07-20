@@ -8,7 +8,7 @@ set(subdirs "")
 
 if(HPXCL_WITH_OPENCL)
   set(subdirs
-    ${subdirs} opencl)
+   ${subdirs} opencl)
 endif()
 
 if(HPXCL_WITH_CUDA)
