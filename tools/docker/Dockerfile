@@ -5,6 +5,7 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 FROM stellargroup/hpx:dev
+RUN apt-get update
 RUN apt-get install -y xsltproc      \
         doxygen		    \
 	libpng-dev          \
