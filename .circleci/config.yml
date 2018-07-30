@@ -15,9 +15,6 @@ jobs:
            name: Install dependencies
            command: apt-get update && apt-get install -y xsltproc doxygen libpng-dev wget opencl-headers ocl-icd-opencl-dev
        - run: 
-           name: Prepare build folder
-           command: cd /hpx && mkdir build 
-       - run: 
            name: Configure
            command: cmake .. -DCMAKE_BUILD_TYPE=Debug -DHPX_WITH_MALLOC=system -DCMAKE_CXX_FLAGS="-fcolor-diagnostics" -DHPXCL_WITH_OPENCL=On -DHPXCL_WITH_CUDA=On  -DHPXCL_WITH_BENCHMARK=On
        - run: 
