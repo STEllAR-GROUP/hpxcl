@@ -9,12 +9,14 @@ jobs:
       docker:
        - image: stellargroup/hpx:dev
       working_directory: /hpx/
-      environment:
-         PERL5LIB: .
-         LIBRARY_PATH: ${LD_LIBRARY_PATH}:/usr/local/cuda-8.0/lib64
-         PATH: ${PATH}:/usr/local/cuda-8.0/bin
-         CUDA_LIB_PATH: /usr/local/cuda-8.0/lib64/stubs/
       steps:
+       - run:
+         name: Export variables
+         command: |
+               echo 'export PATH=/usr/local/cuda-8.0/bin:$PATH' >> $BASH_ENV && \
+               echo 'export LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda-8.0/lib64' >> $BASH_ENV && \
+               echo 'export PERL5LIB=.' >> $BASH_ENV && \
+               echo 'export CUDA_LIB_PATH=/usr/local/cuda-8.0/lib64/stubs/' >> $BASH_ENV 
        - checkout
        - run:
            name: Install dependencies
