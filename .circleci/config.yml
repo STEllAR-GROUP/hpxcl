@@ -10,17 +10,17 @@ jobs:
        - image: stellargroup/hpxcl:build_env
     working_directory: /hpx
     steps:
-    - checkout
-    - run: 
+       - checkout
+       - run: 
          name: Prepare build folder
          command: mkdir build && cd build
-    - run: 
+       - run: 
          name: Configure
          command: cmake .. -DCMAKE_BUILD_TYPE=Debug -DHPX_WITH_MALLOC=system -DCMAKE_CXX_FLAGS="-fcolor-diagnostics" -DHPXCL_WITH_OPENCL=On -DHPXCL_WITH_CUDA=On -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-8.0 -DHPXCL_WITH_BENCHMARK=On
-    - run: 
+       - run: 
          name: Build
          command: make -j 2
-    - save_cache:
+       - save_cache:
         key: build-{{ .Branch }}-{{ .Revision }}
         paths:
             - "hpx/build"
@@ -30,12 +30,12 @@ jobs:
        - image: stellargroup/hpxcl:build_env
     working_directory: /hpx
     steps:
-    - checkout
-    - restore_cache:
-        key:  build-{{ .Branch }}-{{ .Revision }}
-    - run:
-       name: Run tests
-       command:  cd build && ../tools/run_tests.sh
+       - checkout
+       - restore_cache:
+          key:  build-{{ .Branch }}-{{ .Revision }}
+       - run:
+          name: Run tests
+          command:  cd build && ../tools/run_tests.sh
        
 workflows:
   version: 2
