@@ -8,7 +8,7 @@ jobs:
     build:
       docker:
        - image: stellargroup/hpx:dev
-      working_directory: /hpx/build
+      working_directory: /hpx/
       steps:
        - checkout
        - run:
@@ -16,10 +16,10 @@ jobs:
            command: apt-get update && apt-get install -y xsltproc doxygen libpng-dev wget opencl-headers ocl-icd-opencl-dev
        - run: 
            name: Configure
-           command: cmake .. -DCMAKE_BUILD_TYPE=Debug -DHPX_WITH_MALLOC=system -DCMAKE_CXX_FLAGS="-fcolor-diagnostics" -DHPXCL_WITH_OPENCL=On -DHPXCL_WITH_CUDA=On  -DHPXCL_WITH_BENCHMARK=On
+           command: cd build && cmake .. -DCMAKE_BUILD_TYPE=Debug -DHPX_WITH_MALLOC=system -DCMAKE_CXX_FLAGS="-fcolor-diagnostics" -DHPXCL_WITH_OPENCL=On -DHPXCL_WITH_CUDA=On  -DHPXCL_WITH_BENCHMARK=On
        - run: 
            name: Build
-           command: make -j 2
+           command: cd build && make -j 2
        - save_cache:
            key: build-{{ .Branch }}-{{ .Revision }}
            paths:
