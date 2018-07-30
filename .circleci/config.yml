@@ -11,8 +11,8 @@ jobs:
       working_directory: /hpx/
       steps:
        - run:
-         name: Export variables
-         command: |
+           name: Export variables
+           command: |
                echo 'export PATH=/usr/local/cuda-8.0/bin:$PATH' >> $BASH_ENV && \
                echo 'export LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda-8.0/lib64' >> $BASH_ENV && \
                echo 'export PERL5LIB=.' >> $BASH_ENV && \
