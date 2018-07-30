@@ -8,7 +8,7 @@ jobs:
     build:
       docker:
        - image: stellargroup/hpx:dev
-      working_directory: /hpx/
+      working_directory: /hpx/build
       steps:
        - checkout
        - run:
