@@ -9,17 +9,33 @@ jobs:
       docker:
        - image: stellargroup/hpx:dev
       working_directory: /hpx/
+      environment:
+         PERL5LIB: .
+         LIBRARY_PATH: /usr/local/cuda-8.0/lib64
+         PATH: /usr/local/cuda-8.0/bin
+         CUDA_LIB_PATH:/usr/local/cuda-8.0/lib64/stubs/
       steps:
        - checkout
        - run:
            name: Install dependencies
            command: apt-get update && apt-get install -y xsltproc doxygen libpng-dev wget opencl-headers ocl-icd-opencl-dev
+       - run: 
+           name: Install cuda
+           command: |
+                wget https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda_8.0.61_375.26_linux-run && \
+                chmod +x cuda_8.0.61_375.26_linux-run && \
+                mkdir nvidia_installers && \
+                ./cuda_8.0.61_375.26_linux-run -extract=`pwd`/nvidia_installers && \
+                cd nvidia_installers && \
+               ./cuda-linux64-rel-8.0.61-21551265.run -noprompt && \
+               cd .. && \
+               rm -r nvidia_installers
        - run:
            name: Create build folder
            command: cd /hpx && mkdir -p build
        - run: 
            name: Configure
-           command: cd /hpx/build && cmake .. -DCMAKE_BUILD_TYPE=Debug -DHPX_WITH_MALLOC=system -DCMAKE_CXX_FLAGS="-fcolor-diagnostics" -DHPXCL_WITH_OPENCL=On -DHPXCL_WITH_CUDA=On  -DHPXCL_WITH_BENCHMARK=On
+           command: cd /hpx/build && cmake .. -DCMAKE_BUILD_TYPE=Debug -DHPX_WITH_MALLOC=system -DCMAKE_CXX_FLAGS="-fcolor-diagnostics" -DHPXCL_WITH_OPENCL=On -DHPXCL_WITH_CUDA=On  -DHPXCL_WITH_BENCHMARK=On -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-8.0
        - run: 
            name: Build
            command: cd /hpx/build make -j 2
