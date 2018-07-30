@@ -49,7 +49,7 @@ jobs:
     test:
       docker:
        - image: stellargroup/hpx:dev
-      working_directory: /hpx/build
+      working_directory: /hpx/
       steps:
        - checkout
        - restore_cache:
