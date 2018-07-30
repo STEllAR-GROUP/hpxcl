@@ -27,7 +27,7 @@ jobs:
     
     test:
       docker:
-       - image: stellargroup/hpxcl:build_env
+       - image: stellargroup/hpx:dev
       working_directory: /hpx
       steps:
        - checkout
