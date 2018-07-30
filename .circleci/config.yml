@@ -11,8 +11,8 @@ jobs:
       working_directory: /hpx/
       environment:
          PERL5LIB: .
-         LIBRARY_PATH: $LD_LIBRARY_PATH:/usr/local/cuda-8.0/lib64
-         PATH: $PATH:/usr/local/cuda-8.0/bin
+         LIBRARY_PATH: ${LD_LIBRARY_PATH}:/usr/local/cuda-8.0/lib64
+         PATH: ${PATH}:/usr/local/cuda-8.0/bin
          CUDA_LIB_PATH: /usr/local/cuda-8.0/lib64/stubs/
       steps:
        - checkout
