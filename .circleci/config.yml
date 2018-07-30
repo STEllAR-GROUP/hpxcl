@@ -8,7 +8,7 @@ jobs:
     build:
       docker:
        - image: stellargroup/hpx:dev
-      working_directory: /hpx/build
+      working_directory: /hpx/
       steps:
        - checkout
        - run:
@@ -26,7 +26,7 @@ jobs:
        - save_cache:
            key: build-{{ .Branch }}-{{ .Revision }}
            paths:
-              - "/hpx/build"
+              - "/hpx"
     
     test:
       docker:
