@@ -7,7 +7,7 @@ version: 2
 jobs:
     build:
       docker:
-       - image: stellargroup/build_env:hpxcl
+       - image: stellargroup/hpx:dev
       working_directory: /hpx
       steps:
        - checkout
