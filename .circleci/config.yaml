@@ -23,3 +23,27 @@ jobs:
         paths:
             - "hpx/build"
     
+    test:
+    docker:
+       - image: stellargroup/hpxcl:build_env
+    working_directory: /hpx
+    steps:
+    - checkout
+    - restore_cache:
+        key:  build-{{ .Branch }}-{{ .Revision }}
+    - run:
+       name: Run tests
+       command:  cd build && ../tools/run_tests.sh
+       
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore:
+                 - gh-pages
