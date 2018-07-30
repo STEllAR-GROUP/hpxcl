@@ -14,12 +14,15 @@ jobs:
        - run:
            name: Install dependencies
            command: apt-get update && apt-get install -y xsltproc doxygen libpng-dev wget opencl-headers ocl-icd-opencl-dev
+       - run:
+           name: Create build folder
+           command: cd /hpx && mkdir -p build
        - run: 
            name: Configure
-           command: cmake .. -DCMAKE_BUILD_TYPE=Debug -DHPX_WITH_MALLOC=system -DCMAKE_CXX_FLAGS="-fcolor-diagnostics" -DHPXCL_WITH_OPENCL=On -DHPXCL_WITH_CUDA=On  -DHPXCL_WITH_BENCHMARK=On
+           command: cd /hpx/build && cmake .. -DCMAKE_BUILD_TYPE=Debug -DHPX_WITH_MALLOC=system -DCMAKE_CXX_FLAGS="-fcolor-diagnostics" -DHPXCL_WITH_OPENCL=On -DHPXCL_WITH_CUDA=On  -DHPXCL_WITH_BENCHMARK=On
        - run: 
            name: Build
-           command: make -j 2
+           command: cd /hpx/build make -j 2
        - save_cache:
            key: build-{{ .Branch }}-{{ .Revision }}
            paths:
@@ -28,14 +31,14 @@ jobs:
     test:
       docker:
        - image: stellargroup/hpx:dev
-      working_directory: /hpx
+      working_directory: /hpx/build
       steps:
        - checkout
        - restore_cache:
           key:  build-{{ .Branch }}-{{ .Revision }}
        - run:
           name: Run tests
-          command:  cd build && ../tools/run_tests.sh
+          command:  cd /hpx/build && ../tools/run_tests.sh
        
 workflows:
   version: 2
