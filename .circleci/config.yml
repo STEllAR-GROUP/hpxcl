@@ -6,10 +6,10 @@ version: 2
 
 jobs:
     build:
-    docker:
+      docker:
        - image: stellargroup/hpxcl:build_env
-    working_directory: /hpx
-    steps:
+      working_directory: /hpx
+      steps:
        - checkout
        - run: 
          name: Prepare build folder
@@ -26,10 +26,10 @@ jobs:
             - "hpx/build"
     
     test:
-    docker:
+      docker:
        - image: stellargroup/hpxcl:build_env
-    working_directory: /hpx
-    steps:
+      working_directory: /hpx
+      steps:
        - checkout
        - restore_cache:
           key:  build-{{ .Branch }}-{{ .Revision }}
