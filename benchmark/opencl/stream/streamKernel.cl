@@ -7,38 +7,38 @@
 //Kernels
 //###########################################################################
 
-__kernel void STREAM_Copy(TYPE* a, TYPE *b, int len) {
+__kernel void STREAM_Copy(__global double* a, __global double *b,__global int *len) {
 	int threadIdX = get_local_id(0);
 	int workGroupSize = get_global_size(0);
-	int idx = threadIdX + workGroupSize;
+	int idx = get_global_id(0);
 
-	if(idx < len)
+	if(idx < *len)
 		b[idx] = a[idx];
 } 
 
-__kernel void STREAM_Scale(TYPE* a, TYPE *b, TYPE scale, int len) {
+__kernel void STREAM_Scale(__global double* a,__global double *b,__global double *scale,__global int *len) {
 	int threadIdX = get_local_id(0);
 	int workGroupSize = get_global_size(0);
-	int idx = threadIdX + workGroupSize;
+	int idx = get_global_id(0);
 
-	if(idx < len)
-		b[idx] = scale * a[idx];
+	if(idx < *len)
+		b[idx] = (*scale) * a[idx];
 } 
 
-__kernel void STREAM_Add(TYPE* a, TYPE *b, TYPE *c, int len) {
+__kernel void STREAM_Add(__global double* a, __global double *b, __global double *c,__global int *len) {
 	int threadIdX = get_local_id(0);
 	int workGroupSize = get_global_size(0);
-	int idx = threadIdX + workGroupSize;
+	int idx = get_global_id(0); 
 
-	if(idx < len)
+	if(idx < *len)
 		a[idx] = c[idx] * b[idx];
 }
 
-__kernel void STREAM_Triad(TYPE* a, TYPE *b, TYPE *c, TYPE scale, int len) {
+__kernel void STREAM_Triad(__global double* a,__global double *b,__global double *c,__global double *scale,__global int *len) {
 	int threadIdX = get_local_id(0);
 	int workGroupSize = get_global_size(0);
-	int idx = threadIdX + workGroupSize;
+	int idx = get_global_id(0);
 
-	if(idx < len)
-		a[idx] = c[idx] * scale + b[idx];
+	if(idx < *len)
+		a[idx] = c[idx] * (*scale) + b[idx];
 }

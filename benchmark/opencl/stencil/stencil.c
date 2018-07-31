@@ -58,6 +58,7 @@ int main(int argc, char*argv[]) {
 	cl_int ret;
 	size_t contextDescriptorSize;
 
+	TYPE *inObject;
 	TYPE *outObject;
 	TYPE *sObject; 
 
@@ -74,6 +75,7 @@ int main(int argc, char*argv[]) {
 		exit(1);
 	}
 
+	inObject = (TYPE *) malloc(count * sizeof(TYPE));
 	outObject = (TYPE *) malloc(count * sizeof(TYPE));
 	sObject = (TYPE *) malloc(3 * sizeof(TYPE));
 
@@ -97,15 +99,16 @@ int main(int argc, char*argv[]) {
 	commandQueue = clCreateCommandQueue(context, deviceId, 0, &ret);
 
 	//randomly generate s vector
+	fillRandomVector(inObject, count);
 	sObject[0] = 0.5;
 	sObject[1] = 1.0;
 	sObject[2] = 0.5;
 
 	//Create memory object
-	countMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(size_t), NULL, &ret);
-	inMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,count * sizeof(TYPE), NULL, &ret);
-	outMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,count * sizeof(TYPE), NULL, &ret);
-	sMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,3 * sizeof(TYPE), NULL, &ret);
+	countMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(size_t), &count, &ret);
+	inMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,count * sizeof(TYPE), inObject, &ret);
+	outMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,count * sizeof(TYPE), outObject, &ret);
+	sMemobj = clCreateBuffer(context, CL_MEM_READ_WRITE,3 * sizeof(TYPE), sObject, &ret);
 
 	//Create kernel program from source
 	program = clCreateProgramWithSource(context, 1, (const char **)&kernelSource,(const size_t *)&sourceSize, &ret);
@@ -128,6 +131,8 @@ int main(int argc, char*argv[]) {
 	//copy the result back
 	ret = clEnqueueReadBuffer(commandQueue, outMemobj, CL_TRUE, 0, count * sizeof(TYPE),outObject, 0, NULL, NULL);
 
+	printf(" Check Result: %d", checkStencil(inObject, outObject, sObject, count));
+
 	//Before program termination
 	ret = clFlush(commandQueue);
 	ret = clFinish(commandQueue);
@@ -147,8 +152,10 @@ int main(int argc, char*argv[]) {
 }
 
 bool checkStencil(TYPE *in, TYPE *out, TYPE *s, size_t size) {
+	size_t i;
 	bool validate = true;
-	for (size_t i = 1; i < size - 1; ++i) {
+
+	for (i = 1; i < size - 1; ++i) {
 		TYPE res = in[i - 1] * s[0] + in[i] * s[1] + in[i + 1] * s[2];
 
 		if (abs(res - out[i]) >= 10e-5) {
@@ -161,9 +168,10 @@ bool checkStencil(TYPE *in, TYPE *out, TYPE *s, size_t size) {
 }
 
 void fillRandomVector(TYPE *matrix, size_t size) {
+	size_t i;
 	srand(time(NULL));
 
-	for (size_t i = 0; i < size; i++) {
+	for (i = 0; i < size; i++) {
 
 		matrix[i] = (TYPE) (0.5) * ((TYPE) rand()) / (TYPE) RAND_MAX;
 	}
