@@ -15,6 +15,7 @@
 
 // HPX dependencies
 #include <hpx/include/thread_executors.hpp>
+#include <hpx/parallel/executors/service_executors.hpp>
 
 
 using hpx::opencl::server::kernel;
@@ -52,7 +53,7 @@ kernel::~kernel()
                                           hpx::threads::thread_stacksize_medium);
 
     // run dectructor in a thread, as we need it to run on a large stack size
-    hpx::async( exec, &kernel_cleanup, reinterpret_cast<uintptr_t>(kernel_id))
+    hpx::threads::async_execute( exec, &kernel_cleanup, reinterpret_cast<uintptr_t>(kernel_id))
                                                                         .wait();
 
 

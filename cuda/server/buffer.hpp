@@ -1,5 +1,6 @@
 // Copyright (c)		2013 Damond Howard
 //						2015 Patrick Diehl
+//                      2017 Madhavan Seshadri
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #pragma once
@@ -33,7 +34,11 @@ namespace hpx
                 size_t arg_buffer_size;
                 int parent_device_num;
                 void* data_device;
+
+                //New stream if defined
+                #ifdef HPXCL_CUDA_WITH_STREAMS
                 cudaStream_t stream;
+                #endif
 
                 public:
                 buffer();
@@ -57,8 +62,10 @@ namespace hpx
 
                 void* get_raw_pointer();
 
+                #ifdef HPXCL_CUDA_WITH_STREAMS
                 cudaStream_t get_stream();
-
+                #endif
+                
                 HPX_DEFINE_COMPONENT_ACTION(buffer, size);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, set_size);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read);

@@ -70,6 +70,7 @@ int main(int argc, char*argv[]) {
 	//Malloc Host
 	TYPE* in;
 	cudaMallocHost((void**) &in, bytes);
+	checkCudaError("Malloc in");
 	memset(in, 0, bytes);
 
 	time += timer_stop();
@@ -80,7 +81,7 @@ int main(int argc, char*argv[]) {
 	std::vector<hpx::future<void>> dependencies;
 
 	// Create the hello_world device program
-	program prog = cudaDevice.create_program_with_source(kernel_src);
+	program prog = cudaDevice.create_program_with_source(kernel_src).get();
 
 	// Add compiler flags for compiling the kernel
 
@@ -101,14 +102,14 @@ int main(int argc, char*argv[]) {
 	std::vector<buffer> bufferIn;
 	for (size_t i = 0; i < nStreams; i++)
 	{
-		bufferIn.push_back(cudaDevice.create_buffer(streamBytes));
+		bufferIn.push_back(cudaDevice.create_buffer(streamBytes).get());
 
 	}
 
 	for (size_t i = 0; i < nStreams; i++)
 	{
 
-		bufferIn[i].enqueue_write(i*streamSize,streamBytes,in);
+		dependencies.push_back(bufferIn[i].enqueue_write(i*streamSize,streamBytes,in));
 	}
 
 	std::vector<hpx::cuda::buffer> args;
@@ -132,7 +133,11 @@ int main(int argc, char*argv[]) {
 	for (size_t i = 0; i < nStreams; i++)
 	{
 		args.push_back(bufferIn[i]);
+		#ifdef HPXCL_CUDA_WITH_STREAMS
 		kernelFutures.push_back(prog.run(args, "kernel", grid, block,args));
+		#else
+		kernelFutures.push_back(prog.run(args, "kernel", grid, block));
+		#endif
 		args.clear();
 	}
 
@@ -153,6 +158,7 @@ int main(int argc, char*argv[]) {
 
 	//Clean
 	cudaFreeHost(in);
+	checkCudaError("Free in");
 
 	std:: cout << check << " " << time + timer_stop() << std::endl;
 

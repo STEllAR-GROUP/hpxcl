@@ -46,7 +46,8 @@ int main(int argc, char* argv[]){
 	//Malloc Host
 	char *image;
 	cudaMallocHost((void**) &image, bytes);
-	//memset(in, 0, bytes);
+	checkCudaError("Malloc image");
+
 
 	int deviceCount = devices.size();
 	int numDevices = std::min(4, deviceCount);
@@ -79,9 +80,9 @@ int main(int argc, char* argv[]){
 		device cudaDevice = devices[i];
 
 		//Create a Mandelbrot device program
-		program prog = cudaDevice.create_program_with_file("kernel.cu");
+		program prog = cudaDevice.create_program_with_file("kernel.cu").get();
 
-		//Compile with the kernal
+		//Compile with the kernel
 		std::vector<std::string> flags;
 		std::string mode = "--gpu-architecture=compute_";
 		mode.append(
@@ -111,10 +112,10 @@ int main(int argc, char* argv[]){
 		program prog = progVector.at(i);
 		
 		//creating buffers
-		buffer imageBuffer = cudaDevice.create_buffer(bytes);
-		buffer widthBuffer = cudaDevice.create_buffer(sizeof(int));
-		buffer heightBuffer = cudaDevice.create_buffer(sizeof(int));
-		buffer yStartBuffer = cudaDevice.create_buffer(sizeof(int));
+		buffer imageBuffer = cudaDevice.create_buffer(bytes).get();
+		buffer widthBuffer = cudaDevice.create_buffer(sizeof(int)).get();
+		buffer heightBuffer = cudaDevice.create_buffer(sizeof(int)).get();
+		buffer yStartBuffer = cudaDevice.create_buffer(sizeof(int)).get();
 
 		// Copy input data to the buffer
 		data_futures.push_back(imageBuffer.enqueue_write(0, bytes, image));
@@ -136,7 +137,11 @@ int main(int argc, char* argv[]){
 		imageBufferVector.push_back(imageBuffer);
 
 		//run the program on the device
-		kernelFutures.push_back(prog.run(args, "kernel", grid, block, args));
+		#ifdef HPXCL_CUDA_WITH_STREAMS
+			kernelFutures.push_back(prog.run(args, "kernel", grid, block, args));
+		#else
+			kernelFutures.push_back(prog.run(args, "kernel", grid, block));
+		#endif
 		//for multiple runs
 		args.clear();
 	}
@@ -163,6 +168,7 @@ int main(int argc, char* argv[]){
 
 	//Free Memory
 	cudaFree(image);
+	checkCudaError("Free image");
 	free(mainImage);
 
 	return EXIT_SUCCESS;

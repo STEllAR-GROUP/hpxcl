@@ -5,3 +5,5 @@
 
 add_subdirectory(stencil)
 add_subdirectory(stream)
+add_subdirectory(dgemm)
+add_subdirectory(smvp)

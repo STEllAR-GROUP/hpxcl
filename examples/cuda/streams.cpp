@@ -64,13 +64,15 @@ int main(int argc, char*argv[]) {
 	//Malloc Host
 	float* in;
 	cudaMallocHost((void**) &in, bytes);
+	checkCudaError("Malloc in");
+
 	memset(in, 0, bytes);
 
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
 
 	// Create the hello_world device program
-	program prog = cudaDevice.create_program_with_source(kernel_src);
+	program prog = cudaDevice.create_program_with_source(kernel_src).get();
 
 	// Add compiler flags for compiling the kernel
 	std::vector<std::string> flags;
@@ -87,9 +89,11 @@ int main(int argc, char*argv[]) {
 	std::vector<buffer> bufferIn;
 	for (size_t i = 0; i < nStreams; i++)
 	{
-		bufferIn.push_back(cudaDevice.create_buffer(streamBytes));
+		bufferIn.push_back(cudaDevice.create_buffer(streamBytes).get());
 
 	}
+
+
 
 	for (size_t i = 0; i < nStreams; i++)
 	{
@@ -119,7 +123,11 @@ int main(int argc, char*argv[]) {
 	for (size_t i = 0; i < nStreams; i++)
 	{
 		args.push_back(bufferIn[i]);
+	#ifdef HPXCL_CUDA_WITH_STREAMS
 		kernelFutures.push_back(prog.run(args, "kernel", grid, block,args));
+	#else
+		kernelFutures.push_back(prog.run(args, "kernel", grid, block));
+	#endif
 		args.clear();
 	}
 
@@ -127,6 +135,7 @@ int main(int argc, char*argv[]) {
 
 	//Clean
 	cudaFreeHost(in);
+	checkCudaError("Free in");
 
 	return EXIT_SUCCESS;
 }

@@ -12,6 +12,7 @@
 
 #include "../export_definitions.hpp"
 #include "zerocopy_buffer.hpp"
+#include <boost/atomic.hpp>
 
 #include <boost/detail/atomic_count.hpp>
 
