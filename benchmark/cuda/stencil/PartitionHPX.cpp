@@ -73,8 +73,6 @@ int main(int argc, char*argv[]) {
 	checkCudaError("Malloc in");
 	memset(in, 0, bytes);
 
-	time += timer_stop();
-
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
 
@@ -82,7 +80,7 @@ int main(int argc, char*argv[]) {
 
 	// Create the hello_world device program
 	program prog = cudaDevice.create_program_with_source(kernel_src).get();
-
+   
 	// Add compiler flags for compiling the kernel
 
 	std::vector<std::string> flags;
@@ -94,24 +92,28 @@ int main(int argc, char*argv[]) {
 
 	flags.push_back(mode);
 
-	auto f = prog.build(flags, "kernel");
-	hpx::wait_all(f);
+	dependencies.push_back(prog.build(flags, "kernel"));
 
-	timer_start();
+    std::vector<hpx::future<hpx::cuda::buffer>> fbuffer;
+    for (size_t i = 0; i < nStreams; i++)
+    {                                                                            
+       fbuffer.push_back(cudaDevice.create_buffer(streamBytes));       
+    }                                                                            
+        
+    hpx::wait_all(fbuffer);
 
 	std::vector<buffer> bufferIn;
 	for (size_t i = 0; i < nStreams; i++)
 	{
-		bufferIn.push_back(cudaDevice.create_buffer(streamBytes).get());
-
+	   bufferIn.push_back(fbuffer[i].get());
 	}
 
 	for (size_t i = 0; i < nStreams; i++)
 	{
 
-		dependencies.push_back(bufferIn[i].enqueue_write(i*streamSize,streamBytes,in));
-	}
-
+	    dependencies.push_back(bufferIn[i].enqueue_write(i*streamSize,streamBytes,in));
+    }
+    
 	std::vector<hpx::cuda::buffer> args;
 	//Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;
