@@ -18,6 +18,8 @@ if(HPXCL_WITH_NAIVE_CUDA_BENCHMARK)
 	CUDA_ADD_EXECUTABLE(StencilCuda StencilCUDA.cu)
 	#Benchmark for partitions
 	CUDA_ADD_EXECUTABLE(PartitionCuda PartitionCUDA.cu)
+	#Benchmark for partitions using multiple devices
+	CUDA_ADD_EXECUTABLE(PartitionCudaMultiDevice PartitionCUDAMultiDevice.cu)
 endif()
 
 ############################################################################
