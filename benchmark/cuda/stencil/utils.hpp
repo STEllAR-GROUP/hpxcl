@@ -41,7 +41,6 @@ bool checkKernel(T*in,size_t size) {
 	for (size_t i = 0; i < size ; ++i) {
 
 		T error = abs(in[i]-1.0f);
-
 		if (error > EPS) { check = false; break;}
 	}
 
