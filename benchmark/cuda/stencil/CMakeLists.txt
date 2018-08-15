@@ -29,6 +29,7 @@ endif()
 set(example_programs
     StencilHPX
     PartitionHPX
+    PartitionHPXMultiDevice
 )
 
 foreach(example_program ${example_programs})
