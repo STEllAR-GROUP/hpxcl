@@ -1,4 +1,5 @@
 // Copyright (c)       2017 Madhavan Seshadri
+// Copyright (c)       2018 Patrick Diehl
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -6,7 +7,6 @@
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/iostreams.hpp>
 #include <hpx/lcos/future.hpp>
-#include <hpx/hpx_main.hpp>
 
 #include <hpxcl/cuda.hpp>
 
@@ -26,7 +26,6 @@ int main(int argc, char* argv[]) {
 	std::vector<hpx::lcos::future<void>> data_futures;
 
 	//Reading a list of available devices in hpx locality
-	//Returns a future
 	std::vector<device> devices = get_all_devices(2, 0).get();
 
 	if (devices.size() < 1) {
@@ -34,7 +33,7 @@ int main(int argc, char* argv[]) {
 		return hpx::finalize();
 	}
 
-	if (argc != 3) {
+	if (argc != 5) {
 		std::cout << "Usage: " << argv[0] << "width height" << std::endl;
 		exit(1);
 	}
@@ -44,8 +43,13 @@ int main(int argc, char* argv[]) {
 	int iterations = atoi(argv[3]);
 	int numDevices = atoi(argv[4]);
 
-	char* image[iterations];
-	char* mainImage[iterations];
+	//char* image[iterations];
+	//char* mainImage[iterations];
+
+    char* image;
+    char* mainImage;
+
+    std::vector<hpx::lcos::future<void>> writeImages;
 
 	for (size_t i = 0; i < iterations; i++) {
 
@@ -55,13 +59,14 @@ int main(int argc, char* argv[]) {
 
 		//Malloc Host
 		//char *image;
-		cudaMallocHost((void**) &image[i], bytes);
+		cudaMallocHost((void**) &image, bytes);
 		checkCudaError("Malloc image");
-
-		//char *mainImage = (char*)malloc(bytes);
+        //memset(image,0,bytes);
+		char* mainImage = (char*)malloc(bytes);
 		//char *mainImage;
-		cudaMallocHost((void**) &mainImage[i], bytes);
-		checkCudaError("Malloc mainImage");
+		//cudaMallocHost((void**) &mainImage, bytes);
+		//checkCudaError("Malloc mainImage");
+        //memset(mainImage,0,bytes);
 
 		std::vector<hpx::cuda::buffer> args;
 		//Generate the grid and block dim
@@ -145,11 +150,11 @@ int main(int argc, char* argv[]) {
 					imageBufferVector[j].enqueue_write(0, bytes, image));
 			widthBufferVector.push_back(bufferFutures[(j * 4) + 1].get());
 			data_futures.push_back(
-					widthBufferVector[j].enqueue_write(0, sizeof(int), &width));
+					widthBufferVector[j].enqueue_write(0, sizeof(int), &currentWidth));
 			heightBufferVector.push_back(bufferFutures[(j * 4) + 2].get());
 			data_futures.push_back(
 					heightBufferVector[j].enqueue_write(0, sizeof(int),
-							&height));
+							&currentHeight));
 			yStartBufferVector.push_back(bufferFutures[(j * 4) + 3].get());
 			data_futures.push_back(
 					yStartBufferVector[j].enqueue_write(0, sizeof(int),
@@ -169,6 +174,8 @@ int main(int argc, char* argv[]) {
 			args.push_back(widthBufferVector[j]);
 			args.push_back(heightBufferVector[j]);
 			args.push_back(yStartBufferVector[j]);
+
+
 
 			//run the program on the device
 #ifdef HPXCL_CUDA_WITH_STREAMS
@@ -190,32 +197,33 @@ int main(int argc, char* argv[]) {
 
 		//Stich multiple images
 		for (int j = 0; j < numDevices; j++) {
-			image[j] = imageBufferVector.at(j).enqueue_read_sync<char>(0,
+			image = imageBufferVector.at(j).enqueue_read_sync<char>(0,
 					bytes / numDevices);
-			std::copy(image[i],
-					image[i] + currentWidth * (currentHeight / numDevices) * 3
+			std::copy(image,
+					image + currentWidth * (currentHeight / numDevices) * 3
 							- 1,
-					mainImage[i]
-							+ currentWidth * (currentHeight / numDevices) * 3
+					mainImage +currentWidth * (currentHeight / numDevices) * 3
 									* j);
 		}
 		img_data = std::make_shared < std::vector<char>
-				> (mainImage[i], mainImage[i] + bytes);
+				> (mainImage, mainImage + bytes );
 
 		std::string str = "Mandel_brot_imp_";
-		str.append(std::to_string(width));
+		str.append(std::to_string(currentWidth));
 		str.append("_");
-		str.append(std::to_string(height));
+		str.append(std::to_string(currentHeight));
 		str.append(".png");
-		hpx::async(save_png, img_data, width, height, str.c_str());
+	    writeImages.push_back(hpx::async(save_png, img_data, currentWidth, currentHeight,"Mandelbrot.png"));
+	    save_png(img_data, currentWidth, currentHeight, "Mandelbrot_img.png");
+    }
 
-	}
+    hpx::wait_all(writeImages);
 
 	for (int j = 0; j < numDevices; j++) {
 		//Free Memory
-		cudaFree(image[j]);
+		cudaFreeHost(image);
 		checkCudaError("Free image");
-		cudaFree(mainImage[j]);
+		cudaFreeHost(mainImage);
 		checkCudaError("Free mainImage");
 	}
 
