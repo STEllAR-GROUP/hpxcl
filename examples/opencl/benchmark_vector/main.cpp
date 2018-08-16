@@ -14,7 +14,7 @@
 
 #include <string>
 
-int hpx_main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 
     // Print help message on wrong argument count

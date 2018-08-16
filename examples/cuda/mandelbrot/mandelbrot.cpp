@@ -164,7 +164,14 @@ int main(int argc, char* argv[]){
 		(mainImage, mainImage+bytes);
 	
 
-	save_png(img_data, width, height, "Mandelbrot_img.png");
+
+    std::string str = "Mandel_brot_imp_";
+    str.append(std::to_string(width));
+    str.append("_");
+    str.append(std::to_string(height));
+    str.append(".png");
+    hpx::async(save_png,img_data,width,height,str.c_str());
+
 
 	//Free Memory
 	cudaFree(image);
