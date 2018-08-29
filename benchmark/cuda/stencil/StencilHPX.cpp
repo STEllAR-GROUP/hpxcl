@@ -73,7 +73,7 @@ int main(int argc, char*argv[]) {
 
 	// Create the hello_world device program
 	hpx::lcos::future < hpx::cuda::program > futureProg = cudaDevice.create_program_with_file(
-			"kernel.cu");
+			"stencil_kernel.cu");
 
 	//Add compiler flags for compiling the kernel
 	std::vector < std::string > flags;

@@ -36,4 +36,4 @@ extern "C" { __global__ void kernel(char *out, int *width, int *height, int *ySt
 		out[arrayIndex+2]=iterationCount;
 	}
 }
-}
+};

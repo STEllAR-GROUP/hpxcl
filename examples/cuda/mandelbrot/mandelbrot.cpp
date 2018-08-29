@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	if (argc != 5) {
-		std::cout << "Usage: " << argv[0] << "width height" << std::endl;
+		std::cout << "Usage: " << argv[0] << " width height" << std::endl;
 		exit(1);
 	}
 
@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
 
 		for (int j = 0; j < numDevices; j++) {
 			progBuildVector.push_back(
-					devices[j].create_program_with_file("kernel.cu"));
+					devices[j].create_program_with_file("mandel_brot_kernel.cu"));
 
 		}
 
@@ -213,7 +213,7 @@ int main(int argc, char* argv[]) {
 		str.append("_");
 		str.append(std::to_string(currentHeight));
 		str.append(".png");
-	    writeImages.push_back(hpx::async(save_png, img_data, currentWidth, currentHeight,"Mandelbrot.png"));
+	    //writeImages.push_back(hpx::async(save_png, img_data, currentWidth, currentHeight,"Mandelbrot.png"));
 	    save_png(img_data, currentWidth, currentHeight, "Mandelbrot_img.png");
     }
 
