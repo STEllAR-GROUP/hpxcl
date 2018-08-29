@@ -2,7 +2,7 @@
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-extern "C" { __global__ void kernel(char *out, int *width, int *height, int *yStart){
+extern "C" { __global__ void kernel(char *out, int *width, int *height, int *yStart, int* n){
 	unsigned int xDim = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int yDim = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -25,7 +25,9 @@ extern "C" { __global__ void kernel(char *out, int *width, int *height, int *ySt
 		x = xTemp;
 		iterationCount++;
 	}
-
+    
+    if (arrayIndex < *n)
+    { 
 	if(iterationCount == (numIterations)){
 		out[arrayIndex] = 0;
 		out[arrayIndex+1]=0;
@@ -35,5 +37,6 @@ extern "C" { __global__ void kernel(char *out, int *width, int *height, int *ySt
 		out[arrayIndex+1]=iterationCount;
 		out[arrayIndex+2]=iterationCount;
 	}
-}
+   }
+ }
 };

@@ -43,9 +43,6 @@ int main(int argc, char* argv[]) {
 	int iterations = atoi(argv[3]);
 	int numDevices = atoi(argv[4]);
 
-	//char* image[iterations];
-	//char* mainImage[iterations];
-
     char* image;
     char* mainImage;
 
@@ -56,7 +53,9 @@ int main(int argc, char* argv[]) {
 		int currentWidth = width * (i + 1);
 		int currentHeight = height * (i + 1);
 		const int bytes = sizeof(char) * currentWidth * currentHeight * 3;
+        int n = currentWidth * currentHeight * 3;
 
+        std::cout << bytes << "," ;
 		//Malloc Host
 		//char *image;
 		cudaMallocHost((void**) &image, bytes);
@@ -129,7 +128,8 @@ int main(int argc, char* argv[]) {
 			bufferFutures.push_back(devices[j].create_buffer(sizeof(int)));
 			// yStart buffer
 			bufferFutures.push_back(devices[j].create_buffer(sizeof(int)));
-
+			// n buffer
+			bufferFutures.push_back(devices[j].create_buffer(sizeof(int)));
 		}
 
 		hpx::wait_all(bufferFutures);
@@ -139,27 +139,32 @@ int main(int argc, char* argv[]) {
 		std::vector<buffer> widthBufferVector;
 		std::vector<buffer> heightBufferVector;
 		std::vector<buffer> yStartBufferVector;
+		std::vector<buffer> nBufferVector;
 
 		//creating buffers
 		for (int j = 0; j < numDevices; j++) {
 			//calculate the start position
 			int yStart = j * currentHeight / numDevices;
 
-			imageBufferVector.push_back(bufferFutures[j * 4].get());
+			imageBufferVector.push_back(bufferFutures[j * 5].get());
 			data_futures.push_back(
 					imageBufferVector[j].enqueue_write(0, bytes, image));
-			widthBufferVector.push_back(bufferFutures[(j * 4) + 1].get());
+			widthBufferVector.push_back(bufferFutures[(j * 5) + 1].get());
 			data_futures.push_back(
 					widthBufferVector[j].enqueue_write(0, sizeof(int), &currentWidth));
-			heightBufferVector.push_back(bufferFutures[(j * 4) + 2].get());
+			heightBufferVector.push_back(bufferFutures[(j * 5) + 2].get());
 			data_futures.push_back(
 					heightBufferVector[j].enqueue_write(0, sizeof(int),
 							&currentHeight));
-			yStartBufferVector.push_back(bufferFutures[(j * 4) + 3].get());
+			yStartBufferVector.push_back(bufferFutures[(j * 5) + 3].get());
 			data_futures.push_back(
 					yStartBufferVector[j].enqueue_write(0, sizeof(int),
 							&yStart));
 
+			nBufferVector.push_back(bufferFutures[(j * 5) + 4].get());
+			data_futures.push_back(
+					nBufferVector[j].enqueue_write(0, sizeof(int),
+							&n));
 		}
 
 		//Synchronize copy to buffer
@@ -174,6 +179,7 @@ int main(int argc, char* argv[]) {
 			args.push_back(widthBufferVector[j]);
 			args.push_back(heightBufferVector[j]);
 			args.push_back(yStartBufferVector[j]);
+			args.push_back(nBufferVector[j]);
 
 
 
@@ -208,24 +214,21 @@ int main(int argc, char* argv[]) {
 		img_data = std::make_shared < std::vector<char>
 				> (mainImage, mainImage + bytes );
 
-		std::string str = "Mandel_brot_imp_";
-		str.append(std::to_string(currentWidth));
-		str.append("_");
-		str.append(std::to_string(currentHeight));
-		str.append(".png");
-	    //writeImages.push_back(hpx::async(save_png, img_data, currentWidth, currentHeight,"Mandelbrot.png"));
-	    save_png(img_data, currentWidth, currentHeight, "Mandelbrot_img.png");
+	    writeImages.push_back(hpx::async(save_png_it, img_data, currentWidth, currentHeight,i));
+
     }
 
     hpx::wait_all(writeImages);
 
-	for (int j = 0; j < numDevices; j++) {
+	for (int j = 0; j < iterations; j++) {
+
+    }
 		//Free Memory
 		cudaFreeHost(image);
 		checkCudaError("Free image");
 		cudaFreeHost(mainImage);
 		checkCudaError("Free mainImage");
-	}
+	
 
 	return EXIT_SUCCESS;
 }

@@ -170,3 +170,19 @@ void save_png(std::shared_ptr< std::vector<char> > data, size_t width, size_t he
     png_write_to_file(png, png_size, filename);
 
 }
+
+void save_png_it(std::shared_ptr< std::vector<char> > data, size_t width, size_t height, size_t it)
+{
+
+    size_t png_size;
+
+    boost::shared_array<char> png = create_png(data, width, height, &png_size);
+
+    std::string filename;
+    filename.append("Mandelbrot_");
+    filename.append(std::to_string(it));
+    filename.append(".png");
+
+    png_write_to_file(png, png_size, filename.c_str());
+
+}
