@@ -10,8 +10,8 @@
 
 #include <hpxcl/cuda.hpp>
 
-//for writing image
 #include "examples/opencl/mandelbrot/pngwriter.cpp"
+#include "opencl/benchmark_vector/timer.hpp"
 
 using std::atoi;
 using namespace hpx::cuda;
@@ -49,9 +49,10 @@ int main(int argc, char* argv[]) {
     std::vector<hpx::lcos::future<void>> writeImages;
 
 	for (size_t i = 0; i < iterations; i++) {
-
-		int currentWidth = width * (i + 1);
-		int currentHeight = height * (i + 1);
+        
+        timer_start();
+		int currentWidth = width * (i + 1) * 10;
+		int currentHeight = height * (i + 1) * 10;
 		const int bytes = sizeof(char) * currentWidth * currentHeight * 3;
         int n = currentWidth * currentHeight * 3;
 
@@ -145,7 +146,7 @@ int main(int argc, char* argv[]) {
 		for (int j = 0; j < numDevices; j++) {
 			//calculate the start position
 			int yStart = j * currentHeight / numDevices;
-
+            std::cout << yStart << std::endl;
 			imageBufferVector.push_back(bufferFutures[j * 5].get());
 			data_futures.push_back(
 					imageBufferVector[j].enqueue_write(0, bytes, image));
@@ -215,14 +216,13 @@ int main(int argc, char* argv[]) {
 				> (mainImage, mainImage + bytes );
 
 	    writeImages.push_back(hpx::async(save_png_it, img_data, currentWidth, currentHeight,i));
-
+        //save_png_it(img_data, currentWidth, currentHeight,i);
+        std::cout << timer_stop() << std::endl;
     }
 
     hpx::wait_all(writeImages);
 
-	for (int j = 0; j < iterations; j++) {
 
-    }
 		//Free Memory
 		cudaFreeHost(image);
 		checkCudaError("Free image");
