@@ -48,11 +48,11 @@ int main(int argc, char* argv[]) {
 
     std::vector<hpx::lcos::future<void>> writeImages;
 
-	for (size_t i = 0; i < iterations; i++) {
+	for (size_t it = 0; it < iterations; it++) {
         
         timer_start();
-		int currentWidth = width * (i + 1) * 10;
-		int currentHeight = height * (i + 1) * 10;
+		int currentWidth = width * (it + 1) * 10;
+		int currentHeight = height * (it + 1) * 10;
 		const int bytes = sizeof(char) * currentWidth * currentHeight * 3;
         int n = currentWidth * currentHeight * 3;
 
@@ -142,11 +142,13 @@ int main(int argc, char* argv[]) {
 		std::vector<buffer> yStartBufferVector;
 		std::vector<buffer> nBufferVector;
 
+
+        int yStart[numDevices]; 
 		//creating buffers
 		for (int j = 0; j < numDevices; j++) {
 			//calculate the start position
-			int yStart = j * currentHeight / numDevices;
-            std::cout << yStart << std::endl;
+			yStart[j] = j * currentHeight / numDevices;
+            
 			imageBufferVector.push_back(bufferFutures[j * 5].get());
 			data_futures.push_back(
 					imageBufferVector[j].enqueue_write(0, bytes, image));
@@ -160,7 +162,7 @@ int main(int argc, char* argv[]) {
 			yStartBufferVector.push_back(bufferFutures[(j * 5) + 3].get());
 			data_futures.push_back(
 					yStartBufferVector[j].enqueue_write(0, sizeof(int),
-							&yStart));
+							&yStart[j]));
 
 			nBufferVector.push_back(bufferFutures[(j * 5) + 4].get());
 			data_futures.push_back(
@@ -215,7 +217,7 @@ int main(int argc, char* argv[]) {
 		img_data = std::make_shared < std::vector<char>
 				> (mainImage, mainImage + bytes );
 
-	    writeImages.push_back(hpx::async(save_png_it, img_data, currentWidth, currentHeight,i));
+	    writeImages.push_back(hpx::async(save_png_it, img_data, currentWidth, currentHeight,it));
         //save_png_it(img_data, currentWidth, currentHeight,i);
         std::cout << timer_stop() << std::endl;
     }
