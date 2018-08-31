@@ -30,13 +30,13 @@ extern "C" { __global__ void kernel(char *out, int *width, int *height, int *ySt
     if (arrayIndex < *n)
     { 
 	if(iterationCount == (numIterations)){
-		out[arrayIndex] = 0;
-		out[arrayIndex+1]=0;
-		out[arrayIndex+2]=0;
-	}else{
 		out[arrayIndex] = iterationCount;
-		out[arrayIndex+1]=iterationCount;
+		out[arrayIndex+1]=1;
 		out[arrayIndex+2]=iterationCount;
+	}else{
+		out[arrayIndex] = 0;
+		out[arrayIndex+1]=iterationCount;
+		out[arrayIndex+2]=0;
 	}
    }
  }
