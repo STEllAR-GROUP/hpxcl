@@ -51,8 +51,8 @@ int main(int argc, char* argv[]) {
 	for (size_t it = 0; it < iterations; it++) {
 
 		timer_start();
-		int currentWidth = width * (it + 1) * 10;
-		int currentHeight = height * (it + 1) * 10;
+		int currentWidth = width * std::pow(2,it + 1) /2;
+		int currentHeight = height * std::pow(2,it + 1) /2;
 		const int bytes = sizeof(char) * currentWidth * currentHeight * 3;
 		int n = currentWidth * currentHeight * 3;
 
