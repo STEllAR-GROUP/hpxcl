@@ -3,7 +3,6 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-//#include <hpx/hpx_start.hpp>
 #include <hpx/include/iostreams.hpp>
 #include <hpx/lcos/future.hpp>
 #include <hpx/hpx_main.hpp>
@@ -12,7 +11,7 @@
 #include <sstream>
 
 // hpx_main, is the actual main called by hpx
-int hpx_main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 	{
 
 		//Get list of available CUDA Devices.

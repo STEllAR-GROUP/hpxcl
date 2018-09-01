@@ -1,14 +1,15 @@
 // Copyright (c)       2017 Madhavan Seshadri
+//                     2018 Patrick Diehl
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-extern "C" { __global__ void kernel(char *out, int *width, int *height, int *yStart){
+extern "C" { __global__ void kernel(char *out, int *width, int *height, int *yStart, int* n){
 	unsigned int xDim = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int yDim = blockIdx.y * blockDim.y + threadIdx.y;
 
 	//index of the output array, multiplied by 3 for R,G,B values
 	int arrayIndex = 3 * (*width) * yDim + xDim*3;
-
+    
 	float xPoint = ((float) (xDim)/(*width)) * 3.25f - 2.0f;
 	float yPoint = ((float) (yDim+*yStart)/(*height)) * 2.5f - 1.25f; 
 
@@ -25,15 +26,18 @@ extern "C" { __global__ void kernel(char *out, int *width, int *height, int *ySt
 		x = xTemp;
 		iterationCount++;
 	}
-
+    
+    if (arrayIndex < *n)
+    { 
 	if(iterationCount == (numIterations)){
-		out[arrayIndex] = 0;
-		out[arrayIndex+1]=0;
-		out[arrayIndex+2]=0;
-	}else{
 		out[arrayIndex] = iterationCount;
-		out[arrayIndex+1]=iterationCount;
+		out[arrayIndex+1]=1;
 		out[arrayIndex+2]=iterationCount;
+	}else{
+		out[arrayIndex] = 0;
+		out[arrayIndex+1]=iterationCount;
+		out[arrayIndex+2]=0;
 	}
-}
-}
+   }
+ }
+};

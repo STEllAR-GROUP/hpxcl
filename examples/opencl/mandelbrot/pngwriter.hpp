@@ -19,10 +19,6 @@ boost::shared_array<char> create_png(std::shared_ptr< std::vector<char> > data, 
 
 void png_write_to_file(boost::shared_array<char> png, size_t png_size, const char* filename);
 
-
-
-
-
-
+void save_pngi_it(std::shared_ptr< std::vector<char> > data, size_t width, size_t height, size_t it);
 #endif
 

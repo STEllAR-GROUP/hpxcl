@@ -35,10 +35,8 @@ int main(int argc, char*argv[]) {
 	checkCudaError("Malloc count");
 	count[0]= atoi(argv[1]);
 
-	data += timer_stop();
 	std::cout << count[0] << " ";
 
-	timer_start();
 	//Vector for all futures for the data management
 	std::vector<hpx::lcos::future<void>> data_futures;
 
@@ -50,8 +48,6 @@ int main(int argc, char*argv[]) {
 		hpx::cerr << "No CUDA devices found!" << hpx::endl;
 		return hpx::finalize();
 	}
-
-	timer_start();
 
 	//Pointer
 	TYPE* out;
@@ -75,11 +71,9 @@ int main(int argc, char*argv[]) {
 	// Create a device component from the first device found
 	device cudaDevice = devices[0];
 
-	data += timer_stop();
-
 	// Create the hello_world device program
 	hpx::lcos::future < hpx::cuda::program > futureProg = cudaDevice.create_program_with_file(
-			"kernel.cu");
+			"stencil_kernel.cu");
 
 	//Add compiler flags for compiling the kernel
 	std::vector < std::string > flags;
@@ -97,7 +91,6 @@ int main(int argc, char*argv[]) {
 	hpx::cuda::program prog = futureProg.get();
 	prog.build_sync(flags, "stencil");
 
-	timer_start();
 	// Create a buffer
 	std::vector<hpx::lcos::future<buffer>> futureBuffers;
 	futureBuffers.push_back(cudaDevice.create_buffer(count[0] * sizeof(TYPE)));
@@ -121,8 +114,6 @@ int main(int argc, char*argv[]) {
 	data_futures.push_back(
 			lengthbuffer.enqueue_write(0, sizeof(size_t), count));
 
-	hpx::wait_all(data_futures);
-
 	//Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;
 	hpx::cuda::server::program::Dim3 block;
@@ -144,9 +135,9 @@ int main(int argc, char*argv[]) {
 	args.push_back(outBuffer);
 	args.push_back(sBuffer);
 
-	auto kernel_future = prog.run(args, "stencil", grid, block);
+	data_futures.push_back(prog.run(args, "stencil", grid, block));
 
-	hpx::wait_all(kernel_future);
+    hpx::wait_all(data_futures); 
 
 	TYPE* res = outBuffer.enqueue_read_sync<TYPE>(0, sizeof(TYPE));
 
