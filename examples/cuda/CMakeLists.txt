@@ -25,18 +25,6 @@ foreach(example_program ${example_programs})
                      COMPONENT_DEPENDENCIES iostreams cuda
                      DEPENDENCIES ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY}
                      FOLDER "Examples/CUDA/${example_program}")
-
-  # add a custom target for this example
-  add_hpx_pseudo_target(examples.cuda.${example_program})
-
-  # make pseudo-targets depend on master pseudo-target
-  add_hpx_pseudo_dependencies(examples.cuda
-                              examples.cuda.${example_program})
-
-  # add dependencies to pseudo-target
-  add_hpx_pseudo_dependencies(examples.cuda.${example_program}
-                              ${example_program}_exe)
-
 endforeach()
 
 
