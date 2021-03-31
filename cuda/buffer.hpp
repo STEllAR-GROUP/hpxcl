@@ -9,6 +9,8 @@
 
 #include <hpx/hpx.hpp>
 
+#include <hpx/include/serialization.hpp>
+
 #include "cuda/server/buffer.hpp"
 
 namespace hpx {
