@@ -24,14 +24,10 @@ jobs:
        - run: 
            name: Install cuda
            command: |
-                wget https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda_8.0.61_375.26_linux-run && \
-                chmod +x cuda_8.0.61_375.26_linux-run && \
-                mkdir nvidia_installers && \
-                ./cuda_8.0.61_375.26_linux-run -extract=`pwd`/nvidia_installers && \
-                cd nvidia_installers && \
-                ./cuda-linux64-rel-8.0.61-21551265.run -noprompt && \
-                cd .. && \
-                rm -r nvidia_installers
+                wget https://developer.download.nvidia.com/compute/cuda/11.2.2/local_installers/cuda_11.2.2_460.32.03_linux.run && \
+                chmod +x cuda_11.2.2_460.32.03_linux.run && \
+                sudo ./cuda_11.2.2_460.32.03_linux.run --toolkit --silent && \
+                rm cuda_11.2.2_460.32.03_linux.run
        - run:
            name: Create build folder
            command: cd /hpx && mkdir -p build
