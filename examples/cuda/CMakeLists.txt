@@ -28,13 +28,16 @@ foreach(example_program ${example_programs})
 endforeach()
 
 
+if(${HPXCL_BUILD_EXAMPLE_MANDELBROT}==ON)
+
 set(subdirs
 mandelbrot
 )
 
-
 foreach(subdir ${subdirs})
     add_subdirectory(${subdir})
 endforeach()
+
+endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/example_kernel.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/examples/cuda)

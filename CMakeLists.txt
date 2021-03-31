@@ -80,6 +80,7 @@ hpx_option(HPXCL_WITH_BENCHMARK BOOL "Builds the benchmark (default OFF)." OFF)
 hpx_option(HPXCL_WITH_NAIVE_CUDA_BENCHMARK BOOL "Builds the naive CUDA benchmark (default OFF)." OFF)
 hpx_option(HPXCL_CUDA_WITH_STREAM BOOL "Builds multiple stream version (default ON)." ON)
 hpx_option(HPXCL_WITH_NAIVE_OPENCL_BENCHMARK BOOL "Builds the naive OPENCL benchmark (default OFF)." OFF)
+hpx_option(HPXCL_BUILD_EXAMPLE_MANDELBROT BOOL "Build themandel brot example (defualt OFF)." OFF)
 
 if(NOT HPXCL_WITH_OPENCL AND NOT HPXCL_WITH_CUDA)
     message(FATAL_ERROR "At least one of HPXCL_WITH_OPENCL or HPXCL_WITH_CUDA has to be set to ON")
@@ -106,7 +107,7 @@ if(HPXCL_WITH_CUDA)
 endif()
 
 # Only search for PNG lib, if HPXCL_BUILD_EXAMPLES is build
-if(HPXCL_BUILD_EXAMPLES)
+if(HPXCL_BUILD_EXAMPLE_MANDELBROT)
     find_package(PNG)
     if(PNG_FOUND)
         include_directories(${PNG_INCLUDE_DIRS})
