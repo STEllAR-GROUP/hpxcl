@@ -13,7 +13,7 @@ jobs:
        - checkout
        - run:
            name: Install dependencies
-           command: dnf update && dnf install -y xsltproc doxygen libpng-dev wget hpx-devel kernel-devel-$(uname -r) kernel-headers-$(uname -r)
+           command: dnf update -y && dnf install -y xsltproc doxygen libpng-dev wget hpx-devel kernel-devel-$(uname -r) kernel-headers-$(uname -r)
        - run: 
            name: Install cuda
            command: |
