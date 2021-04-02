@@ -13,14 +13,14 @@ jobs:
        - checkout
        - run:
            name: Install dependencies
-           command: dnf update -y && dnf install -y  doxygen libpng-devel wget hpx-devel kernel-devel kernel-headers
+           command: dnf update -y && dnf install -y  doxygen libpng-devel hpx-devel 
        - run: 
            name: Install cuda
            command: |
-                wget https://developer.download.nvidia.com/compute/cuda/11.2.2/local_installers/cuda_11.2.2_460.32.03_linux.run && \
-                chmod +x cuda_11.2.2_460.32.03_linux.run && \
-                ./cuda_11.2.2_460.32.03_linux.run --toolkit --silent && \
-                rm cuda_11.2.2_460.32.03_linux.run
+                dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/fedora33/x86_64/cuda-fedora33.repo && \
+                dnf clean all && \
+                dnf module disable nvidia-driver && \
+                dnf -y install cuda
        - run:
            name: Create build folder
            command: cd /hpx && mkdir -p build
