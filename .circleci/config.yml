@@ -21,7 +21,7 @@ jobs:
                 dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/fedora33/x86_64/cuda-fedora33.repo && \
                 dnf clean all && \
                 dnf module disable nvidia-driver && \
-                dnf -y install cuda
+                dnf install -y  cuda
        - run:
            name: Create build folder
            command: cd /hpx && mkdir -p build
