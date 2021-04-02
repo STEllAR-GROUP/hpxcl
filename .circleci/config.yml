@@ -17,6 +17,7 @@ jobs:
        - run: 
            name: Install cuda
            command: |
+                dnf install -y  'dnf-command(config-manager)' && \
                 dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/fedora33/x86_64/cuda-fedora33.repo && \
                 dnf clean all && \
                 dnf module disable nvidia-driver && \
