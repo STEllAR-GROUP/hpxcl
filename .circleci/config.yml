@@ -28,7 +28,7 @@ jobs:
            command: cd /hpx && mkdir -p build
        - run: 
            name: Configure
-           command: cd /hpx/build && cmake .. -DCMAKE_BUILD_TYPE=Debug -DHPX_WITH_MALLOC=system -DCMAKE_CXX_FLAGS="-fcolor-diagnostics" -DHPXCL_WITH_OPENCL=OFF -DHPXCL_WITH_CUDA=On  -DHPXCL_WITH_BENCHMARK=On -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-8.0
+           command: cd /hpx/build && cmake .. -DCMAKE_BUILD_TYPE=Debug -DHPX_WITH_MALLOC=system -DHPXCL_WITH_OPENCL=OFF -DHPXCL_WITH_CUDA=On  -DHPXCL_WITH_BENCHMARK=On -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-8.0
        - run: 
            name: Build
            command: cd /hpx/build && make -j 2
