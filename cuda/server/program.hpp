@@ -8,6 +8,9 @@
 #define HPX_CUDA_SERVER_PROGRAM_HPP_
 
 #include <hpx/hpx.hpp>
+
+#include <hpx/include/serialization.hpp>
+
 #include <cuda.h>
 #include <nvrtc.h>
 

@@ -6,6 +6,8 @@
 #ifndef HPX_CUDA_PROGRAM_HPP_
 #define HPX_CUDA_PROGRAM_HPP_
 
+#include <hpx/include/serialization.hpp>
+
 #include <hpx/include/components.hpp>
 #include "cuda/server/program.hpp"
 #include "cuda/buffer.hpp"

@@ -8,6 +8,8 @@
 
 #include <hpx/hpx.hpp>
 
+#include <hpx/include/serialization.hpp>
+
 #include "cuda/server/buffer.hpp"
 #include "cuda/server/program.hpp"
 #include "cuda/server/device.hpp"
