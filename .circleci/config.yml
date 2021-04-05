@@ -21,7 +21,7 @@ jobs:
                 dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/fedora33/x86_64/cuda-fedora33.repo && \
                 dnf clean expire-cache && \
                 dnf update -y && \
-                dnf module install nvidia-driver:latest-dkms && \
+                dnf module install -y  nvidia-driver:latest-dkms && \
                 dnf install -y  cuda
        - run:
            name: Create build folder
