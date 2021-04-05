@@ -22,7 +22,7 @@ jobs:
                 dnf clean all && \
                 dnf update -y && \
                 dnf module -y disable nvidia-driver && \
-                dnf install -y  cuda
+                dnf install -y  cuda-11.2.0
        - run:
            name: Create build folder
            command: cd /hpx && mkdir -p build
