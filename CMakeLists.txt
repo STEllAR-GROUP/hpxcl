@@ -186,7 +186,6 @@ endif()
 ###############################################################################
 
 if(HPXCL_BUILD_TESTS)
-  file(COPY ${HPX_PREFIX}/bin/hpxrun.py DESTINATION ${PROJECT_BINARY_DIR}/bin)
 
   hpx_option(HPXCL_BUILD_TESTS_BENCHMARKS BOOL "Build HPX benchmark tests (default: ON)" ON ADVANCED)
   hpx_option(HPXCL_BUILD_TESTS_REGRESSIONS BOOL "Build HPX regression tests (default: ON)" ON ADVANCED)
