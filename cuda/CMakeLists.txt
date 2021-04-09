@@ -19,7 +19,7 @@ add_hpx_component(cuda
 
 # Add installation of the header files
 install(FILES
-    ${CMAKE_SOURCE_DIR}/hpx/cuda.hpp
+    ${CMAKE_SOURCE_DIR}/hpxcl/cuda.hpp
     DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/cuda/
     DESTINATION ${CMAKE_INSTALL_PREFIX}/include/cuda
