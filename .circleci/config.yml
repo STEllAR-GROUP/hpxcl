@@ -33,12 +33,11 @@ jobs:
              cmake .. -DCMAKE_BUILD_TYPE=Release -DHPX_WITH_MALLOC=system -DHPXCL_WITH_OPENCL=OFF -DHPXCL_WITH_CUDA=On  -DHPXCL_WITH_BENCHMARK=On -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.2
        - run: 
            name: Build
-           command: cd /hpx/build && make -j 2
+           command: cd /hpx/build && make -j 2 && make install
        - save_cache:
            key: build-{{ .Branch }}-{{ .Revision }}
            paths:
               - "/hpx"
-    
     test:
       docker:
        - image: stellargroup/hpx:dev
