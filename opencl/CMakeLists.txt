@@ -10,9 +10,10 @@ add_definitions(-DHPX_OPENCL_MODULE_EXPORTS)
 add_definitions(-DCL_USE_DEPRECATED_OPENCL_1_1_APIS)
 
 add_hpx_component(opencl
+    EXPORT HPXCLTargets
     AUTOGLOB
     ESSENTIAL
     COMPONENT_DEPENDENCIES iostreams
     DEPENDENCIES ${OPENCL_LIBRARIES}
-    FOLDER "Components/OpenCL")
-
+    FOLDER "Components/OpenCL"
+    COMPONENT dev)

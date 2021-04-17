@@ -29,7 +29,7 @@ foreach(example_program ${example_programs})
                      DEPENDENCIES opencl_component
                      COMPONENT_DEPENDENCIES iostreams opencl
                      FOLDER "Examples/OpenCL/${example_program}")
-
+ list(APPEND HPXCL_TARGETS ${example_program}))
   # add a custom target for this example
   add_hpx_pseudo_target(examples.opencl.${example_program})
 

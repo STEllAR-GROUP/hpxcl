@@ -9,11 +9,13 @@ set(subdirs "")
 if(HPXCL_WITH_NAIVE_OPENCL_BENCHMARK)
   set(subdirs
     ${subdirs} opencl)
+    list(append HPXCL_TARGETS benchmark/opencl)
 endif()
 
 if(HPXCL_WITH_CUDA)
   set(subdirs
     ${subdirs} cuda)
+    list(append HPXCL_TARGETS benchmark/cuda)
 endif()
 
 

@@ -25,6 +25,7 @@ foreach(example_program ${example_programs})
                      COMPONENT_DEPENDENCIES iostreams cuda
                      DEPENDENCIES ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY}
                      FOLDER "Examples/CUDA/${example_program}")
+   list(APPEND HPXCL_TARGETS ${example_program})
 endforeach()
 
 
