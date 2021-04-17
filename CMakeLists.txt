@@ -16,38 +16,8 @@ endif()
 # This project is C++ based.
 project(hpxcl CXX)
 
-set(HPXCL_MAJOR_VERSION 0)
-set(HPXCL_MINOR_VERSION 1)
-set(HPXCL_PATCH_VERSION 0)
-set(HPXCL_VERSION
-    ${HPCXL_MAJOR_VERSION}.${HPXCL_MINOR_VERSION}.${HPXCL_PATCH_VERSION})
-
-
-# Offer the user to ovverride the installation directories
-set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
-set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
-set(INSTALL_INCLUDE_DIR include CACHE PATH
-  "Installation directory for header files")
-if(WIN32 AND NOT CYGWIN)
-  set(DEF_INSTALL_CMAKE_DIR CMake)
-else()
-    set(DEF_INSTALL_CMAKE_DIR lib/CMake/HPXCL)
-endif()
-set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
-  "Installation directory for CMake files")
-
-# Make relative paths absolute (needed later on)
-foreach(p LIB BIN INCLUDE CMAKE)
-  set(var INSTALL_${p}_DIR)
-  if(NOT IS_ABSOLUTE "${${var}}")
-    set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-  endif()
-endforeach()
-
 # add our cmake path
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
-
-
 
 if(HPX_ROOT)
     set(HPX_DIR "${HPX_ROOT}/lib/cmake/HPX")
@@ -238,38 +208,4 @@ else()
   unset(HPXCL_BUILD_TESTS_REGRESSIONS CACHE)
   unset(HPXCL_BUILD_TESTS_UNIT CACHE)
 endif()
-
-###############################################################################
-
-# Add all targets to the build-tree export set
-export(TARGETS ${BUILDSYSTEM_TARGETS}
-    FILE "${PROJECT_BINARY_DIR}/HPXCLTargets.cmake")
-
-# Export the package for use from the build-tree
-export(PACKAGE HPXCL)
-
-# Create the HPXCLConfig.cmake and HPXCLConfigVersion files
-file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
-   "${INSTALL_INCLUDE_DIR}")
-# ... for the build tree
-set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
-configure_file(HPXCLConfig.cmake.in
-    "${PROJECT_BINARY_DIR}/HPXCLConfig.cmake" @ONLY)
-# ... for the install tree
-set(CONF_INCLUDE_DIRS "\${HPXCL_CMAKE_DIR}/${REL_INCLUDE_DIR}")
-configure_file(HPXCLConfig.cmake.in
-    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HPXCLConfig.cmake" @ONLY)
-# ... for both
-configure_file(HPXCLConfigVersion.cmake.in
-    "${PROJECT_BINARY_DIR}/HPXCLConfigVersion.cmake" @ONLY)
-
-# Install the HPXCLConfig.cmake and HPXCLConfigVersion.cmake
-install(FILES
-    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/HPXCLConfig.cmake"
-    "${PROJECT_BINARY_DIR}/HPXCLConfigVersion.cmake"
-  DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
-
-# Install the export set for use with the install-tree
-install(EXPORT HPXCLTargets DESTINATION
-  "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
