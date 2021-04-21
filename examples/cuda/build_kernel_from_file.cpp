@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 	flags.push_back(mode);
 
 	// Compile the program
-	prog.build_sync(flags,"sum");
+	prog.build_sync(flags,"sum2");
 
 	// Create the buffer for the result
 	unsigned int* result;
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 	hpx::wait_all(data_futures);
 
 	//Run the kernel at the default stream
-	auto kernel_future = prog.run(args,"sum",grid,block);
+	auto kernel_future = prog.run(args,"sum2",grid,block);
 
 	hpx::wait_all(kernel_future);
 
