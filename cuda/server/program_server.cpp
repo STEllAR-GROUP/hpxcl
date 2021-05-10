@@ -163,7 +163,7 @@ void program::build(std::vector<std::string> compilerFlags,
 */
 void program::run(std::vector<hpx::naming::id_type> args,
 		std::string modulename, Dim3 grid, Dim3 block,
-		std::vector<hpx::naming::id_type> dependencies, int stream) {
+		std::vector<hpx::naming::id_type> dependencies, size_t shared_memory, int stream) {
 
 	std::vector<void*> args_pointer(args.size());
 

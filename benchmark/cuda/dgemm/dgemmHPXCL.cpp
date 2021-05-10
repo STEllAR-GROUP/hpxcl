@@ -176,9 +176,9 @@ int main(int argc, char*argv[]) {
 
 	//run the program on the device
 #ifdef HPXCL_CUDA_WITH_STREAMS
-	kernelFutures.push_back(prog.run(args, "dgemm", grid, block, args));
+	kernelFutures.push_back(prog.run(args, "dgemm", grid, block, 0));
 #else
-	kernelFutures.push_back(prog.run(args, "dgemm", grid, block));
+	kernelFutures.push_back(prog.run(args, "dgemm", grid, block,0));
 #endif
 
 	//wait for all the kernal futures to return

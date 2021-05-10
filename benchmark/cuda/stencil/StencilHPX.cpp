@@ -135,7 +135,7 @@ int main(int argc, char*argv[]) {
 	args.push_back(outBuffer);
 	args.push_back(sBuffer);
 
-	data_futures.push_back(prog.run(args, "stencil", grid, block));
+	data_futures.push_back(prog.run(args, "stencil", grid, block,0));
 
     hpx::wait_all(data_futures); 
 

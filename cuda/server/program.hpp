@@ -75,13 +75,13 @@ public:
 #ifdef HPXCL_CUDA_WITH_STREAMS
 	void run(std::vector<hpx::naming::id_type> args, std::string modulename,
 			Dim3 grid, Dim3 block, std::vector<hpx::naming::id_type> dependencies,
-			int stream = -1);
+			size_t shared_memory, int stream = -1);
 
 	unsigned int get_streams_size();
 	unsigned int create_stream();
 #else
 	void run(std::vector<hpx::naming::id_type> args, std::string modulename,
-			Dim3 grid, Dim3 block);	
+			Dim3 grid, Dim3 block,size_t shared_memory);	
 #endif
 
 	HPX_DEFINE_COMPONENT_ACTION(program, build);

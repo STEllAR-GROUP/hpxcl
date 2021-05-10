@@ -121,7 +121,7 @@ public:
 
 	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
 			std::string modulename, hpx::cuda::server::program::Dim3 grid,
-			hpx::cuda::server::program::Dim3 block, int stream = -1) {
+			hpx::cuda::server::program::Dim3 block, size_t shared_memory, int stream = -1) {
 
 		HPX_ASSERT(this->get_id());
 
@@ -136,7 +136,7 @@ public:
 
 		typedef server::program::run_action action_type;
 		return hpx::async<action_type>(this->get_id(), args_id, modulename,
-				grid, block, dependencies, stream);
+				grid, block, dependencies, shared_memory, stream);
 
 	}
 
@@ -158,7 +158,7 @@ public:
 	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
 			std::string modulename, hpx::cuda::server::program::Dim3 grid,
 			hpx::cuda::server::program::Dim3 block,
-			std::vector<hpx::cuda::buffer> dependencies, int stream = -1) {
+			std::vector<hpx::cuda::buffer> dependencies, size_t shared_memory, int stream = -1) {
 
 		HPX_ASSERT(this->get_id());
 
@@ -178,14 +178,14 @@ public:
 
 		typedef server::program::run_action action_type;
 		return hpx::async<action_type>(this->get_id(), args_id, modulename,
-				grid, block, dependencies_id, stream);
+				grid, block, dependencies_id, shared_memory, stream);
 
 	}
 
 	hpx::lcos::future<void> run(std::vector<hpx::cuda::buffer> args,
 			std::string modulename, hpx::cuda::server::program::Dim3 grid,
 			hpx::cuda::server::program::Dim3 block,
-			hpx::cuda::buffer dependency, int stream = -1) {
+			hpx::cuda::buffer dependency, size_t shared_memory, int stream = -1) {
 
 		HPX_ASSERT(this->get_id());
 
@@ -201,7 +201,7 @@ public:
 
 		typedef server::program::run_action action_type;
 		return hpx::async<action_type>(this->get_id(), args_id, modulename,
-				grid, block, dependencies_id, stream);
+				grid, block, dependencies_id, shared_memory, stream);
 
 	}
 
