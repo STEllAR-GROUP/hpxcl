@@ -1,4 +1,4 @@
-HPX Compute Language (HPXCL) [![DOI](https://zenodo.org/badge/13384046.svg)](https://zenodo.org/badge/latestdoi/13384046)
+HPX Compute Language (HPXCL) [![DOI](https://zenodo.org/badge/13384046.svg)](https://zenodo.org/badge/latestdoi/13384046) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/688e4c620bfd46708eb1c2ae0a517445)](https://www.codacy.com/gh/STEllAR-GROUP/hpxcl/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=STEllAR-GROUP/hpxcl&amp;utm_campaign=Badge_Grade)
 ====
 
 HPX is an open-source, general purpose C++ library for developing parallel and distributed applications with a broad community usage. This repository is for the development of HPX Compute language (HPXCL) API for the integration of GPU computation with asynchronous many task execution library HPX. Asynchronous functions are provided for kernel launch, kernel execution and data transfer with the capability to hide the communication latency through computation. This is done through the provision of Buffer, Device and Program.
