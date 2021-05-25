@@ -40,6 +40,7 @@ foreach(subdir ${subdirs})
     add_subdirectory(${subdir})
 endforeach()
 
+endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/example_kernel.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/examples/cuda)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/example_shared_kernel.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/examples/cuda)
