@@ -6,9 +6,6 @@ extern "C" {
 
 		int t = threadIdx.x;
 		int tr = n-t-1;
-
-		
-		d[t] = d[tr];
 		
 		s[t] = d[t];
 		
@@ -17,4 +14,3 @@ extern "C" {
 		d[t] = s[tr];
 	}
 }
-
