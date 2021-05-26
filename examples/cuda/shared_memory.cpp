@@ -36,7 +36,6 @@ int main(int argc, char* argv[]) {
 	std::vector<device> devices = get_all_devices(2, 0).get();
 
 	// Check whether there are any devices
-
 	if (devices.size() < 1) {
 		hpx::cerr << "No CUDA devices found!" << hpx::endl;
 		return hpx::finalize();
@@ -44,7 +43,6 @@ int main(int argc, char* argv[]) {
 
 
 	// Generate Input data
-
 	int* input;
 	cudaMallocHost((void**)&input, sizeof(int) * SIZE);
 	checkCudaError("Malloc inputData");
@@ -68,7 +66,6 @@ int main(int argc, char* argv[]) {
 	program prog = cudaDevice.create_program_with_file("example_shared_kernel.cu").get();
 
 
-
 	// Add compiler flags for compiling the kernel
 	std::vector<std::string> flags;
 	std::string mode = "--gpu-architecture=compute_";
@@ -89,7 +86,6 @@ int main(int argc, char* argv[]) {
 	data_futures.push_back(sizebuffer.enqueue_write(0, sizeof(int), n));
 
 
-
 	// Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;
 	hpx::cuda::server::program::Dim3 block;
@@ -105,7 +101,6 @@ int main(int argc, char* argv[]) {
 	block.z = 1;
 
 
-
 	// Set the parameter for the kernel, have to be the same order as in the definition
 	std::vector<hpx::cuda::buffer> args;
 	args.push_back(inbuffer);
@@ -118,7 +113,7 @@ int main(int argc, char* argv[]) {
 
 	hpx::wait_all(kernel_future);
 
-
+    
 	// Copy the result back
 	int* res = inbuffer.enqueue_read_sync<int>(0, SIZE*sizeof(int));
 	
