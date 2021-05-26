@@ -136,9 +136,9 @@ int main(int argc, char*argv[]) {
 	{
 		args.push_back(bufferIn[i]);
 		#ifdef HPXCL_CUDA_WITH_STREAMS
-		kernelFutures.push_back(prog.run(args, "kernel", grid, block,args));
+		kernelFutures.push_back(prog.run(args, "kernel", grid, block,0));
 		#else
-		kernelFutures.push_back(prog.run(args, "kernel", grid, block));
+		kernelFutures.push_back(prog.run(args, "kernel", grid, block,0));
 		#endif
 		args.clear();
 	}

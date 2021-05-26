@@ -10,6 +10,7 @@ set(example_programs
     build_kernel
     build_kernel_from_file
     streams
+    shared_memory
 )
 
 foreach(example_program ${example_programs})
@@ -42,3 +43,4 @@ endforeach()
 endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/example_kernel.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/examples/cuda)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/example_shared_kernel.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/examples/cuda)

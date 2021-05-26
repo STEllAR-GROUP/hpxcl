@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
 	hpx::wait_all(data_futures);
 
 	//Run the kernel at the default stream
-	auto kernel_future = prog.run(args,"sum2",grid,block);
+	auto kernel_future = prog.run(args,"sum2",grid,block,0);
 
 	hpx::wait_all(kernel_future);
 

@@ -301,7 +301,7 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 
 	// Check clock ticks ...
 	double t = mysecond();
-	auto fk = prog.run(args, "multiply_step", grid, block);
+	auto fk = prog.run(args, "multiply_step", grid, block,0);
 	hpx::wait_all(fk);
 	t = 1.0E6 * (mysecond() - t);
 
@@ -351,7 +351,7 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 		args.push_back(cBuffer);
 		args.push_back(bBuffer);
 		args.push_back(fBuffer);
-		fk = prog.run(args, "multiply_step", grid, block);
+		fk = prog.run(args, "multiply_step", grid, block,0);
 		hpx::wait_all(fk);
 		timing[1][iteration] = mysecond() - timing[1][iteration];
 
@@ -362,7 +362,7 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 		args.push_back(aBuffer);
 		args.push_back(bBuffer);
 		args.push_back(cBuffer);
-		fk = prog.run(args, "add_step", grid, block);
+		fk = prog.run(args, "add_step", grid, block,0);
 		hpx::wait_all(fk);
 		timing[2][iteration] = mysecond() - timing[2][iteration];
 
@@ -374,7 +374,7 @@ std::vector<std::vector<double> > run_benchmark(size_t iterations,
 		args.push_back(cBuffer);
 		args.push_back(aBuffer);
 		args.push_back(fBuffer);
-		fk = prog.run(args, "triad_step", grid, block);
+		fk = prog.run(args, "triad_step", grid, block,0);
 		hpx::wait_all(fk);
 		timing[3][iteration] = mysecond() - timing[3][iteration];
 
