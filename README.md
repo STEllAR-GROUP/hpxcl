@@ -12,7 +12,7 @@ any [issue](http://github.com/STEllAR-GROUP/hpxcl/issues) reports through the is
 
 The [CircleCI](https://circleci.com/gh/STEllAR-GROUP/hpxcl) contiguous
 integration service tracks the current build status for the master branch:
-![HPXCL master branch build status](https://circleci.com/gh/STEllAR-GROUP/hpxcl/tree/master.svg?style=svg "")
+![HPXCL master branch build status](https://circleci.com/gh/STEllAR-GROUP/hpxcl/tree/main.svg?style=svg "")
 
 Build
 ===
