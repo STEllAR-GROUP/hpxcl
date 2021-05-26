@@ -14,42 +14,58 @@
 
 using namespace hpx::cuda;
 
-#define SIZE 64
+#define SIZE 8
+
+void print_array(int* a){
+	for(int i = 0; i < SIZE-1; i++){
+		std::cout << a[i] << ", ";
+	}
+	std::cout << a[SIZE-1] << std::endl;
+}
+
+
 
 int main(int argc, char* argv[]) {
 
 	auto start = std::chrono::steady_clock::now();
 
+	// Vector for all futures for the data management
 	std::vector<hpx::lcos::future<void>> data_futures;
 
+	// Get list of available Cuda Devices.
 	std::vector<device> devices = get_all_devices(2, 0).get();
 
+	// Check whether there are any devices
 	if (devices.size() < 1) {
 		hpx::cerr << "No CUDA devices found!" << hpx::endl;
 		return hpx::finalize();
 	}
 
 
+	// Generate Input data
 	int* input;
 	cudaMallocHost((void**)&input, sizeof(int) * SIZE);
 	checkCudaError("Malloc inputData");
 
 	for(int i = 0; i < SIZE; i++){
 		input[i] = i;
-		std::cout << input[i] << ", ";
 	}
-	std::cout << std::endl;
 
+	print_array(input);
 
+	// Create a device component from the first device found
 	device cudaDevice = devices[0];
 
+	// Create a buffer
 	buffer inbuffer = cudaDevice.create_buffer(sizeof(int) * SIZE).get();
 
+	// Copy input data to the buffer
 	data_futures.push_back(inbuffer.enqueue_write(0, sizeof(int) * SIZE, input));
 
+	// Create the example_shared_kernel device program
 	program prog = cudaDevice.create_program_with_file("example_shared_kernel.cu").get();
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	// Add compiler flags for compiling the kernel
 	std::vector<std::string> flags;
 	std::string mode = "--gpu-architecture=compute_";
@@ -59,7 +75,16 @@ int main(int argc, char* argv[]) {
 
 	// Compile the program
 	prog.build_sync(flags, "dynamicReverse");
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	// Create the buffer for the length of the array
+	int* n;
+	cudaMallocHost((void**)&n, sizeof(int));
+	checkCudaError("Malloc size n");
+	n[0] = SIZE;
+	buffer sizebuffer = cudaDevice.create_buffer(sizeof(int)).get();
+	data_futures.push_back(sizebuffer.enqueue_write(0, sizeof(int), n));
+
 
 	// Generate the grid and block dim
 	hpx::cuda::server::program::Dim3 grid;
@@ -76,16 +101,6 @@ int main(int argc, char* argv[]) {
 	block.z = 1;
 
 
-
-	int* n;
-	cudaMallocHost((void**)&n, sizeof(int));
-	n[0] = SIZE;
-
-	buffer sizebuffer = cudaDevice.create_buffer(sizeof(int)).get();
-	data_futures.push_back(sizebuffer.enqueue_write(0, sizeof(int), n));
-
-
-
 	// Set the parameter for the kernel, have to be the same order as in the definition
 	std::vector<hpx::cuda::buffer> args;
 	args.push_back(inbuffer);
@@ -93,20 +108,22 @@ int main(int argc, char* argv[]) {
 
 	hpx::wait_all(data_futures);
 
-	//Run the kernel at the default stream
+	// Run the kernel at the default stream
 	auto kernel_future = prog.run(args, "dynamicReverse", grid, block, SIZE*sizeof(int));
 
 	hpx::wait_all(kernel_future);
 
-	
-	//Copy the result back
+    
+	// Copy the result back
 	int* res = inbuffer.enqueue_read_sync<int>(0, SIZE*sizeof(int));
+	
+	// Print the result
+	print_array(res);
 
-	for (int i = 0; i < SIZE; i++){
-		std::cout << res[i] << ", ";
-	}
-	std::cout << std::endl;
-
+	cudaFreeHost(n);
+	checkCudaError("Free n");
+	cudaFreeHost(input);
+	checkCudaError("Free input");
 
 
 	auto end = std::chrono::steady_clock::now();
