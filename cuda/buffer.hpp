@@ -94,6 +94,39 @@ public:
 
 	}
 
+    /** 
+     * \brief Method to access the device pointer wrapped as a smart pointer
+     * \return The pointer to the device memory as a smart pointer
+     */
+    hpx::lcos::future<std::shared_ptr<size_t>> get_smart_pointer(){
+    
+		HPX_ASSERT(this->get_id());
+        
+        typedef server::buffer::get_smart_pointer_action action_type;
+        return hpx::async<action_type>(this->get_id()); 
+    }
+
+    
+    /** 
+     * \brief Method to access the device pointer wrapped as a smart pointer
+     * \return The pointer to the device memory as a smart pointer
+     */
+    std::shared_ptr<size_t> get_smart_pointer_sync(){
+    
+        return get_smart_pointer().get();
+    }
+
+
+    /**
+     * \brief Method to access the device pointer
+     * \return The raw pointer to the device memory allocated in this buffer
+     */
+    void* get_raw_pointer_sync(){
+    
+    return reinterpret_cast<void*>(get_smart_pointer_sync().get());
+
+    }
+
 	/**
 	 * \brief Method copy the data on the attached device to the host
 	 * \param offset Offset, where to start copying data

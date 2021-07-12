@@ -62,6 +62,8 @@ namespace hpx
 
                 void* get_raw_pointer();
 
+                std::shared_ptr<size_t> get_smart_pointer();
+
                 #ifdef HPXCL_CUDA_WITH_STREAMS
                 cudaStream_t get_stream();
                 #endif
@@ -72,6 +74,7 @@ namespace hpx
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read_local);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write_local);
+                HPX_DEFINE_COMPONENT_ACTION(buffer, get_smart_pointer);
             };
         }
     }
@@ -95,5 +98,7 @@ namespace hpx
  HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::buffer::enqueue_read_local_action,
     buffer_enqueue_read_local_action);
-
+ HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::buffer::get_smart_pointer_action,
+    buffer_get_smart_pointer_action);
  #endif //BUFFER_2_HPP
