@@ -11,6 +11,7 @@ set(example_programs
     build_kernel_from_file
     streams
     shared_memory
+    get_device_id
 )
 
 foreach(example_program ${example_programs})

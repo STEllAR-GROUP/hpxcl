@@ -1,6 +1,7 @@
-// Copyright (c)		2013 Damond Howard
-//						2015 Patrick Diehl
-//                      2017 Madhavan Seshadri
+// Copyright (c)     2013 Damond Howard
+//                   2015 Patrick Diehl
+//                   2017 Madhavan Seshadri
+//                   2021 Pedro Barbosa
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #pragma once
@@ -62,6 +63,8 @@ namespace hpx
 
                 void* get_raw_pointer();
 
+                int get_device_id();
+
                 std::shared_ptr<size_t> get_smart_pointer();
 
                 #ifdef HPXCL_CUDA_WITH_STREAMS
@@ -75,6 +78,7 @@ namespace hpx
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write_local);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, get_smart_pointer);
+                HPX_DEFINE_COMPONENT_ACTION(buffer, get_device_id);
             };
         }
     }
@@ -101,4 +105,7 @@ namespace hpx
  HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::buffer::get_smart_pointer_action,
     buffer_get_smart_pointer_action);
+ HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::buffer::get_device_id_action,
+    buffer_get_device_id_action);
  #endif //BUFFER_2_HPP

@@ -1,6 +1,7 @@
 // Copyright (c)    2013 Damond Howard
 //                  2015 Patrick Diehl
 //					2017 Madhavan Seshadri
+//					2021 Pedro Barbosa
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 #pragma once
@@ -127,6 +128,26 @@ public:
 
     }
 
+    /**
+	 * \brief Method to access the buffer's device ID
+	 * \return The ID of the device where the buffer is allocated
+	 */
+    hpx::lcos::future<int> get_device_id(){
+    
+		HPX_ASSERT(this->get_id());
+        
+        typedef server::buffer::get_device_id_action action_type;
+        return hpx::async<action_type>(this->get_id()); 
+    }
+    
+    /**
+	 * \brief Method to access the buffer's device ID
+	 * \return The ID of the device where the buffer is allocated
+	 */
+    int get_device_id_sync(){
+    	return get_device_id().get();
+    }
+    
 	/**
 	 * \brief Method copy the data on the attached device to the host
 	 * \param offset Offset, where to start copying data

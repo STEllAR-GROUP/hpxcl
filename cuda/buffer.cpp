@@ -1,5 +1,6 @@
 // Copyright (c)    2013 Damond Howard
 //                  2015 Patrick Diehl
+//                  2021 Pedro Barbosa
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt
 
@@ -36,3 +37,6 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
     cuda_buffer_type::wrapped_type::get_smart_pointer_action,
     cuda_buffer_get_smart_pointer_action);
+HPX_REGISTER_ACTION(
+    cuda_buffer_type::wrapped_type::get_device_id_action,
+    cuda_buffer_get_device_id_action);
