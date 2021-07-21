@@ -7,7 +7,7 @@ version: 2
 jobs:
     build:
       docker:
-          - image: fedora:33
+          - image: fedora:34
       working_directory: /hpx/
       steps:
        - checkout
@@ -18,7 +18,7 @@ jobs:
            name: Install cuda
            command: |
                 dnf install -y  'dnf-command(config-manager)' && \
-                dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/fedora33/x86_64/cuda-fedora33.repo && \
+                dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/fedora33/x86_64/cuda-fedora33.repo  && \
                 dnf clean expire-cache && \
                 dnf update -y && \
                 dnf module install -y  nvidia-driver:latest-dkms && \
@@ -29,8 +29,9 @@ jobs:
        - run: 
            name: Configure
            command: |
+             echo $(find /usr/local -name "cuda*") \
              cd /hpx/build && \
-             cmake .. -DCMAKE_BUILD_TYPE=Release -DHPX_WITH_MALLOC=system -DHPXCL_WITH_OPENCL=OFF -DHPXCL_WITH_CUDA=On  -DHPXCL_WITH_BENCHMARK=On -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.4
+             cmake .. -DCMAKE_BUILD_TYPE=Release -DHPX_WITH_MALLOC=system -DHPXCL_WITH_OPENCL=OFF -DHPXCL_WITH_CUDA=On  -DHPXCL_WITH_BENCHMARK=On -DCUDA_TOOLKIT_ROOT_DIR=$(find /usr/local -name "cuda*")
        - run: 
            name: Build
            command: cd /hpx/build && make -j 2 && make install
