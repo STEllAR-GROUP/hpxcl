@@ -7,7 +7,7 @@ version: 2
 jobs:
     build:
       docker:
-          - image: fedora:33
+          - image: fedora:34
       working_directory: /hpx/
       steps:
        - checkout
