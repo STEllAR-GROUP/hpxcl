@@ -32,7 +32,7 @@ public:
 	buffer(hpx::future<hpx::naming::id_type> && gid) :
 			base_type(std::move(gid)) {
 
-		is_local = (hpx::get_colocation_id(hpx::launch::sync, get_id()) == hpx::find_here());
+		is_local = (hpx::agas::get_colocation_id(hpx::launch::sync, get_id()) == hpx::find_here());
 	}
 
 	/**
