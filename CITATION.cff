@@ -15,8 +15,8 @@ references:
         given-names: "Hartmut"
         orcid: "https://orcid.org/0000-0002-8712-2806"
     title: "Integration of CUDA Processing within the C++ Library for Parallelism and Concurrency (HPX)"
-    doi: 10.1109/ESPM2.2018.00006
-    pages: 19--28
-    year: 2018
+    doi: "10.1109/ESPM2.2018.00006"
+    pages: "19--28"
+    year: "2018"
     issue-title: "2018 IEEE/ACM 4th International Workshop on Extreme Scale Programming Models and Middleware (ESPM2)"
     publisher: IEEE
