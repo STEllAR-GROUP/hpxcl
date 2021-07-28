@@ -1,3 +1,5 @@
+# YAML 1.2
+# Metadata for citation of this software according to the CFF format (https://citation-file-format.github.io/)
 cff-version: 1.2.0
 message: "If you use this software, please cite this paper."
 references:
