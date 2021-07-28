@@ -1,0 +1,26 @@
+# Copyright (c) 2021 The STE||AR Group
+#
+# SPDX-License-Identifier: BSL-1.0
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+cff-version: 1.2.0
+message: "If you use this software, please cite this paper."
+references:
+  authors:
+  - family-names: "Diehl"
+    given-names: "Patrick"
+    orcid: "https://orcid.org/0000-0003-3922-8419"
+  - family-names: "Seshadri"
+    given-names: "Madhavan"
+  - family-names: "Heller"
+    given-names: "Thomas"
+    orcid: "https://orcid.org/0000-0003-2620-9438"
+  - family-names: "Kaiser"
+    given-names: "Hartmut"
+    orcid: "https://orcid.org/0000-0002-8712-2806"
+  title: "Integration of CUDA Processing within the C++ Library for Parallelism and Concurrency (HPX)"
+  doi: 10.1109/ESPM2.2018.00006
+  pages: 19--28
+  year: 2018
+  issue-title: "2018 IEEE/ACM 4th International Workshop on Extreme Scale Programming Models and Middleware (ESPM2)"
