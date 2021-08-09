@@ -16,78 +16,58 @@
 
 using hpx::opencl::device;
 
-hpx::opencl::util::generic_buffer
-device::get_device_info_raw(cl_device_info info_type) const
-{
+hpx::opencl::util::generic_buffer device::get_device_info_raw(
+    cl_device_info info_type) const {
+  HPX_ASSERT(this->get_id());
 
-    HPX_ASSERT(this->get_id());
+  typedef hpx::opencl::server::device::get_device_info_action func;
 
-    typedef hpx::opencl::server::device::get_device_info_action func;
-
-    return hpx::opencl::util::generic_buffer(
-                                hpx::async<func>(this->get_id(), info_type));
-
+  return hpx::opencl::util::generic_buffer(
+      hpx::async<func>(this->get_id(), info_type));
 }
 
+hpx::opencl::util::generic_buffer device::get_platform_info_raw(
+    cl_platform_info info_type) const {
+  HPX_ASSERT(this->get_id());
 
-hpx::opencl::util::generic_buffer
-device::get_platform_info_raw(cl_platform_info info_type) const
-{
+  typedef hpx::opencl::server::device::get_platform_info_action func;
 
-    HPX_ASSERT(this->get_id());
-
-    typedef hpx::opencl::server::device::get_platform_info_action func;
-
-    return hpx::opencl::util::generic_buffer(
-                                hpx::async<func>(this->get_id(), info_type));
-
+  return hpx::opencl::util::generic_buffer(
+      hpx::async<func>(this->get_id(), info_type));
 }
 
+hpx::opencl::buffer device::create_buffer(cl_mem_flags flags,
+                                          std::size_t size) const {
+  HPX_ASSERT(this->get_id());
 
-hpx::opencl::buffer
-device::create_buffer(cl_mem_flags flags, std::size_t size) const
-{
+  typedef hpx::opencl::server::device::create_buffer_action func;
 
-    HPX_ASSERT(this->get_id());
+  hpx::future<hpx::id_type> buffer_server =
+      hpx::async<func>(this->get_id(), flags, size);
 
-    typedef hpx::opencl::server::device::create_buffer_action func;
-    
-    hpx::future<hpx::id_type> buffer_server =
-                                 hpx::async<func>(this->get_id(), flags, size);
-
-    return buffer(std::move(buffer_server), this->get_id());
-
+  return buffer(std::move(buffer_server), this->get_id());
 }
 
-hpx::opencl::program
-device::create_program_with_source(
-    hpx::serialization::serialize_buffer<char> src ) const
-{
+hpx::opencl::program device::create_program_with_source(
+    hpx::serialization::serialize_buffer<char> src) const {
+  HPX_ASSERT(this->get_id());
 
-    HPX_ASSERT(this->get_id());
+  typedef hpx::opencl::server::device::create_program_with_source_action func;
 
-    typedef hpx::opencl::server::device::create_program_with_source_action func;
-    
-    hpx::future<hpx::id_type> program_server =
-                                 hpx::async<func>(this->get_id(), src);
+  hpx::future<hpx::id_type> program_server =
+      hpx::async<func>(this->get_id(), src);
 
-    return program(std::move(program_server), this->get_id());
-
+  return program(std::move(program_server), this->get_id());
 }
 
-hpx::opencl::program
-device::create_program_with_binary(
-    hpx::serialization::serialize_buffer<char> binary ) const
-{
+hpx::opencl::program device::create_program_with_binary(
+    hpx::serialization::serialize_buffer<char> binary) const {
+  HPX_ASSERT(this->get_id());
 
-    HPX_ASSERT(this->get_id());
+  typedef hpx::opencl::server::device::create_program_with_binary_action func;
 
-    typedef hpx::opencl::server::device::create_program_with_binary_action func;
-    
-    hpx::future<hpx::id_type> program_server =
-                                 hpx::async<func>(this->get_id(), binary);
+  hpx::future<hpx::id_type> program_server =
+      hpx::async<func>(this->get_id(), binary);
 
-    return program(std::move(program_server), this->get_id());
-
+  return program(std::move(program_server), this->get_id());
 }
-

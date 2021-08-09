@@ -5,9 +5,6 @@
 
 #include "enqueue_overloads.hpp"
 
-void
-hpx::opencl::util::enqueue_overloads::resolver_impl(
-    hpx::naming::gid_type device_id,
-    std::vector<hpx::naming::id_type>&,
-    std::vector<hpx::naming::gid_type>&){
-};
+void hpx::opencl::util::enqueue_overloads::resolver_impl(
+    hpx::naming::gid_type device_id, std::vector<hpx::naming::id_type>&,
+    std::vector<hpx::naming::gid_type>&){};

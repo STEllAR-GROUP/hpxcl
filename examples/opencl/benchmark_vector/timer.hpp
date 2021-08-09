@@ -10,32 +10,20 @@
 
 static boost::posix_time::ptime start_time;
 
-static void timer_start()
-{
-    
-    // Measure start time
-    start_time = boost::posix_time::microsec_clock::local_time();
-
+static void timer_start() {
+  // Measure start time
+  start_time = boost::posix_time::microsec_clock::local_time();
 }
 
-static double timer_stop()
-{
+static double timer_stop() {
+  // Measure stop time
+  boost::posix_time::ptime stop_time =
+      boost::posix_time::microsec_clock::local_time();
 
-    // Measure stop time
-    boost::posix_time::ptime stop_time =
-                                boost::posix_time::microsec_clock::local_time();
+  // Calculate difference
+  boost::posix_time::time_duration diff = stop_time - start_time;
 
-    // Calculate difference
-    boost::posix_time::time_duration diff = stop_time - start_time;
-
-    return diff.total_microseconds() / 1000.0;
-
+  return diff.total_microseconds() / 1000.0;
 }
 
-
-
-
-
-#endif // BENCHMARK_TIMER_H_
-
-
+#endif  // BENCHMARK_TIMER_H_

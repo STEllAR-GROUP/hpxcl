@@ -26,463 +26,415 @@
 namespace hpx {
 namespace opencl {
 
-    //////////////////////////////////////
-    /// @brief Device memory.
-    ///
-    /// Every buffer belongs to one \ref device.
-    ///
-    class HPX_OPENCL_EXPORT buffer
-      : public hpx::components::client_base<buffer, server::buffer>
-    {
+//////////////////////////////////////
+/// @brief Device memory.
+///
+/// Every buffer belongs to one \ref device.
+///
+class HPX_OPENCL_EXPORT buffer
+    : public hpx::components::client_base<buffer, server::buffer> {
+  typedef hpx::components::client_base<buffer, server::buffer> base_type;
 
-        typedef hpx::components::client_base<buffer, server::buffer> base_type;
+ public:
+  // the result struct for enqueue_send
+  struct send_result {
+   public:
+    send_result(hpx::future<void> &&fut1, hpx::future<void> &&fut2)
+        : src_future(std::move(fut1)), dst_future(std::move(fut2)){};
 
-        public:
-            // the result struct for enqueue_send
-            struct send_result{
-                public:
-                    send_result( hpx::future<void>&& fut1,
-                                 hpx::future<void>&& fut2 )
-                        : src_future(std::move(fut1)),
-                          dst_future(std::move(fut2)){};
+    hpx::future<void> src_future;
+    hpx::future<void> dst_future;
+  };
 
-                    hpx::future< void > src_future;
-                    hpx::future< void > dst_future;
-            };
+ public:
+  // Empty constructor, necessary for hpx purposes
+  buffer() {}
 
+  // Constructor
+  buffer(hpx::shared_future<hpx::naming::id_type> const &gid,
+         hpx::naming::id_type device_gid_)
+      : base_type(gid), device_gid(std::move(device_gid_)) {
+    is_local = (hpx::get_colocation_id(hpx::launch::sync, get_id()) ==
+                hpx::find_here());
+  }
 
-        public:
-            // Empty constructor, necessary for hpx purposes
-            buffer() {}
+  buffer(hpx::future<hpx::naming::id_type> &&gid)
+      : base_type(std::move(gid)), device_gid() {
+    is_local = (hpx::get_colocation_id(hpx::launch::sync, get_id()) ==
+                hpx::find_here());
+  }
 
-            // Constructor
-            buffer(hpx::shared_future<hpx::naming::id_type> const& gid,
-                   hpx::naming::id_type device_gid_)
-              : base_type(gid), device_gid(std::move(device_gid_))
-            {
-                is_local =
-                    (hpx::get_colocation_id(hpx::launch::sync, get_id()) == hpx::find_here());
-            }
+  // initialization
 
-            buffer(hpx::future<hpx::naming::id_type> && gid)
-              : base_type(std::move(gid)), device_gid()
-            {
-                is_local =
-                    (hpx::get_colocation_id(hpx::launch::sync, get_id()) == hpx::find_here());
-            }
+  // ///////////////////////////////////////////////
+  // Exposed Component functionality
+  //
 
-            // initialization
+  /**
+   *  @brief Get the size of the buffer
+   *
+   *  @return The size of the buffer
+   */
+  hpx::future<std::size_t> size() const;
 
+  /**
+   *  @brief Writes data to the buffer
+   *
+   *  @param offset   The start position of the area to write to.
+   *  @param data     The data to be written.
+   *  @return         An future that can be used for synchronization or
+   *                  dependency for other calls.
+   */
+  template <typename T, typename... Deps>
+  hpx::future<void> enqueue_write(
+      std::size_t offset, const hpx::serialization::serialize_buffer<T> data,
+      Deps &&...dependencies);
 
-            // ///////////////////////////////////////////////
-            // Exposed Component functionality
-            //
+  /**
+   *  @brief Writes data to the buffer in a rectangular region
+   *
+   *  @param rect_properties  The parameters like size, offset, stride
+   *  @param data             The data to be written.
+   *
+   *  @return        An future that can be used for synchronization or
+   *                 dependency for other calls.
+   */
+  template <typename T, typename... Deps>
+  hpx::future<void> enqueue_write_rect(
+      rect_props rect_properties,
+      const hpx::serialization::serialize_buffer<T> data,
+      Deps &&...dependencies);
 
-            /**
-             *  @brief Get the size of the buffer
-             *
-             *  @return The size of the buffer
-             */
-            hpx::future<std::size_t>
-            size() const;
+  /**
+   *  @brief Reads data from the buffer
+   *
+   *  @param offset   The start position of the area to read.
+   *  @param size     The size of the area to read.
+   *  @return         A future that can be used for synchronization or
+   *                  dependency for other calls.
+   *                  Contains the result buffer of the call.
+   */
+  template <typename... Deps>
+  hpx::future<hpx::serialization::serialize_buffer<char> > enqueue_read(
+      std::size_t offset, std::size_t size, Deps &&...dependencies);
 
-            /**
-             *  @brief Writes data to the buffer
-             *
-             *  @param offset   The start position of the area to write to.
-             *  @param data     The data to be written.
-             *  @return         An future that can be used for synchronization or
-             *                  dependency for other calls.
-             */
-            template<typename T, typename ...Deps>
-            hpx::future<void>
-            enqueue_write( std::size_t offset,
-                           const hpx::serialization::serialize_buffer<T> data,
-                           Deps &&... dependencies );
+  /**
+   *  @brief Reads data from the buffer
+   *
+   *  @param offset   The start position of the area to read.
+   *  @param data     The buffer the result will get written to.
+   *                  The buffer also contains information about the
+   *                  size of the data to read.
+   *                  The buffer will get returned and kept alive
+   *                  through the future.
+   *  @return         A future that can be used for synchronization or
+   *                  dependency for other calls.
+   *                  Contains the 'data' parameter with the result
+   *                  written to.
+   */
+  template <typename T, typename... Deps>
+  hpx::future<hpx::serialization::serialize_buffer<T> > enqueue_read(
+      std::size_t offset, hpx::serialization::serialize_buffer<T> data,
+      Deps &&...dependencies);
 
-            /**
-             *  @brief Writes data to the buffer in a rectangular region
-             *
-             *  @param rect_properties  The parameters like size, offset, stride
-             *  @param data             The data to be written.
-             *
-             *  @return        An future that can be used for synchronization or
-             *                 dependency for other calls.
-             */
-            template<typename T, typename ...Deps>
-            hpx::future<void>
-            enqueue_write_rect(
-                            rect_props rect_properties,
-                            const hpx::serialization::serialize_buffer<T> data,
-                            Deps &&... dependencies );
+  /**
+   *  @brief Reads data from the buffer
+   *
+   *  @param rect_properties      Parameters of the rectangle to read.
+   *  @param data     The buffer the result will get written to.
+   *                  The buffer will get returned and kept alive
+   *                  through the future.
+   *  @return         A future that can be used for synchronization or
+   *                  dependency for other calls.
+   *                  Contains the 'data' parameter with the result
+   *                  written to.
+   */
+  template <typename T, typename... Deps>
+  hpx::future<hpx::serialization::serialize_buffer<T> > enqueue_read_rect(
+      rect_props rect_properties, hpx::serialization::serialize_buffer<T> data,
+      Deps &&...dependencies);
 
-            /**
-             *  @brief Reads data from the buffer
-             *
-             *  @param offset   The start position of the area to read.
-             *  @param size     The size of the area to read.
-             *  @return         A future that can be used for synchronization or
-             *                  dependency for other calls.
-             *                  Contains the result buffer of the call.
-             */
-            template<typename ...Deps>
-            hpx::future<hpx::serialization::serialize_buffer<char> >
-            enqueue_read( std::size_t offset,
-                          std::size_t size,
-                          Deps &&... dependencies );
+  /*
+   *  @name Copies data to another buffer.
+   *
+   *  The buffers do NOT need to be from the same device,
+   *  neither do they have to be on the same node.
+   *
+   *  @param dst          The source buffer.
+   *  @param src_offset   The offset on the source buffer.
+   *  @param dst_offset   The offset on the destination buffer.
+   *  @param size         The size of the area to copy.
+   *  @return             A future that can be used for synchronization
+   *                      or dependency for other calls.
+   *
+   *  @see event
+   */
+  template <typename... Deps>
+  send_result enqueue_send(const hpx::opencl::buffer &dst,
+                           std::size_t src_offset, std::size_t dst_offset,
+                           std::size_t size, Deps &&...dependencies);
 
-            /**
-             *  @brief Reads data from the buffer
-             *
-             *  @param offset   The start position of the area to read.
-             *  @param data     The buffer the result will get written to.
-             *                  The buffer also contains information about the
-             *                  size of the data to read.
-             *                  The buffer will get returned and kept alive
-             *                  through the future.
-             *  @return         A future that can be used for synchronization or
-             *                  dependency for other calls.
-             *                  Contains the 'data' parameter with the result
-             *                  written to.
-             */
-            template<typename T, typename ...Deps>
-            hpx::future<hpx::serialization::serialize_buffer<T> >
-            enqueue_read( std::size_t offset,
-                          hpx::serialization::serialize_buffer<T> data,
-                          Deps &&... dependencies );
+  /*
+   *  @name Copies data to another buffer.
+   *
+   *  The buffers do NOT need to be from the same device,
+   *  neither do they have to be on the same node.
+   *
+   *  @param dst          The source buffer.
+   *  @param rect_properties      Parameters of the rectangle to send.
+   *  @return             A future that can be used for synchronization
+   *                      or dependency for other calls.
+   *
+   *  @see event
+   */
+  template <typename... Deps>
+  send_result enqueue_send_rect(const hpx::opencl::buffer &dst,
+                                rect_props rect_properties,
+                                Deps &&...dependencies);
 
-            /**
-             *  @brief Reads data from the buffer
-             *
-             *  @param rect_properties      Parameters of the rectangle to read.
-             *  @param data     The buffer the result will get written to.
-             *                  The buffer will get returned and kept alive
-             *                  through the future.
-             *  @return         A future that can be used for synchronization or
-             *                  dependency for other calls.
-             *                  Contains the 'data' parameter with the result
-             *                  written to.
-             */
-            template<typename T, typename ...Deps>
-            hpx::future<hpx::serialization::serialize_buffer<T> >
-            enqueue_read_rect( rect_props rect_properties,
-                               hpx::serialization::serialize_buffer<T> data,
-                               Deps &&... dependencies );
+  ////////////////////////////////////////////////////////////////////
+  // Proxied functions
+  //
+ private:
+  hpx::future<hpx::serialization::serialize_buffer<char> > enqueue_read_impl(
+      std::size_t &&offset, std::size_t &&size,
+      hpx::opencl::util::resolved_events &&deps);
 
-            /*
-             *  @name Copies data to another buffer.
-             *
-             *  The buffers do NOT need to be from the same device,
-             *  neither do they have to be on the same node.
-             *
-             *  @param dst          The source buffer.
-             *  @param src_offset   The offset on the source buffer.
-             *  @param dst_offset   The offset on the destination buffer.
-             *  @param size         The size of the area to copy.
-             *  @return             A future that can be used for synchronization
-             *                      or dependency for other calls.
-             *
-             *  @see event
-             */
-            template<typename ...Deps>
-            send_result enqueue_send( const hpx::opencl::buffer& dst,
-                                      std::size_t         src_offset,
-                                      std::size_t         dst_offset,
-                                      std::size_t         size,
-                                      Deps &&... dependencies );
+  send_result enqueue_send_impl(const hpx::opencl::buffer &dst,
+                                std::size_t &&src_offset,
+                                std::size_t &&dst_offset, std::size_t &&size,
+                                hpx::opencl::util::resolved_events &&deps);
 
-            /*
-             *  @name Copies data to another buffer.
-             *
-             *  The buffers do NOT need to be from the same device,
-             *  neither do they have to be on the same node.
-             *
-             *  @param dst          The source buffer.
-             *  @param rect_properties      Parameters of the rectangle to send.
-             *  @return             A future that can be used for synchronization
-             *                      or dependency for other calls.
-             *
-             *  @see event
-             */
-            template<typename ...Deps>
-            send_result enqueue_send_rect( const hpx::opencl::buffer& dst,
-                                           rect_props rect_properties,
-                                           Deps &&... dependencies );
+  send_result enqueue_send_rect_impl(const hpx::opencl::buffer &dst,
+                                     rect_props &&rect_properties,
+                                     hpx::opencl::util::resolved_events &&deps);
 
-            ////////////////////////////////////////////////////////////////////
-            // Proxied functions
-            //
-        private:
-            hpx::future<hpx::serialization::serialize_buffer<char> >
-            enqueue_read_impl( std::size_t && offset,
-                               std::size_t && size,
-                               hpx::opencl::util::resolved_events && deps );
+  void ensure_device_id();
 
-            send_result
-            enqueue_send_impl( const hpx::opencl::buffer& dst,
-                               std::size_t && src_offset,
-                               std::size_t && dst_offset,
-                               std::size_t && size,
-                               hpx::opencl::util::resolved_events && deps );
+ private:
+  mutable hpx::naming::id_type device_gid;
+  bool is_local;
 
-            send_result
-            enqueue_send_rect_impl( const hpx::opencl::buffer& dst,
-                                    rect_props && rect_properties,
-                                    hpx::opencl::util::resolved_events && deps );
+ private:
+  // serialization support
+  friend class hpx::serialization::access;
 
-            void ensure_device_id();
+  template <typename Archive>
+  void load(Archive &ar, unsigned) {
+    ar >> hpx::serialization::base_object<base_type>(*this);
+    ar >> device_gid;
+    is_local = (hpx::get_colocation_id(hpx::launch::sync, get_id()) ==
+                hpx::find_here());
+  }
 
-        private:
-            mutable hpx::naming::id_type device_gid;
-            bool is_local;
+  template <typename Archive>
+  void save(Archive &ar, unsigned) const {
+    HPX_ASSERT(device_gid);
+    ar << hpx::serialization::base_object<base_type>(*this);
+    ar << device_gid;
+  }
 
-        private:
-            // serialization support
-            friend class hpx::serialization::access;
+  HPX_SERIALIZATION_SPLIT_MEMBER()
+};
 
-            template <typename Archive>
-            void load(Archive & ar, unsigned)
-            {
-                ar >> hpx::serialization::base_object<base_type>(*this);
-                ar >> device_gid;
-                is_local =
-                    (hpx::get_colocation_id(hpx::launch::sync, get_id()) == hpx::find_here());
-            }
-
-            template <typename Archive>
-            void save(Archive & ar, unsigned) const
-            {
-                HPX_ASSERT(device_gid);
-                ar << hpx::serialization::base_object<base_type>(*this);
-                ar << device_gid;
-            }
-
-            HPX_SERIALIZATION_SPLIT_MEMBER()
-
-    };
-
-}}
-
+}  // namespace opencl
+}  // namespace hpx
 
 ////////////////////////////////////////////////////////////////////////////////
 // IMPLEMENTATIONS
 //
-template<typename T, typename ...Deps>
+template <typename T, typename... Deps>
 hpx::future<hpx::serialization::serialize_buffer<T> >
-hpx::opencl::buffer::enqueue_read( std::size_t offset,
-                                   hpx::serialization::serialize_buffer<T> data,
-                                   Deps &&... dependencies )
-{
-    ensure_device_id();
+hpx::opencl::buffer::enqueue_read(std::size_t offset,
+                                  hpx::serialization::serialize_buffer<T> data,
+                                  Deps &&...dependencies) {
+  ensure_device_id();
 
-    typedef hpx::serialization::serialize_buffer<T> buffer_type;
+  typedef hpx::serialization::serialize_buffer<T> buffer_type;
 
-    // combine dependency futures in one std::vector
-    using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
-    HPX_ASSERT(deps.are_from_device(device_gid));
+  // combine dependency futures in one std::vector
+  using hpx::opencl::util::enqueue_overloads::resolver;
+  auto deps =
+      resolver(device_gid.get_gid(), std::forward<Deps>(dependencies)...);
+  HPX_ASSERT(deps.are_from_device(device_gid));
 
-    // create local event
-    using hpx::opencl::lcos::event;
-    event<buffer_type> ev( device_gid );
+  // create local event
+  using hpx::opencl::lcos::event;
+  event<buffer_type> ev(device_gid);
 
-    // send command to server class
-    if(!is_local) {
-        // is remote call
+  // send command to server class
+  if (!is_local) {
+    // is remote call
 
-        typedef hpx::opencl::server::buffer
-            ::enqueue_read_to_userbuffer_remote_action<T> func_remote;
-        hpx::apply<func_remote>( std::move(get_id()),
-                                 std::move(ev.get_event_id()),
-                                 offset,
-                                 data.size() * sizeof(T),
-                                 reinterpret_cast<std::uintptr_t>(data.data()),
-                                 std::move(deps.event_ids) );
+    typedef hpx::opencl::server::buffer ::
+        enqueue_read_to_userbuffer_remote_action<T>
+            func_remote;
+    hpx::apply<func_remote>(std::move(get_id()), std::move(ev.get_event_id()),
+                            offset, data.size() * sizeof(T),
+                            reinterpret_cast<std::uintptr_t>(data.data()),
+                            std::move(deps.event_ids));
 
-        auto f = ev.get_future();
+    auto f = ev.get_future();
 
-        hpx::traits::detail::get_shared_state(f)->set_on_completed(
-            [data]() { /* just keep data alive */ });
+    hpx::traits::detail::get_shared_state(f)->set_on_completed(
+        [data]() { /* just keep data alive */ });
 
-        return f;
-    }
+    return f;
+  }
 
-    // is local call, send direct reference to buffer
-    typedef hpx::opencl::server::buffer
-        ::enqueue_read_to_userbuffer_local_action<T> func_local;
-    hpx::apply<func_local>( std::move(get_id()),
-                            std::move(ev.get_event_id()),
-                            offset,
-                            data,
-                            std::move(deps.event_ids) );
+  // is local call, send direct reference to buffer
+  typedef hpx::opencl::server::buffer ::enqueue_read_to_userbuffer_local_action<
+      T>
+      func_local;
+  hpx::apply<func_local>(std::move(get_id()), std::move(ev.get_event_id()),
+                         offset, data, std::move(deps.event_ids));
 
-    // return future connected to event
-    return ev.get_future();
+  // return future connected to event
+  return ev.get_future();
 }
 
-template<typename T, typename ...Deps>
+template <typename T, typename... Deps>
 hpx::future<hpx::serialization::serialize_buffer<T> >
 hpx::opencl::buffer::enqueue_read_rect(
-                                   rect_props rect_properties,
-                                   hpx::serialization::serialize_buffer<T> data,
-                                   Deps &&... dependencies )
-{
-    ensure_device_id();
+    rect_props rect_properties, hpx::serialization::serialize_buffer<T> data,
+    Deps &&...dependencies) {
+  ensure_device_id();
 
-    typedef hpx::serialization::serialize_buffer<T> buffer_type;
+  typedef hpx::serialization::serialize_buffer<T> buffer_type;
 
-    // combine dependency futures in one std::vector
-    using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
-    HPX_ASSERT(deps.are_from_device(device_gid));
+  // combine dependency futures in one std::vector
+  using hpx::opencl::util::enqueue_overloads::resolver;
+  auto deps =
+      resolver(device_gid.get_gid(), std::forward<Deps>(dependencies)...);
+  HPX_ASSERT(deps.are_from_device(device_gid));
 
-    // create local event
-    using hpx::opencl::lcos::event;
-    event<buffer_type> ev( device_gid );
+  // create local event
+  using hpx::opencl::lcos::event;
+  event<buffer_type> ev(device_gid);
 
-    // send command to server class
-    if(!is_local) {
-        // is remote call
+  // send command to server class
+  if (!is_local) {
+    // is remote call
 
-        typedef hpx::opencl::server::buffer
-            ::enqueue_read_to_userbuffer_rect_remote_action<T> func_remote;
-        hpx::apply<func_remote>( std::move(get_id()),
-                                 std::move(ev.get_event_id()),
-                                 std::move(rect_properties),
-                                 reinterpret_cast<std::uintptr_t>(data.data()),
-                                 std::move(deps.event_ids) );
-
-        auto f = ev.get_future();
-
-        hpx::traits::detail::get_shared_state(f)->set_on_completed(
-            [data]() { /* just keep data alive */ });
-
-        return f;
-    }
-
-    // is local call, send direct reference to buffer
-
-    typedef hpx::opencl::server::buffer
-        ::enqueue_read_to_userbuffer_rect_local_action<T> func_local;
-    hpx::apply<func_local>( std::move(get_id()),
-                            std::move(ev.get_event_id()),
+    typedef hpx::opencl::server::buffer ::
+        enqueue_read_to_userbuffer_rect_remote_action<T>
+            func_remote;
+    hpx::apply<func_remote>(std::move(get_id()), std::move(ev.get_event_id()),
                             std::move(rect_properties),
-                            data,
-                            std::move(deps.event_ids) );
+                            reinterpret_cast<std::uintptr_t>(data.data()),
+                            std::move(deps.event_ids));
 
-    // return future connected to event
-    return ev.get_future();
+    auto f = ev.get_future();
+
+    hpx::traits::detail::get_shared_state(f)->set_on_completed(
+        [data]() { /* just keep data alive */ });
+
+    return f;
+  }
+
+  // is local call, send direct reference to buffer
+
+  typedef hpx::opencl::server::buffer ::
+      enqueue_read_to_userbuffer_rect_local_action<T>
+          func_local;
+  hpx::apply<func_local>(std::move(get_id()), std::move(ev.get_event_id()),
+                         std::move(rect_properties), data,
+                         std::move(deps.event_ids));
+
+  // return future connected to event
+  return ev.get_future();
 }
 
-template<typename T, typename ...Deps>
-hpx::future<void>
-hpx::opencl::buffer::enqueue_write( std::size_t offset,
-               const hpx::serialization::serialize_buffer<T> data,
-               Deps &&... dependencies )
-{
-    ensure_device_id();
+template <typename T, typename... Deps>
+hpx::future<void> hpx::opencl::buffer::enqueue_write(
+    std::size_t offset, const hpx::serialization::serialize_buffer<T> data,
+    Deps &&...dependencies) {
+  ensure_device_id();
 
-    // combine dependency futures in one std::vector
-    using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
-    HPX_ASSERT(deps.are_from_device(device_gid));
+  // combine dependency futures in one std::vector
+  using hpx::opencl::util::enqueue_overloads::resolver;
+  auto deps =
+      resolver(device_gid.get_gid(), std::forward<Deps>(dependencies)...);
+  HPX_ASSERT(deps.are_from_device(device_gid));
 
-    // create local event
-    using hpx::opencl::lcos::event;
-    event<void> ev( device_gid );
+  // create local event
+  using hpx::opencl::lcos::event;
+  event<void> ev(device_gid);
 
-    // send command to server class
-    typedef hpx::opencl::server::buffer::enqueue_write_action<T> func;
-    hpx::apply<func>( this->get_id(),
-                      ev.get_event_id(),
-                      offset,
-                      data,
-                      std::move(deps.event_ids) );
+  // send command to server class
+  typedef hpx::opencl::server::buffer::enqueue_write_action<T> func;
+  hpx::apply<func>(this->get_id(), ev.get_event_id(), offset, data,
+                   std::move(deps.event_ids));
 
-
-    // return future connected to event
-    return ev.get_future();
+  // return future connected to event
+  return ev.get_future();
 }
 
-template<typename T, typename ...Deps>
-hpx::future<void>
-hpx::opencl::buffer::enqueue_write_rect( rect_props rect_properties,
-                    const hpx::serialization::serialize_buffer<T> data,
-                    Deps &&... dependencies )
-{
-    ensure_device_id();
+template <typename T, typename... Deps>
+hpx::future<void> hpx::opencl::buffer::enqueue_write_rect(
+    rect_props rect_properties,
+    const hpx::serialization::serialize_buffer<T> data,
+    Deps &&...dependencies) {
+  ensure_device_id();
 
-    // combine dependency futures in one std::vector
-    using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
-    HPX_ASSERT(deps.are_from_device(device_gid));
+  // combine dependency futures in one std::vector
+  using hpx::opencl::util::enqueue_overloads::resolver;
+  auto deps =
+      resolver(device_gid.get_gid(), std::forward<Deps>(dependencies)...);
+  HPX_ASSERT(deps.are_from_device(device_gid));
 
-    // create local event
-    using hpx::opencl::lcos::event;
-    event<void> ev( device_gid );
+  // create local event
+  using hpx::opencl::lcos::event;
+  event<void> ev(device_gid);
 
-    // send command to server class
-    typedef hpx::opencl::server::buffer::enqueue_write_rect_action<T> func;
-    hpx::apply<func>( this->get_id(),
-                      ev.get_event_id(),
-                      std::move(rect_properties),
-                      data,
-                      std::move(deps.event_ids) );
+  // send command to server class
+  typedef hpx::opencl::server::buffer::enqueue_write_rect_action<T> func;
+  hpx::apply<func>(this->get_id(), ev.get_event_id(),
+                   std::move(rect_properties), data, std::move(deps.event_ids));
 
-    // return future connected to event
-    return ev.get_future();
+  // return future connected to event
+  return ev.get_future();
 }
 
-template<typename ...Deps>
+template <typename... Deps>
 hpx::future<hpx::serialization::serialize_buffer<char> >
-hpx::opencl::buffer::enqueue_read( std::size_t offset,
-                                   std::size_t size,
-                                   Deps &&... dependencies )
-{
-    ensure_device_id();
+hpx::opencl::buffer::enqueue_read(std::size_t offset, std::size_t size,
+                                  Deps &&...dependencies) {
+  ensure_device_id();
 
-    // combine dependency futures in one std::vector
-    using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
-    HPX_ASSERT(deps.are_from_device(device_gid));
+  // combine dependency futures in one std::vector
+  using hpx::opencl::util::enqueue_overloads::resolver;
+  auto deps =
+      resolver(device_gid.get_gid(), std::forward<Deps>(dependencies)...);
+  HPX_ASSERT(deps.are_from_device(device_gid));
 
-    return enqueue_read_impl( std::move(offset),
-                              std::move(size),
-                              std::move(deps) );
+  return enqueue_read_impl(std::move(offset), std::move(size), std::move(deps));
 }
 
-template<typename ...Deps>
-hpx::opencl::buffer::send_result
-hpx::opencl::buffer::enqueue_send( const hpx::opencl::buffer& dst,
-                                   std::size_t src_offset,
-                                   std::size_t dst_offset,
-                                   std::size_t size,
-                                   Deps &&... dependencies )
-{
-    // combine dependency futures in one std::vector
-    using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
+template <typename... Deps>
+hpx::opencl::buffer::send_result hpx::opencl::buffer::enqueue_send(
+    const hpx::opencl::buffer &dst, std::size_t src_offset,
+    std::size_t dst_offset, std::size_t size, Deps &&...dependencies) {
+  // combine dependency futures in one std::vector
+  using hpx::opencl::util::enqueue_overloads::resolver;
+  auto deps =
+      resolver(device_gid.get_gid(), std::forward<Deps>(dependencies)...);
 
-    return enqueue_send_impl( dst,
-                              std::move(src_offset),
-                              std::move(dst_offset),
-                              std::move(size),
-                              std::move(deps) );
+  return enqueue_send_impl(dst, std::move(src_offset), std::move(dst_offset),
+                           std::move(size), std::move(deps));
 }
 
-template<typename ...Deps>
-hpx::opencl::buffer::send_result
-hpx::opencl::buffer::enqueue_send_rect( const hpx::opencl::buffer& dst,
-                                        rect_props rect_properties,
-                                        Deps &&... dependencies )
-{
-    // combine dependency futures in one std::vector
-    using hpx::opencl::util::enqueue_overloads::resolver;
-    auto deps = resolver(device_gid.get_gid(),std::forward<Deps>(dependencies)...);
+template <typename... Deps>
+hpx::opencl::buffer::send_result hpx::opencl::buffer::enqueue_send_rect(
+    const hpx::opencl::buffer &dst, rect_props rect_properties,
+    Deps &&...dependencies) {
+  // combine dependency futures in one std::vector
+  using hpx::opencl::util::enqueue_overloads::resolver;
+  auto deps =
+      resolver(device_gid.get_gid(), std::forward<Deps>(dependencies)...);
 
-    return enqueue_send_rect_impl( dst,
-                                   std::move(rect_properties),
-                                   std::move(deps) );
+  return enqueue_send_rect_impl(dst, std::move(rect_properties),
+                                std::move(deps));
 }
 
 #endif

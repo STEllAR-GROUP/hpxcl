@@ -7,11 +7,11 @@
 #ifndef HPX_OPENCL_HPP_
 #define HPX_OPENCL_HPP_
 
-    #include "opencl/device.hpp"
-    #include "opencl/create_devices.hpp"
-    #include "opencl/buffer.hpp"
-    #include "opencl/program.hpp"
-    #include "opencl/kernel.hpp"
+#include "opencl/device.hpp"
+#include "opencl/create_devices.hpp"
+#include "opencl/buffer.hpp"
+#include "opencl/program.hpp"
+#include "opencl/kernel.hpp"
 
 #endif
 

@@ -10,64 +10,59 @@
 
 #include "register_event.hpp"
 
-class test_client{
-    public:
-    template<typename ...Deps>
-    hpx::future<int> func(hpx::naming::gid_type device_id,int a, int b, Deps &&... dependencies )
-    {
-        // combine dependency futures in one std::vector
-        using hpx::opencl::util::enqueue_overloads::resolver;
-        auto deps = resolver(device_id,std::forward<Deps>(dependencies)...);
+class test_client {
+ public:
+  template <typename... Deps>
+  hpx::future<int> func(hpx::naming::gid_type device_id, int a, int b,
+                        Deps &&...dependencies) {
+    // combine dependency futures in one std::vector
+    using hpx::opencl::util::enqueue_overloads::resolver;
+    auto deps = resolver(device_id, std::forward<Deps>(dependencies)...);
 
-        return func_impl( std::move(a), std::move(b), std::move(deps) );
-    }
+    return func_impl(std::move(a), std::move(b), std::move(deps));
+  }
 
-    hpx::future<int> func_impl( int && a, int && b,
-                                hpx::opencl::util::resolved_events && ids );
+  hpx::future<int> func_impl(int &&a, int &&b,
+                             hpx::opencl::util::resolved_events &&ids);
 };
 
-
-hpx::future<int>
-test_client::func_impl( int && a, int && b,
-                        hpx::opencl::util::resolved_events && ids){
-    return hpx::make_ready_future<int>((int)ids.event_ids.size() + 1000 * a + 100 * b);
+hpx::future<int> test_client::func_impl(
+    int &&a, int &&b, hpx::opencl::util::resolved_events &&ids) {
+  return hpx::make_ready_future<int>((int)ids.event_ids.size() + 1000 * a +
+                                     100 * b);
 };
 
-static void cl_test( hpx::opencl::device local_device, 
-                     hpx::opencl::device cldevice ){
+static void cl_test(hpx::opencl::device local_device,
+                    hpx::opencl::device cldevice) {
+  hpx::opencl::lcos::event<void> event(local_device.get_id());
+  register_event(local_device, event.get_event_id());
 
-    hpx::opencl::lcos::event<void> event(local_device.get_id());
-    register_event(local_device, event.get_event_id());
+  hpx::shared_future<void> sfut = event.get_future();
+  std::vector<hpx::shared_future<void>> vsfut1;
+  vsfut1.push_back(sfut);
+  std::vector<hpx::shared_future<void>> vsfut2;
+  vsfut2.push_back(sfut);
+  vsfut2.push_back(sfut);
 
-    hpx::shared_future<void> sfut = event.get_future();
-    std::vector<hpx::shared_future<void>> vsfut1;
-    vsfut1.push_back( sfut );
-    std::vector<hpx::shared_future<void>> vsfut2;
-    vsfut2.push_back( sfut );
-    vsfut2.push_back( sfut );
+  test_client t;
 
-    test_client t;
-    
-    hpx::naming::gid_type device_gid = cldevice.get_id().get_gid();
+  hpx::naming::gid_type device_gid = cldevice.get_id().get_gid();
 
-    std::cout << cldevice.get_id().get_gid() << std::endl;
+  std::cout << cldevice.get_id().get_gid() << std::endl;
 
-    HPX_TEST_EQ( 5300, t.func(device_gid,5, 3                       ).get() );
-    HPX_TEST_EQ( 5301, t.func(device_gid,5, 3, sfut                 ).get() );
-    HPX_TEST_EQ( 5302, t.func(device_gid,5, 3, sfut, sfut           ).get() );
-    HPX_TEST_EQ( 5301, t.func(device_gid,5, 3, vsfut1               ).get() );
-    HPX_TEST_EQ( 5302, t.func(device_gid,5, 3, vsfut2               ).get() );
-    HPX_TEST_EQ( 5302, t.func(device_gid,5, 3, vsfut1, vsfut1       ).get() );
-    HPX_TEST_EQ( 5303, t.func(device_gid,5, 3, vsfut1, vsfut2       ).get() );
-    HPX_TEST_EQ( 5303, t.func(device_gid,5, 3, vsfut2, vsfut1       ).get() );
-    HPX_TEST_EQ( 5304, t.func(device_gid,5, 3, vsfut2, vsfut2       ).get() );
-    HPX_TEST_EQ( 5304, t.func(device_gid,5, 3, sfut, sfut, vsfut2   ).get() );
-    HPX_TEST_EQ( 5304, t.func(device_gid,5, 3, sfut, vsfut2, sfut   ).get() );
-    HPX_TEST_EQ( 5304, t.func(device_gid,5, 3, vsfut2, sfut, sfut   ).get() );
-    HPX_TEST_EQ( 5305, t.func(device_gid,5, 3, sfut, vsfut2, vsfut2 ).get() );
-    HPX_TEST_EQ( 5305, t.func(device_gid,5, 3, vsfut2, sfut, vsfut2 ).get() );
-    HPX_TEST_EQ( 5305, t.func(device_gid,5, 3, vsfut2, vsfut2, sfut ).get() );
-
-
+  HPX_TEST_EQ(5300, t.func(device_gid, 5, 3).get());
+  HPX_TEST_EQ(5301, t.func(device_gid, 5, 3, sfut).get());
+  HPX_TEST_EQ(5302, t.func(device_gid, 5, 3, sfut, sfut).get());
+  HPX_TEST_EQ(5301, t.func(device_gid, 5, 3, vsfut1).get());
+  HPX_TEST_EQ(5302, t.func(device_gid, 5, 3, vsfut2).get());
+  HPX_TEST_EQ(5302, t.func(device_gid, 5, 3, vsfut1, vsfut1).get());
+  HPX_TEST_EQ(5303, t.func(device_gid, 5, 3, vsfut1, vsfut2).get());
+  HPX_TEST_EQ(5303, t.func(device_gid, 5, 3, vsfut2, vsfut1).get());
+  HPX_TEST_EQ(5304, t.func(device_gid, 5, 3, vsfut2, vsfut2).get());
+  HPX_TEST_EQ(5304, t.func(device_gid, 5, 3, sfut, sfut, vsfut2).get());
+  HPX_TEST_EQ(5304, t.func(device_gid, 5, 3, sfut, vsfut2, sfut).get());
+  HPX_TEST_EQ(5304, t.func(device_gid, 5, 3, vsfut2, sfut, sfut).get());
+  HPX_TEST_EQ(5305, t.func(device_gid, 5, 3, sfut, vsfut2, vsfut2).get());
+  HPX_TEST_EQ(5305, t.func(device_gid, 5, 3, vsfut2, sfut, vsfut2).get());
+  HPX_TEST_EQ(5305, t.func(device_gid, 5, 3, vsfut2, vsfut2, sfut).get());
 };
-

@@ -25,12 +25,13 @@ namespace server {
 //  Global cuda functions
 
 // Returns the IDs of all devices on current host
-HPX_CUDA_EXPORT std::vector<hpx::cuda::device> get_devices(int major, int minor);
+HPX_CUDA_EXPORT std::vector<hpx::cuda::device> get_devices(int major,
+                                                           int minor);
 
 HPX_DEFINE_PLAIN_ACTION(get_devices, get_devices_action);
 
-}
-}
-}
+}  // namespace server
+}  // namespace cuda
+}  // namespace hpx
 
 #endif

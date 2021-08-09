@@ -8,21 +8,18 @@
 
 #include "export_definitions.hpp"
 
-namespace hpx
-{
-    namespace cuda
-    {
-        class device;
-        class buffer;
-        class program;
+namespace hpx {
+namespace cuda {
+class device;
+class buffer;
+class program;
 
-        namespace server
-        {
-            class HPX_CUDA_EXPORT device;
-            class HPX_CUDA_EXPORT buffer;
-            class HPX_CUDA_EXPORT program;
-        }
-    }
-}
+namespace server {
+class HPX_CUDA_EXPORT device;
+class HPX_CUDA_EXPORT buffer;
+class HPX_CUDA_EXPORT program;
+}  // namespace server
+}  // namespace cuda
+}  // namespace hpx
 
 #endif

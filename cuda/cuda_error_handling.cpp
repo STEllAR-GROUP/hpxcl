@@ -5,24 +5,19 @@
 
 #include "cuda/cuda_error_handling.hpp"
 
-namespace hpx { namespace cuda
-{
+namespace hpx {
+namespace cuda {
 
 void checkCudaError(char const* function) {
+  cudaError_t err = cudaGetLastError();
+  if (cudaSuccess != err) {
+    std::stringstream errorMessage;
+    errorMessage << "CudaError: " << cudaGetErrorString(err) << " at "
+                 << function << std::endl;
 
-    cudaError_t err = cudaGetLastError();
-    if (cudaSuccess != err) {
-
-        std::stringstream errorMessage;
-        errorMessage << "CudaError: " << cudaGetErrorString(err) << " at " << function << std::endl;
-
-        HPX_THROW_EXCEPTION(hpx::no_success, function,
-                errorMessage.str().c_str());
-
-    }
-
+    HPX_THROW_EXCEPTION(hpx::no_success, function, errorMessage.str().c_str());
+  }
 }
 
-}}
-
-
+}  // namespace cuda
+}  // namespace hpx

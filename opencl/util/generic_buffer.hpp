@@ -18,105 +18,89 @@ namespace hpx {
 namespace opencl {
 namespace util {
 
-        namespace detail{
+namespace detail {
 
-            template<typename T>
-            struct generic_buffer_impl{
-                typedef hpx::future<hpx::serialization::serialize_buffer<char> >
-                    data_type;
-                public:
-                    static hpx::future<T>
-                    get(data_type && data){
-                        return data.then(
-                            [] (data_type && data) -> T
-                            {
-                                hpx::serialization::serialize_buffer<char>
-                                raw_data = data.get();
+template <typename T>
+struct generic_buffer_impl {
+  typedef hpx::future<hpx::serialization::serialize_buffer<char>> data_type;
 
-                                // Compare lengths
-                                HPX_ASSERT(sizeof(T) == raw_data.size());
+ public:
+  static hpx::future<T> get(data_type&& data) {
+    return data.then([](data_type&& data) -> T {
+      hpx::serialization::serialize_buffer<char> raw_data = data.get();
 
-                                return * reinterpret_cast<T*>(raw_data.data());
-                            });
-                    };
-            };
+      // Compare lengths
+      HPX_ASSERT(sizeof(T) == raw_data.size());
 
-            template<typename T>
-            struct generic_buffer_impl<std::vector<T>>{
-                typedef hpx::future<hpx::serialization::serialize_buffer<char> >
-                    data_type;
-                public:
-                    static hpx::future<std::vector<T>>
-                    get(data_type && data){
-                        return data.then(
-                            [] (data_type && data) -> std::vector<T>
-                            {
+      return *reinterpret_cast<T*>(raw_data.data());
+    });
+  };
+};
 
-                                hpx::serialization::serialize_buffer<char>
-                                raw_data = data.get();
+template <typename T>
+struct generic_buffer_impl<std::vector<T>> {
+  typedef hpx::future<hpx::serialization::serialize_buffer<char>> data_type;
 
-                                // Compute number of elements
-                                std::size_t num_elements = raw_data.size() / sizeof(T);
+ public:
+  static hpx::future<std::vector<T>> get(data_type&& data) {
+    return data.then([](data_type&& data) -> std::vector<T> {
+      hpx::serialization::serialize_buffer<char> raw_data = data.get();
 
-                                // Initialize result vector
-                                std::vector<T> result;
-                                result.reserve(num_elements);
+      // Compute number of elements
+      std::size_t num_elements = raw_data.size() / sizeof(T);
 
-                                // Fill result vector
-                                for(std::size_t i = 0; i + sizeof(T) <= raw_data.size();
-                                    i+=sizeof(T))
-                                {
-                                    result.push_back(
-                                        *reinterpret_cast<T*>(&raw_data.data()[i]) );
-                                }
+      // Initialize result vector
+      std::vector<T> result;
+      result.reserve(num_elements);
 
-                                /* Compare lengths */
-                                HPX_ASSERT(result.size() == num_elements);
+      // Fill result vector
+      for (std::size_t i = 0; i + sizeof(T) <= raw_data.size();
+           i += sizeof(T)) {
+        result.push_back(*reinterpret_cast<T*>(&raw_data.data()[i]));
+      }
 
-                                return result;
-                            });
-                    };
-            };
+      /* Compare lengths */
+      HPX_ASSERT(result.size() == num_elements);
 
-            template<>
-            struct generic_buffer_impl<std::string>{
-                typedef hpx::future<hpx::serialization::serialize_buffer<char> >
-                    data_type;
-                public:
-                    HPX_OPENCL_EXPORT static hpx::future<std::string>
-                        get(data_type && data);
-            };
-    };
+      return result;
+    });
+  };
+};
 
-    /////////////////////////////////////////
-    /// @brief An accelerator device.
-    ///
-    class HPX_OPENCL_EXPORT generic_buffer
-    {
-        typedef hpx::future<hpx::serialization::serialize_buffer<char> >
-            data_type;
-        public:
-            generic_buffer(data_type && data_) : data(std::move(data_)){}
+template <>
+struct generic_buffer_impl<std::string> {
+  typedef hpx::future<hpx::serialization::serialize_buffer<char>> data_type;
 
-            /**
-             * @brief Converts the info to a generic datatype.
-             *
-             * @return The converted result
-             */
-            template <typename T>
-            hpx::future<T> get()
-            {
-                return detail::generic_buffer_impl<T>::get(std::move(data));
-            }
+ public:
+  HPX_OPENCL_EXPORT static hpx::future<std::string> get(data_type&& data);
+};
+};  // namespace detail
 
-        private:
-            data_type data;
+/////////////////////////////////////////
+/// @brief An accelerator device.
+///
+class HPX_OPENCL_EXPORT generic_buffer {
+  typedef hpx::future<hpx::serialization::serialize_buffer<char>> data_type;
 
-    };
+ public:
+  generic_buffer(data_type&& data_) : data(std::move(data_)) {}
 
-}}}
+  /**
+   * @brief Converts the info to a generic datatype.
+   *
+   * @return The converted result
+   */
+  template <typename T>
+  hpx::future<T> get() {
+    return detail::generic_buffer_impl<T>::get(std::move(data));
+  }
 
+ private:
+  data_type data;
+};
 
-#endif// HPX_OPENCL_UTIL_GENERIC_BUFFER_HPP_
+}  // namespace util
+}  // namespace opencl
+}  // namespace hpx
 
-
+#endif  // HPX_OPENCL_UTIL_GENERIC_BUFFER_HPP_

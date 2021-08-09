@@ -6,9 +6,9 @@
 #ifndef MANDELBROT_MAPS_RESOURCES_HPP_
 #define MANDELBROT_MAPS_RESOURCES_HPP_
 
-    extern const char mandelbrot_html[];
-    extern const unsigned long mandelbrot_html_len;
-    extern const char mandelbrot_ico[];
-    extern const unsigned long mandelbrot_ico_len;
+extern const char mandelbrot_html[];
+extern const unsigned long mandelbrot_html_len;
+extern const char mandelbrot_ico[];
+extern const unsigned long mandelbrot_ico_len;
 
 #endif

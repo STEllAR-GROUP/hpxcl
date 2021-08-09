@@ -28,8 +28,8 @@ namespace cuda {
  *
  * \return A list of suitable CUDA devices on target node
  */
-HPX_CUDA_EXPORT hpx::future<std::vector<device> >
-get_devices(hpx::naming::id_type node_id, int major = 1, int minor = 0);
+HPX_CUDA_EXPORT hpx::future<std::vector<device>> get_devices(
+    hpx::naming::id_type node_id, int major = 1, int minor = 0);
 
 /**
  * \brief Fetches a list of all accelerator devices present in the current
@@ -40,8 +40,8 @@ get_devices(hpx::naming::id_type node_id, int major = 1, int minor = 0);
  *
  * \return A list of suitable CUDA devices
  */
-HPX_CUDA_EXPORT hpx::future<std::vector<device>>
-get_all_devices(int major = 1, int minor = 0);
+HPX_CUDA_EXPORT hpx::future<std::vector<device>> get_all_devices(int major = 1,
+                                                                 int minor = 0);
 
 /**
  * \brief Fetches a list of local accelerator devices present in the current
@@ -52,8 +52,8 @@ get_all_devices(int major = 1, int minor = 0);
  *
  * \return A list of suitable CUDA devices
  */
-HPX_CUDA_EXPORT hpx::future<std::vector<device>>
-get_local_devices(int major = 1, int minor = 0);
+HPX_CUDA_EXPORT hpx::future<std::vector<device>> get_local_devices(
+    int major = 1, int minor = 0);
 
 /**
  * \brief Fetches a list of remote accelerator devices present in the current
@@ -64,9 +64,9 @@ get_local_devices(int major = 1, int minor = 0);
  *
  * \return A list of suitable CUDA devices
  */
-HPX_CUDA_EXPORT hpx::future<std::vector<device>>
-get_remote_devices(int major = 1, int minor = 0);
-}
-}
+HPX_CUDA_EXPORT hpx::future<std::vector<device>> get_remote_devices(
+    int major = 1, int minor = 0);
+}  // namespace cuda
+}  // namespace hpx
 
 #endif

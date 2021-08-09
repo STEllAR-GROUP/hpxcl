@@ -17,172 +17,165 @@
 using namespace hpx::cuda;
 
 //###########################################################################
-//Kernels
+// Kernels
 //###########################################################################
 
 static const char kernel_src[] =
 
-"extern \"C\" __global__ void kernel(float* in) { 		 				\n"
-		"																\n"
-		"	size_t i = threadIdx.x + blockIdx.x * blockDim.x;			\n"
-		"	float x = (float) i;										\n"
-		"	float s = sinf(x);											\n"
-		"	float c = cosf(x);											\n"
-		"	in[i] = in[i] + sqrtf(s * s + c * c);						\n"
-		"																\n"
-		"}																\n";
+    "extern \"C\" __global__ void kernel(float* in) { 		 	"
+    "			\n"
+    "									"
+    "							\n"
+    "	size_t i = threadIdx.x + blockIdx.x * blockDim.x;		"
+    "	\n"
+    "	float x = (float) i;						"
+    "				\n"
+    "	float s = sinf(x);						"
+    "					\n"
+    "	float c = cosf(x);						"
+    "					\n"
+    "	in[i] = in[i] + sqrtf(s * s + c * c);				"
+    "		\n"
+    "									"
+    "							\n"
+    "}									"
+    "							\n";
 
 //###########################################################################
-//Main
+// Main
 //###########################################################################
 
-int main(int argc, char*argv[]) {
+int main(int argc, char* argv[]) {
+  // Get list of available Cuda Devices.
+  std::vector<device> devices = get_all_devices(2, 0).get();
 
-	// Get list of available Cuda Devices.
-	std::vector<device> devices = get_all_devices(2, 0).get();
+  // Check whether there are any devices
+  if (devices.size() < 1) {
+    hpx::cerr << "No CUDA devices found!" << hpx::endl;
+    return hpx::finalize();
+  }
 
-	// Check whether there are any devices
-	if (devices.size() < 1) {
-		hpx::cerr << "No CUDA devices found!" << hpx::endl;
-		return hpx::finalize();
-	}
+  const int blockSize = 256;
 
-	const int blockSize = 256;
+  if (argc != 3) {
+    std::cout << "Usage: " << argv[0] << " n -> 2^n*1024*" << blockSize
+              << " elements and g -> amount of GPUs" << std::endl;
+    exit(1);
+  }
 
+  double time = 0;
+  size_t count = atoi(argv[1]);
+  int deviceCount = atoi(argv[2]);
 
-	if (argc != 3) {
-		std::cout << "Usage: " << argv[0] << " n -> 2^n*1024*" << blockSize
-				<< " elements and g -> amount of GPUs" << std::endl;
-		exit(1);
-	}
+  if (deviceCount > devices.size()) {
+    std::cout << "Error: You are using " << deviceCount << " and only "
+              << devices.size() << "are available" << std::endl;
+    exit(1);
+  }
 
-	double time = 0;
-	size_t count = atoi(argv[1]);
-	int deviceCount = atoi(argv[2]);
+  const int n = pow(2, count) * 1024 * blockSize;
+  const int streamSize = n / deviceCount;
+  const int streamBytes = streamSize * sizeof(TYPE);
+  const int bytes = n * sizeof(TYPE);
 
-	if( deviceCount > devices.size())
-    {
-        std::cout << "Error: You are using " << deviceCount << " and only "
-            << devices.size() << "are available" << std::endl;
-        exit(1);
-    }
+  std::cout << n << " ";
 
+  timer_start();
 
-	const int n = pow(2,count) * 1024 * blockSize;
-	const int streamSize = n / deviceCount;
-	const int streamBytes = streamSize * sizeof(TYPE);
-	const int bytes = n * sizeof(TYPE);
+  // Malloc Host
+  TYPE* in;
+  cudaMallocHost((void**)&in, bytes);
+  checkCudaError("Malloc in");
+  for (size_t i = 0; i < n; i++) in[i] = 0.;
 
-	std::cout << n << " ";
+  std::vector<hpx::future<void>> dependencies;
 
-	timer_start();
+  // Create the hello_world device program
+  std::vector<hpx::future<hpx::cuda::program>> fprogram;
 
-	//Malloc Host
-	TYPE* in;
-	cudaMallocHost((void**) &in, bytes);
-	checkCudaError("Malloc in");
-	for (size_t i = 0; i < n ; i++)
-	        in[i] = 0.;
+  for (size_t i = 0; i < deviceCount; i++)
+    fprogram.push_back(devices[i].create_program_with_source(kernel_src));
 
-	std::vector<hpx::future<void>> dependencies;
+  // Add compiler flags for compiling the kernel
 
-	// Create the hello_world device program
-	std::vector<hpx::future<hpx::cuda::program>> fprogram;
+  std::vector<std::string> flags;
+  std::string mode = "--gpu-architecture=compute_";
+  mode.append(std::to_string(devices[0].get_device_architecture_major().get()));
+  mode.append(std::to_string(devices[0].get_device_architecture_minor().get()));
 
-	for (size_t i = 0; i < deviceCount; i++)
-	fprogram.push_back(devices[i].create_program_with_source(kernel_src));
+  flags.push_back(mode);
 
-	// Add compiler flags for compiling the kernel
+  hpx::wait_all(fprogram);
 
-	std::vector<std::string> flags;
-	std::string mode = "--gpu-architecture=compute_";
-	mode.append(
-			std::to_string(devices[0].get_device_architecture_major().get()));
-	mode.append(
-			std::to_string(devices[0].get_device_architecture_minor().get()));
+  std::vector<hpx::cuda::program> programs;
+  for (size_t i = 0; i < deviceCount; i++) {
+    programs.push_back(fprogram[i].get());
+    dependencies.push_back(programs[i].build(flags, "kernel"));
+  }
 
-	flags.push_back(mode);
+  std::vector<hpx::future<hpx::cuda::buffer>> fbuffer;
+  for (size_t i = 0; i < deviceCount; i++) {
+    fbuffer.push_back(devices[i].create_buffer(streamBytes));
+  }
 
-	hpx::wait_all(fprogram);
+  hpx::wait_all(fbuffer);
 
-	std::vector<hpx::cuda::program> programs;
-	for (size_t i = 0; i < deviceCount; i++)
-	{
-		programs.push_back(fprogram[i].get());
-		dependencies.push_back(programs[i].build(flags, "kernel"));
+  std::vector<buffer> bufferIn;
+  for (size_t i = 0; i < deviceCount; i++) {
+    bufferIn.push_back(fbuffer[i].get());
+  }
 
-	}
+  for (size_t i = 0; i < deviceCount; i++) {
+    dependencies.push_back(
+        bufferIn[i].enqueue_write(i * streamSize, streamBytes, in));
+  }
 
-    std::vector<hpx::future<hpx::cuda::buffer>> fbuffer;
-    for (size_t i = 0; i < deviceCount; i++)
-    {                                                                            
-       fbuffer.push_back(devices[i].create_buffer(streamBytes));
-    }                                                                            
-        
-    hpx::wait_all(fbuffer);
+  std::vector<hpx::cuda::buffer> args;
+  // Generate the grid and block dim
+  hpx::cuda::server::program::Dim3 grid;
+  hpx::cuda::server::program::Dim3 block;
 
-	std::vector<buffer> bufferIn;
-	for (size_t i = 0; i < deviceCount; i++)
-	{
-	   bufferIn.push_back(fbuffer[i].get());
-	}
+  // Set the values for the grid dimension
+  grid.x = streamSize / blockSize;
+  grid.y = 1;
+  grid.z = 1;
 
-	for (size_t i = 0; i < deviceCount; i++)
-	{
+  // Set the values for the block dimension
+  block.x = blockSize;
+  block.y = 1;
+  block.z = 1;
 
-	    dependencies.push_back(bufferIn[i].enqueue_write(i*streamSize,streamBytes,in));
-    }
-    
-	std::vector<hpx::cuda::buffer> args;
-	//Generate the grid and block dim
-	hpx::cuda::server::program::Dim3 grid;
-	hpx::cuda::server::program::Dim3 block;
+  hpx::wait_all(dependencies);
 
-	//Set the values for the grid dimension
-	grid.x = streamSize / blockSize;
-	grid.y = 1;
-	grid.z = 1;
+  std::vector<hpx::future<void>> kernelFutures;
+  for (size_t i = 0; i < deviceCount; i++) {
+    args.push_back(bufferIn[i]);
+#ifdef HPXCL_CUDA_WITH_STREAMS
+    kernelFutures.push_back(programs[i].run(args, "kernel", grid, block, 0));
+#else
+    kernelFutures.push_back(programs[i].run(args, "kernel", grid, block, 0));
+#endif
+    args.clear();
+  }
 
-	//Set the values for the block dimension
-	block.x = blockSize;
-	block.y = 1;
-	block.z = 1;
+  hpx::wait_all(kernelFutures);
 
-	hpx::wait_all(dependencies);
+  time += timer_stop();
 
-	std::vector<hpx::future<void>> kernelFutures;
-	for (size_t i = 0; i < deviceCount; i++)
-	{
-		args.push_back(bufferIn[i]);
-		#ifdef HPXCL_CUDA_WITH_STREAMS
-		kernelFutures.push_back(programs[i].run(args, "kernel", grid, block,0));
-		#else
-		kernelFutures.push_back(programs[i].run(args, "kernel", grid, block,0));
-		#endif
-		args.clear();
-	}
+  bool check;
+  for (size_t i = 0; i < deviceCount; i++) {
+    TYPE* res = bufferIn[i].enqueue_read_sync<TYPE>(0, streamBytes);
+    check = checkKernel(res, streamSize);
+    if (check == false) break;
+  }
 
-	hpx::wait_all(kernelFutures);
+  timer_start();
 
-	time += timer_stop();
+  // Clean
+  cudaFreeHost(in);
+  checkCudaError("Free in");
 
-	bool check;
-	for (size_t i = 0; i < deviceCount; i++)
-	{
-		TYPE* res = bufferIn[i].enqueue_read_sync<TYPE>(0,streamBytes);
-		check = checkKernel(res,streamSize);
-		if(check==false) break;
+  std::cout << check << " " << time + timer_stop() << std::endl;
 
-	}
-
-	timer_start();
-
-	//Clean
-	cudaFreeHost(in);
-	checkCudaError("Free in");
-
-	std:: cout << check << " " << time + timer_stop() << std::endl;
-
-	return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
-
