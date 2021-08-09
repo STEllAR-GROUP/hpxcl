@@ -206,7 +206,40 @@ uintptr_t buffer::enqueue_read_local(size_t offset, size_t size) {
 
 void buffer::p2p_copy(uintptr_t dst, size_t dst_parent_device_id, size_t count){
 
+    int can_peer;
 
+    cudaDeviceCanAccessPeer(&can_peer, this->parent_device_num, dst_parent_device_id);
+    checkCudaError(
+              "buffer::p2p Error checking peer access");
+
+    if ( can_peer == 0){
+    
+        std::cerr << "Error: P2P copy between these devices is not possible!" << std::endl;
+    
+    }
+    else
+    {
+        cudaSetDevice(dst_parent_device_id);
+        checkCudaError("buffer::p2p_copy Set dest device");
+        cudaDeviceEnablePeerAccess(this->parent_device_num, 0);
+        checkCudaError("buffer::p2p_copy Enable p2p on the parent device");
+        cudaSetDevice(this->parent_device_num);
+        checkCudaError("buffer::p2p_copy Set source device");
+        cudaDeviceEnablePeerAccess(dst_parent_device_id, 0);
+        checkCudaError("buffer::p2p_copy Enable p2p in the source device");
+
+        #ifdef HPXCL_CUDA_WITH_STREAMS
+                  cudaMemcpyPeerAsync((void*)dst, dst_parent_device_id, this->data_device, this->parent_device_num, count, this->stream);
+                  checkCudaError("buffer::p2p_copy Error during copy data between devices");
+                  cudaStreamSynchronize(this->stream);
+                  checkCudaError("buffer::p2p_copy Error during synchronization of stream");
+  
+        #else
+                  cudaMemcpyPeerAsync((void*)dst, dst_parent_device_id, this->data_device, this->parent_device_num, count);
+                  checkCudaError("buffer::p2p_copy Error during copy data between devices");
+        #endif
+    
+    }
 }
 
 
