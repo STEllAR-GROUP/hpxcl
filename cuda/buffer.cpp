@@ -40,3 +40,6 @@ HPX_REGISTER_ACTION(
 HPX_REGISTER_ACTION(
     cuda_buffer_type::wrapped_type::get_device_id_action,
     cuda_buffer_get_device_id_action);
+HPX_REGISTER_ACTION(
+    cuda_buffer_type::wrapped_type::p2p_copy_action,
+    cuda_buffer_p2p_copy_action);

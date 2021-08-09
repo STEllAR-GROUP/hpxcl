@@ -67,6 +67,8 @@ namespace hpx
 
                 int get_device_id();
 
+                void p2p_copy(uintptr_t dst, size_t dst_parent_device_id, size_t count);
+
                 #ifdef HPXCL_CUDA_WITH_STREAMS
                 cudaStream_t get_stream();
                 #endif
@@ -79,6 +81,7 @@ namespace hpx
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write_local);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, get_device_pointer);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, get_device_id);
+                HPX_DEFINE_COMPONENT_ACTION(buffer, p2p_copy);
             };
         }
     }
@@ -108,4 +111,9 @@ namespace hpx
  HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::buffer::get_device_id_action,
     buffer_get_device_id_action);
+ HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::buffer::p2p_copy_action,
+    buffer_p2p_copy_action);
+
+
  #endif //BUFFER_2_HPP

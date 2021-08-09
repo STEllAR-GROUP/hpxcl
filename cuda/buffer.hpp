@@ -213,6 +213,15 @@ public:
 
 	}
 
+
+     hpx::lcos::future<void> p2p_copy(uintptr_t dst, size_t dst_parent_device_id, size_t count){
+ 
+          HPX_ASSERT(this->get_id());
+ 
+          typedef server::buffer::p2p_copy_action action_type;
+          return hpx::async<action_type>(this->get_id(), dst, dst_parent_device_id, count);
+      }
+
 private:
 	hpx::naming::id_type device_gid;
 	bool is_local;

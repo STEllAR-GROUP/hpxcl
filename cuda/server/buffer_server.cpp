@@ -204,6 +204,13 @@ uintptr_t buffer::enqueue_read_local(size_t offset, size_t size) {
 
 }
 
+void buffer::p2p_copy(uintptr_t dst, size_t dst_parent_device_id, size_t count){
+
+
+}
+
+
+
 #ifdef HPXCL_CUDA_WITH_STREAMS
 cudaStream_t buffer::get_stream() {
 	return this->stream;
