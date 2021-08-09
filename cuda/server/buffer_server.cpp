@@ -137,18 +137,15 @@ void buffer::enqueue_write(size_t offset, size_t size,
 /**
  * Get the device pointer
  */
-void* buffer::get_raw_pointer() {
-	return &data_device;
+uintptr_t buffer::get_device_pointer() {
+	return reinterpret_cast<uintptr_t>(data_device);
 }
 
-/**
- * Get the device pointer wrapped in a smart pointer to make it seriazible
- */
-
-std::shared_ptr<size_t> buffer::get_smart_pointer(){
-
-    return std::shared_ptr<size_t>(reinterpret_cast<size_t*>(&data_device));
+void* buffer::get_raw_pointer()
+{
+    return &data_device;
 }
+
 
 /**
  * Get the device id
