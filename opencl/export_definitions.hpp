@@ -10,12 +10,10 @@
 #include <hpx/config.hpp>
 #include <hpx/config/export_definitions.hpp>
 
-
 #if defined(HPX_OPENCL_MODULE_EXPORTS)
-# define HPX_OPENCL_EXPORT HPX_SYMBOL_EXPORT
+#define HPX_OPENCL_EXPORT HPX_SYMBOL_EXPORT
 #else
-# define HPX_OPENCL_EXPORT HPX_SYMBOL_IMPORT
+#define HPX_OPENCL_EXPORT HPX_SYMBOL_IMPORT
 #endif
 
-
-#endif //HPX_OPENCL_EXPORT_DEFINITIONS_HPP_
+#endif  // HPX_OPENCL_EXPORT_DEFINITIONS_HPP_

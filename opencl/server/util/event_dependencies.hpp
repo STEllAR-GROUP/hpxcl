@@ -14,37 +14,40 @@
 #include "../../fwd_declarations.hpp"
 
 ////////////////////////////////////////////////////////////////
-namespace hpx { namespace opencl{ namespace server{ namespace util{
+namespace hpx {
+namespace opencl {
+namespace server {
+namespace util {
 
+////////////////////////////////////////////////////////
+// This class is used to convert event ids to cl_events
+//
+class HPX_OPENCL_EXPORT event_dependencies {
+ public:
+  // Constructor
+  event_dependencies(const std::vector<hpx::naming::id_type>& event_ids,
+                     hpx::opencl::server::device* parent_device);
+  ~event_dependencies();
 
-    ////////////////////////////////////////////////////////
-    // This class is used to convert event ids to cl_events
-    //
-    class HPX_OPENCL_EXPORT event_dependencies
-    {
-    public:
-        // Constructor
-        event_dependencies(const std::vector<hpx::naming::id_type> & event_ids,
-                           hpx::opencl::server::device* parent_device);
-        ~event_dependencies();
+  //////////////////////////////////////////////////
+  /// Local public functions
+  ///
 
-        //////////////////////////////////////////////////
-        /// Local public functions
-        ///
+  // Returns a pointer to a list of cl_events. Ensure that deallocation
+  // of this class only happens when this pointer is not needed any more!
+  //
+  // Returns NULL if size() == 0
+  cl_event* get_cl_events();
 
-        // Returns a pointer to a list of cl_events. Ensure that deallocation
-        // of this class only happens when this pointer is not needed any more!
-        //
-        // Returns NULL if size() == 0
-        cl_event* get_cl_events();
+  // Returns the number of events in this list
+  std::size_t size();
 
-        // Returns the number of events in this list
-        std::size_t size();
-
-    private:
-        std::vector<cl_event> events;
-
-    };
-}}}}
+ private:
+  std::vector<cl_event> events;
+};
+}  // namespace util
+}  // namespace server
+}  // namespace opencl
+}  // namespace hpx
 
 #endif

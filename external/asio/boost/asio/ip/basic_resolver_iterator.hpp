@@ -12,8 +12,8 @@
 #define BOOST_ASIO_IP_BASIC_RESOLVER_ITERATOR_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
-# pragma once
-#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+#pragma once
+#endif  // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
 #include <boost/asio/detail/config.hpp>
 #include <cstddef>
@@ -45,9 +45,8 @@ namespace ip {
  * @e Shared @e objects: Unsafe.
  */
 template <typename InternetProtocol>
-class basic_resolver_iterator
-{
-public:
+class basic_resolver_iterator {
+ public:
   /// The type used for the distance between two iterators.
   typedef std::ptrdiff_t difference_type;
 
@@ -64,32 +63,23 @@ public:
   typedef std::forward_iterator_tag iterator_category;
 
   /// Default constructor creates an end iterator.
-  basic_resolver_iterator()
-    : index_(0)
-  {
-  }
+  basic_resolver_iterator() : index_(0) {}
 
-  basic_resolver_iterator(basic_resolver_iterator const & o)
-    : index_(o.index_)
-    , values_(o.values_)
-  {}
+  basic_resolver_iterator(basic_resolver_iterator const& o)
+      : index_(o.index_), values_(o.values_) {}
 
-  basic_resolver_iterator(basic_resolver_iterator && o)
-    : index_(o.index_)
-    , values_(std::move(o.values_))
-  {
-      o.values_.reset();
-      o.index_ = 0;
+  basic_resolver_iterator(basic_resolver_iterator&& o)
+      : index_(o.index_), values_(std::move(o.values_)) {
+    o.values_.reset();
+    o.index_ = 0;
   }
 
   /// Create an iterator from an addrinfo list returned by getaddrinfo.
   static basic_resolver_iterator create(
       boost::asio::detail::addrinfo_type* address_info,
-      const std::string& host_name, const std::string& service_name)
-  {
+      const std::string& host_name, const std::string& service_name) {
     basic_resolver_iterator iter;
-    if (!address_info)
-      return std::move(iter);
+    if (!address_info) return std::move(iter);
 
     std::string actual_host_name = host_name;
     if (address_info->ai_canonname)
@@ -97,19 +87,16 @@ public:
 
     iter.values_.reset(new values_type);
 
-    while (address_info)
-    {
-      if (address_info->ai_family == PF_INET
-          || address_info->ai_family == PF_INET6)
-      {
-        using namespace std; // For memcpy.
+    while (address_info) {
+      if (address_info->ai_family == PF_INET ||
+          address_info->ai_family == PF_INET6) {
+        using namespace std;  // For memcpy.
         typename InternetProtocol::endpoint endpoint;
         endpoint.resize(static_cast<std::size_t>(address_info->ai_addrlen));
         memcpy(endpoint.data(), address_info->ai_addr,
-            address_info->ai_addrlen);
-        iter.values_->push_back(
-            basic_resolver_entry<InternetProtocol>(endpoint,
-              actual_host_name, service_name));
+               address_info->ai_addrlen);
+        iter.values_->push_back(basic_resolver_entry<InternetProtocol>(
+            endpoint, actual_host_name, service_name));
       }
       address_info = address_info->ai_next;
     }
@@ -120,38 +107,32 @@ public:
   /// Create an iterator from an endpoint, host name and service name.
   static basic_resolver_iterator create(
       const typename InternetProtocol::endpoint& endpoint,
-      const std::string& host_name, const std::string& service_name)
-  {
+      const std::string& host_name, const std::string& service_name) {
     basic_resolver_iterator iter;
     iter.values_.reset(new values_type);
-    iter.values_->push_back(
-        basic_resolver_entry<InternetProtocol>(
-          endpoint, host_name, service_name));
+    iter.values_->push_back(basic_resolver_entry<InternetProtocol>(
+        endpoint, host_name, service_name));
     return std::move(iter);
   }
 
   /// Dereference an iterator.
-  const basic_resolver_entry<InternetProtocol>& operator*() const
-  {
+  const basic_resolver_entry<InternetProtocol>& operator*() const {
     return dereference();
   }
 
   /// Dereference an iterator.
-  const basic_resolver_entry<InternetProtocol>* operator->() const
-  {
+  const basic_resolver_entry<InternetProtocol>* operator->() const {
     return &dereference();
   }
 
   /// Increment operator (prefix).
-  basic_resolver_iterator& operator++()
-  {
+  basic_resolver_iterator& operator++() {
     increment();
     return *this;
   }
 
   /// Increment operator (postfix).
-  basic_resolver_iterator operator++(int)
-  {
+  basic_resolver_iterator operator++(int) {
     basic_resolver_iterator tmp(*this);
     ++*this;
     return tmp;
@@ -159,40 +140,32 @@ public:
 
   /// Test two iterators for equality.
   friend bool operator==(const basic_resolver_iterator& a,
-      const basic_resolver_iterator& b)
-  {
+                         const basic_resolver_iterator& b) {
     return a.equal(b);
   }
 
   /// Test two iterators for inequality.
   friend bool operator!=(const basic_resolver_iterator& a,
-      const basic_resolver_iterator& b)
-  {
+                         const basic_resolver_iterator& b) {
     return !a.equal(b);
   }
 
-private:
-  void increment()
-  {
-    if (++index_ == values_->size())
-    {
+ private:
+  void increment() {
+    if (++index_ == values_->size()) {
       // Reset state to match a default constructed end iterator.
       values_.reset();
       index_ = 0;
     }
   }
 
-  bool equal(const basic_resolver_iterator& other) const
-  {
-    if (!values_ && !other.values_)
-      return true;
-    if (values_ != other.values_)
-      return false;
+  bool equal(const basic_resolver_iterator& other) const {
+    if (!values_ && !other.values_) return true;
+    if (values_ != other.values_) return false;
     return index_ == other.index_;
   }
 
-  const basic_resolver_entry<InternetProtocol>& dereference() const
-  {
+  const basic_resolver_entry<InternetProtocol>& dereference() const {
     return (*values_)[index_];
   }
 
@@ -201,10 +174,10 @@ private:
   detail::shared_ptr<values_type> values_;
 };
 
-} // namespace ip
-} // namespace asio
-} // namespace boost
+}  // namespace ip
+}  // namespace asio
+}  // namespace boost
 
 #include <boost/asio/detail/pop_options.hpp>
 
-#endif // BOOST_ASIO_IP_BASIC_RESOLVER_ITERATOR_HPP
+#endif  // BOOST_ASIO_IP_BASIC_RESOLVER_ITERATOR_HPP

@@ -9,12 +9,12 @@
 
 #if !defined(BOOST_NO_0X_HDR_ATOMIC)
 #ifdef __GNUC__
-# if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6)
-  || !defined(__GXX_EXPERIMENTAL_CXX0X__)
-#  define BOOST_NO_0X_HDR_ATOMIC
-# endif
+#if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6)
+|| !defined(__GXX_EXPERIMENTAL_CXX0X__)
+#define BOOST_NO_0X_HDR_ATOMIC
+#endif
 #else
-# define BOOST_NO_0X_HDR_ATOMIC
+#define BOOST_NO_0X_HDR_ATOMIC
 #endif
 #endif
 
@@ -24,16 +24,16 @@
 #include <atomic>
 #endif
 
-namespace boost {
-namespace lockfree {
-namespace detail {
+        namespace boost {
+  namespace lockfree {
+  namespace detail {
 
 #ifdef BOOST_NO_0X_HDR_ATOMIC
-using boost::atomic;
-using boost::memory_order_acquire;
-using boost::memory_order_consume;
-using boost::memory_order_relaxed;
-using boost::memory_order_release;
+  using boost::atomic;
+  using boost::memory_order_acquire;
+  using boost::memory_order_consume;
+  using boost::memory_order_relaxed;
+  using boost::memory_order_release;
 #else
 using std::atomic;
 using std::memory_order_acquire;
@@ -42,13 +42,14 @@ using std::memory_order_relaxed;
 using std::memory_order_release;
 #endif
 
-}
-using detail::atomic;
-using detail::memory_order_acquire;
-using detail::memory_order_consume;
-using detail::memory_order_relaxed;
-using detail::memory_order_release;
+  }  // namespace detail
+  using detail::atomic;
+  using detail::memory_order_acquire;
+  using detail::memory_order_consume;
+  using detail::memory_order_relaxed;
+  using detail::memory_order_release;
 
-}}
+  }  // namespace lockfree
+}  // namespace boost
 
 #endif /* BOOST_LOCKFREE_DETAIL_ATOMIC_HPP */

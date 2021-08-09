@@ -20,296 +20,256 @@
 
 using hpx::opencl::server::program;
 
-
 // Constructor
-program::program()
-{}
+program::program() {}
 
 // External destructor.
 // This is needed because OpenCL calls only run properly on large stack size.
-static void program_cleanup(uintptr_t program_id_ptr)
-{
+static void program_cleanup(uintptr_t program_id_ptr) {
+  cl_int err;
 
-    cl_int err;
+  HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
+  cl_program program_id = reinterpret_cast<cl_program>(program_id_ptr);
 
-    cl_program program_id = reinterpret_cast<cl_program>(program_id_ptr);
-
-    // Release the device memory
-    if(program_id)
-    {
-        err = clReleaseProgram(program_id);
-        cl_ensure_nothrow(err, "clReleaseProgram()");
-    }
+  // Release the device memory
+  if (program_id) {
+    err = clReleaseProgram(program_id);
+    cl_ensure_nothrow(err, "clReleaseProgram()");
+  }
 }
 
 // Destructor
-program::~program()
-{
+program::~program() {
+  hpx::threads::executors::default_executor exec(
+      hpx::threads::thread_priority_normal,
+      hpx::threads::thread_stacksize_medium);
 
-    hpx::threads::executors::default_executor exec(
-                                          hpx::threads::thread_priority_normal,
-                                          hpx::threads::thread_stacksize_medium);
-
-    // run dectructor in a thread, as we need it to run on a large stack size
-    hpx::threads::async_execute( exec, &program_cleanup, reinterpret_cast<uintptr_t>(program_id))
-                                                                        .wait();
-
-
+  // run dectructor in a thread, as we need it to run on a large stack size
+  hpx::threads::async_execute(exec, &program_cleanup,
+                              reinterpret_cast<uintptr_t>(program_id))
+      .wait();
 }
 
-hpx::naming::id_type program::get_parent_device_id()
-{
-    return parent_device_id;
+hpx::naming::id_type program::get_parent_device_id() {
+  return parent_device_id;
 }
 
-void
-program::init_with_source( hpx::naming::id_type device_id,
-                           hpx::serialization::serialize_buffer<char> src )
-{
+void program::init_with_source(hpx::naming::id_type device_id,
+                               hpx::serialization::serialize_buffer<char> src) {
+  HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
+  this->parent_device_id = std::move(device_id);
+  this->parent_device =
+      hpx::get_ptr<hpx::opencl::server::device>(parent_device_id).get();
+  this->program_id = NULL;
 
-    this->parent_device_id = std::move(device_id);
-    this->parent_device = hpx::get_ptr
-                          <hpx::opencl::server::device>(parent_device_id).get();
-    this->program_id = NULL;
+  // Retrieve the context from parent class
+  cl_context context = parent_device->get_context();
 
-    // Retrieve the context from parent class
-    cl_context context = parent_device->get_context();
+  // The opencl error variable
+  cl_int err;
 
-    // The opencl error variable
-    cl_int err;
+  // Set up data for OpenCL call
+  HPX_ASSERT(src.size() > 0);
+  std::size_t src_size = src.size();
+  const char* src_data = src.data();
+  if (src_data[src_size - 1] == '\0') {
+    // Decrease one if zero-terminated, as
+    // OpenCL specifies 'length of source string excluding null terminator'
+    src_size--;
+  }
 
-    // Set up data for OpenCL call
-    HPX_ASSERT(src.size() > 0);
-    std::size_t src_size = src.size();
-    const char* src_data = src.data();
-    if(src_data[src_size - 1] == '\0'){
-        // Decrease one if zero-terminated, as
-        // OpenCL specifies 'length of source string excluding null terminator'
-        src_size --;
-    }
-
-    // Create the cl_program
-    program_id = clCreateProgramWithSource( context, 1, &src_data, &src_size,
-                                            &err );
-    cl_ensure(err, "clCreateProgramWithSource()");
-
+  // Create the cl_program
+  program_id =
+      clCreateProgramWithSource(context, 1, &src_data, &src_size, &err);
+  cl_ensure(err, "clCreateProgramWithSource()");
 }
 
-void
-program::init_with_binary( hpx::naming::id_type device_id,
-                           hpx::serialization::serialize_buffer<char> binary )
-{
+void program::init_with_binary(
+    hpx::naming::id_type device_id,
+    hpx::serialization::serialize_buffer<char> binary) {
+  HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
+  this->parent_device_id = std::move(device_id);
+  this->parent_device =
+      hpx::get_ptr<hpx::opencl::server::device>(parent_device_id).get();
+  this->program_id = NULL;
 
-    this->parent_device_id = std::move(device_id);
-    this->parent_device = hpx::get_ptr
-                          <hpx::opencl::server::device>(parent_device_id).get();
-    this->program_id = NULL;
+  // Retrieve the context from parent class
+  cl_context context = parent_device->get_context();
 
-    // Retrieve the context from parent class
-    cl_context context = parent_device->get_context();
+  // The opencl error variable
+  cl_int err;
 
-    // The opencl error variable
-    cl_int err;
+  // Set up data for OpenCL call
+  HPX_ASSERT(binary.size() > 0);
+  cl_device_id device = parent_device->get_device_id();
+  const std::size_t size = binary.size();
+  const unsigned char* bin = reinterpret_cast<unsigned char*>(binary.data());
 
-    // Set up data for OpenCL call
-    HPX_ASSERT(binary.size() > 0);
-    cl_device_id device = parent_device->get_device_id();
-    const std::size_t size = binary.size();
-    const unsigned char* bin = reinterpret_cast<unsigned char*>(binary.data());
-
-    // Create the cl_program
-    cl_int binary_status;
-    program_id = clCreateProgramWithBinary( context,
-                                            1, &device, &size, &bin,
-                                            &binary_status, &err );
-    cl_ensure(err, "clCreateProgramWithBinary()");
-    cl_ensure(binary_status, "clCreateProgramWithBinary().binary_status");
-
+  // Create the cl_program
+  cl_int binary_status;
+  program_id = clCreateProgramWithBinary(context, 1, &device, &size, &bin,
+                                         &binary_status, &err);
+  cl_ensure(err, "clCreateProgramWithBinary()");
+  cl_ensure(binary_status, "clCreateProgramWithBinary().binary_status");
 }
 
-std::string
-program::acquire_build_log()
-{
-    cl_int err;
+std::string program::acquire_build_log() {
+  cl_int err;
 
-    std::size_t build_log_size;
+  std::size_t build_log_size;
 
-    // Query size
-    err = clGetProgramBuildInfo(program_id, parent_device->get_device_id(),
-                                CL_PROGRAM_BUILD_LOG, 0, NULL, &build_log_size);
+  // Query size
+  err = clGetProgramBuildInfo(program_id, parent_device->get_device_id(),
+                              CL_PROGRAM_BUILD_LOG, 0, NULL, &build_log_size);
 
-    // Create buffer
-    std::vector<char> buf(build_log_size);
+  // Create buffer
+  std::vector<char> buf(build_log_size);
 
-    // Get log
-    err = clGetProgramBuildInfo(program_id, parent_device->get_device_id(),
-                                CL_PROGRAM_BUILD_LOG, build_log_size,
-                                buf.data(), NULL);
+  // Get log
+  err = clGetProgramBuildInfo(program_id, parent_device->get_device_id(),
+                              CL_PROGRAM_BUILD_LOG, build_log_size, buf.data(),
+                              NULL);
 
-    // make build log look nice in exception
-    std::stringstream sstream;
-    sstream << std::endl << std::endl;
-    sstream << "//////////////////////////////////////" << std::endl;
-    sstream << "/// OPENCL BUILD LOG" << std::endl;
-    sstream << "///" << std::endl;
-    sstream << std::endl << buf.data() << std::endl;
-    sstream << "///" << std::endl;
-    sstream << "/// OPENCL BUILD LOG END" << std::endl;
-    sstream << "//////////////////////////////////////" << std::endl;
-    sstream << std::endl;
+  // make build log look nice in exception
+  std::stringstream sstream;
+  sstream << std::endl << std::endl;
+  sstream << "//////////////////////////////////////" << std::endl;
+  sstream << "/// OPENCL BUILD LOG" << std::endl;
+  sstream << "///" << std::endl;
+  sstream << std::endl << buf.data() << std::endl;
+  sstream << "///" << std::endl;
+  sstream << "/// OPENCL BUILD LOG END" << std::endl;
+  sstream << "//////////////////////////////////////" << std::endl;
+  sstream << std::endl;
 
-    // return the nice looking error string.
-    return sstream.str();
-
+  // return the nice looking error string.
+  return sstream.str();
 }
 
-void
-program::throw_on_build_errors(const char* function_name){
+void program::throw_on_build_errors(const char* function_name) {
+  HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
+  cl_int err;
+  cl_build_status build_status;
 
-    cl_int err;
-    cl_build_status build_status;
+  // Read build status
+  err = clGetProgramBuildInfo(program_id, parent_device->get_device_id(),
+                              CL_PROGRAM_BUILD_STATUS, sizeof(cl_build_status),
+                              &build_status, NULL);
+  cl_ensure(err, "clGetProgramBuildInfo()");
 
-    // Read build status
-    err = clGetProgramBuildInfo( program_id, parent_device->get_device_id(),
-                                 CL_PROGRAM_BUILD_STATUS,
-                                 sizeof(cl_build_status), &build_status, NULL );
-    cl_ensure(err, "clGetProgramBuildInfo()");
-
-    // Throw if build did not succeed
-    if(build_status != CL_BUILD_SUCCESS)
-    {
-        HPX_THROW_EXCEPTION(hpx::no_success, function_name,
-                            std::string("A build error occured!") +
-                            acquire_build_log());
-    }
+  // Throw if build did not succeed
+  if (build_status != CL_BUILD_SUCCESS) {
+    HPX_THROW_EXCEPTION(
+        hpx::no_success, function_name,
+        std::string("A build error occured!") + acquire_build_log());
+  }
 }
 
-struct build_callback_args{
-    hpx::runtime* rt;
-    hpx::lcos::local::promise<void>* promise;
+struct build_callback_args {
+  hpx::runtime* rt;
+  hpx::lcos::local::promise<void>* promise;
 };
 
-static void CL_CALLBACK
-build_callback( cl_program program_id, void* user_data )
-{
-    // Cast arguments
-    build_callback_args* args =
-        static_cast<build_callback_args*>(user_data);
+static void CL_CALLBACK build_callback(cl_program program_id, void* user_data) {
+  // Cast arguments
+  build_callback_args* args = static_cast<build_callback_args*>(user_data);
 
-    // Send exec status to waiting future
-    using hpx::opencl::server::util::set_promise_from_external;
-    set_promise_from_external ( args->rt, args->promise );
+  // Send exec status to waiting future
+  using hpx::opencl::server::util::set_promise_from_external;
+  set_promise_from_external(args->rt, args->promise);
 }
 
-void
-program::build(std::string options)
-{
-    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
+void program::build(std::string options) {
+  HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
-    cl_int err;
+  cl_int err;
 
-    // fetch device id from parent device
-    cl_device_id device_id = parent_device->get_device_id();
+  // fetch device id from parent device
+  cl_device_id device_id = parent_device->get_device_id();
 
-    // Create a new promise
-    hpx::lcos::local::promise<void> promise;
+  // Create a new promise
+  hpx::lcos::local::promise<void> promise;
 
-    // Retrieve the future
-    hpx::future<void> future = promise.get_future();
+  // Retrieve the future
+  hpx::future<void> future = promise.get_future();
 
-    // Create args for build_callback
-    build_callback_args args;
-    args.rt = hpx::get_runtime_ptr();
-    args.promise = &promise;
+  // Create args for build_callback
+  build_callback_args args;
+  args.rt = hpx::get_runtime_ptr();
+  args.promise = &promise;
 
-    // Initialize compilation
-    err = clBuildProgram( program_id, 1, &device_id, options.c_str(),
-                          &build_callback, &args );
+  // Initialize compilation
+  err = clBuildProgram(program_id, 1, &device_id, options.c_str(),
+                       &build_callback, &args);
 
-    // ignore CL_BUILD_PROGRAM_FAILURE.
-    // we handle this case in throw_on_build_errors()
-    if(err != CL_BUILD_PROGRAM_FAILURE)
-        cl_ensure(err, "clBuildProgram()");
+  // ignore CL_BUILD_PROGRAM_FAILURE.
+  // we handle this case in throw_on_build_errors()
+  if (err != CL_BUILD_PROGRAM_FAILURE) cl_ensure(err, "clBuildProgram()");
 
-    // Wait for compilation to finish
-    future.wait();
+  // Wait for compilation to finish
+  future.wait();
 
-    // check build status
-    throw_on_build_errors("clBuildProgram()");
-
+  // check build status
+  throw_on_build_errors("clBuildProgram()");
 }
 
-hpx::serialization::serialize_buffer<char>
-program::get_binary()
-{
-    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
+hpx::serialization::serialize_buffer<char> program::get_binary() {
+  HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
-    typedef hpx::serialization::serialize_buffer<char> buffer_type;
-    cl_int err;
+  typedef hpx::serialization::serialize_buffer<char> buffer_type;
+  cl_int err;
 
-    // get number of devices
-    cl_uint num_devices;
-    err = clGetProgramInfo(program_id, CL_PROGRAM_NUM_DEVICES, sizeof(cl_uint),
-                           &num_devices, NULL);
-    cl_ensure(err, "clGetProgramInfo()");
+  // get number of devices
+  cl_uint num_devices;
+  err = clGetProgramInfo(program_id, CL_PROGRAM_NUM_DEVICES, sizeof(cl_uint),
+                         &num_devices, NULL);
+  cl_ensure(err, "clGetProgramInfo()");
 
-    // ensure that only one device is associated
-    if(num_devices != 1)
-    {
-        HPX_THROW_EXCEPTION(hpx::internal_server_error, "program::get_binary()",
-                            "Internal Error: More than one device linked!");
-    }
+  // ensure that only one device is associated
+  if (num_devices != 1) {
+    HPX_THROW_EXCEPTION(hpx::internal_server_error, "program::get_binary()",
+                        "Internal Error: More than one device linked!");
+  }
 
-    // get binary size
-    std::size_t binary_size;
-    err = clGetProgramInfo(program_id, CL_PROGRAM_BINARY_SIZES,
-                           sizeof(std::size_t), &binary_size, NULL);
-    cl_ensure(err, "clGetProgramInfo()");
+  // get binary size
+  std::size_t binary_size;
+  err = clGetProgramInfo(program_id, CL_PROGRAM_BINARY_SIZES,
+                         sizeof(std::size_t), &binary_size, NULL);
+  cl_ensure(err, "clGetProgramInfo()");
 
-    // ensure that there actually is binary code
-    if(binary_size == 0)
-    {
-        HPX_THROW_EXCEPTION(hpx::no_success, "program::get_binary()",
-                            "Unable to fetch binary code!");
-    }
+  // ensure that there actually is binary code
+  if (binary_size == 0) {
+    HPX_THROW_EXCEPTION(hpx::no_success, "program::get_binary()",
+                        "Unable to fetch binary code!");
+  }
 
-    // get binary code
-    buffer_type binary( binary_size );
-    char* binary_ptr = binary.data();
-    err = clGetProgramInfo( program_id, CL_PROGRAM_BINARIES,
-                            sizeof(unsigned char*),
-                            &binary_ptr,
-                            NULL );
-    cl_ensure(err, "clGetProgramInfo()");
+  // get binary code
+  buffer_type binary(binary_size);
+  char* binary_ptr = binary.data();
+  err = clGetProgramInfo(program_id, CL_PROGRAM_BINARIES,
+                         sizeof(unsigned char*), &binary_ptr, NULL);
+  cl_ensure(err, "clGetProgramInfo()");
 
-    // return vector
-    return binary;
-
+  // return vector
+  return binary;
 }
 
-hpx::naming::id_type
-program::create_kernel(std::string kernel_name)
-{
+hpx::naming::id_type program::create_kernel(std::string kernel_name) {
+  HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
 
-    HPX_ASSERT(hpx::opencl::tools::runs_on_medium_stack());
+  // Create new kernel
+  hpx::id_type kernel =
+      hpx::components::new_<hpx::opencl::server::kernel>(hpx::find_here())
+          .get();
 
-    // Create new kernel
-    hpx::id_type kernel = hpx::components::new_<hpx::opencl::server::kernel>
-                                                     ( hpx::find_here() ).get();
+  // Initialize kernel locally
+  auto kernel_server = hpx::get_ptr<hpx::opencl::server::kernel>(kernel).get();
 
-    // Initialize kernel locally
-    auto kernel_server = hpx::get_ptr<hpx::opencl::server::kernel>(kernel).get();
+  kernel_server->init(parent_device_id, program_id, kernel_name);
 
-    kernel_server->init(parent_device_id, program_id, kernel_name);
-
-    return kernel;
-
+  return kernel;
 }

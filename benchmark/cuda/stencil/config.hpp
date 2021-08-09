@@ -7,7 +7,7 @@
 #define EPS 10e-5
 
 //###########################################################################
-//Switching between single precision and double precision
+// Switching between single precision and double precision
 //###########################################################################
 
 #ifdef SINGLE

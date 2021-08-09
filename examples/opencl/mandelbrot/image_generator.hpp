@@ -24,85 +24,66 @@
  * this class is the main observer of the image generation.
  * it gets image queries, which it then splits into subimages and sends it to
  * the calculation queue.
- * it then collects the calculated data and puts it together, to have one finished image.
+ * it then collects the calculated data and puts it together, to have one
+ * finished image.
  */
-class image_generator
-{
+class image_generator {
+ public:
+  // initializes the image generator
+  image_generator(size_t img_size_hint_x, size_t img_size_hint_y,
+                  size_t num_parallel_kernels, bool verbose,
+                  std::vector<hpx::opencl::device> devices =
+                      std::vector<hpx::opencl::device>());
 
-    public:
-        // initializes the image generator
-        image_generator(size_t img_size_hint_x,
-                        size_t img_size_hint_y,
-                        size_t num_parallel_kernels,
-                        bool verbose,
-                        std::vector<hpx::opencl::device> devices
-                                = std::vector<hpx::opencl::device>());
+  // destructor
+  ~image_generator();
 
-        // destructor
-        ~image_generator();
+  // waits for the worker to finish
+  void shutdown();
 
-        // waits for the worker to finish
-        void shutdown();
+  // adds a worker
+  void add_worker(hpx::opencl::device& device, size_t num_parallel_kernels);
 
-        // adds a worker
-        void add_worker(hpx::opencl::device & device,
-                        size_t num_parallel_kernels);
+  // waits for the worker to finish initialization
+  void wait_for_startup_finished();
 
-        // waits for the worker to finish initialization
-        void wait_for_startup_finished();
+  // computes an image
+  hpx::lcos::future<std::shared_ptr<std::vector<char>>> compute_image(
+      double pos_x, double pos_y, double zoom, double rotation,
+      size_t img_width, size_t img_height);
 
-        // computes an image
-        hpx::lcos::future<std::shared_ptr<std::vector<char>>>
-        compute_image(double pos_x,
-                      double pos_y,
-                      double zoom,
-                      double rotation,
-                      size_t img_width,
-                      size_t img_height);
+  // computes an image, enhanced version
+  hpx::lcos::future<std::shared_ptr<std::vector<char>>> compute_image(
+      double pos_x, double pos_y, double zoom, double rotation,
+      size_t img_width, size_t img_height,
+      bool benchmark,  // purges output
+      size_t tile_width, size_t tile_height);
 
-        // computes an image, enhanced version
-        hpx::lcos::future<std::shared_ptr<std::vector<char>>>
-        compute_image(double pos_x,
-                      double pos_y,
-                      double zoom,
-                      double rotation,
-                      size_t img_width,
-                      size_t img_height,
-                      bool benchmark, // purges output
-                      size_t tile_width,
-                      size_t tile_height);
+ private:
+  // the main worker function, runs the main work loop
+  static void retrieve_worker_main(intptr_t parent_, bool verbose);
 
-    private:
-        // the main worker function, runs the main work loop
-        static void retrieve_worker_main(
-           intptr_t parent_,
-           bool verbose);
+  // private attributes
+ private:
+  hpx::lcos::shared_future<void> retrievers_finished;
+  std::shared_ptr<work_queue<std::shared_ptr<workload>>> workqueue;
+  std::shared_ptr<std::vector<std::shared_ptr<mandelbrotworker>>> workers;
+  hpx::lcos::local::spinlock images_lock;
 
+  typedef std::map<size_t, std::shared_ptr<std::vector<char>>> image_data_map;
+  typedef std::map<size_t, std::shared_ptr<std::atomic<size_t>>>
+      image_countdown_map;
+  typedef std::map<size_t, std::shared_ptr<hpx::lcos::local::event>>
+      image_ready_map;
+  image_data_map images;
+  image_countdown_map images_countdown;
+  image_ready_map images_ready;
 
-    // private attributes
-    private:
-        hpx::lcos::shared_future<void> retrievers_finished;
-        std::shared_ptr<work_queue<std::shared_ptr<workload>>> workqueue;
-        std::shared_ptr<std::vector<std::shared_ptr<mandelbrotworker>>> workers;
-        hpx::lcos::local::spinlock images_lock;
+  std::atomic<size_t> next_image_id;
+  bool verbose;
 
-        typedef std::map<size_t, std::shared_ptr<std::vector<char>>>
-                    image_data_map;
-        typedef std::map<size_t, std::shared_ptr<std::atomic<size_t>>>
-                    image_countdown_map;
-        typedef std::map<size_t, std::shared_ptr<hpx::lcos::local::event>>
-                    image_ready_map;
-        image_data_map      images;
-        image_countdown_map images_countdown;
-        image_ready_map     images_ready;
-
-        std::atomic<size_t>  next_image_id;
-        bool verbose;
-
-        size_t img_size_hint_x;
-        size_t img_size_hint_y;
-
+  size_t img_size_hint_x;
+  size_t img_size_hint_y;
 };
 
 #endif
-

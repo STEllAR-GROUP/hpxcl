@@ -7,22 +7,21 @@
 
 #include "cuda/program.hpp"
 
-typedef hpx::components::managed_component<
-    hpx::cuda::server::program>
+typedef hpx::components::managed_component<hpx::cuda::server::program>
     cuda_program_type;
 
 HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(cuda_program_type, cuda_program);
 
 HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::build_action,
-    cuda_program_build_action);
+                    cuda_program_build_action);
 HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::set_source_action,
-    cuda_program_set_source_action);
+                    cuda_program_set_source_action);
 HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::run_action,
-    cuda_program_run_action);
+                    cuda_program_run_action);
 
 #ifdef HPXCL_CUDA_WITH_STREAMS
 HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::get_streams_size_action,
-    cuda_get_streams_size_action);
+                    cuda_get_streams_size_action);
 HPX_REGISTER_ACTION(cuda_program_type::wrapped_type::create_stream_action,
-    cuda_create_stream_action);
+                    cuda_create_stream_action);
 #endif

@@ -7,7 +7,6 @@
 #ifndef HPX_OPENCL_CL_HEADERS_HPP_
 #define HPX_OPENCL_CL_HEADERS_HPP_
 
-
 #if defined(__APPLE__) || defined(__MACOSX)
 
 //#include <OpenGL/OpenGL.h>
@@ -18,9 +17,6 @@
 //#include <GL/gl.h>
 #include <CL/opencl.h>
 
-#endif // !__APPLE__
+#endif  // !__APPLE__
 
-
-#endif// HPX_OPENCL_CL_HEADERS_HPP_
-
-
+#endif  // HPX_OPENCL_CL_HEADERS_HPP_

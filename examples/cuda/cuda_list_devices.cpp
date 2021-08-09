@@ -12,30 +12,27 @@
 
 // hpx_main, is the actual main called by hpx
 int main(int argc, char* argv[]) {
-	{
+  {
+    // Get list of available CUDA Devices.
+    std::vector<hpx::cuda::device> devices =
+        hpx::cuda::get_all_devices(1, 0).get();
 
-		//Get list of available CUDA Devices.
-		std::vector<hpx::cuda::device> devices = hpx::cuda::get_all_devices(1,
-				0).get();
+    // Check whether there are any devices
+    if (devices.size() < 1) {
+      hpx::cerr << "No CUDA devices found!" << hpx::endl;
+      return hpx::finalize();
+    }
 
-		// Check whether there are any devices
-		if (devices.size() < 1) {
-			hpx::cerr << "No CUDA devices found!" << hpx::endl;
-			return hpx::finalize();
-		}
+    hpx::cout << hpx::endl << "Devices:" << hpx::endl << hpx::endl;
 
-		hpx::cout << hpx::endl << "Devices:" << hpx::endl << hpx::endl;
+    // print a lot of information about every device
+    for (auto& device : devices) {
+      device.get_cuda_info();
+      // add newline before starting a new device
+      hpx::cout << hpx::endl;
+    }
+  }
 
-		// print a lot of information about every device
-		for (auto &device : devices) {
-
-			device.get_cuda_info();
-			// add newline before starting a new device
-			hpx::cout << hpx::endl;
-
-		}
-	}
-
-// End the program
-	return hpx::finalize();
+  // End the program
+  return hpx::finalize();
 }

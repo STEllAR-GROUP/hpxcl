@@ -16,103 +16,98 @@
 #include <hpx/compat/mutex.hpp>
 
 ////////////////////////////////////////////////////////////////
-namespace hpx { namespace opencl{ namespace server{ namespace util{
+namespace hpx {
+namespace opencl {
+namespace server {
+namespace util {
 
+////////////////////////////////////////////////////////
+// This class is used to hide the template parameter from serialize_buffer.
+//
+class data_map_entry {
+ private:
+  template <typename T, typename Alloc>
+  static void send_to_client_impl(
+      hpx::serialization::serialize_buffer<T, Alloc> data,
+      const hpx::naming::id_type& event_id) {
+    hpx::set_lco_value(event_id, data, false);
+  }
 
-    ////////////////////////////////////////////////////////
-    // This class is used to hide the template parameter from serialize_buffer.
-    //
-    class data_map_entry
+ public:
+  template <typename T, typename Alloc>
+  void set_data(hpx::serialization::serialize_buffer<T, Alloc> data) {
+    // The data itself does not need to explicitely get kept alive,
+    // it gets kept alive inside of the bind.
+
+    send_callback = hpx::util::bind(&send_to_client_impl<T, Alloc>, data,
+                                    hpx::util::placeholders::_1);
+  }
+
+  // Sends the data to the client event (to trigger client future)
+  HPX_OPENCL_EXPORT void send_data_to_client(
+      const hpx::naming::id_type& client_event);
+
+ private:
+  hpx::util::function_nonser<void(const hpx::naming::id_type&)> send_callback;
+};
+
+////////////////////////////////////////////////////////
+// This class is used for keeping data associated with cl_events alive.
+//
+class data_map {
+  typedef hpx::lcos::local::spinlock lock_type;
+
+ public:
+  // Constructor
+  HPX_OPENCL_EXPORT data_map();
+  HPX_OPENCL_EXPORT ~data_map();
+
+  //////////////////////////////////////////////////
+  /// Local public functions
+  ///
+
+  // Registers a data chunk to a cl_event
+  template <typename T, typename Alloc>
+  void add(cl_event event,
+           hpx::serialization::serialize_buffer<T, Alloc> data) {
+    // Strip the template from the buffer
+    data_map_entry entry;
+    entry.set_data(data);
+
     {
-    private:
-        template <typename T, typename Alloc>
-        static void
-        send_to_client_impl( hpx::serialization::serialize_buffer<T, Alloc> data,
-                             const hpx::naming::id_type& event_id )
-        {
-            hpx::set_lco_value(event_id, data, false);
-        }
+      // Lock the map
+      std::lock_guard<hpx::compat::mutex> lock(this->m);
 
-    public:
-        template <typename T, typename Alloc>
-        void set_data(hpx::serialization::serialize_buffer<T, Alloc> data)
-        {
+      // Insert the data into the map
+      map.insert(std::move(map_type::value_type(event, std::move(entry))));
+    }
+  }
 
-            // The data itself does not need to explicitely get kept alive,
-            // it gets kept alive inside of the bind.
+  // Returns the data entry associated with the event.
+  // Undefined behaviour if no data is available.
+  HPX_OPENCL_EXPORT data_map_entry get(cl_event event);
 
-            send_callback = hpx::util::bind(&send_to_client_impl<T, Alloc>, data,
-                                             hpx::util::placeholders::_1);
-        }
+  // Returns bool if data is registered, and false if not
+  HPX_OPENCL_EXPORT bool has_data(cl_event event);
 
-        // Sends the data to the client event (to trigger client future)
-        HPX_OPENCL_EXPORT void send_data_to_client(const hpx::naming::id_type& client_event);
+  // Deletes the data
+  HPX_OPENCL_EXPORT void remove(cl_event event);
 
-    private:
-        hpx::util::function_nonser<void(const hpx::naming::id_type&)>
-            send_callback;
-    };
+ private:
+  ///////////////////////////////////////////////
+  // Private Member Variables
+  //
 
+  // The actual internal datastructure
+  typedef std::map<cl_event, data_map_entry> map_type;
+  map_type map;
 
-    ////////////////////////////////////////////////////////
-    // This class is used for keeping data associated with cl_events alive.
-    //
-    class data_map
-    {
-        typedef hpx::lcos::local::spinlock lock_type;
-    public:
-        // Constructor
-        HPX_OPENCL_EXPORT data_map();
-        HPX_OPENCL_EXPORT ~data_map();
-
-        //////////////////////////////////////////////////
-        /// Local public functions
-        ///
-
-        // Registers a data chunk to a cl_event
-        template <typename T, typename Alloc>
-        void add( cl_event event,
-                  hpx::serialization::serialize_buffer<T, Alloc> data )
-        {
-            // Strip the template from the buffer
-            data_map_entry entry;
-            entry.set_data(data);
-
-            {
-                // Lock the map
-            	std::lock_guard<hpx::compat::mutex> lock(this->m);
-
-                // Insert the data into the map
-                map.insert(std::move(
-                        map_type::value_type(event, std::move(entry))
-                    ));
-            }
-        }
-
-        // Returns the data entry associated with the event.
-        // Undefined behaviour if no data is available.
-        HPX_OPENCL_EXPORT data_map_entry get(cl_event event);
-
-        // Returns bool if data is registered, and false if not
-        HPX_OPENCL_EXPORT bool has_data(cl_event event);
-
-        // Deletes the data
-        HPX_OPENCL_EXPORT void remove(cl_event event);
-
-    private:
-        ///////////////////////////////////////////////
-        // Private Member Variables
-        //
-
-        // The actual internal datastructure
-        typedef std::map<cl_event, data_map_entry> map_type;
-        map_type map;
-
-        // Lock for synchronization
-        hpx::compat::mutex m;
-
-
-    };
-}}}}
+  // Lock for synchronization
+  hpx::compat::mutex m;
+};
+}  // namespace util
+}  // namespace server
+}  // namespace opencl
+}  // namespace hpx
 
 #endif

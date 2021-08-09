@@ -17,33 +17,29 @@ namespace cuda {
 
 namespace server {
 
-std::vector<hpx::cuda::device> get_devices(int major, int minor)
-{
-    std::vector<hpx::cuda::device> devices;
+std::vector<hpx::cuda::device> get_devices(int major, int minor) {
+  std::vector<hpx::cuda::device> devices;
 
-    int count = 0;
+  int count = 0;
 
-    cudaGetDeviceCount(&count);
+  cudaGetDeviceCount(&count);
+  checkCudaError("get_devices");
+
+  for (int device_id = 0; device_id < count; ++device_id) {
+    cudaDeviceProp prop;
+    cudaGetDeviceProperties(&prop, device_id);
     checkCudaError("get_devices");
 
-    for (int device_id = 0; device_id < count; ++device_id)
-    {
-        cudaDeviceProp prop;
-        cudaGetDeviceProperties(&prop, device_id);
-        checkCudaError("get_devices");
+    if (prop.major >= major && prop.minor >= minor)
+      devices.push_back(hpx::cuda::device(find_here(), device_id));
+  }
 
-        if (prop.major >= major && prop.minor >= minor)
-            devices.push_back(hpx::cuda::device(find_here(), device_id));
-    }
-
-    return devices;
+  return devices;
 }
 
-}
-}
-}
+}  // namespace server
+}  // namespace cuda
+}  // namespace hpx
 
-HPX_PLAIN_ACTION(
-    hpx::cuda::server::get_devices,
-    hpx_cuda_server_get_devices_action);
-
+HPX_PLAIN_ACTION(hpx::cuda::server::get_devices,
+                 hpx_cuda_server_get_devices_action);
