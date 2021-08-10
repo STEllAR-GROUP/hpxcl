@@ -99,11 +99,11 @@ public:
      * \brief Method to access the device pointer wrapped as a smart pointer
      * \return The pointer to the device memory as a smart pointer
      */
-    hpx::lcos::future<std::shared_ptr<size_t>> get_smart_pointer(){
+    hpx::lcos::future<uintptr_t> get_device_pointer(){
     
 		HPX_ASSERT(this->get_id());
         
-        typedef server::buffer::get_smart_pointer_action action_type;
+        typedef server::buffer::get_device_pointer_action action_type;
         return hpx::async<action_type>(this->get_id()); 
     }
 
@@ -112,9 +112,9 @@ public:
      * \brief Method to access the device pointer wrapped as a smart pointer
      * \return The pointer to the device memory as a smart pointer
      */
-    std::shared_ptr<size_t> get_smart_pointer_sync(){
+    uintptr_t get_device_pointer_sync(){
     
-        return get_smart_pointer().get();
+        return get_device_pointer().get();
     }
 
 
@@ -122,9 +122,9 @@ public:
      * \brief Method to access the device pointer
      * \return The raw pointer to the device memory allocated in this buffer
      */
-    void* get_raw_pointer_sync(){
+    void* get_device_pointer_unwrapped_sync(){
     
-    return reinterpret_cast<void*>(get_smart_pointer_sync().get());
+    return (void*)(get_device_pointer_sync());
 
     }
 
@@ -212,6 +212,15 @@ public:
 		}
 
 	}
+
+
+     hpx::lcos::future<void> p2p_copy(uintptr_t dst, size_t dst_parent_device_id, size_t count){
+ 
+          HPX_ASSERT(this->get_id());
+ 
+          typedef server::buffer::p2p_copy_action action_type;
+          return hpx::async<action_type>(this->get_id(), dst, dst_parent_device_id, count);
+      }
 
 private:
 	hpx::naming::id_type device_gid;

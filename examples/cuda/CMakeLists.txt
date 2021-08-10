@@ -12,6 +12,7 @@ set(example_programs
     streams
     shared_memory
     get_device_id
+    p2p_test
 )
 
 foreach(example_program ${example_programs})
@@ -45,3 +46,4 @@ endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/example_kernel.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/examples/cuda)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/example_shared_kernel.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/examples/cuda)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/p2p_test_kernel.cu DESTINATION ${CMAKE_SOURCE_DIR}/build/examples/cuda)

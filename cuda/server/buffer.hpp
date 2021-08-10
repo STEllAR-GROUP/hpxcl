@@ -61,11 +61,13 @@ namespace hpx
 
                 void enqueue_write_local(size_t offset, size_t size, uintptr_t data);
 
+                uintptr_t  get_device_pointer();
+
                 void* get_raw_pointer();
 
                 int get_device_id();
 
-                std::shared_ptr<size_t> get_smart_pointer();
+                void p2p_copy(uintptr_t dst, size_t dst_parent_device_id, size_t count);
 
                 #ifdef HPXCL_CUDA_WITH_STREAMS
                 cudaStream_t get_stream();
@@ -77,8 +79,9 @@ namespace hpx
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read_local);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write_local);
-                HPX_DEFINE_COMPONENT_ACTION(buffer, get_smart_pointer);
+                HPX_DEFINE_COMPONENT_ACTION(buffer, get_device_pointer);
                 HPX_DEFINE_COMPONENT_ACTION(buffer, get_device_id);
+                HPX_DEFINE_COMPONENT_ACTION(buffer, p2p_copy);
             };
         }
     }
@@ -103,9 +106,14 @@ namespace hpx
     hpx::cuda::server::buffer::enqueue_read_local_action,
     buffer_enqueue_read_local_action);
  HPX_REGISTER_ACTION_DECLARATION(
-    hpx::cuda::server::buffer::get_smart_pointer_action,
-    buffer_get_smart_pointer_action);
+    hpx::cuda::server::buffer::get_device_pointer_action,
+    buffer_get_device_pointer_action);
  HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::buffer::get_device_id_action,
     buffer_get_device_id_action);
+ HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::buffer::p2p_copy_action,
+    buffer_p2p_copy_action);
+
+
  #endif //BUFFER_2_HPP
