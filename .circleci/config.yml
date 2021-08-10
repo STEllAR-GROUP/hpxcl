@@ -18,7 +18,7 @@ jobs:
            name: Install cuda
            command: |
                 dnf install -y  'dnf-command(config-manager)' && \
-                dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/fedora33/x86_64/cuda-fedora33.repo  && \
+                dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/fedora34/x86_64/cuda-fedora34.repo  && \
                 dnf clean expire-cache && \
                 dnf update -y && \
                 dnf module install -y  nvidia-driver:latest-dkms && \
