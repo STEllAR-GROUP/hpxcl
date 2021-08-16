@@ -7,7 +7,6 @@
 #ifndef HPX_OPENCL_SERVER_KERNEL_HPP
 #define HPX_OPENCL_SERVER_KERNEL_HPP
 
-
 #include <hpx/hpx.hpp>
 #include <hpx/config.hpp>
 
@@ -18,63 +17,61 @@
 // REGISTER_ACTION_DECLARATION templates
 #include "util/server_definitions.hpp"
 
-namespace hpx { namespace opencl{ namespace server{
+namespace hpx {
+namespace opencl {
+namespace server {
 
-    // /////////////////////////////////////////////////////
-    //  This class represents an opencl kernel.
+// /////////////////////////////////////////////////////
+//  This class represents an opencl kernel.
 
-    class HPX_OPENCL_EXPORT kernel
-      : public hpx::components::managed_component_base<kernel>
-    {
-    public:
+class HPX_OPENCL_EXPORT kernel
+    : public hpx::components::managed_component_base<kernel> {
+ public:
+  // Constructor
+  kernel();
+  // Destructor
+  ~kernel();
 
-        // Constructor
-        kernel();
-        // Destructor
-        ~kernel();
+  ///////////////////////////////////////////////////
+  /// Local functions
+  ///
+  void init(hpx::naming::id_type device_id, cl_program program,
+            std::string kernel_name);
 
-        ///////////////////////////////////////////////////
-        /// Local functions
-        ///
-        void init ( hpx::naming::id_type device_id, cl_program program,
-                    std::string kernel_name );
+  //////////////////////////////////////////////////
+  /// Exposed functionality of this component
+  ///
 
-        //////////////////////////////////////////////////
-        /// Exposed functionality of this component
-        ///
+  // Returns the parent device
+  hpx::naming::id_type get_parent_device_id();
 
-        // Returns the parent device
-        hpx::naming::id_type get_parent_device_id();
+  // Sets an argument of the kernel
+  void set_arg(cl_uint arg_index, hpx::naming::id_type buffer);
 
-        // Sets an argument of the kernel
-        void set_arg(cl_uint arg_index, hpx::naming::id_type buffer);
+  // Runs the kernel
+  void enqueue(hpx::naming::id_type&& event_gid, std::vector<std::size_t> size,
+               std::vector<hpx::naming::id_type>&& dependencies);
 
-        // Runs the kernel
-        void enqueue( hpx::naming::id_type && event_gid,
-                      std::vector<std::size_t> size,
-                      std::vector<hpx::naming::id_type> && dependencies );
+  HPX_DEFINE_COMPONENT_ACTION(kernel, get_parent_device_id);
+  HPX_DEFINE_COMPONENT_ACTION(kernel, set_arg);
+  HPX_DEFINE_COMPONENT_ACTION(kernel, enqueue);
 
-        HPX_DEFINE_COMPONENT_ACTION(kernel, get_parent_device_id);
-        HPX_DEFINE_COMPONENT_ACTION(kernel, set_arg);
-        HPX_DEFINE_COMPONENT_ACTION(kernel, enqueue);
+  //////////////////////////////////////////////////
+  // Private Member Functions
+  //
+ private:
+  //////////////////////////////////////////////////
+  //  Private Member Variables
+  //
+ private:
+  std::shared_ptr<device> parent_device;
+  cl_kernel kernel_id;
+  hpx::naming::id_type parent_device_id;
+};
 
-        //////////////////////////////////////////////////
-        // Private Member Functions
-        //
-    private:
-
-
-        //////////////////////////////////////////////////
-        //  Private Member Variables
-        //
-    private:
-        std::shared_ptr<device> parent_device;
-        cl_kernel kernel_id;
-        hpx::naming::id_type parent_device_id;
-
-    };
-
-}}}
+}  // namespace server
+}  // namespace opencl
+}  // namespace hpx
 
 //[opencl_management_registration_declarations
 HPX_OPENCL_REGISTER_ACTION_DECLARATION(kernel, get_parent_device_id);

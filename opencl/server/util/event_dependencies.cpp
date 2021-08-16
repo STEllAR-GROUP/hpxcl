@@ -9,44 +9,24 @@
 
 using hpx::opencl::server::util::event_dependencies;
 
-event_dependencies::
-event_dependencies(const std::vector<hpx::naming::id_type> & event_ids,
-                   hpx::opencl::server::device* parent_device)
-{
-    if(event_ids.size() != 0){
-    
-        events.reserve(event_ids.size());
-    
-        for(const auto & id : event_ids){
-            events.push_back( parent_device->retrieve_event(id) );
-        }
+event_dependencies::event_dependencies(
+    const std::vector<hpx::naming::id_type>& event_ids,
+    hpx::opencl::server::device* parent_device) {
+  if (event_ids.size() != 0) {
+    events.reserve(event_ids.size());
 
+    for (const auto& id : event_ids) {
+      events.push_back(parent_device->retrieve_event(id));
     }
+  }
 }
 
-event_dependencies::
-~event_dependencies()
-{
+event_dependencies::~event_dependencies() {}
 
-}
+std::size_t event_dependencies::size() { return events.size(); }
 
-std::size_t
-event_dependencies::
-size()
-{
+cl_event* event_dependencies::get_cl_events() {
+  if (events.size() == 0) return NULL;
 
-    return events.size();
-
-}
-
-cl_event*
-event_dependencies::
-get_cl_events()
-{
-
-    if(events.size() == 0)
-        return NULL;
-        
-    return events.data();
-
+  return events.data();
 }

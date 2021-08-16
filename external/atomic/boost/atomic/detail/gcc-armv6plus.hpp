@@ -9,7 +9,6 @@
 //  Copyright (c) 2009 Phil Endecott
 //  ARM Code by Phil Endecott, based on other architectures.
 
-
 #include <boost/memory_order.hpp>
 #include <boost/atomic/detail/base.hpp>
 #include <boost/atomic/detail/builder.hpp>
@@ -43,43 +42,55 @@ namespace boost {
 namespace detail {
 namespace atomic {
 
-
-// "Thumb 1" is a subset of the ARM instruction set that uses a 16-bit encoding.  It
-// doesn't include all instructions and in particular it doesn't include the co-processor
-// instruction used for the memory barrier or the load-locked/store-conditional
-// instructions.  So, if we're compiling in "Thumb 1" mode, we need to wrap all of our
-// asm blocks with code to temporarily change to ARM mode.
+// "Thumb 1" is a subset of the ARM instruction set that uses a 16-bit encoding.
+// It doesn't include all instructions and in particular it doesn't include the
+// co-processor instruction used for the memory barrier or the
+// load-locked/store-conditional instructions.  So, if we're compiling in "Thumb
+// 1" mode, we need to wrap all of our asm blocks with code to temporarily
+// change to ARM mode.
 //
 // You can only change between ARM and Thumb modes when
 //    branching using the bx instruction.
-// bx takes an address specified in a register.  The least significant bit of the address
-// indicates the mode, so 1 is added to indicate that the destination code is Thumb.
-// A temporary register is needed for the address and is passed as an argument to these
-// macros.  It must be one of the "low" registers accessible to Thumb code, specified
-// usng the "l" attribute in the asm statement.
+// bx takes an address specified in a register.  The least significant bit of
+// the address indicates the mode, so 1 is added to indicate that the
+// destination code is Thumb. A temporary register is needed for the address and
+// is passed as an argument to these macros.  It must be one of the "low"
+// registers accessible to Thumb code, specified usng the "l" attribute in the
+// asm statement.
 //
-// Architecture v7 introduces "Thumb 2", which does include (almost?) all of the ARM
-// instruction set.  So in v7 we don't need to change to ARM mode;
+// Architecture v7 introduces "Thumb 2", which does include (almost?) all of the
+// ARM instruction set.  So in v7 we don't need to change to ARM mode;
 //    we can write "universal
-// assembler" which will assemble to Thumb 2 or ARM code as appropriate.  The only thing
-// we need to do to make this "universal"
+// assembler" which will assemble to Thumb 2 or ARM code as appropriate.  The
+// only thing we need to do to make this "universal"
 //    assembler mode work is to insert "IT" instructions
-// to annotate the conditional instructions.  These are ignored in other modes (e.g. v6),
-// so they can always be present.
+// to annotate the conditional instructions.  These are ignored in other modes
+// (e.g. v6), so they can always be present.
 
 #if defined(__thumb__) && !defined(__ARM_ARCH_7A__)
 // FIXME also other v7 variants.
 #define BOOST_ATOMIC_ARM_ASM_START(TMPREG) \
-  "adr " #TMPREG ", 1f\n" "bx " #TMPREG "\n" ".arm\n" ".align 4\n" "1: "
+  "adr " #TMPREG                           \
+  ", 1f\n"                                 \
+  "bx " #TMPREG                            \
+  "\n"                                     \
+  ".arm\n"                                 \
+  ".align 4\n"                             \
+  "1: "
 #define BOOST_ATOMIC_ARM_ASM_END(TMPREG) \
-  "adr " #TMPREG ", 1f + 1\n" "bx " #TMPREG "\n" ".thumb\n" ".align 2\n" "1: "
+  "adr " #TMPREG                         \
+  ", 1f + 1\n"                           \
+  "bx " #TMPREG                          \
+  "\n"                                   \
+  ".thumb\n"                             \
+  ".align 2\n"                           \
+  "1: "
 
 #else
 // The tmpreg is wasted in this case, which is non-optimal.
 #define BOOST_ATOMIC_ARM_ASM_START(TMPREG)
 #define BOOST_ATOMIC_ARM_ASM_END(TMPREG)
 #endif
-
 
 #if defined(__ARM_ARCH_7A__)
 // FIXME ditto.
@@ -92,75 +103,61 @@ namespace atomic {
 //    this exists in v6 as another co-processor
 // instruction like the above.
 
-
-static inline void fence_before(memory_order order)
-{
-    // FIXME I don't understand enough about barriers to know what this should do.
-    switch(order) {
-        case memory_order_release:
-        case memory_order_acq_rel:
-        case memory_order_seq_cst:
-            int brtmp;
-            __asm__ __volatile__ (
-                BOOST_ATOMIC_ARM_ASM_START(%0)
-                BOOST_ATOMIC_ARM_DMB
-                BOOST_ATOMIC_ARM_ASM_END(%0)
-                : "=&l" (brtmp) :: "memory"
-            );
-        default:;
-    }
+static inline void fence_before(memory_order order) {
+  // FIXME I don't understand enough about barriers to know what this should do.
+  switch (order) {
+    case memory_order_release:
+    case memory_order_acq_rel:
+    case memory_order_seq_cst:
+      int brtmp;
+      __asm__ __volatile__(
+          BOOST_ATOMIC_ARM_ASM_START(% 0)
+              BOOST_ATOMIC_ARM_DMB BOOST_ATOMIC_ARM_ASM_END(% 0)
+          : "=&l"(brtmp)::"memory");
+    default:;
+  }
 }
 
-static inline void fence_after(memory_order order)
-{
-    // FIXME I don't understand enough about barriers to know what this should do.
-    switch(order) {
-        case memory_order_acquire:
-        case memory_order_acq_rel:
-        case memory_order_seq_cst:
-            int brtmp;
-            __asm__ __volatile__ (
-                BOOST_ATOMIC_ARM_ASM_START(%0)
-                BOOST_ATOMIC_ARM_DMB
-                BOOST_ATOMIC_ARM_ASM_END(%0)
-                : "=&l" (brtmp) :: "memory"
-            );
-        case memory_order_consume:
-            __asm__ __volatile__ ("" ::: "memory");
-        default:;
-    }
+static inline void fence_after(memory_order order) {
+  // FIXME I don't understand enough about barriers to know what this should do.
+  switch (order) {
+    case memory_order_acquire:
+    case memory_order_acq_rel:
+    case memory_order_seq_cst:
+      int brtmp;
+      __asm__ __volatile__(
+          BOOST_ATOMIC_ARM_ASM_START(% 0)
+              BOOST_ATOMIC_ARM_DMB BOOST_ATOMIC_ARM_ASM_END(% 0)
+          : "=&l"(brtmp)::"memory");
+    case memory_order_consume:
+      __asm__ __volatile__("" ::: "memory");
+    default:;
+  }
 }
 
 #undef BOOST_ATOMIC_ARM_DMB
 
-
-template<typename T>
+template <typename T>
 class atomic_arm_4 {
-public:
-    typedef T integral_type;
-    explicit atomic_arm_4(T v) : i(v) {}
-    atomic_arm_4() {}
-    T load(memory_order order=memory_order_seq_cst) const volatile
-    {
-        T v=const_cast<volatile const T &>(i);
-        fence_after(order);
-        return v;
-    }
-    void store(T v, memory_order order=memory_order_seq_cst) volatile
-    {
-        fence_before(order);
-        const_cast<volatile T &>(i)=v;
-    }
-        bool compare_exchange_weak(
-                T &expected,
-                T desired,
-                memory_order success_order,
-                memory_order failure_order) volatile
-    {
-        fence_before(success_order);
-        int success;
-        int tmp;
-        __asm__ __volatile__(
+ public:
+  typedef T integral_type;
+  explicit atomic_arm_4(T v) : i(v) {}
+  atomic_arm_4() {}
+  T load(memory_order order = memory_order_seq_cst) const volatile {
+    T v = const_cast<volatile const T &>(i);
+    fence_after(order);
+    return v;
+  }
+  void store(T v, memory_order order = memory_order_seq_cst) volatile {
+    fence_before(order);
+    const_cast<volatile T &>(i) = v;
+  }
+  bool compare_exchange_weak(T &expected, T desired, memory_order success_order,
+                             memory_order failure_order) volatile {
+    fence_before(success_order);
+    int success;
+    int tmp;
+    __asm__ __volatile__(
             BOOST_ATOMIC_ARM_ASM_START(%2)
             "mov     %1, #0\n"        // success = 0
             "ldrex   %0, [%3]\n"      // expected' = *(&i)
@@ -178,19 +175,21 @@ public:
                   "r" ((int)desired) // %5
                 : "cc"
             );
-                if (success) fence_after(success_order);
-                else fence_after(failure_order);
-        return success;
-    }
+    if (success)
+      fence_after(success_order);
+    else
+      fence_after(failure_order);
+    return success;
+  }
 
-    bool is_lock_free(void) const volatile {return true;}
-protected:
-    inline T fetch_add_var(T c, memory_order order) volatile
-    {
-        fence_before(order);
-        T original, tmp;
-        int tmp2;
-        __asm__ __volatile__(
+  bool is_lock_free(void) const volatile { return true; }
+
+ protected:
+  inline T fetch_add_var(T c, memory_order order) volatile {
+    fence_before(order);
+    T original, tmp;
+    int tmp2;
+    __asm__ __volatile__(
             BOOST_ATOMIC_ARM_ASM_START(%2)
             "1: ldrex %0, [%3]\n"      // original = *(&i)
             "add      %1, %0, %4\n"    // tmp = original + c
@@ -206,15 +205,14 @@ protected:
                   "r" (c)           // %4
                 : "cc"
             );
-        fence_after(order);
-        return original;
-    }
-    inline T fetch_inc(memory_order order) volatile
-    {
-        fence_before(order);
-        T original, tmp;
-        int tmp2;
-        __asm__ __volatile__(
+    fence_after(order);
+    return original;
+  }
+  inline T fetch_inc(memory_order order) volatile {
+    fence_before(order);
+    T original, tmp;
+    int tmp2;
+    __asm__ __volatile__(
             BOOST_ATOMIC_ARM_ASM_START(%2)
             "1: ldrex %0, [%3]\n"      // original = *(&i)
             "add      %1, %0, #1\n"    // tmp = original + 1
@@ -229,15 +227,14 @@ protected:
                 : "r" (&i)          // %3
                 : "cc"
             );
-        fence_after(order);
-        return original;
-    }
-    inline T fetch_dec(memory_order order) volatile
-    {
-        fence_before(order);
-        T original, tmp;
-        int tmp2;
-        __asm__ __volatile__(
+    fence_after(order);
+    return original;
+  }
+  inline T fetch_dec(memory_order order) volatile {
+    fence_before(order);
+    T original, tmp;
+    int tmp2;
+    __asm__ __volatile__(
             BOOST_ATOMIC_ARM_ASM_START(%2)
             "1: ldrex %0, [%3]\n"      // original = *(&i)
             "sub      %1, %0, #1\n"    // tmp = original - 1
@@ -252,57 +249,53 @@ protected:
                 : "r" (&i)          // %3
                 : "cc"
             );
-        fence_after(order);
-        return original;
-    }
-private:
-    T i;
-};
+    fence_after(order);
+    return original;
+  }
 
+ private:
+  T i;
+};
 
 // #ifdef _ARM_ARCH_7
 // FIXME TODO can add native byte and halfword version here
 
-
-template<typename T>
+template <typename T>
 class platform_atomic_integral<T, 4>
     : public build_atomic_from_typical<build_exchange<atomic_arm_4<T> > > {
-public:
-    typedef build_atomic_from_typical<build_exchange<atomic_arm_4<T> > > super;
-    explicit platform_atomic_integral(T v) : super(v) {}
-    platform_atomic_integral(void) {}
+ public:
+  typedef build_atomic_from_typical<build_exchange<atomic_arm_4<T> > > super;
+  explicit platform_atomic_integral(T v) : super(v) {}
+  platform_atomic_integral(void) {}
 };
 
-template<typename T>
+template <typename T>
 class platform_atomic_integral<T, 1>
     : public build_atomic_from_larger_type<atomic_arm_4<uint32_t>, T> {
-public:
-    typedef build_atomic_from_larger_type<atomic_arm_4<uint32_t>, T> super;
+ public:
+  typedef build_atomic_from_larger_type<atomic_arm_4<uint32_t>, T> super;
 
-    explicit platform_atomic_integral(T v) : super(v) {}
-    platform_atomic_integral(void) {}
+  explicit platform_atomic_integral(T v) : super(v) {}
+  platform_atomic_integral(void) {}
 };
 
-template<typename T>
+template <typename T>
 class platform_atomic_integral<T, 2>
     : public build_atomic_from_larger_type<atomic_arm_4<uint32_t>, T> {
-public:
-    typedef build_atomic_from_larger_type<atomic_arm_4<uint32_t>, T> super;
+ public:
+  typedef build_atomic_from_larger_type<atomic_arm_4<uint32_t>, T> super;
 
-    explicit platform_atomic_integral(T v) : super(v) {}
-    platform_atomic_integral(void) {}
+  explicit platform_atomic_integral(T v) : super(v) {}
+  platform_atomic_integral(void) {}
 };
-
-
 
 typedef build_exchange<atomic_arm_4<void *> > platform_atomic_address;
 
-}
-}
-}
+}  // namespace atomic
+}  // namespace detail
+}  // namespace boost
 
 #undef BOOST_ATOMIC_ARM_ASM_START
 #undef BOOST_ATOMIC_ARM_ASM_END
-
 
 #endif

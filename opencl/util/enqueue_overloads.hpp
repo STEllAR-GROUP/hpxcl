@@ -14,166 +14,148 @@
 
 #include "../lcos/event.hpp"
 
-namespace hpx { namespace opencl { namespace util
-{
-    struct resolved_events
-    {
-    public:
-        std::vector<hpx::naming::id_type> event_ids;
-        std::vector<hpx::naming::gid_type> device_ids;
-        bool are_from_device(const hpx::naming::id_type& device_id)
-        {
-            hpx::naming::gid_type device_gid = device_id.get_gid();
-            for(const auto& id : device_ids){
-                if(device_gid != id)
-                    return false;
-            }
-            return true;
-        }
-        bool are_from_devices( const hpx::naming::id_type& device1,
-                                const hpx::naming::id_type& device2 )
-        {
-            hpx::naming::gid_type device_gid1 = device1.get_gid();
-            hpx::naming::gid_type device_gid2 = device2.get_gid();
-            for(const auto& id : device_ids){
-                if((device_gid1 != id) && (device_gid2 != id))
-                    return false;
-            }
-            return true;
-        }
-    };
-}}}
-
-namespace hpx { namespace opencl { namespace util { namespace enqueue_overloads
-{
-    // TODO implement check for correct device
-    // This is the function that actually extrudes the GID from the futures.
-    template<typename Future>
-    hpx::naming::id_type
-    extrude_id(const Future & fut, hpx::naming::gid_type& device_id)
-    {
-        typedef typename std::remove_reference<Future>::type::result_type
-            result_type;
-        typedef typename hpx::opencl::lcos::event<result_type>::shared_state_type
-            event_type;
-
-        auto shared_state = hpx::traits::detail::get_shared_state(fut);
-
-        HPX_ASSERT(boost::dynamic_pointer_cast<event_type>(shared_state).get());
-        auto ev = boost::static_pointer_cast<event_type>(shared_state);
-
-		std::stringstream str;
-		str << "devide_id=" << device_id << " and ev_id=" << ev->get_device_gid();
-        HPX_ASSERT_MSG(device_id == ev->get_device_gid(), str.str().c_str());
-
-        auto event_id = ev->get_event_id();
-        return event_id;
+namespace hpx {
+namespace opencl {
+namespace util {
+struct resolved_events {
+ public:
+  std::vector<hpx::naming::id_type> event_ids;
+  std::vector<hpx::naming::gid_type> device_ids;
+  bool are_from_device(const hpx::naming::id_type& device_id) {
+    hpx::naming::gid_type device_gid = device_id.get_gid();
+    for (const auto& id : device_ids) {
+      if (device_gid != id) return false;
     }
-
-    namespace detail
-    {
-        BOOST_MPL_HAS_XXX_TRAIT_DEF(value_type)
-        BOOST_MPL_HAS_XXX_TRAIT_DEF(iterator)
-        BOOST_MPL_HAS_XXX_TRAIT_DEF(size_type)
-        BOOST_MPL_HAS_XXX_TRAIT_DEF(reference)
-
-        template <typename T>
-        struct is_container
-          : boost::mpl::bool_<
-                has_value_type<T>::value && has_iterator<T>::value &&
-                has_size_type<T>::value && has_reference<T>::value>
-        {};
-
-        template <typename T>
-        struct is_container<T&>
-          : is_container<T>
-        {};
+    return true;
+  }
+  bool are_from_devices(const hpx::naming::id_type& device1,
+                        const hpx::naming::id_type& device2) {
+    hpx::naming::gid_type device_gid1 = device1.get_gid();
+    hpx::naming::gid_type device_gid2 = device2.get_gid();
+    for (const auto& id : device_ids) {
+      if ((device_gid1 != id) && (device_gid2 != id)) return false;
     }
+    return true;
+  }
+};
+}  // namespace util
+}  // namespace opencl
+}  // namespace hpx
 
-    // This function object switches its implementation depending on whether
-    // the given value is a container or not
-    template<bool is_vector>
-    struct extrude_all_ids
-    {
-    };
+namespace hpx {
+namespace opencl {
+namespace util {
+namespace enqueue_overloads {
+// TODO implement check for correct device
+// This is the function that actually extrudes the GID from the futures.
+template <typename Future>
+hpx::naming::id_type extrude_id(const Future& fut,
+                                hpx::naming::gid_type& device_id) {
+  typedef typename std::remove_reference<Future>::type::result_type result_type;
+  typedef typename hpx::opencl::lcos::event<result_type>::shared_state_type
+      event_type;
 
-    template<>
-    struct extrude_all_ids<false>
-    {
-        template<typename T>
-        void
-        operator()(hpx::naming::gid_type device_id,const T & t,
-                   std::vector<hpx::naming::id_type> &event_ids,
-                   std::vector<hpx::naming::gid_type> &device_ids) const
-        {
-            //hpx::naming::gid_type device_id;
-            event_ids.push_back(std::move(extrude_id(t, device_id)));
-            device_ids.push_back(device_id);
-        }
-    };
+  auto shared_state = hpx::traits::detail::get_shared_state(fut);
 
-    template<>
-    struct extrude_all_ids<true>
-    {
-        template<typename T>
-        void
-        operator()(hpx::naming::gid_type device_id,const std::vector<T> & t_vec,
-                   std::vector<hpx::naming::id_type> &event_ids,
-                   std::vector<hpx::naming::gid_type> &device_ids) const
-        {
-            for(const T & t : t_vec){
-                //hpx::naming::gid_type device_id;
-                event_ids.push_back(std::move(extrude_id(t, device_id)));
-                device_ids.push_back(device_id);
-            }
-        }
-    };
+  HPX_ASSERT(boost::dynamic_pointer_cast<event_type>(shared_state).get());
+  auto ev = boost::static_pointer_cast<event_type>(shared_state);
 
+  std::stringstream str;
+  str << "devide_id=" << device_id << " and ev_id=" << ev->get_device_gid();
+  HPX_ASSERT_MSG(device_id == ev->get_device_gid(), str.str().c_str());
 
-    // The resolver recursive template functions are here to convert
-    // an arbitrary number of future and std::vector<future> to
-    // one single std::vector<id_type>.
-    HPX_OPENCL_EXPORT void
-    resolver_impl(hpx::naming::gid_type device_id,std::vector<hpx::naming::id_type>&,
-                  std::vector<hpx::naming::gid_type>&);
+  auto event_id = ev->get_event_id();
+  return event_id;
+}
 
-    template<typename Dep>
-    void
-    resolver_impl(hpx::naming::gid_type device_id,std::vector<hpx::naming::id_type>& event_ids,
-                  std::vector<hpx::naming::gid_type>& device_ids,
-                  Dep&& dep)
-    {
-        extrude_all_ids<detail::is_container<Dep>::value>()(device_id, dep, event_ids,
-                                                                  device_ids);
+namespace detail {
+BOOST_MPL_HAS_XXX_TRAIT_DEF(value_type)
+BOOST_MPL_HAS_XXX_TRAIT_DEF(iterator)
+BOOST_MPL_HAS_XXX_TRAIT_DEF(size_type)
+BOOST_MPL_HAS_XXX_TRAIT_DEF(reference)
+
+template <typename T>
+struct is_container
+    : boost::mpl::bool_<has_value_type<T>::value && has_iterator<T>::value &&
+                        has_size_type<T>::value && has_reference<T>::value> {};
+
+template <typename T>
+struct is_container<T&> : is_container<T> {};
+}  // namespace detail
+
+// This function object switches its implementation depending on whether
+// the given value is a container or not
+template <bool is_vector>
+struct extrude_all_ids {};
+
+template <>
+struct extrude_all_ids<false> {
+  template <typename T>
+  void operator()(hpx::naming::gid_type device_id, const T& t,
+                  std::vector<hpx::naming::id_type>& event_ids,
+                  std::vector<hpx::naming::gid_type>& device_ids) const {
+    // hpx::naming::gid_type device_id;
+    event_ids.push_back(std::move(extrude_id(t, device_id)));
+    device_ids.push_back(device_id);
+  }
+};
+
+template <>
+struct extrude_all_ids<true> {
+  template <typename T>
+  void operator()(hpx::naming::gid_type device_id, const std::vector<T>& t_vec,
+                  std::vector<hpx::naming::id_type>& event_ids,
+                  std::vector<hpx::naming::gid_type>& device_ids) const {
+    for (const T& t : t_vec) {
+      // hpx::naming::gid_type device_id;
+      event_ids.push_back(std::move(extrude_id(t, device_id)));
+      device_ids.push_back(device_id);
     }
+  }
+};
 
-    template<typename Dep, typename ...Deps>
-    void
-    resolver_impl(hpx::naming::gid_type device_id,std::vector<hpx::naming::id_type>& event_ids,
-                  std::vector<hpx::naming::gid_type>& device_ids,
-                  Dep&& dep, Deps&&... deps)
-    {
-        // process current dep
-        extrude_all_ids<detail::is_container<Dep>::value>()(device_id, dep, event_ids,
-                                                                  device_ids );
+// The resolver recursive template functions are here to convert
+// an arbitrary number of future and std::vector<future> to
+// one single std::vector<id_type>.
+HPX_OPENCL_EXPORT void resolver_impl(hpx::naming::gid_type device_id,
+                                     std::vector<hpx::naming::id_type>&,
+                                     std::vector<hpx::naming::gid_type>&);
 
-        // recursive call
-        resolver_impl(device_id,event_ids, device_ids, std::forward<Deps>(deps)...);
-    }
+template <typename Dep>
+void resolver_impl(hpx::naming::gid_type device_id,
+                   std::vector<hpx::naming::id_type>& event_ids,
+                   std::vector<hpx::naming::gid_type>& device_ids, Dep&& dep) {
+  extrude_all_ids<detail::is_container<Dep>::value>()(device_id, dep, event_ids,
+                                                      device_ids);
+}
 
-    template<typename ...Deps>
-    resolved_events
-    resolver(hpx::naming::gid_type device_id,Deps&&... deps)
-    {
-        resolved_events res;
-        res.event_ids.reserve(sizeof...(deps));
-        res.device_ids.reserve(sizeof...(deps));
-        resolver_impl(device_id, res.event_ids, res.device_ids,
-                       std::forward<Deps>(deps)... );
-        return res;
-    }
+template <typename Dep, typename... Deps>
+void resolver_impl(hpx::naming::gid_type device_id,
+                   std::vector<hpx::naming::id_type>& event_ids,
+                   std::vector<hpx::naming::gid_type>& device_ids, Dep&& dep,
+                   Deps&&... deps) {
+  // process current dep
+  extrude_all_ids<detail::is_container<Dep>::value>()(device_id, dep, event_ids,
+                                                      device_ids);
 
-}}}}
+  // recursive call
+  resolver_impl(device_id, event_ids, device_ids, std::forward<Deps>(deps)...);
+}
+
+template <typename... Deps>
+resolved_events resolver(hpx::naming::gid_type device_id, Deps&&... deps) {
+  resolved_events res;
+  res.event_ids.reserve(sizeof...(deps));
+  res.device_ids.reserve(sizeof...(deps));
+  resolver_impl(device_id, res.event_ids, res.device_ids,
+                std::forward<Deps>(deps)...);
+  return res;
+}
+
+}  // namespace enqueue_overloads
+}  // namespace util
+}  // namespace opencl
+}  // namespace hpx
 
 // #define HPX_OPENCL_GENERATE_ENQUEUE_OVERLOADS(return_value, name, ...)          \
 //                                                                                 \

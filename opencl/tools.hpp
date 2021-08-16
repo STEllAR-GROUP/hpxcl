@@ -20,53 +20,47 @@
 #error "OpenCL 1.1 required!"
 #endif
 
-namespace hpx { namespace opencl { namespace tools {
+namespace hpx {
+namespace opencl {
+namespace tools {
 
-    // Used to disable the empty constructor of classes
-    #define CL_FORBID_EMPTY_CONSTRUCTOR(classname)                           \
-        classname::classname()                                               \
-        {                                                                    \
-            HPX_THROW_EXCEPTION(hpx::no_success, #classname "()",            \
-                    "Empty constructor is not defined!");                    \
-        }
+// Used to disable the empty constructor of classes
+#define CL_FORBID_EMPTY_CONSTRUCTOR(classname)                \
+  classname::classname() {                                    \
+    HPX_THROW_EXCEPTION(hpx::no_success, #classname "()",     \
+                        "Empty constructor is not defined!"); \
+  }
 
-    // To be called on OpenCL errorcodes, throws an exception on OpenCL Error
-    #define cl_ensure(errCode, functionname){                          \
-        if(errCode != CL_SUCCESS)                                      \
-        {                                                              \
-            std::stringstream errorMessage;                            \
-            errorMessage << "CL_ERROR("                                \
-                         << (errCode)                                  \
-                         << "): "                                      \
-                         << hpx::opencl::tools::cl_err_to_str(errCode);\
-            HPX_THROW_EXCEPTION(hpx::no_success,                       \
-                                (functionname),                        \
-                                errorMessage.str());                   \
-        }                                                              \
-    }
+// To be called on OpenCL errorcodes, throws an exception on OpenCL Error
+#define cl_ensure(errCode, functionname)                                   \
+  {                                                                        \
+    if (errCode != CL_SUCCESS) {                                           \
+      std::stringstream errorMessage;                                      \
+      errorMessage << "CL_ERROR(" << (errCode)                             \
+                   << "): " << hpx::opencl::tools::cl_err_to_str(errCode); \
+      HPX_THROW_EXCEPTION(hpx::no_success, (functionname),                 \
+                          errorMessage.str());                             \
+    }                                                                      \
+  }
 
-     // To be called on OpenCL errorcodes in destructors, does not throw
-    #define cl_ensure_nothrow(errCode, functionname){                  \
-        if(errCode != CL_SUCCESS)                                      \
-        {                                                              \
-            hpx::cerr << (functionname)                                \
-                      << ": CL_ERROR("                                 \
-                      << (errCode)                                     \
-                      << "): "                                         \
-                      << hpx::opencl::tools::cl_err_to_str(errCode)    \
-                      << hpx::endl;                                    \
-        }                                                              \
-    }
+// To be called on OpenCL errorcodes in destructors, does not throw
+#define cl_ensure_nothrow(errCode, functionname)                       \
+  {                                                                    \
+    if (errCode != CL_SUCCESS) {                                       \
+      hpx::cerr << (functionname) << ": CL_ERROR(" << (errCode)        \
+                << "): " << hpx::opencl::tools::cl_err_to_str(errCode) \
+                << hpx::endl;                                          \
+    }                                                                  \
+  }
 
+// Translates CL errorcode to descriptive string
+HPX_OPENCL_EXPORT const char* cl_err_to_str(cl_int errCode);
 
-    // Translates CL errorcode to descriptive string
-    HPX_OPENCL_EXPORT const char* cl_err_to_str(cl_int errCode);
+// Returns true if curren thread runs on a large stack
+HPX_OPENCL_EXPORT bool runs_on_medium_stack();
 
-    // Returns true if curren thread runs on a large stack
-    HPX_OPENCL_EXPORT bool runs_on_medium_stack();
+}  // namespace tools
+}  // namespace opencl
+}  // namespace hpx
 
-}}}
-
-#endif//HPX_OPENCL_TOOLS_HPP_
-
-
+#endif  // HPX_OPENCL_TOOLS_HPP_

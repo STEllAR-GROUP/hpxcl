@@ -14,71 +14,74 @@
 #include "../../cl_headers.hpp"
 
 ////////////////////////////////////////////////////////////////
-namespace hpx { namespace opencl{ namespace server{ namespace util{
+namespace hpx {
+namespace opencl {
+namespace server {
+namespace util {
 
+////////////////////////////////////////////////////////
+// This class is used for the mapping between gid's and cl_events.
+//
+class event_map {
+  typedef hpx::lcos::local::spinlock lock_type;
+  typedef hpx::lcos::local::condition_variable_any condition_type;
 
-    ////////////////////////////////////////////////////////
-    // This class is used for the mapping between gid's and cl_events.
-    //
-    class event_map
-    {
-        typedef hpx::lcos::local::spinlock lock_type;
-        typedef hpx::lcos::local::condition_variable_any condition_type;
+ public:
+  // Constructor
+  HPX_OPENCL_EXPORT event_map();
+  HPX_OPENCL_EXPORT ~event_map();
 
-    public:
-        // Constructor
-        HPX_OPENCL_EXPORT event_map();
-        HPX_OPENCL_EXPORT ~event_map();
+  //////////////////////////////////////////////////
+  /// Local public functions
+  ///
 
-        //////////////////////////////////////////////////
-        /// Local public functions
-        ///
+  // Adds a new gid-cl_event pair
+  // !! add does not have any sequential consistency guarantee to get().
+  // It might happen that get() gets called before the referencing GID
+  // is registered with add().
+  // (=> Fancy synchronization needed inside of event_map)
+  HPX_OPENCL_EXPORT void add(const hpx::naming::id_type &, cl_event);
 
-        // Adds a new gid-cl_event pair
-        // !! add does not have any sequential consistency guarantee to get().
-        // It might happen that get() gets called before the referencing GID
-        // is registered with add().
-        // (=> Fancy synchronization needed inside of event_map)
-        HPX_OPENCL_EXPORT void add(const hpx::naming::id_type&, cl_event);
+  // Retrieves the cl_event associated with the gid.
+  // !! BLOCKS if gid is not present until gid gets added
+  // with 'add()'.
+  HPX_OPENCL_EXPORT cl_event get(const hpx::naming::id_type &);
+  HPX_OPENCL_EXPORT cl_event get(const hpx::naming::gid_type &);
 
-        // Retrieves the cl_event associated with the gid.
-        // !! BLOCKS if gid is not present until gid gets added
-        // with 'add()'.
-        HPX_OPENCL_EXPORT cl_event get(const hpx::naming::id_type&);
-        HPX_OPENCL_EXPORT cl_event get(const hpx::naming::gid_type&);
+  // Registers a function that will get called upon gid removal
+  // (Used to delete associated cl_event)
+  HPX_OPENCL_EXPORT void register_deletion_callback(
+      std::function<void(cl_event)> &&);
 
-        // Registers a function that will get called upon gid removal
-        // (Used to delete associated cl_event)
-        HPX_OPENCL_EXPORT void register_deletion_callback(std::function<void(cl_event)> &&);
+  // Removes a GID.
+  // !! This function is the only one of this class with a consistency
+  // guarantee. remove() will ALWAYS be called AFTER all other calls
+  // involving the given GID are finished. (i.e. add() and get())
+  HPX_OPENCL_EXPORT void remove(const hpx::naming::gid_type &);
 
-        // Removes a GID.
-        // !! This function is the only one of this class with a consistency
-        // guarantee. remove() will ALWAYS be called AFTER all other calls
-        // involving the given GID are finished. (i.e. add() and get())
-        HPX_OPENCL_EXPORT void remove(const hpx::naming::gid_type&);
+ private:
+  ///////////////////////////////////////////////
+  // Private Member Variables
+  //
 
-    private:
-        ///////////////////////////////////////////////
-        // Private Member Variables
-        //
+  // The actual internal datastructure
+  typedef std::map<hpx::naming::gid_type, cl_event> map_type;
+  map_type events;
 
-        // The actual internal datastructure
-        typedef std::map<hpx::naming::gid_type, cl_event>
-            map_type;
-        map_type events;
+  // Threads that called get() and are waiting for a corresponding add()
+  typedef std::map<hpx::naming::gid_type, std::shared_ptr<condition_type> >
+      waitmap_type;
+  waitmap_type waits;
 
-        // Threads that called get() and are waiting for a corresponding add()
-        typedef std::map<hpx::naming::gid_type, std::shared_ptr<condition_type> >
-            waitmap_type;
-        waitmap_type waits;
+  // Lock for synchronization
+  lock_type lock;
 
-        // Lock for synchronization
-        lock_type lock;
-
-        // Callback function for cl_event cleanup
-        std::function<void(cl_event)> deletion_callback;
-
-    };
-}}}}
+  // Callback function for cl_event cleanup
+  std::function<void(cl_event)> deletion_callback;
+};
+}  // namespace util
+}  // namespace server
+}  // namespace opencl
+}  // namespace hpx
 
 #endif

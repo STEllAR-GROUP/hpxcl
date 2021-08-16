@@ -7,7 +7,6 @@
 #define MANDELBROT_MANDELBROTKERNEL_H_
 
 extern const char mandelbrotkernel_cl[];
-extern const unsigned long  mandelbrotkernel_cl_len;
+extern const unsigned long mandelbrotkernel_cl_len;
 
 #endif
-

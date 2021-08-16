@@ -13,112 +13,91 @@
 #include <queue>
 
 template <typename T>
-class fifo
-{
+class fifo {
+  typedef hpx::lcos::local::spinlock lock_type;
+  typedef hpx::lcos::local::condition_variable_any cond_type;
 
-    typedef hpx::lcos::local::spinlock lock_type;
-    typedef hpx::lcos::local::condition_variable_any cond_type;
+ public:
+  // push an item to the queue
+  void push(const T &);
+  // take an item from the queue, will return false on end-of-program.
+  // blocks.
+  bool pop(T *);
+  // signal end of program
+  void finish();
 
-public:
-    // push an item to the queue
-    void push(const T &);
-    // take an item from the queue, will return false on end-of-program.
-    // blocks.
-    bool pop(T*);
-    // signal end of program
-    void finish();
+ public:
+  fifo();
+  ~fifo();
 
-public:
-    fifo();
-    ~fifo();
+ private:
+  std::queue<T> queue;
+  lock_type lock;
+  cond_type cond_var;
 
-private:
-    std::queue<T> queue;
-    lock_type     lock;
-    cond_type     cond_var;
-
-    volatile bool finished;
-
-
+  volatile bool finished;
 };
 
-template<typename T>
-fifo<T>::fifo()
-{
-    finished = false;
+template <typename T>
+fifo<T>::fifo() {
+  finished = false;
 }
 
-template<typename T>
-fifo<T>::~fifo()
-{
-    finish();
+template <typename T>
+fifo<T>::~fifo() {
+  finish();
 }
 
-template<typename T>
-void fifo<T>::push(const T &item)
-{
+template <typename T>
+void fifo<T>::push(const T &item) {
+  // lock class
+  std::unique_lock<lock_type> l(lock);
 
-    // lock class
-    std::unique_lock<lock_type> l(lock);
+  // check whether fifo is already in finished state
+  if (finished) {
+    HPX_THROW_EXCEPTION(hpx::invalid_status, "fifo::push()",
+                        "fifo::finish() already called!");
+  }
 
+  // push item
+  queue.push(item);
+
+  // signal waiting threads that new item is available
+  cond_var.notify_one();
+}
+
+template <typename T>
+bool fifo<T>::pop(T *item) {
+  // lock class
+  std::unique_lock<lock_type> l(lock);
+
+  // wait for queue to not be empty
+  while (queue.empty()) {
     // check whether fifo is already in finished state
-    if(finished)
-    {
-        HPX_THROW_EXCEPTION(hpx::invalid_status, "fifo::push()",
-                            "fifo::finish() already called!");
-    }
+    if (finished) return false;
 
-    // push item
-    queue.push(item);
+    // wait for something to change
+    cond_var.wait(l);
+  }
 
-    // signal waiting threads that new item is available
-    cond_var.notify_one();
+  // Retrieve element from queue
+  *item = queue.front();
 
+  // Remove element from queue
+  queue.pop();
+
+  // Return success
+  return true;
 }
 
-template<typename T>
-bool fifo<T>::pop(T* item)
-{
+template <typename T>
+void fifo<T>::finish() {
+  // lock class
+  std::unique_lock<lock_type> l(lock);
 
-    // lock class
-    std::unique_lock<lock_type> l(lock);
+  finished = true;
 
-    // wait for queue to not be empty
-    while(queue.empty())
-    {
-
-        // check whether fifo is already in finished state
-        if(finished)
-            return false;
-
-        // wait for something to change
-        cond_var.wait(l);
-
-    }
-
-    // Retrieve element from queue
-    *item = queue.front();
-
-    // Remove element from queue
-    queue.pop();
-
-    // Return success
-    return true;
-
-}
-
-template<typename T>
-void fifo<T>::finish()
-{
-
-    // lock class
-    std::unique_lock<lock_type> l(lock);
-
-    finished = true;
-
-    cond_var.notify_all();
-
+  cond_var.notify_all();
 }
 
 #endif
-

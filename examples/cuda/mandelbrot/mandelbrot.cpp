@@ -17,202 +17,188 @@ using std::atoi;
 using namespace hpx::cuda;
 
 //###########################################################################
-//Main
+// Main
 //###########################################################################
 
 int main(int argc, char* argv[]) {
+  // Reading a list of available devices in hpx locality
+  std::vector<device> devices = get_all_devices(2, 0).get();
 
-	//Reading a list of available devices in hpx locality
-	std::vector<device> devices = get_all_devices(2, 0).get();
+  if (devices.size() < 1) {
+    hpx::cerr << "No CUDA devices found! Terminating...." << hpx::endl;
+    return hpx::finalize();
+  }
 
-	if (devices.size() < 1) {
-		hpx::cerr << "No CUDA devices found! Terminating...." << hpx::endl;
-		return hpx::finalize();
-	}
+  if (argc != 5) {
+    std::cout << "Usage: " << argv[0] << " width height" << std::endl;
+    exit(1);
+  }
 
-	if (argc != 5) {
-		std::cout << "Usage: " << argv[0] << " width height" << std::endl;
-		exit(1);
-	}
+  int width = atoi(argv[1]);
+  int height = atoi(argv[2]);
+  int iterations = atoi(argv[3]);
+  int numDevices = atoi(argv[4]);
 
-	int width = atoi(argv[1]);
-	int height = atoi(argv[2]);
-	int iterations = atoi(argv[3]);
-	int numDevices = atoi(argv[4]);
+  // Vector for all futures for the data management
+  std::vector<std::vector<hpx::lcos::future<void>>> data_futures(numDevices);
 
-	//Vector for all futures for the data management
-	std::vector < std::vector<hpx::lcos::future<void>>>data_futures(numDevices);
+  char* image;
+  char* mainImage;
 
-	char* image;
-	char* mainImage;
+  std::vector<hpx::lcos::future<void>> writeImages;
 
-	std::vector<hpx::lcos::future<void>> writeImages;
+  for (size_t it = 0; it < iterations; it++) {
+    timer_start();
+    int currentWidth = width * std::pow(2, it + 1) / 2;
+    int currentHeight = height * std::pow(2, it + 1) / 2;
+    const int bytes = sizeof(char) * currentWidth * currentHeight * 3;
+    int n = currentWidth * currentHeight * 3;
 
-	for (size_t it = 0; it < iterations; it++) {
+    std::cout << bytes << ",";
+    // Malloc Host
+    cudaMallocHost((void**)&image, bytes);
+    checkCudaError("Malloc image");
+    char* mainImage = (char*)malloc(bytes);
 
-		timer_start();
-		int currentWidth = width * std::pow(2,it + 1) /2;
-		int currentHeight = height * std::pow(2,it + 1) /2;
-		const int bytes = sizeof(char) * currentWidth * currentHeight * 3;
-		int n = currentWidth * currentHeight * 3;
+    std::vector<hpx::cuda::buffer> args;
+    // Generate the grid and block dim
+    hpx::cuda::server::program::Dim3 grid;
+    hpx::cuda::server::program::Dim3 block;
 
-		std::cout << bytes << ",";
-		//Malloc Host
-		cudaMallocHost((void**) &image, bytes);
-		checkCudaError("Malloc image");
-		char* mainImage = (char*) malloc(bytes);
+    block.x = 16;
+    block.y = 16;
+    block.z = 1;
 
-		std::vector<hpx::cuda::buffer> args;
-		//Generate the grid and block dim
-		hpx::cuda::server::program::Dim3 grid;
-		hpx::cuda::server::program::Dim3 block;
+    grid.x = currentWidth / block.x;
+    grid.y = 1 + std::ceil(currentHeight / (block.y * numDevices));
+    grid.z = 1;
 
-		block.x = 16;
-		block.y = 16;
-		block.z = 1;
+    std::vector<hpx::future<program>> progBuildVector;
+    std::vector<program> progVector;
 
-		grid.x = currentWidth / block.x;
-		grid.y = 1 + std::ceil(currentHeight / (block.y * numDevices));
-		grid.z = 1;
+    // creating vector of futures
+    std::vector<hpx::future<void>> kernelFutures;
 
-		std::vector < hpx::future < program >> progBuildVector;
-		std::vector<program> progVector;
+    for (int j = 0; j < numDevices; j++) {
+      progBuildVector.push_back(
+          devices[j].create_program_with_file("mandel_brot_kernel.cu"));
+    }
 
-		//creating vector of futures
-		std::vector<hpx::future<void>> kernelFutures;
+    hpx::wait_all(progBuildVector);
 
-		for (int j = 0; j < numDevices; j++) {
-			progBuildVector.push_back(
-					devices[j].create_program_with_file(
-							"mandel_brot_kernel.cu"));
+    std::vector<hpx::lcos::future<void>> progCompileVector;
 
-		}
+    for (int j = 0; j < numDevices; j++) {
+      progVector.push_back(progBuildVector[j].get());
 
-		hpx::wait_all (progBuildVector);
+      // Compile with the kernel
+      std::vector<std::string> flags;
+      std::string mode = "--gpu-architecture=compute_";
+      mode.append(
+          std::to_string(devices[j].get_device_architecture_major().get()));
+      mode.append(
+          std::to_string(devices[j].get_device_architecture_minor().get()));
 
-		std::vector<hpx::lcos::future<void>> progCompileVector;
+      flags.push_back(mode);
 
-		for (int j = 0; j < numDevices; j++) {
-			progVector.push_back(progBuildVector[j].get());
+      progCompileVector.push_back(progVector[j].build(flags, "kernel"));
+    }
 
-			//Compile with the kernel
-			std::vector < std::string > flags;
-			std::string mode = "--gpu-architecture=compute_";
-			mode.append(
-					std::to_string(
-							devices[j].get_device_architecture_major().get()));
-			mode.append(
-					std::to_string(
-							devices[j].get_device_architecture_minor().get()));
+    std::vector<std::vector<hpx::lcos::future<buffer>>> bufferFutures(
+        numDevices);
+    // Buffer vectors
+    std::vector<buffer> imageBufferVector;
+    std::vector<buffer> widthBufferVector;
+    std::vector<buffer> heightBufferVector;
+    std::vector<buffer> yStartBufferVector;
+    std::vector<buffer> nBufferVector;
 
-			flags.push_back(mode);
+    int yStart[numDevices];
+    // creating buffers
+    for (int j = 0; j < numDevices; j++) {
+      // Image buffer
+      bufferFutures[j].push_back(devices[j].create_buffer(bytes));
+      // Width buffer
+      bufferFutures[j].push_back(devices[j].create_buffer(sizeof(int)));
+      // Height buffer
+      bufferFutures[j].push_back(devices[j].create_buffer(sizeof(int)));
+      // yStart buffer
+      bufferFutures[j].push_back(devices[j].create_buffer(sizeof(int)));
+      // n buffer
+      bufferFutures[j].push_back(devices[j].create_buffer(sizeof(int)));
 
-			progCompileVector.push_back(progVector[j].build(flags, "kernel"));
+      hpx::wait_all(bufferFutures[j]);
 
-		}
+      yStart[j] = j * currentHeight / numDevices;
 
-		std::vector < std::vector<hpx::lcos::future<buffer>>>bufferFutures(
-				numDevices);
-		//Buffer vectors
-		std::vector<buffer> imageBufferVector;
-		std::vector<buffer> widthBufferVector;
-		std::vector<buffer> heightBufferVector;
-		std::vector<buffer> yStartBufferVector;
-		std::vector<buffer> nBufferVector;
+      imageBufferVector.push_back(bufferFutures[j][0].get());
+      data_futures[j].push_back(
+          imageBufferVector[j].enqueue_write(0, bytes, image));
+      widthBufferVector.push_back(bufferFutures[j][1].get());
+      data_futures[j].push_back(
+          widthBufferVector[j].enqueue_write(0, sizeof(int), &currentWidth));
+      heightBufferVector.push_back(bufferFutures[j][2].get());
+      data_futures[j].push_back(
+          heightBufferVector[j].enqueue_write(0, sizeof(int), &currentHeight));
+      yStartBufferVector.push_back(bufferFutures[j][3].get());
+      data_futures[j].push_back(
+          yStartBufferVector[j].enqueue_write(0, sizeof(int), &yStart[j]));
 
-		int yStart[numDevices];
-		//creating buffers
-		for (int j = 0; j < numDevices; j++) {
-			//Image buffer
-			bufferFutures[j].push_back(devices[j].create_buffer(bytes));
-			//Width buffer
-			bufferFutures[j].push_back(devices[j].create_buffer(sizeof(int)));
-			//Height buffer
-			bufferFutures[j].push_back(devices[j].create_buffer(sizeof(int)));
-			// yStart buffer
-			bufferFutures[j].push_back(devices[j].create_buffer(sizeof(int)));
-			// n buffer
-			bufferFutures[j].push_back(devices[j].create_buffer(sizeof(int)));
+      nBufferVector.push_back(bufferFutures[j][4].get());
+      data_futures[j].push_back(
+          nBufferVector[j].enqueue_write(0, sizeof(int), &n));
 
-			hpx::wait_all (bufferFutures[j]);
+      // Synchronize copy to buffer
+      hpx::wait_all(data_futures[j]);
+      // wait for program to build on all devices
+      hpx::wait_all(progCompileVector);
 
-			yStart[j] = j * currentHeight / numDevices;
-
-			imageBufferVector.push_back(bufferFutures[j][0].get());
-			data_futures[j].push_back(
-					imageBufferVector[j].enqueue_write(0, bytes, image));
-			widthBufferVector.push_back(bufferFutures[j][1].get());
-			data_futures[j].push_back(
-					widthBufferVector[j].enqueue_write(0, sizeof(int),
-							&currentWidth));
-			heightBufferVector.push_back(bufferFutures[j][2].get());
-			data_futures[j].push_back(
-					heightBufferVector[j].enqueue_write(0, sizeof(int),
-							&currentHeight));
-			yStartBufferVector.push_back(bufferFutures[j][3].get());
-			data_futures[j].push_back(
-					yStartBufferVector[j].enqueue_write(0, sizeof(int),
-							&yStart[j]));
-
-			nBufferVector.push_back(bufferFutures[j][4].get());
-			data_futures[j].push_back(
-					nBufferVector[j].enqueue_write(0, sizeof(int), &n));
-
-			//Synchronize copy to buffer
-			hpx::wait_all (data_futures[j]);
-			//wait for program to build on all devices
-			hpx::wait_all(progCompileVector);
-
-			//Launch the kernel
-			args.push_back(imageBufferVector[j]);
-			args.push_back(widthBufferVector[j]);
-			args.push_back(heightBufferVector[j]);
-			args.push_back(yStartBufferVector[j]);
-			args.push_back(nBufferVector[j]);
+      // Launch the kernel
+      args.push_back(imageBufferVector[j]);
+      args.push_back(widthBufferVector[j]);
+      args.push_back(heightBufferVector[j]);
+      args.push_back(yStartBufferVector[j]);
+      args.push_back(nBufferVector[j]);
 #ifdef HPXCL_CUDA_WITH_STREAMS
-			kernelFutures.push_back(progVector[j].run(args, "kernel", grid, block, args));
+      kernelFutures.push_back(
+          progVector[j].run(args, "kernel", grid, block, args));
 #else
-			kernelFutures.push_back(
-					progVector[j].run(args, "kernel", grid, block));
+      kernelFutures.push_back(progVector[j].run(args, "kernel", grid, block));
 #endif
-			//for multiple runs
-			args.clear();
+      // for multiple runs
+      args.clear();
+    }
 
-		}
+    // wait for all the kernel futures to return
+    hpx::wait_all(kernelFutures);
 
-		//wait for all the kernel futures to return
-		hpx::wait_all(kernelFutures);
+    // write images to file
+    std::shared_ptr<std::vector<char>> img_data;
 
-		//write images to file
-		std::shared_ptr<std::vector<char>> img_data;
+    // Stich multiple images
+    for (int j = 0; j < numDevices; j++) {
+      image = imageBufferVector.at(j).enqueue_read_sync<char>(
+          0, bytes / numDevices);
+      std::copy(
+          image, image + currentWidth * (currentHeight / numDevices) * 3 - 1,
+          mainImage + currentWidth * (currentHeight / numDevices) * 3 * j);
+    }
+    img_data =
+        std::make_shared<std::vector<char>>(mainImage, mainImage + bytes);
 
-		//Stich multiple images
-		for (int j = 0; j < numDevices; j++) {
-			image = imageBufferVector.at(j).enqueue_read_sync<char>(0,
-					bytes / numDevices);
-			std::copy(image,
-					image + currentWidth * (currentHeight / numDevices) * 3 - 1,
-					mainImage
-							+ currentWidth * (currentHeight / numDevices) * 3
-									* j);
-		}
-		img_data = std::make_shared < std::vector<char>
-				> (mainImage, mainImage + bytes);
+    writeImages.push_back(
+        hpx::async(save_png_it, img_data, currentWidth, currentHeight, it));
+    // save_png_it(img_data, currentWidth, currentHeight,i);
+    std::cout << timer_stop() << std::endl;
+  }
 
-		writeImages.push_back(
-				hpx::async(save_png_it, img_data, currentWidth, currentHeight,
-						it));
-		//save_png_it(img_data, currentWidth, currentHeight,i);
-		std::cout << timer_stop() << std::endl;
-	}
+  hpx::wait_all(writeImages);
 
-	hpx::wait_all(writeImages);
+  // Free Memory
+  cudaFreeHost(image);
+  checkCudaError("Free image");
+  cudaFreeHost(mainImage);
+  checkCudaError("Free mainImage");
 
-	//Free Memory
-	cudaFreeHost(image);
-	checkCudaError("Free image");
-	cudaFreeHost(mainImage);
-	checkCudaError("Free mainImage");
-
-	return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }

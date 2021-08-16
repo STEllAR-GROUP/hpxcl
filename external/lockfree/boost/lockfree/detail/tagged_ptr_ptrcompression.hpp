@@ -9,7 +9,7 @@
 #ifndef BOOST_LOCKFREE_TAGGED_PTR_PTRCOMPRESSION_HPP_INCLUDED
 #define BOOST_LOCKFREE_TAGGED_PTR_PTRCOMPRESSION_HPP_INCLUDED
 
-#include <cstddef>              /* for std::size_t */
+#include <cstddef> /* for std::size_t */
 #include <cstdint>
 #include <limits>
 
@@ -19,149 +19,112 @@ namespace boost {
 namespace lockfree {
 namespace detail {
 
-#if defined (__x86_64__) || defined (_M_X64)
+#if defined(__x86_64__) || defined(_M_X64)
 
 template <class T>
-class tagged_ptr
-{
-    typedef std::uint64_t compressed_ptr_t;
+class tagged_ptr {
+  typedef std::uint64_t compressed_ptr_t;
 
-public:
-    typedef std::uint16_t tag_t;
+ public:
+  typedef std::uint16_t tag_t;
 
-private:
-    union cast_unit
-    {
-        compressed_ptr_t value;
-        tag_t tag[4];
-    };
+ private:
+  union cast_unit {
+    compressed_ptr_t value;
+    tag_t tag[4];
+  };
 
-    static const int tag_index = 3;
-    static const compressed_ptr_t ptr_mask = 0xffffffffffffUL; //(1L<<48L)-1;
+  static const int tag_index = 3;
+  static const compressed_ptr_t ptr_mask = 0xffffffffffffUL;  //(1L<<48L)-1;
 
-    static T* extract_ptr(volatile compressed_ptr_t const & i)
-    {
-        return reinterpret_cast<T*>(i & ptr_mask);
-    }
+  static T* extract_ptr(volatile compressed_ptr_t const& i) {
+    return reinterpret_cast<T*>(i & ptr_mask);
+  }
 
-    static tag_t extract_tag(volatile compressed_ptr_t const & i)
-    {
-        cast_unit cu;
-        cu.value = i;
-        return cu.tag[tag_index];
-    }
+  static tag_t extract_tag(volatile compressed_ptr_t const& i) {
+    cast_unit cu;
+    cu.value = i;
+    return cu.tag[tag_index];
+  }
 
-    static compressed_ptr_t pack_ptr(T * ptr, int tag)
-    {
-        cast_unit ret;
-        ret.value = compressed_ptr_t(ptr);
-        ret.tag[tag_index] = tag;
-        return ret.value;
-    }
+  static compressed_ptr_t pack_ptr(T* ptr, int tag) {
+    cast_unit ret;
+    ret.value = compressed_ptr_t(ptr);
+    ret.tag[tag_index] = tag;
+    return ret.value;
+  }
 
-public:
-    /** uninitialized constructor */
-    tagged_ptr(void) BOOST_NOEXCEPT//: ptr(0), tag(0)
-    {}
+ public:
+  /** uninitialized constructor */
+  tagged_ptr(void) BOOST_NOEXCEPT  //: ptr(0), tag(0)
+  {}
 
-    /** copy constructor */
+  /** copy constructor */
 #ifdef BOOST_NO_CXX11_DEFAULTED_FUNCTIONS
-    tagged_ptr(tagged_ptr const & p):
-        ptr(p.ptr)
-    {}
+  tagged_ptr(tagged_ptr const& p) : ptr(p.ptr) {}
 #else
-    tagged_ptr(tagged_ptr const & p) = default;
+  tagged_ptr(tagged_ptr const& p) = default;
 #endif
 
-    explicit tagged_ptr(T * p, tag_t t = 0):
-        ptr(pack_ptr(p, t))
-    {}
+  explicit tagged_ptr(T* p, tag_t t = 0) : ptr(pack_ptr(p, t)) {}
 
-    /** unsafe set operation */
-    /* @{ */
+  /** unsafe set operation */
+  /* @{ */
 #ifdef BOOST_NO_CXX11_DEFAULTED_FUNCTIONS
-    tagged_ptr & operator= (tagged_ptr const & p)
-    {
-         ptr = p.ptr;
-         return *this;
-    }
+  tagged_ptr& operator=(tagged_ptr const& p) {
+    ptr = p.ptr;
+    return *this;
+  }
 #else
-    tagged_ptr & operator= (tagged_ptr const & p) = default;
+  tagged_ptr& operator=(tagged_ptr const& p) = default;
 #endif
 
-    void set(T * p, tag_t t)
-    {
-        ptr = pack_ptr(p, t);
-    }
-    /* @} */
+  void set(T* p, tag_t t) { ptr = pack_ptr(p, t); }
+  /* @} */
 
-    /** comparing semantics */
-    /* @{ */
-    bool operator== (volatile tagged_ptr const & p) const
-    {
-        return (ptr == p.ptr);
-    }
+  /** comparing semantics */
+  /* @{ */
+  bool operator==(volatile tagged_ptr const& p) const { return (ptr == p.ptr); }
 
-    bool operator!= (volatile tagged_ptr const & p) const
-    {
-        return !operator==(p);
-    }
-    /* @} */
+  bool operator!=(volatile tagged_ptr const& p) const { return !operator==(p); }
+  /* @} */
 
-    /** pointer access */
-    /* @{ */
-    T * get_ptr() const
-    {
-        return extract_ptr(ptr);
-    }
+  /** pointer access */
+  /* @{ */
+  T* get_ptr() const { return extract_ptr(ptr); }
 
-    void set_ptr(T * p)
-    {
-        tag_t tag = get_tag();
-        ptr = pack_ptr(p, tag);
-    }
-    /* @} */
+  void set_ptr(T* p) {
+    tag_t tag = get_tag();
+    ptr = pack_ptr(p, tag);
+  }
+  /* @} */
 
-    /** tag access */
-    /* @{ */
-    tag_t get_tag() const
-    {
-        return extract_tag(ptr);
-    }
+  /** tag access */
+  /* @{ */
+  tag_t get_tag() const { return extract_tag(ptr); }
 
-    tag_t get_next_tag() const
-    {
-        tag_t next = (get_tag() + 1) & (std::numeric_limits<tag_t>::max)();
-        return next;
-    }
+  tag_t get_next_tag() const {
+    tag_t next = (get_tag() + 1) & (std::numeric_limits<tag_t>::max)();
+    return next;
+  }
 
-    void set_tag(tag_t t)
-    {
-        T * p = get_ptr();
-        ptr = pack_ptr(p, t);
-    }
-    /* @} */
+  void set_tag(tag_t t) {
+    T* p = get_ptr();
+    ptr = pack_ptr(p, t);
+  }
+  /* @} */
 
-    /** smart pointer support  */
-    /* @{ */
-    T & operator*() const
-    {
-        return *get_ptr();
-    }
+  /** smart pointer support  */
+  /* @{ */
+  T& operator*() const { return *get_ptr(); }
 
-    T * operator->() const
-    {
-        return get_ptr();
-    }
+  T* operator->() const { return get_ptr(); }
 
-    operator bool(void) const
-    {
-        return get_ptr() != 0;
-    }
-    /* @} */
+  operator bool(void) const { return get_ptr() != 0; }
+  /* @} */
 
-protected:
-    compressed_ptr_t ptr;
+ protected:
+  compressed_ptr_t ptr;
 };
 #else
 #error unsupported platform

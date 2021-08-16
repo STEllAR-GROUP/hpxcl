@@ -8,30 +8,16 @@
 
 #include <hpxcl/opencl.hpp>
 
-static hpx::naming::id_type hpx_get_remote_node()
-{
+static hpx::naming::id_type hpx_get_remote_node() {
+  // Get all HPX localities
+  std::vector<hpx::naming::id_type> localities = hpx::find_remote_localities();
 
-    // Get all HPX localities
-    std::vector<hpx::naming::id_type> localities =
-                    hpx::find_remote_localities();
+  if (localities.empty()) {
+    hpx::cout << "ERROR: No remote node found!" << hpx::endl;
+    return hpx::naming::id_type();
+  }
 
-    if(localities.empty()){
-        hpx::cout << "ERROR: No remote node found!" << hpx::endl;
-        return hpx::naming::id_type();
-    }
-
-    return localities[0];
-
+  return localities[0];
 }
 
-
-
-
-
-
-
-
-
-
-#endif //BENCHMARK_HPX_HELPERS_HPP_
-
+#endif  // BENCHMARK_HPX_HELPERS_HPP_

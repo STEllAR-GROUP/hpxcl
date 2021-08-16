@@ -15,8 +15,8 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-namespace hpx { namespace cuda
-{
+namespace hpx {
+namespace cuda {
 
 /** \brief Handles the error checking for CUDA functions calls
  *	and kernel executions
@@ -34,6 +34,7 @@ namespace hpx { namespace cuda
  */
 HPX_CUDA_EXPORT void checkCudaError(char const* function_name = "");
 
-}}
+}  // namespace cuda
+}  // namespace hpx
 
 #endif /* CUDA_CUDA_CUDAERRORHANDLING_HPP_ */

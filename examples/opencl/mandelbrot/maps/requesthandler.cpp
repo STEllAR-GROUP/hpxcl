@@ -9,59 +9,40 @@
 
 using namespace hpx::opencl::examples::mandelbrot;
 
-requesthandler::requesthandler(size_t tilesize_x_,
-                               size_t tilesize_y_,
-                               size_t lines_per_gpu_) :
-                                    tilesize_x(tilesize_x_),
-                                    tilesize_y(tilesize_y_),
-                                    lines_per_gpu(lines_per_gpu_)
-{
+requesthandler::requesthandler(size_t tilesize_x_, size_t tilesize_y_,
+                               size_t lines_per_gpu_)
+    : tilesize_x(tilesize_x_),
+      tilesize_y(tilesize_y_),
+      lines_per_gpu(lines_per_gpu_) {}
 
+void requesthandler::submit_request(std::shared_ptr<request> request) {
+  // Check if still valid
+  if (!request->stillValid()) {
+    request->abort();
+    return;
+  }
 
+  // add missing data in request
+  request->tilesize_x = tilesize_x;
+  request->tilesize_y = tilesize_y;
+  request->lines_per_gpu = lines_per_gpu;
+  request->img_countdown = tilesize_y / lines_per_gpu;
+
+  hpx::cout << "Request submitted: " << request->zoom << hpx::endl;
+
+  // hand the request to an hpx thread
+  new_requests.push(request);
 }
 
-void
-requesthandler::submit_request(std::shared_ptr<request> request)
-{
+std::shared_ptr<request> requesthandler::query_request() {
+  std::shared_ptr<request> ret;
 
-    // Check if still valid
-    if(!request->stillValid())
-    {
-        request->abort();
-        return;
+  // take a new request out of the queue
+  while (true) {
+    if (!new_requests.pop(&ret)) return std::shared_ptr<request>();
+    if (ret->stillValid()) {
+      return ret;
     }
-
-    // add missing data in request
-    request->tilesize_x = tilesize_x;
-    request->tilesize_y = tilesize_y;
-    request->lines_per_gpu = lines_per_gpu;
-    request->img_countdown = tilesize_y/lines_per_gpu;
-
-    hpx::cout << "Request submitted: " << request->zoom << hpx::endl;
-
-    // hand the request to an hpx thread
-    new_requests.push(request);
-
+    ret->abort();
+  }
 }
-
-std::shared_ptr<request>
-requesthandler::query_request()
-{
-
-    std::shared_ptr<request> ret;
-
-    // take a new request out of the queue
-    while(true)
-    {
-        if(!new_requests.pop(&ret))
-            return std::shared_ptr<request>();
-        if(ret->stillValid())
-        {
-            return ret;
-        }
-        ret->abort();
-    }
-
-}
-
-
