@@ -13,7 +13,7 @@ jobs:
        - checkout
        - run:
            name: Install dependencies
-           command: dnf update -y && dnf install -y  doxygen libpng-devel hpx-devel cmake clang
+           command: dnf update -y && dnf install -y  doxygen libpng-devel hpx-devel cmake clang llvm-devel
        - run: 
            name: Install cuda
            command: |
