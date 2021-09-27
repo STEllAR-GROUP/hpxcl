@@ -21,12 +21,16 @@ HPX_REGISTER_ACTION(cuda_buffer_type::wrapped_type::set_size_action,
                     cuda_buffer_set_size_action);
 HPX_REGISTER_ACTION(cuda_buffer_type::wrapped_type::enqueue_read_action,
                     cuda_buffer_enqueue_read_action);
+HPX_REGISTER_ACTION(cuda_buffer_type::wrapped_type::enqueue_read_parcel_action,
+                    cuda_buffer_enqueue_read_parcel_action);
 HPX_REGISTER_ACTION(cuda_buffer_type::wrapped_type::enqueue_write_action,
                     cuda_buffer_enqueue_write_action);
 HPX_REGISTER_ACTION(cuda_buffer_type::wrapped_type::enqueue_write_local_action,
                     cuda_buffer_enqueue_write_local_action);
 HPX_REGISTER_ACTION(cuda_buffer_type::wrapped_type::enqueue_read_local_action,
                     cuda_buffer_enqueue_read_local_action);
+HPX_REGISTER_ACTION(cuda_buffer_type::wrapped_type::enqueue_read_local_parcel_action,
+                    cuda_buffer_enqueue_read_local_parcel_action);
 HPX_REGISTER_ACTION(cuda_buffer_type::wrapped_type::get_device_pointer_action,
                     cuda_buffer_get_device_pointer_action);
 HPX_REGISTER_ACTION(cuda_buffer_type::wrapped_type::get_device_id_action,

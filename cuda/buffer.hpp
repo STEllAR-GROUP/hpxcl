@@ -82,6 +82,24 @@ class buffer
   }
 
   /**
+   * \brief Method copy synchronized the data on the attached device to the
+   *  host.
+   * \param offset Offset, where to start copying data
+   * \param size Size of the data, to be copied, from the device to the host
+   * \return Pointer to the data on the host
+   */
+
+  template <typename T>
+  T* enqueue_read_parcel_sync(size_t offset, size_t size) {
+    if (is_local) {
+      return reinterpret_cast<T*>(enqueue_read_local_parcel(offset, size).get());
+
+    } else {
+      return (T*)enqueue_read_parcel(offset, size).get().data();
+    }
+  }
+
+  /**
    * \brief Method to access the device pointer wrapped as a smart pointer
    * \return The pointer to the device memory as a smart pointer
    */
@@ -143,6 +161,23 @@ class buffer
   /**
    * \brief Method copy the data on the attached device to the host
    * \param offset Offset, where to start copying data
+   * \param size Size of the data, to be copied, from the device to the host
+   * \return A future with the serialized data
+   *
+   * \note This method is for accessing data on remote localities.
+   */
+
+  hpx::future<hpx::serialization::serialize_buffer<char>> enqueue_read_parcel(
+      size_t offset, size_t size) {
+    HPX_ASSERT(this->get_id());
+
+    typedef server::buffer::enqueue_read_parcel_action action_type;
+    return hpx::async<action_type>(this->get_id(), offset, size);
+  }
+
+  /**
+   * \brief Method copy the data on the attached device to the host
+   * \param offset Offset, where to start copying data
    * \param size Size of the data on the device
    * \return A future with the uintptr_t to the data
    *
@@ -155,6 +190,22 @@ class buffer
     typedef server::buffer::enqueue_read_local_action action_type;
     return hpx::async<action_type>(this->get_id(), offset, size);
   }
+  
+  /**
+   * \brief Method copy the data on the attached device to the host
+   * \param offset Offset, where to start copying data
+   * \param size Size of the data, to be copied, from the device to the host
+   * \return A future with the uintptr_t to the data
+   *
+   * \note This method is for accessing data on local localities.
+   */
+  hpx::future<uintptr_t> enqueue_read_local_parcel(size_t offset, size_t size) {
+    HPX_ASSERT(this->get_id());
+
+    typedef server::buffer::enqueue_read_local_parcel_action action_type;
+    return hpx::async<action_type>(this->get_id(), offset, size);
+  }
+
 
   /**
    * \brief Method copies the provided data on the attached device memory
