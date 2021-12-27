@@ -155,6 +155,29 @@ void buffer::enqueue_write(size_t offset, size_t size,
 #endif
 }
 
+void buffer::enqueue_write_parcel(size_t dst_offset, size_t size,
+                                  hpx::serialization::serialize_buffer<char> data, size_t src_offset) {
+  cudaSetDevice(this->parent_device_num);
+  checkCudaError("buffer:enqueue_read Set device");
+  char* src_slicedPointer = (char*)(data.data()) + src_offset;
+  char* dst_slicedPointer = (char*)(this->data_device) + dst_offset;
+
+// Asynchronous copy from Host to device call -- Non-blocking on host
+#ifdef HPXCL_CUDA_WITH_STREAMS
+  cudaMemcpyAsync((void*)dst_slicedPointer, (void*)src_slicedPointer, size,
+                  cudaMemcpyHostToDevice, this->stream);
+  checkCudaError(
+      "buffer::enque_write Error during copy data from the host to the device");
+  cudaStreamSynchronize(this->stream);
+  checkCudaError("buffer::enque_read Error during synchronization of stream");
+#else
+  cudaMemcpyAsync((void*)dst_slicedPointer, (void*)src_slicedPointer, size,
+                  cudaMemcpyHostToDevice);
+  checkCudaError(
+      "buffer::enque_write Error during copy data from the host to the device");
+#endif
+}
+
 /**
  * Get the device pointer
  */
@@ -184,6 +207,28 @@ void buffer::enqueue_write_local(size_t offset, size_t size, uintptr_t data) {
   checkCudaError("buffer::enque_read Error during synchronization of stream");
 #else
   cudaMemcpyAsync(this->data_device, (void*)slicedPointer, size,
+                  cudaMemcpyHostToDevice);
+  checkCudaError(
+      "buffer::enque_write Error during copy data from the host to the device");
+#endif
+}
+
+void buffer::enqueue_write_local_parcel(size_t dst_offset, size_t size, uintptr_t data, size_t src_offset) {
+  cudaSetDevice(this->parent_device_num);
+  checkCudaError("buffer:enqueue_read Set device");
+  char* src_slicedPointer = reinterpret_cast<char*>(data) + src_offset;
+  char* dst_slicedPointer = reinterpret_cast<char*>(this->data_device) + dst_offset;
+
+// Asynchronous copy from Host to device call -- Non-blocking on host
+#ifdef HPXCL_CUDA_WITH_STREAMS
+  cudaMemcpyAsync((void*)dst_slicedPointer, (void*)src_slicedPointer, size,
+                  cudaMemcpyHostToDevice, this->stream);
+  checkCudaError(
+      "buffer::enque_write Error during copy data from the host to the device");
+  cudaStreamSynchronize(this->stream);
+  checkCudaError("buffer::enque_read Error during synchronization of stream");
+#else
+  cudaMemcpyAsync((void*)dst_slicedPointer, (void*)src_slicedPointer, size,
                   cudaMemcpyHostToDevice);
   checkCudaError(
       "buffer::enque_write Error during copy data from the host to the device");

@@ -59,7 +59,12 @@ class HPX_CUDA_EXPORT buffer
   void enqueue_write(size_t offset, size_t size,
                      hpx::serialization::serialize_buffer<char> data);
 
+  void enqueue_write_parcel(size_t dst_offset, size_t size,
+                            hpx::serialization::serialize_buffer<char> data, size_t src_offset);
+
   void enqueue_write_local(size_t offset, size_t size, uintptr_t data);
+
+  void enqueue_write_local_parcel(size_t dst_offset, size_t size, uintptr_t data, size_t src_offset);
 
   uintptr_t get_device_pointer();
 
@@ -80,7 +85,9 @@ class HPX_CUDA_EXPORT buffer
   HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read_local);
   HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_read_local_parcel);
   HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write);
+  HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write_parcel);
   HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write_local);
+  HPX_DEFINE_COMPONENT_ACTION(buffer, enqueue_write_local_parcel);
   HPX_DEFINE_COMPONENT_ACTION(buffer, get_device_pointer);
   HPX_DEFINE_COMPONENT_ACTION(buffer, get_device_id);
   HPX_DEFINE_COMPONENT_ACTION(buffer, p2p_copy);
@@ -99,9 +106,14 @@ HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::buffer::enqueue_read_parcel_a
                                 buffer_enqueue_read_parcel_action);
 HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::buffer::enqueue_write_action,
                                 buffer_enqueue_write_action);
+HPX_REGISTER_ACTION_DECLARATION(hpx::cuda::server::buffer::enqueue_write_parcel_action,
+                                buffer_enqueue_write_parcel_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::buffer::enqueue_write_local_action,
     buffer_enqueue_write_local_action);
+HPX_REGISTER_ACTION_DECLARATION(
+    hpx::cuda::server::buffer::enqueue_write_local_parcel_action,
+    buffer_enqueue_write_local_parcel_action);
 HPX_REGISTER_ACTION_DECLARATION(
     hpx::cuda::server::buffer::enqueue_read_local_action,
     buffer_enqueue_read_local_action);
