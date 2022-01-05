@@ -234,6 +234,34 @@ class buffer
     }
   }
 
+  /**
+   * \brief Method copies the provided data on the attached device memory
+   * \param dst_offset Offset, where to start pasting data
+   * \param size Size of the data on the device
+   * \param data Pointer to the data, which is transfered to the device
+   * \param src_offset Offset, where to start copying data
+   */
+
+  hpx::future<void> enqueue_write_parcel(size_t dst_offset, size_t size,
+                                        const void* data, size_t src_offset) const {
+    HPX_ASSERT(this->get_id());
+
+    if (is_local) {
+      typedef server::buffer::enqueue_write_local_parcel_action action_type;
+      return hpx::async<action_type>(this->get_id(), dst_offset, size,
+                                     reinterpret_cast<uintptr_t>(data), src_offset);
+
+    } else {
+      hpx::serialization::serialize_buffer<char> serializable_data(
+          (char*)data, size,
+          hpx::serialization::serialize_buffer<char>::init_mode::reference);
+
+      typedef server::buffer::enqueue_write_parcel_action action_type;
+      return hpx::async<action_type>(this->get_id(), dst_offset, size,
+                                     serializable_data, src_offset);
+    }
+  }
+
   hpx::lcos::future<void> p2p_copy(uintptr_t dst, size_t dst_parent_device_id,
                                    size_t count) {
     HPX_ASSERT(this->get_id());
